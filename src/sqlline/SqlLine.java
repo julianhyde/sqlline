@@ -401,7 +401,9 @@ public class SqlLine
 		throws IOException
 	{
 		Terminal.setupTerminal ();
-		ConsoleReader reader = new ConsoleReader ();
+		ConsoleReader reader = new ConsoleReader (
+			new FileInputStream (FileDescriptor.in),
+			new PrintWriter (System.out));
 
 
 		// setup history
@@ -2701,7 +2703,9 @@ public class SqlLine
 	{
 		public int complete (String buf, int pos, List cand)
 		{
-			if (buf != null && buf.startsWith (COMMAND_PREFIX))
+			if (buf != null && buf.startsWith (COMMAND_PREFIX)
+				&& !buf.startsWith (COMMAND_PREFIX + "all")
+				&& !buf.startsWith (COMMAND_PREFIX + "sql"))
 			{
 				return sqlLineCommandCompletor.complete (buf, pos, cand);
 			}
