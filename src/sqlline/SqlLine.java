@@ -1,5 +1,5 @@
 /*
- *	Copyright (c) 2002 Marc Prud'hommeaux
+ *	Copyright (c) 2002,2003 Marc Prud'hommeaux
  *
  *	This library is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public
@@ -34,7 +34,9 @@ import java.util.zip.*;
  *  <p>
  *  TODO:
  *  <ul>
+ *  <li>User-friendly connection prompts</li>
  *	<li>Page results</li>
+ *	<li>Handle binary data (blob fields)</li>
  *	<li>Implement command aliases</li>
  *	<li>Stored procedure execution</li>
  *	<li>Binding parameters to prepared statements</li>
@@ -75,36 +77,48 @@ public class SqlLine
 	private List batch = null;
 
 
+	private final Map formats = map (new Object [] {
+		"vertical",			new VerticalOutputFormat (),
+		"table",			new TableOutputFormat (),
+		"csv",				new SeparatedValuesOutputFormat (','),
+		"tsv",				new SeparatedValuesOutputFormat ('\t'),
+		"xmlattr",			new XMLAttributeOutputFormat (),
+		"xmlelements",		new XMLElementOutputFormat (),
+		});
+
+
 	private CommandHandler [] commands = new CommandHandler []
 	{
 		new ReflectiveCommandHandler (new String [] { "quit", "done", "exit" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "connect", "open" },
-			new SimpleCompletor (getConnectionURLExamples ())),
+			new Completor [] {
+				new SimpleCompletor (getConnectionURLExamples ())}),
 		new ReflectiveCommandHandler (new String [] { "describe" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "indexes" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "primarykeys" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "exportedkeys" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "importedkeys" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "procedures" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "tables" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "columns" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "reconnect" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "dropall" },
-			new TableNameCompletor ()),
+			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "history" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "metadata" },
-			new SimpleCompletor (getMetadataMethodNames ())),
+			new Completor [] {
+				new SimpleCompletor (getMetadataMethodNames ())}),
 		new ReflectiveCommandHandler (new String [] { "dbinfo" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "rehash" },
@@ -112,7 +126,7 @@ public class SqlLine
 		new ReflectiveCommandHandler (new String [] { "verbose" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "run" },
-			new FileNameCompletor ()),
+			new Completor [] { new FileNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "batch" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "list" },
@@ -122,15 +136,18 @@ public class SqlLine
 		new ReflectiveCommandHandler (new String [] { "go", "#" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "script" },
-			new FileNameCompletor ()),
+			new Completor [] { new FileNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "record" },
-			new FileNameCompletor ()),
+			new Completor [] { new FileNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "brief" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "close" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "isolation" },
-			new SimpleCompletor (getIsolationLevels ())),
+			new Completor [] { new SimpleCompletor (getIsolationLevels ())}),
+		new ReflectiveCommandHandler (new String [] { "outputformat" },
+			new Completor [] { new SimpleCompletor (
+				(String [])formats.keySet ().toArray (new String [0]) )}),
 		new ReflectiveCommandHandler (new String [] { "autocommit" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "commit" },
@@ -140,7 +157,7 @@ public class SqlLine
 		new ReflectiveCommandHandler (new String [] { "help", "?" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "set" },
-			opts),
+			opts.optionCompletors ()),
 		new ReflectiveCommandHandler (new String [] { "save" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "scan" },
@@ -444,6 +461,59 @@ public class SqlLine
 	}
 
 
+	/*
+	public String nameToDriverClass (String name)
+	{
+		if (name.startsWith ("jdbc:"))
+			return null;
+
+		// ### FIXME: other drivers
+		if (name.indexOf ("oracle") != -1)
+			return "oracle.jdbc.OracleDriver";
+
+		return null;
+	}
+	*/
+
+
+	/*
+	public boolean connectByPrompt (String className)
+		throws Exception
+	{
+		return false;
+	}
+	*/
+
+
+	/** 
+	 *  Currently does nothing, because very few drivers actually support
+	 *  {@link DriverPropertyInfo}.
+	 */
+	/*
+	public boolean connectByDriverPropertyInfo (String className)
+		throws Exception
+	{
+		Driver driver = (Driver)Class.forName (className).newInstance ();
+		String url = "jdbc:oracle:thin:@10.0.0.50:1521:ora92";
+		Properties props = new Properties ();
+		DriverPropertyInfo [] info = driver.getPropertyInfo (url, props);
+		while (info != null && info.length > 0)
+		{
+			for (int i = 0; info != null && i < info.length; i++)
+			{
+				output (info [i].description + " (" + info [i].name + "): "
+					+ info [i].value
+					+ " [" + Arrays.asList (info [i].choices) + "]");
+			}
+
+			info = driver.getPropertyInfo (url, props);
+		}
+
+		return false;
+	}
+	*/
+
+
 	/** 
 	 *  Walk through all the known drivers and try to register them.
 	 */
@@ -459,11 +529,17 @@ public class SqlLine
 
 	boolean initArgs (String [] args)
 	{
-		String command = null;
+		List commands = new LinkedList ();
 		String driver = null, user = null, pass = null, url = null, cmd = null;
 
 		for (int i = 0; i < args.length; i++)
 		{
+			if (args [i].equals ("--help") || args [i].equals ("-h"))
+			{
+				usage ();
+				return false;
+			}
+
 			// -- arguments are treated as properties
 			if (args [i].startsWith ("--"))
 			{
@@ -498,7 +574,7 @@ public class SqlLine
 			else if (args [i].equals ("-u"))
 				url = args [i++ + 1];
 			else if (args [i].equals ("-e"))
-				command = args [i++ + 1];
+				commands.add (args [i++ + 1]);
 		}
 
 		if (user != null && pass != null && url != null)
@@ -512,10 +588,20 @@ public class SqlLine
 			dispatch (com);
 		}
 
-		if (command != null)
+		if (commands.size () > 0)
 		{
-			debug (loc ("executing-command", command));
-			dispatch (command);
+			// for single commane execute, disable color
+			opts.setColor (false);
+			opts.setHeaderInterval (-1);
+
+			for (Iterator i = commands.iterator (); i.hasNext (); )
+			{
+				String command = i.next ().toString ();
+				debug (loc ("executing-command", command));
+				dispatch (command);
+			}
+
+			exit = true; // execute and exit
 		}
 
 		return true;
@@ -653,9 +739,11 @@ public class SqlLine
 		}
 
 		if (line.trim ().length () == 0)
-		{
 			return true;
-		}
+
+		// Comments start with a "#" character.
+		if (line.startsWith ("#"))
+			return true;
 
 		line = line.trim ();
 
@@ -705,14 +793,14 @@ public class SqlLine
 	void info (String msg)
 	{
 		if (!(opts.getSilent ()))
-			output (msg, true);
+			output (msg, true, System.err);
 	}
 
 
 	void info (ColorBuffer msg)
 	{
 		if (!(opts.getSilent ()))
-			output (msg, true);
+			output (msg, true, System.err);
 	}
 
 
@@ -724,7 +812,7 @@ public class SqlLine
 	 */
 	boolean error (String msg)
 	{
-		output (color ().red (msg), true);
+		output (color ().red (msg), true, System.err);
 		return false;
 	}
 
@@ -739,7 +827,7 @@ public class SqlLine
 	void debug (String msg)
 	{
 		if (opts.getVerbose ())
-			output (color ().blue (msg), true);
+			output (color ().blue (msg), true, System.err);
 	}
 
 
@@ -749,12 +837,24 @@ public class SqlLine
 	}
 
 
+	void output (String msg, boolean newline, PrintStream out)
+	{
+		output (color (msg), newline, out);
+	}
+
+
 	void output (ColorBuffer msg, boolean newline)
 	{
+		output (msg, newline, System.out);
+	}
+
+
+	void output (ColorBuffer msg, boolean newline, PrintStream out)
+	{
 		if (newline)
-			System.out.println (msg.getColor ());
+			out.println (msg.getColor ());
 		else
-			System.out.print (msg.getColor ());
+			out.print (msg.getColor ());
 
 		if (record == null)
 			return;
@@ -775,6 +875,13 @@ public class SqlLine
 	void output (String msg, boolean newline)
 	{
 		output (color (msg), newline);
+	}
+
+
+	void autocommitStatus (Connection c)
+		throws SQLException
+	{
+		info (loc ("autocommit-status", c.getAutoCommit () + ""));
 	}
 
 
@@ -1011,51 +1118,6 @@ public class SqlLine
 
 
 	/** 
-	 *  Pad the specified String with spaces to the indicated length
-	 *  
-	 *  @param  str  the String to pad
-	 *  @param  len  the length we want the return String to be
-	 *  @return  the passed in String with spaces appended until the
-	 *  		length matches the specified length.
-	 */
-	ColorBuffer pad (ColorBuffer str, int len)
-	{
-		if (str == null)
-			str = color ();
-
-		while (str.getVisibleLength () < len)
-			str.append (" ");
-
-		return str;
-	}
-
-
-	String center (String str, int len)
-	{
-		StringBuffer buf = new StringBuffer (str);
-
-		while (buf.length () < len)
-		{
-			buf.append (" ");
-
-			if (buf.length () < len)
-				buf.insert (0, " ");
-		}
-
-		return buf.toString ();
-	}
-
-
-	ColorBuffer pad (String str, int len)
-	{
-		if (str == null)
-			str = "";
-
-		return pad (color (str), len);
-	}
-
-
-	/** 
 	 *  Split the line into an array by tokenizing on space characters
 	 *  
 	 *  @param  line	the line to break up
@@ -1095,6 +1157,61 @@ public class SqlLine
 		}
 
 		return ret;
+	}
+
+
+	static Map map (Object [] obs)
+	{
+		Map m = new HashMap ();
+		for (int i = 0; i < obs.length - 1; i+=2)
+			m.put (obs [i], obs [i + 1]);
+
+		return Collections.unmodifiableMap (m);
+	}
+
+
+	static boolean getMoreResults (Statement stmnt)
+	{
+		try
+		{
+			return stmnt.getMoreResults ();
+		}
+		catch (Throwable t)
+		{
+			return false;
+		}
+	}
+	
+
+	static String xmlattrencode (String str)
+	{
+		str = replace (str, "\"", "&quot;");
+		str = replace (str, "<", "&lt;");
+		return str;
+	}
+
+
+	static String replace (String source, String from, String to)
+	{
+		if (source == null)
+			return null;
+
+		if (from.equals (to))
+			return source;
+
+		StringBuffer replaced = new StringBuffer ();
+
+		int index = -1;
+		while ((index = source.indexOf (from)) != -1)
+		{
+			replaced.append (source.substring (0, index));
+			replaced.append (to);
+			source = source.substring (index + from.length ());
+		}
+
+		replaced.append (source);
+
+		return replaced.toString ();
 	}
 
 
@@ -1220,7 +1337,7 @@ public class SqlLine
 		}
 		else
 		{
-			e.printStackTrace ();
+			e.printStackTrace (System.err);
 		}
 	}
 
@@ -1254,7 +1371,7 @@ public class SqlLine
 			tok.hasMoreTokens (); )
 		{
 			File [] files = new File (tok.nextToken ()).listFiles ();
-			for (int i = 0; i < files.length; i++)
+			for (int i = 0; files != null && i < files.length; i++)
 				paths.add (files [i].getAbsolutePath ());
 		}
 
@@ -1270,7 +1387,8 @@ public class SqlLine
 		for (Iterator i = paths.iterator (); i.hasNext (); )
 		{
 			File f = new File ((String)i.next ());
-			output (pad (loc ("scanning", f.getAbsolutePath ()), 60), false);
+			output (color ().pad (loc ("scanning", f.getAbsolutePath ()), 60),
+				false);
 
 			try
 			{
@@ -1332,83 +1450,356 @@ public class SqlLine
 	// ResultSet output formatting classes
 	///////////////////////////////////////
 
-	void print (ResultSet rs)
+
+	
+	int print (ResultSet rs)
 		throws SQLException
 	{
-		print (rs, -1);
-	}
+		String format = opts.getOutputFormat ();
+		OutputFormat f = (OutputFormat)formats.get (format);
 
-
-	void print (ResultSet rs, long duration)
-		throws SQLException
-	{
-		ResultSetMetaData meta = rs.getMetaData ();
-		int count = meta.getColumnCount ();
-		Rows rows = new Rows (rs);
-		int index = 0;
-		ColorBuffer header = null;
-		ColorBuffer headerCols = null;
-		final int width = opts.getMaxWidth () - 4;
-
-
-		// normalize the columns sizes
-		rows.normalizeWidths ();
-
-		for (Iterator i = rows.iterator (); i.hasNext (); )
+		if (f == null)
 		{
-			Rows.Row row = (Rows.Row)i.next ();
-			ColorBuffer cbuf = row.getOutputString ();
-			cbuf = cbuf.truncate (width);
-
-			if (index == 0)
-			{
-				StringBuffer h = new StringBuffer ();
-				for (int j = 0; j < row.sizes.length; j++)
-				{
-					for (int k = 0; k < row.sizes [j]; k++)
-						h.append ('-');
-					h.append ("-+-");
-				}
-
-				headerCols = cbuf;
-				header = color ().green (h.toString ()).truncate (
-					headerCols.getVisibleLength ());
-			}
-
-			if (index == 0 ||
-				(opts.getHeaderInterval () > 0
-				 && index % opts.getHeaderInterval () == 0
-				 && opts.getShowHeader ()))
-			{
-				printRow (header, true);
-				printRow (headerCols, false);
-				printRow (header, true);
-			}
-
-			if (index != 0) // don't output the header twice
-				printRow (cbuf, false);
-
-			index++;
+			error (loc ("unknown-format", new Object [] {
+				format, formats.keySet () }));
+			f = new TableOutputFormat ();
 		}
 
-		if (header != null && opts.getShowHeader ())
-			printRow (header, true);
-
-		info (loc ("rows-selected", rows.getRowCount ()) + " "
-			+ (duration > 0 ? loc ("time-ms",
-				new Object [] { new Double (duration / 1000d) }) : ""));
+		return f.print (new Rows (rs));
 	}
 
 
-	void printRow (ColorBuffer cbuff, boolean header)
+	interface OutputFormat
 	{
-		if (header)
-			output (color ().green ("+-").append (cbuff).green ("-+"));
-		else
-			output (color ().green ("| ").append (cbuff).green (" |"));
+		int print (Rows rows);
 	}
 
 
+	/** 
+	 *  Abstract OutputFormat.
+	 *  
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
+	 */
+	abstract class AbstractOutputFormat
+		implements OutputFormat
+	{
+		public int print (Rows rows)
+		{
+			int count = 0;
+			Iterator i = rows.iterator ();
+			Rows.Row header = (Rows.Row)i.next ();
+
+			printHeader (header);
+
+			while (i.hasNext ())
+			{
+				printRow (rows, header, (Rows.Row)i.next ());
+				count++;
+			}
+
+			printFooter (header);
+
+			return count;
+		}
+
+
+		abstract void printHeader (Rows.Row header);
+		abstract void printFooter (Rows.Row header);
+		abstract void printRow (Rows rows, Rows.Row header, Rows.Row row);
+	}
+
+
+	class XMLAttributeOutputFormat
+		extends AbstractOutputFormat
+	{
+		public void printHeader (Rows.Row header)
+		{
+			output ("<resultset>");
+		}
+
+
+		public void printFooter (Rows.Row header)
+		{
+			output ("</resultset>");
+		}
+
+
+		public void printRow (Rows rows, Rows.Row header, Rows.Row row)
+		{
+			String [] head = header.values;
+			String [] vals = row.values;
+
+			StringBuffer result = new StringBuffer ("  <result");
+
+			for (int i = 0; i < head.length && i < vals.length; i++)
+			{
+				result.append (' ').append (head [i]).append ("=\"")
+					.append (xmlattrencode (vals [i])).append ('"');
+			}
+
+			result.append ("/>");
+
+			output (result.toString ());
+		}
+	}
+
+
+	class XMLElementOutputFormat
+		extends AbstractOutputFormat
+	{
+		public void printHeader (Rows.Row header)
+		{
+			output ("<resultset>");
+		}
+
+
+		public void printFooter (Rows.Row header)
+		{
+			output ("</resultset>");
+		}
+
+
+		public void printRow (Rows rows, Rows.Row header, Rows.Row row)
+		{
+			String [] head = header.values;
+			String [] vals = row.values;
+
+			output ("  <result>");
+			for (int i = 0; i < head.length && i < vals.length; i++)
+			{
+				output ("    <" + head [i] + ">"
+					+ (xmlattrencode (vals [i]))
+					+ "</" + head [i] + ">");
+			}
+
+			output ("  </result>");
+		}
+	}
+
+
+	/** 
+	 *  OutputFormat for vertical column name: value format.
+	 *  
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
+	 */
+	class VerticalOutputFormat
+		implements OutputFormat
+	{
+		public int print (Rows rows)
+		{
+			int count = 0;
+			Iterator i = rows.iterator ();
+			Rows.Row header = (Rows.Row)i.next ();
+
+			while (i.hasNext ())
+			{
+				printRow (rows, header, (Rows.Row)i.next ());
+				count++;
+			}
+
+			return count;
+		}
+
+
+		public void printRow (Rows rows, Rows.Row header, Rows.Row row)
+		{
+			String [] head = header.values;
+			String [] vals = row.values;
+			int headwidth = 0;
+			for (int i = 0; i < head.length && i < vals.length; i++)
+				headwidth = Math.max (headwidth, head [i].length ());
+
+			headwidth += 2;
+
+			for (int i = 0; i < head.length && i < vals.length; i++)
+				output (color ().bold (
+					color ().pad (head [i], headwidth).getMono ())
+					.append (vals [i] == null ? "" : vals [i]));
+
+			output (""); // spacing
+		}
+	}
+
+
+	/** 
+	 *  OutputFormat for values separated by a delimiter.
+	 *
+	 *  <strong>TODO</strong>: Handle character escaping
+	 *  
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
+	 */
+	class SeparatedValuesOutputFormat
+		implements OutputFormat
+	{
+		private char separator;
+
+		public SeparatedValuesOutputFormat (char separator)
+		{
+			setSeparator (separator);
+		}
+
+
+		public int print (Rows rows)
+		{
+			int count = 0;
+			Iterator i = rows.iterator ();
+			while (i.hasNext ())
+			{
+				printRow (rows, (Rows.Row)i.next ());
+				count++;
+			}
+
+			return count - 1; // sans header row
+		}
+
+
+		public void printRow (Rows rows, Rows.Row row)
+		{
+			String [] vals = row.values;
+			StringBuffer buf = new StringBuffer ();
+			for (int i = 0; i < vals.length; i++)
+				buf.append (buf.length () == 0 ? "" : "" + getSeparator ())
+					.append ('\'')
+					.append (vals [i] == null ? "" : vals [i])
+					.append ('\'');
+			output (buf.toString ());
+		}
+
+
+		public void setSeparator (char separator)
+		{
+			this.separator = separator;
+		}
+
+
+		public char getSeparator ()
+		{
+			return this.separator;
+		}
+
+
+	}
+
+
+	/** 
+	 *  OutputFormat for a pretty, table-like format.
+	 *  
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
+	 */
+	class TableOutputFormat
+		implements OutputFormat
+	{
+		public int print (Rows rows)
+		{
+			int index = 0;
+			ColorBuffer header = null;
+			ColorBuffer headerCols = null;
+			final int width = opts.getMaxWidth () - 4;
+	
+	
+			// normalize the columns sizes
+			rows.normalizeWidths ();
+	
+			for (Iterator i = rows.iterator (); i.hasNext (); )
+			{
+				Rows.Row row = (Rows.Row)i.next ();
+				ColorBuffer cbuf = getOutputString (rows, row);
+				cbuf = cbuf.truncate (width);
+	
+				if (index == 0)
+				{
+					StringBuffer h = new StringBuffer ();
+					for (int j = 0; j < row.sizes.length; j++)
+					{
+						for (int k = 0; k < row.sizes [j]; k++)
+							h.append ('-');
+						h.append ("-+-");
+					}
+	
+					headerCols = cbuf;
+					header = color ().green (h.toString ()).truncate (
+						headerCols.getVisibleLength ());
+				}
+	
+				if (index == 0 ||
+					(opts.getHeaderInterval () > 0
+				 	&& index % opts.getHeaderInterval () == 0
+				 	&& opts.getShowHeader ()))
+				{
+					printRow (header, true);
+					printRow (headerCols, false);
+					printRow (header, true);
+				}
+	
+				if (index != 0) // don't output the header twice
+					printRow (cbuf, false);
+	
+				index++;
+			}
+	
+			if (header != null && opts.getShowHeader ())
+				printRow (header, true);
+	
+			return index - 1;
+		}
+	
+	
+		void printRow (ColorBuffer cbuff, boolean header)
+		{
+			if (header)
+				output (color ().green ("+-").append (cbuff).green ("-+"));
+			else
+				output (color ().green ("| ").append (cbuff).green (" |"));
+		}
+	
+	
+		public ColorBuffer getOutputString (Rows rows, Rows.Row row)
+		{
+			return getOutputString (rows, row, " | ");
+		}
+
+
+		ColorBuffer getOutputString (Rows rows, Rows.Row row, String delim)
+		{
+			ColorBuffer buf = color ();
+
+			for (int i = 0; i < row.values.length; i++)
+			{
+				if (buf.getVisibleLength () > 0)
+					buf.green (delim);
+
+				ColorBuffer v;
+				
+				if (row.isMeta)
+				{
+					v = color ().center (row.values [i], row.sizes [i]);
+					if (rows.isPrimaryKey (i))
+						buf.cyan (v.getMono ());
+					else
+						buf.bold (v.getMono ());
+				}
+				else
+				{
+					v = color ().pad (row.values [i], row.sizes [i]);
+					if (rows.isPrimaryKey (i))
+						buf.cyan (v.getMono ());
+					else
+						buf.append (v.getMono ());
+				}
+			}
+
+			if (row.deleted) // make deleted rows red
+				buf = color ().red (buf.getMono ());
+			else if (row.updated) // make updated rows blue
+				buf = color ().blue (buf.getMono ());
+			else if (row.inserted) // make new rows green
+				buf = color ().green (buf.getMono ());
+
+			return buf;
+		}
+	}
+
+	
 	void runBatch (List statements)
 	{
 		try
@@ -1421,12 +1812,12 @@ public class SqlLine
 
 				int [] counts = stmnt.executeBatch ();
 	
-				output (pad (color ().bold ("COUNT"), 8)
+				output (color ().pad (color ().bold ("COUNT"), 8)
 					.append (color ().bold ("STATEMENT")));
 
 				for (int i = 0; counts != null && i < counts.length; i++)
-					output (pad (counts [i] + "", 8).append (statements.get (i)
-						.toString ()));
+					output (color ().pad (counts [i] + "", 8)
+						.append (statements.get (i).toString ()));
 			}
 			finally
 			{
@@ -1451,7 +1842,7 @@ public class SqlLine
 			for (Iterator i = cmds.iterator (); i.hasNext (); )
 			{
 				String cmd = i.next ().toString ();
-				info (pad ((index++) + "/" + (size), 13).append (cmd));
+				info (color ().pad ((index++) + "/" + (size), 13).append (cmd));
 				boolean success = dispatch (cmd);
 
 				// if we do not force script execution, abort
@@ -1628,52 +2019,6 @@ public class SqlLine
 					sizes [i] = values [i] == null ? 1 : values [i].length ();
 				}
 			}
-	
-	
-			public ColorBuffer getOutputString ()
-			{
-				return getOutputString (" | ");
-			}
-	
-	
-			ColorBuffer getOutputString (String delim)
-			{
-				ColorBuffer buf = color ();
-	
-				for (int i = 0; i < values.length; i++)
-				{
-					if (buf.getVisibleLength () > 0)
-						buf.green (delim);
-	
-					ColorBuffer v;
-					
-					if (isMeta)
-					{
-						v = color (center (values [i], sizes [i]));
-						if (isPrimaryKey (i))
-							buf.cyan (v.getMono ());
-						else
-							buf.bold (v.getMono ());
-					}
-					else
-					{
-						v = pad (values [i], sizes [i]);
-						if (isPrimaryKey (i))
-							buf.cyan (v.getMono ());
-						else
-							buf.append (v.getMono ());
-					}
-				}
-	
-				if (deleted) // make deleted rows red
-					buf = color ().red (buf.getMono ());
-				else if (updated) // make updated rows blue
-					buf = color ().blue (buf.getMono ());
-				else if (inserted) // make new rows green
-					buf = color ().green (buf.getMono ());
-	
-				return buf;
-			}
 		}
 	}
 
@@ -1688,6 +2033,7 @@ public class SqlLine
 	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
 	 */
 	final static class ColorBuffer
+		implements Comparable
 	{
 		private static final ColorAttr BOLD =      new ColorAttr ("\033[1m");
 		private static final ColorAttr NORMAL =    new ColorAttr ("\033[m");
@@ -1723,6 +2069,48 @@ public class SqlLine
 		}
 
 
+		/** 
+		 *  Pad the specified String with spaces to the indicated length
+		 *  
+		 *  @param  str  the String to pad
+		 *  @param  len  the length we want the return String to be
+		 *  @return  the passed in String with spaces appended until the
+		 *  		length matches the specified length.
+		 */
+		ColorBuffer pad (ColorBuffer str, int len)
+		{
+			while (str.getVisibleLength () < len)
+				str.append (" ");
+	
+			return append (str);
+		}
+	
+	
+		ColorBuffer center (String str, int len)
+		{
+			StringBuffer buf = new StringBuffer (str);
+	
+			while (buf.length () < len)
+			{
+				buf.append (" ");
+	
+				if (buf.length () < len)
+					buf.insert (0, " ");
+			}
+	
+			return append (buf.toString ());
+		}
+	
+	
+		ColorBuffer pad (String str, int len)
+		{
+			if (str == null)
+				str = "";
+	
+			return pad (new ColorBuffer (str, false), len);
+		}
+	
+	
 		public String getColor ()
 		{
 			return getBuffer (useColor);
@@ -1901,6 +2289,12 @@ public class SqlLine
 				return attr;
 			}
 		}
+
+
+		public int compareTo (Object other)
+		{
+			return getMono ().compareTo (((ColorBuffer)other).getMono ());
+		}
 	}
 
 
@@ -1976,18 +2370,23 @@ public class SqlLine
 
 
 		public AbstractCommandHandler (String [] names, String helpText,
-			Completor completor)
+			Completor [] completors)
 		{
 			this.name = names [0];
 			this.names = names;
 			this.helpText = helpText;
-			if (completor == null)
+			if (completors == null || completors.length == 0)
+			{
 				this.parameterCompletors = new Completor [] {
 					new NullCompletor () };
+			}
 			else
-				this.parameterCompletors = new Completor [] {
-					completor,
-					new NullCompletor () };
+			{
+				List c = new LinkedList (Arrays.asList (completors));
+				c.add (new NullCompletor ());
+				this.parameterCompletors =
+					(Completor [])c.toArray (new Completor [0]);
+			}
 		}
 
 
@@ -2052,7 +2451,7 @@ public class SqlLine
 	public class ReflectiveCommandHandler
 		extends AbstractCommandHandler
 	{
-		public ReflectiveCommandHandler (String [] cmds, Completor completor)
+		public ReflectiveCommandHandler (String [] cmds, Completor [] completor)
 		{
 			super (cmds, loc ("help-" + cmds [0]), completor);
 		}
@@ -2157,7 +2556,8 @@ public class SqlLine
 			int index = 1;
 			for (Iterator i = hist.iterator (); i.hasNext (); index++)
 			{
-				output (pad (index + ".", 6).append (i.next ().toString ()));
+				output (color ().pad (index + ".", 6)
+					.append (i.next ().toString ()));
 			}
 
 			return true;
@@ -2319,21 +2719,28 @@ public class SqlLine
 			for (Iterator i = drivers.iterator (); i.hasNext (); )
 				names.add (((Driver)i.next ()).getClass ().getName ());
 
+			output (color ()
+				.bold (color ().pad (loc ("compliant"), 10).getMono ())
+				.bold (color ().pad (loc ("jdbc-version"), 8).getMono ())
+				.bold (color (loc ("driver-class")).getMono ()));
+
 			for (Iterator i = names.iterator (); i.hasNext (); )
 			{
 				String name = i.next ().toString ();
 
+
 				try
 				{
 					Driver driver = (Driver)Class.forName (name).newInstance ();
-					String msg = (pad (name, 52).getMono ()
-						+ "(v " + driver.getMajorVersion ()
-						+ "." + driver.getMinorVersion () + ")"
-						+ (driver.jdbcCompliant () ? "" : "[noncompliant]"));
+					ColorBuffer msg = color ()
+						.pad (driver.jdbcCompliant () ? "yes" : "no", 10)
+						.pad (driver.getMajorVersion () + "."
+							+ driver.getMinorVersion (), 8)
+						.append (name);
 					if (driver.jdbcCompliant ())
 						output (msg);
 					else
-						output (color ().red (msg));
+						output (color ().red (msg.getMono ()));
 				}
 				catch (Throwable t)
 				{
@@ -2348,6 +2755,7 @@ public class SqlLine
 		public boolean save (String line)
 			throws IOException
 		{
+			info (loc ("saving-options", opts.rcFile));
 			opts.save ();
 			return true;
 		}
@@ -2357,7 +2765,7 @@ public class SqlLine
 			throws IOException
 		{
 			opts.load ();
-			output ("Loaded preferences from " + opts.rcFile);
+			info (loc ("loaded-options", opts.rcFile));
 			return true;
 		}
 	
@@ -2372,7 +2780,9 @@ public class SqlLine
 				{
 					String key = (String)i.next ();
 					output (color ()
-						.green (pad (key, 20).getMono ())
+						.green (color ().pad (key.substring (
+							opts.PROPERTY_PREFIX.length ()), 20)
+							.getMono ())
 						.append (props.getProperty (key)));
 				}
 			}
@@ -2399,7 +2809,20 @@ public class SqlLine
 	
 			String key = parts [1];
 			String value = parts [2];
-			return opts.set (key, value, false);
+			boolean success = opts.set (key, value, false);
+			// if we autosave, then save
+			if (success && opts.getAutosave ())
+			{
+				try
+				{
+					opts.save ();
+				}
+				catch (Exception saveException)
+				{
+				}
+			}
+
+			return success;
 		}
 	
 	
@@ -2413,9 +2836,14 @@ public class SqlLine
 	
 			try
 			{
+				long start = System.currentTimeMillis ();
 				con ().connection.commit ();
+				long end = System.currentTimeMillis ();
 				showWarnings ();
-				info (loc ("commit-complete"));
+				info (loc ("commit-complete")
+					+ " " + loc ("time-ms", new Object [] {
+						new Double ((end - start) / 1000d) }));
+
 				return true;
 			}
 			catch (Exception e)
@@ -2435,9 +2863,13 @@ public class SqlLine
 	
 			try
 			{
+				long start = System.currentTimeMillis ();
 				con ().connection.rollback ();
+				long end = System.currentTimeMillis ();
 				showWarnings ();
-				info (loc ("rollback-complete"));
+				info (loc ("rollback-complete")
+					+ " " + loc ("time-ms", new Object [] {
+						new Double ((end - start) / 1000d) }));
 				return true;
 			}
 			catch (Exception e)
@@ -2454,21 +2886,12 @@ public class SqlLine
 				return false;
 	
 			if (line.endsWith ("on"))
-			{
 				con ().connection.setAutoCommit (true);
-				info ("Autocommit is "
-					+ (con ().connection.getAutoCommit () ? "on" : "off"));
-			}
 			else if (line.endsWith ("off"))
-			{
 				con ().connection.setAutoCommit (false);
-				info ("Autocommit is "
-					+ (con ().connection.getAutoCommit () ? "on" : "off"));
-			}
-			else
-				return error ("Usage: autocommit <on/off>");
 	
 			showWarnings ();
+			autocommitStatus (con ().connection);
 			return true;
 		}
 	
@@ -2605,7 +3028,7 @@ public class SqlLine
 			{
 				try
 				{
-					output (pad (m [i], padlen).append (
+					output (color ().pad (m [i], padlen).append (
 						"" + Reflector.invoke (con ().meta,
 							m [i], new Object [0])));
 				}
@@ -2623,6 +3046,12 @@ public class SqlLine
 		{
 			info ("verbose: on");
 			return set ("set verbose true");
+		}
+
+
+		public boolean outputformat (String line)
+		{
+			return set ("set " + line);
 		}
 
 
@@ -2778,15 +3207,22 @@ public class SqlLine
 	
 					if (hasResults)
 					{
-						ResultSet rs = stmnt.getResultSet ();
-						try
+						do
 						{
-							print (rs, end - start);
-						}
-						finally
-						{
-							rs.close ();
-						}
+							ResultSet rs = stmnt.getResultSet ();
+							try
+							{
+								int count = print (rs);
+	
+								info (loc ("rows-selected", count) + " "
+									+ loc ("time-ms", new Object [] {
+										new Double ((end - start) / 1000d) }));
+							}
+							finally
+							{
+								rs.close ();
+							}
+						} while (getMoreResults (stmnt));
 					}
 					else
 					{
@@ -2809,8 +3245,8 @@ public class SqlLine
 			showWarnings ();
 			return true;
 		}
-	
-	
+
+
 		public boolean quit (String line)
 		{
 			exit = true;
@@ -2849,6 +3285,7 @@ public class SqlLine
 	
 	
 		public boolean connect (String line)
+			throws Exception
 		{
 			String example = "";
 			example += "Usage: connect <url> <username> <password> [driver]"
@@ -2861,6 +3298,16 @@ public class SqlLine
 			if (parts.length < 2)
 				return error (example);
 	
+			/*
+			if (parts.length == 2)
+			{
+				String cname = nameToDriverClass (parts [1]);
+				if (cname != null)
+					return connectByPrompt (cname);
+			}
+			*/
+
+
 			String url = parts.length < 2 ? "" : parts [1];
 			String user = parts.length < 3 ? "" : parts [2];
 			String pass = parts.length < 4 ? "" : parts [3];
@@ -2930,9 +3377,9 @@ public class SqlLine
 					closed = true;
 				}
 
-				output (pad (" #" + index + "", 5).getMono ()
-					+ pad (closed ? loc ("closed") : loc ("open"), 9).getMono ()
-					+ c.url);
+				output (color ().pad (" #" + index + "", 5)
+					.pad (closed ? loc ("closed") : loc ("open"), 9)
+					.append (c.url));
 			}
 
 			return true;
@@ -3172,14 +3619,14 @@ public class SqlLine
 				if (cmd.length () == 0 ||
 					Arrays.asList (commands [i].getNames ()).contains (cmd))
 				{
-					clist.add (pad ("!" + commands [i].getName (), 20)
-						+ wrap (commands [i].getHelpText (), 60, 20));
+					clist.add (color ().pad ("!" + commands [i].getName (), 20)
+						.append (wrap (commands [i].getHelpText (), 60, 20)));
 				}
 			}
 
 
 			for (Iterator i = clist.iterator (); i.hasNext (); )
-				output (i.next ().toString ());
+				output ((ColorBuffer)i.next ());
 
 			if (cmd.length () == 0)
 			{
@@ -3443,7 +3890,16 @@ public class SqlLine
 		{
 			// setup the completor for the database
 			sqlLineSQLCompletor = new ArgumentCompletor (
-				new SQLLineSQLCompletor (skipmeta));
+				new SQLLineSQLCompletor (skipmeta),
+				new ArgumentCompletor.AbstractArgumentDelimiter ()
+				{
+					// deleimiters for SQL statements are any
+					// non-letter-or-number characters
+					public boolean isDelimiterChar (String buf, int pos)
+					{
+						return !(Character.isLetterOrDigit (buf.charAt (pos)));
+					}
+				});
 
 			// not all argument elements need to hold true
 			((ArgumentCompletor)sqlLineSQLCompletor).setStrict (false);
@@ -3501,7 +3957,7 @@ public class SqlLine
 	
 			try
 			{
-				output (loc ("connected", new Object [] {
+				info (loc ("connected", new Object [] {
 					meta.getDatabaseProductName (),
 					meta.getDatabaseProductVersion () }));
 			}
@@ -3512,7 +3968,7 @@ public class SqlLine
 
 			try
 			{
-				output (loc ("driver", new Object [] {
+				info (loc ("driver", new Object [] {
 					meta.getDriverName (),
 					meta.getDriverVersion () }));
 			}
@@ -3524,8 +3980,7 @@ public class SqlLine
 			try
 			{
 				connection.setAutoCommit (opts.getAutoCommit ());
-				output (loc ("autocommit-status",
-					connection.getAutoCommit () + ""));
+				autocommitStatus (connection);
 			}
 			catch (Exception e)
 			{
@@ -3695,6 +4150,7 @@ public class SqlLine
 	class Opts
 		implements Completor 
 	{
+		private boolean autosave = false;
 		private boolean silent = false;
 		private boolean color = true;
 		private boolean showHeader = true;
@@ -3707,20 +4163,65 @@ public class SqlLine
 		private int maxWidth = Terminal.setupTerminal ().getTerminalWidth ();
 		private int maxColumnWidth = 15;
 		private String isolation = "TRANSACTION_REPEATABLE_READ";
+		private String outputFormat = "table";
 
 		public static final String PROPERTY_PREFIX = "sqlline.";
 
-		private String rcFile = System.getProperty ("sqlline.rcfile",
-			new File (System.getProperty ("user.home"), ".sqllinerc")
-				.getAbsolutePath ());
-		private String historyFile = System.getProperty ("sqlline.historyfile",
-			new File (System.getProperty ("user.home"), ".sqlline_history")
-				.getAbsolutePath ());
+		private File rcFile = new File (saveDir (), "sqlline.properties");
+		private String historyFile = new File (saveDir (), "history")
+			.getAbsolutePath ();
 
 
 		public Opts (Properties props)
 		{
 			loadProperties (props);
+		}
+
+
+		public Completor [] optionCompletors ()
+		{
+			return new Completor [] {
+				this,
+				// new SimpleCompletor (possibleSettingValues ()),
+			};
+		}
+
+
+		public String [] possibleSettingValues ()
+		{
+			List vals = new LinkedList ();
+			vals.addAll (Arrays.asList (new String [] {
+				"yes",
+				"no",
+				}));
+
+			return (String [])vals.toArray (new String [vals.size ()]);
+		}
+
+
+		/** 
+		 *  The save directory if HOME/.sqlline/ on UNIX, and
+		 *  HOME/sqlline/ on Windows.
+		 */
+		public File saveDir ()
+		{
+			String dir = System.getProperty ("sqlline.rcfile");
+			if (dir != null && dir.length () > 0)
+				return new File (dir);
+
+			File f = new File (System.getProperty ("user.home"),
+				(System.getProperty ("os.name").toLowerCase ()
+				 	.indexOf ("windows") != -1 ? "" : ".") + "sqlline")
+					.getAbsoluteFile ();
+			try
+			{
+				f.mkdirs ();
+			}
+			catch (Exception e)
+			{
+			}
+
+			return f;
 		}
 
 
@@ -3741,7 +4242,6 @@ public class SqlLine
 		public void save ()
 			throws IOException
 		{
-			info (loc ("saving-options", rcFile));
 			OutputStream out = new FileOutputStream (rcFile);
 			save (out);
 			out.close ();
@@ -3755,10 +4255,11 @@ public class SqlLine
 			{
 				Properties props = toProperties ();
 
-				// don't save maxwidth: it is automatically set
+				// don't save maxwidth: it is automatically set based on
+				// the terminal configuration
 				props.remove (PROPERTY_PREFIX + "maxwidth");
 
-				props.store (out, new java.util.Date () + "");
+				props.store (out, APP_TITLE);
 			}
 			catch (Exception e)
 			{
@@ -4034,6 +4535,33 @@ public class SqlLine
 		}
 
 
+
+
+		public void setAutosave (boolean autosave)
+		{
+			this.autosave = autosave;
+		}
+
+
+		public boolean getAutosave ()
+		{
+			return this.autosave;
+		}
+
+
+
+		public void setOutputFormat (String outputFormat)
+		{
+			this.outputFormat = outputFormat;
+		}
+
+
+		public String getOutputFormat ()
+		{
+			return this.outputFormat;
+		}
+
+
 	}
 
 
@@ -4158,6 +4686,33 @@ public class SqlLine
 			throws IOException
 		{
 			out.close ();
+		}
+	}
+
+
+	static class DriverInfo
+	{
+		public String sampleURL;
+
+
+		public DriverInfo (String name)
+			throws IOException
+		{
+			Properties props = new Properties ();
+			props.load (DriverInfo.class.getResourceAsStream (name));
+			fromProperties (props);
+		}
+
+
+		public DriverInfo (Properties props)
+		{
+			fromProperties (props);
+		}
+
+
+		public void fromProperties (Properties props)
+		{
+
 		}
 	}
 }

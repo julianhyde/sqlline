@@ -100,7 +100,7 @@
 					Usage:
 					<cmdsynopsis>
 					<command>!all</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>SQL statement</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
@@ -111,21 +111,21 @@
 				<example id="command_all_example">
 					<title>Example of "all" command</title>
 					<screen>
-1: jdbc:mysql://10.0.0.2/jdoautobuild> !list
+1: jdbc:mysql://localhost/mydb> !list
 
 2 active connections:
- #0  open     jdbc:oracle:thin:@10.0.0.50:1521:ora92
- #1  open     jdbc:mysql://10.0.0.2/jdoautobuild?autoReconnect=true
+ #0  open     jdbc:oracle:thin:@localhost:1521:mydb
+ #1  open     jdbc:mysql://localhost/mydb
 
-1: jdbc:mysql://10.0.0.2/jdoautobuild> !all DELETE FROM COMPANY;
+1: jdbc:mysql://localhost/mydb> !all DELETE FROM COMPANY;
 
-Executing SQL against: jdbc:oracle:thin:@10.0.0.50:1521:ora92
+Executing SQL against: jdbc:oracle:thin:@localhost:1521:mydb
 4 rows affected (0.004 seconds)
 
-Executing SQL against: jdbc:mysql://10.0.0.2/jdoautobuild
+Executing SQL against: jdbc:mysql://localhost/mydb
 1 row affected (3.187 seconds)
 
-1: jdbc:mysql://10.0.0.2/jdoautobuild>
+1: jdbc:mysql://localhost/mydb>
 					</screen>
 				</example>
 			</sect1>
@@ -142,20 +142,20 @@ Executing SQL against: jdbc:mysql://10.0.0.2/jdoautobuild
 
 				<para>
 					Set autocommit mode on or off. When autocommit is
-					on, then every individual SQL statement will be committed
+					on, every individual SQL statement will be committed
 					after it is issued. Otherwise, the
 					<link linkend="command_commit">commit</link>
 					command will need to be issued in order to commit any
-					changed to the database.
+					changes to the database.
 				</para>
 				<example id="command_autocommit_example">
 					<title>Example of "autocommit" command</title>
 					<screen>
-1: jdbc:mysql://10.0.0.2/jdoautobuild> !autocommit off
+1: jdbc:mysql://localhost/mydb> !autocommit off
 
 Autocommit status: false
 
-1: jdbc:mysql://10.0.0.2/jdoautobuild>
+1: jdbc:mysql://localhost/mydb>
 					</screen>
 				</example>
 			</sect1>
@@ -166,7 +166,6 @@ Autocommit status: false
 					Usage:
 					<cmdsynopsis>
 					<command>!batch</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
@@ -316,10 +315,10 @@ sqlline>
 +------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
 | TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | DATA_TYPE  | TYPE_NAME  | COLUMN_SIZE  | BUFFER_LENGTH  | DECIMAL_DIGITS  |
 +------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
-|            | JDOAUTO      | EMPLOYEE    | EMPLOYEE_ID  | 3          | NUMBER     | 22           | 0              | 0               |
-|            | JDOAUTO      | EMPLOYEE    | FIRST_NAME   | 12         | VARCHAR2   | 255          | 0              |                 |
-|            | JDOAUTO      | EMPLOYEE    | LAST_NAME    | 12         | VARCHAR2   | 255          | 0              |                 |
-|            | JDOAUTO      | EMPLOYEE    | DOB          | 93         | DATE       | 7            | 0              |                 |
+|            | MYDB         | EMPLOYEE    | EMPLOYEE_ID  | 3          | NUMBER     | 22           | 0              | 0               |
+|            | MYDB         | EMPLOYEE    | FIRST_NAME   | 12         | VARCHAR2   | 255          | 0              |                 |
+|            | MYDB         | EMPLOYEE    | LAST_NAME    | 12         | VARCHAR2   | 255          | 0              |                 |
+|            | MYDB         | EMPLOYEE    | DOB          | 93         | DATE       | 7            | 0              |                 |
 +------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
@@ -454,23 +453,48 @@ getMaxStatements                                  0
 getMaxTableNameLength                             30
 getMaxTablesInSelect                              0
 getMaxUserNameLength                              30
-getNumericFunctions                               ABS,CEIL,COS,COSH,EXP,FLOOR,LN,LOG,MOD,POWER,ROUND,SIGN,SIN,SINH,SQRT,TAN,TANH,TRUNC,AVG,
-                                                  COUNT,GLB,LUB,MAX,MIN,STDDEV,SUM,VARIANCE
+getNumericFunctions                               ABS,CEIL,COS,COSH,EXP,FLOOR,
+                                                  LN,LOG,MOD,POWER,ROUND,SIGN,
+                                                  SIN,SINH,SQRT,TAN,TANH,TRUNC,
+                                                  AVG,COUNT,GLB,LUB,MAX,MIN,
+                                                  STDDEV,SUM,VARIANCE
 getProcedureTerm                                  procedure
 getSchemaTerm                                     schema
 getSearchStringEscape                             //
-getSQLKeywords                                    ACCESS, ADD, ALTER, AUDIT, CLUSTER, COLUMN, COMMENT, COMPRESS, CONNECT, DATE, DROP,
-                                                  EXCLUSIVE, FILE, IDENTIFIED, IMMEDIATE, INCREMENT, INDEX, INITIAL, INTERSECT,
-                                                  LEVEL, LOCK, LONG, MAXEXTENTS, MINUS, MODE, NOAUDIT, NOCOMPRESS, NOWAIT, NUMBER,
-                                                  OFFLINE, ONLINE, PCTFREE, PRIOR, all_PL_SQL_reserved_ words
-getStringFunctions                                CHR, INITCAP, LOWER, LPAD, LTRIM, NLS,_INITCAP, NLS,_LOWER, NLS,_UPPER, REPLACE,
-                                                  RPAD, RTRIM, SOUNDEX, SUBSTR, SUBSTRB, TRANSLATE, UPPER, ASCII, INSTR, INSTRB,
-                                                  LENGTH, LENGTHB, NLSSORT, CHARTOROWID, CONVERT, HEXTORAW, RAWTOHEX, ROWIDTOCHAR,
-                                                  TO_CHAR, TO_DATE, TO_LABEL, TO_MULTI_BYTE, TO_NUMBER, TO_SINGLE_BYTE
-getSystemFunctions                                DUMP, GREATEST, GREATEST_LB, LEAST, LEAST_UB, NVL, UID, USER, USERENV, VSIZE
-getTimeDateFunctions                              ADD_MONTHS, LAST_DAY, MONTHS_BETWEEN, NEW_TIME, NEXT_DAY, ROUND, SYSDATE, TRUNC
+getSQLKeywords                                    ACCESS, ADD, ALTER, AUDIT,
+                                                  CLUSTER, COLUMN, COMMENT,
+                                                  COMPRESS, CONNECT, DATE, DROP,
+                                                  EXCLUSIVE, FILE, IDENTIFIED,
+                                                  IMMEDIATE, INCREMENT, INDEX,
+                                                  INITIAL, INTERSECT,
+                                                  LEVEL, LOCK, LONG, MAXEXTENTS,
+                                                  MINUS, MODE, NOAUDIT,
+                                                  NOCOMPRESS, NOWAIT, NUMBER,
+                                                  OFFLINE, ONLINE, PCTFREE,
+                                                  PRIOR,
+                                                  all_PL_SQL_reserved_ words
+getStringFunctions                                CHR, INITCAP, LOWER, LPAD,
+                                                  LTRIM, NLS,_INITCAP,
+                                                  NLS,_LOWER, NLS,_UPPER,
+                                                  REPLACE, RPAD, RTRIM, SOUNDEX,
+                                                  SUBSTR, SUBSTRB, TRANSLATE,
+                                                  UPPER, ASCII, INSTR, INSTRB,
+                                                  LENGTH, LENGTHB, NLSSORT,
+                                                  CHARTOROWID, CONVERT,
+                                                  HEXTORAW, RAWTOHEX,
+                                                  ROWIDTOCHAR,
+                                                  TO_CHAR, TO_DATE, TO_LABEL,
+                                                  TO_MULTI_BYTE, TO_NUMBER,
+                                                  TO_SINGLE_BYTE
+getSystemFunctions                                DUMP, GREATEST, GREATEST_LB,
+                                                  LEAST, LEAST_UB, NVL, UID,
+                                                  USER, USERENV, VSIZE
+getTimeDateFunctions                              ADD_MONTHS, LAST_DAY,
+                                                  MONTHS_BETWEEN, NEW_TIME,
+                                                  NEXT_DAY, ROUND, SYSDATE,
+                                                  TRUNC
 getURL                                            jdbc:oracle:thin:@localhost:1521:mydb
-getUserName                                       JDOAUTO
+getUserName                                       MYDB
 isCatalogAtStart                                  false
 isReadOnly                                        false
 nullPlusNonNullIsNull                             true
@@ -613,12 +637,21 @@ Really drop every table in the database? (y/n) y
 				</para>
 
 				<para>
-					XXX
+					List all the foreign keys that are exported by the
+					specified table.
 				</para>
 				<example id="command_exportedkeys_example">
 					<title>Example of "exportedkeys" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !exportedkeys XXX
+0: jdbc:hsqldb:db-hypersonic> !exportedkeys COMPANY
+
++--------------+----------------+---------------+----------------+-------------+
+| PKTABLE_CAT  | PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++--------------+----------------+---------------+----------------+-------------+
+|              |                | COMPANY       | COMPANY_ID     |             |
++--------------+----------------+---------------+----------------+-------------+
+
+0: jdbc:hsqldb:db-hypersonic>
 					</screen>
 				</example>
 			</sect1>
@@ -694,12 +727,21 @@ Really drop every table in the database? (y/n) y
 				</para>
 
 				<para>
-					XXX
+					List all the foreign keys that are imported by
+					the specified table.
 				</para>
 				<example id="command_importedkeys_example">
 					<title>Example of "importedkeys" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !importedkeys XXX
+0: jdbc:hsqldb:db-hypersonic> !importedkeys EMPLOYEE
+
++--------------+----------------+---------------+----------------+-------------+
+| PKTABLE_CAT  | PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++--------------+----------------+---------------+----------------+-------------+
+|              |                | COMPANY       | COMPANY_ID     |             |
++--------------+----------------+---------------+----------------+-------------+
+
+0: jdbc:hsqldb:db-hypersonic>
 					</screen>
 				</example>
 			</sect1>
@@ -722,14 +764,14 @@ Really drop every table in the database? (y/n) y
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !indexes EMPLOYEE
 
-+------------+--------------+-------------+-------------+------------------+-----------------+-------+-------------------+--------------+------------+
-| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  | NON_UNIQUE  | INDEX_QUALIFIER  |   INDEX_NAME    | TYPE  | ORDINAL_POSITION  | COLUMN_NAME  |
-+------------+--------------+-------------+-------------+------------------+-----------------+-------+-------------------+--------------+
-|            | JDOAUTO      | EMPLOYEE    | 0           |                  |                 | 0     | 0                 |              |
-|            | JDOAUTO      | EMPLOYEE    | 0           |                  | SYS_C003115849  | 1     | 1                 | EMPLOYEE_ID  |
-|            | JDOAUTO      | EMPLOYEE    | 1           |                  | FIRST_NAME      | 1     | 1                 | FIRST_NAME   |
-|            | JDOAUTO      | EMPLOYEE    | 1           |                  | LAST_NAME       | 1     | 1                 | LAST_NAME    |
-+------------+--------------+-------------+-------------+------------------+-----------------+-------+-------------------+--------------+
++--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
+| TABLE_SCHEM  | TABLE_NAME  | NON_UNIQUE  |   INDEX_NAME    | TYPE  | ORDINAL_POSITION  | COLUMN_NAME  |
++--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
+| MYDB         | EMPLOYEE    | 0           |                 | 0     | 0                 |              |
+| MYDB         | EMPLOYEE    | 0           | SYS_C003115849  | 1     | 1                 | EMPLOYEE_ID  |
+| MYDB         | EMPLOYEE    | 1           | FIRST_NAME      | 1     | 1                 | FIRST_NAME   |
+| MYDB         | EMPLOYEE    | 1           | LAST_NAME       | 1     | 1                 | LAST_NAME    |
++--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
@@ -988,17 +1030,25 @@ NAME        Microsoft
 					Usage:
 					<cmdsynopsis>
 					<command>!primarykeys</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					List all the primary keys for the specified table.
 				</para>
 				<example id="command_primarykeys_example">
 					<title>Example of "primarykeys" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !primarykeys XXX
+0: jdbc:hsqldb:db-hypersonic> !primarykeys COMPANY
+
++------------+--------------+-------------+--------------+----------+----------+
+| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | KEY_SEQ  |     PK_N |
++------------+--------------+-------------+--------------+----------+----------+
+|            |              | COMPANY     | COMPANY_ID   | 1        | SYS_PK_C |
++------------+--------------+-------------+--------------+----------+----------+
+
+0: jdbc:hsqldb:db-hypersonic>
 					</screen>
 				</example>
 			</sect1>
@@ -1020,7 +1070,7 @@ NAME        Microsoft
 				<example id="command_procedures_example">
 					<title>Example of "procedures" command</title>
 					<screen>
-0: jdbc:oracle:thin:@10.0.0.50:1521:ora92> !procedures %JDBC%
+0: jdbc:oracle:thin:@localhost:1521:mydb> !procedures %JDBC%
 
 +----------------+------------------+------------------+-------+-------+-------+
 | PROCEDURE_CAT  | PROCEDURE_SCHEM  |  PROCEDURE_NAME  | NULL  | NULL  | NULL  |
@@ -1029,7 +1079,7 @@ NAME        Microsoft
 | WK_ADM         | WKSYS            | SET_JDBC_DRIVER  |       |       |       |
 +----------------+------------------+------------------+-------+-------+-------+
 
-0: jdbc:oracle:thin:@10.0.0.50:1521:ora92>
+0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
 				</example>
 			</sect1>
@@ -1214,17 +1264,55 @@ Rollback complete (0.016 seconds)
 					Usage:
 					<cmdsynopsis>
 					<command>!run</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>file name</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					Run the individual commands specified in the file name
+					parameter. The file should consist of individual SQL
+					statements or SQLLine commands. Lines beginning with
+					"#" are interpreted as comments and ignored. If any
+					errors occur while running the script, the script will
+					be aborted, unless the
+					<link linkend="setting_force">force</link> preference is
+					set to <literal>true</literal>.
 				</para>
 				<example id="command_run_example">
 					<title>Example of "run" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !run XXX
+0: jdbc:hsqldb:db-hypersonic> !run example.sql
+1/12         CREATE TABLE COMPANY (COMPANY_ID INT PRIMARY KEY, NAME VARCHAR(255));
+No rows affected (0.001 seconds)
+2/12         INSERT INTO COMPANY VALUES (1, 'Apple');
+1 row affected (0 seconds)
+3/12         INSERT INTO COMPANY VALUES (2, 'Sun');
+1 row affected (0 seconds)
+4/12         INSERT INTO COMPANY VALUES (3, 'IBM');
+1 row affected (0.001 seconds)
+5/12         INSERT INTO COMPANY VALUES (4, 'Microsoft');
+1 row affected (0.015 seconds)
+6/12         CREATE TABLE EMPLOYEE (EMPLOYEE_ID INT PRIMARY KEY, FIRST_NAME VARCHAR(255), LAST_NAME VARCHAR(255), COMPANY INT, DOB DATE);
+No rows affected (0.004 seconds)
+7/12         ALTER TABLE EMPLOYEE ADD INDEX ON (FIRST_NAME);
+Error: Unexpected token: 37000 Unexpected token: ON in statement [ALTER TABLE EMPLOYEE ADD INDEX ON (FIRST_NAME)] (state=37000,code=-11)
+8/12         CREATE INDEX FIRST_NAME ON EMPLOYEE(FIRST_NAME);
+No rows affected (0 seconds)
+9/12         CREATE INDEX LAST_NAME ON EMPLOYEE(LAST_NAME);
+No rows affected (0.001 seconds)
+10/12        ALTER TABLE EMPLOYEE ADD CONSTRAINT EMP_COMPANY FOREIGN KEY (COMPANY) REFERENCES COMPANY (COMPANY_ID);
+No rows affected (0 seconds)
+11/12        INSERT INTO EMPLOYEE (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, COMPANY) VALUES (234, 'William', 'Gates', 4);
+1 row affected (0.001 seconds)
+12/12        SELECT * FROM COMPANY,EMPLOYEE WHERE EMPLOYEE.COMPANY = COMPANY.COMPANY_ID;
++-------------+------------+--------------+-------------+------------+---------+
+| COMPANY_ID  |    NAME    | EMPLOYEE_ID  | FIRST_NAME  | LAST_NAME  | COMPANY |
++-------------+------------+--------------+-------------+------------+---------+
+| 4           | Microsoft  | 234          | William     | Gates      | 4       |
++-------------+------------+--------------+-------------+------------+---------+
+1 row selected (0.001 seconds)
+0: jdbc:hsqldb:db-hypersonic>
+
 					</screen>
 				</example>
 			</sect1>
@@ -1259,17 +1347,57 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 					Usage:
 					<cmdsynopsis>
 					<command>!scan</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					Scans all the jar files in the CLASSPATH for any
+					JDBC drivers, and prints the class names of the drivers.
 				</para>
 				<example id="command_scan_example">
 					<title>Example of "scan" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !scan XXX
+sqlline> !scan
+
+35 driver classes found
+Compliant Version Driver Class
+no        4.0     COM.cloudscape.core.JDBCDriver
+no        1.0     COM.cloudscape.core.RmiJdbcDriver
+yes       7.1     COM.ibm.db2.jdbc.net.DB2Driver
+yes       3.2     com.ddtek.jdbc.db2.DB2Driver
+yes       3.2     com.ddtek.jdbc.informix.InformixDriver
+yes       3.2     com.ddtek.jdbc.oracle.OracleDriver
+yes       3.2     com.ddtek.jdbc.sqlserver.SQLServerDriver
+yes       3.2     com.ddtek.jdbc.sybase.SybaseDriver
+yes       1.0     com.ibm.db2.jcc.DB2Driver
+yes       2.21    com.informix.jdbc.IfxDriver
+no        0.2     com.internetcds.jdbc.tds.Driver
+no        0.2     com.internetcds.jdbc.tds.SybaseDriver
+yes       2.2715  com.jnetdirect.jsql.JSQLDriver
+yes       3.2     com.merant.datadirect.jdbc.db2.DB2Driver
+yes       3.2     com.merant.datadirect.jdbc.informix.InformixDriver
+yes       3.2     com.merant.datadirect.jdbc.oracle.OracleDriver
+yes       3.2     com.merant.datadirect.jdbc.sqlserver.SQLServerDriver
+yes       3.2     com.merant.datadirect.jdbc.sybase.SybaseDriver
+yes       2.2     com.microsoft.jdbc.sqlserver.SQLServerDriver
+no        3.0     com.mysql.jdbc.Driver
+no        3.0     com.mysql.jdbc.NonRegisteringDriver
+yes       4.4     com.pointbase.jdbc.jdbcDriver
+yes       4.4     com.pointbase.jdbc.jdbcEmbeddedDriver
+yes       4.4     com.pointbase.jdbc.jdbcUniversalDriver
+no        5.5     com.sybase.jdbc2.jdbc.SybDriver
+yes       1.0     in.co.daffodil.db.jdbc.DaffodilDBDriver
+no        2.0     interbase.interclient.Driver
+no        0.5     net.sourceforge.jtds.jdbc.Driver
+yes       1.0     oracle.jdbc.OracleDriver
+yes       1.0     oracle.jdbc.driver.OracleDriver
+no        3.26    org.enhydra.instantdb.jdbc.idbDriver
+no        3.0     org.gjt.mm.mysql.Driver
+no        1.7     org.hsqldb.jdbcDriver
+no        7.3     org.postgresql.Driver
+yes       0.9     org.sourceforge.jxdbcon.JXDBConDriver
+
+sqlline>
 					</screen>
 				</example>
 			</sect1>
@@ -1280,17 +1408,53 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 					Usage:
 					<cmdsynopsis>
 					<command>!script</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>filename</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					Start saving all commands entered to the specified
+					file. Once scripting on, it can be finished
+					by entering the script command again with no arguments.
+					Saved scripts can be re-run using the
+					<link linkend="command_run">run</link> command.
 				</para>
 				<example id="command_script_example">
 					<title>Example of "script" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !script XXX
+0: jdbc:hsqldb:db-hypersonic> !script /tmp/mysession.script
+
+Saving command script to "/tmp/mysession.script". Enter "script" with no arguments to stop it.
+
+0: jdbc:hsqldb:db-hypersonic> !autocommit off
+
+Autocommit status: false
+
+0: jdbc:hsqldb:db-hypersonic> SELECT * FROM COMPANY;
+
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 1           | Apple      |
+| 2           | Sun        |
+| 3           | IBM        |
+| 4           | Microsoft  |
++-------------+------------+
+4 rows selected (0.001 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> UPDATE COMPANY SET NAME='Apple, Inc.' WHERE NAME='Apple';
+
+1 row affected (0.005 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> !commit
+
+Commit complete (0 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> !script
+
+Script closed. Enter "run /tmp/mysession.script" to replay it.
+
+0: jdbc:hsqldb:db-hypersonic>
 					</screen>
 				</example>
 			</sect1>
@@ -1301,17 +1465,23 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 					Usage:
 					<cmdsynopsis>
 					<command>!set</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>preference</replaceable></arg>
+					<arg choice="req"><replaceable>value</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					Set the specified preference to the specified value. If
+					<link linkend="setting_autosave">autosave</link> is
+					on, then this will cause preferences to be
+					immediately saved. Otherwise, changed setting can be
+					saved for future SQLLine session eith the
+					<link linkend="command_save">save</link> command.
 				</para>
 				<example id="command_set_example">
 					<title>Example of "set" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !set XXX
+0: jdbc:hsqldb:db-hypersonic> !set color on
 					</screen>
 				</example>
 			</sect1>
@@ -1322,17 +1492,22 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 					Usage:
 					<cmdsynopsis>
 					<command>!sql</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
+					<arg choice="req"><replaceable>statement</replaceable></arg>
 					</cmdsynopsis>
 				</para>
 
 				<para>
-					XXX
+					Issue the specified SQL statement. This is equivalent to
+					entering the statement by itself from the command line.
 				</para>
 				<example id="command_sql_example">
 					<title>Example of "sql" command</title>
 					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !sql XXX
+0: jdbc:hsqldb:db-hypersonic> !sql DELETE FROM COMPANY;
+
+4 rows affected (0.005 seconds)
+
+0: jdbc:hsqldb:db-hypersonic>
 					</screen>
 				</example>
 			</sect1>
@@ -1353,7 +1528,7 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 				<example id="command_tables_example">
 					<title>Example of "tables" command</title>
 					<screen>
-0: jdbc:oracle:thin:@10.0.0.50:1521:ora92> !tables                              
+0: jdbc:oracle:thin:@localhost:1521:mydb> !tables
 
 +------------+--------------+---------------------------------+-------------+--+
 | TABLE_CAT  | TABLE_SCHEM  |           TABLE_NAME            | TABLE_TYPE  |  |
@@ -1362,7 +1537,7 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 |            | MYDB         | EMPLOYEE                        | TABLE       |  |
 +------------+--------------+---------------------------------+-------------+--+
 
-0: jdbc:oracle:thin:@10.0.0.50:1521:ora92> 
+0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
 				</example>
 			</sect1>
@@ -1419,14 +1594,157 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 
 		<chapter id="settings">
 			<title>Parameter Reference</title>
+			<sect1 id="setting_autocommit">
+				<title>autocommit</title>
+				<para>
+					If <literal>true</literal>, then new connections will have autocommit
+					set, otherwise, transactions will need to be explicitely
+					<link linkend="command_commit">committed</link> or
+					<link linkend="command_rollback">rolled back</link>.
+					Defaults to <literal>true</literal>.
+					To change the autocommit status for
+					a connection that is already open and active, use the
+					<link linkend="command_autocommit">autocommit</link>
+					command instead. 
+				</para>
+			</sect1>
+			<sect1 id="setting_autosave">
+				<title>autosave</title>
+				<para>
+					When set to <literal>true</literal>, any changes
+					to preferences using the
+					<link linkend="command_set">set</link> command will cause
+					the preferences to be saved. Otherwise, preferences will
+					need to be explicitely saved using the
+					<link linkend="command_save">save</link> command.
+					Defaults to <literal>false</literal>.
+				</para>
+			</sect1>
 			<sect1 id="setting_color">
 				<title>color</title>
 				<para>
+					If <literal>true</literal>, then output to
+					the terminal will use color for
+					a more pleasing visual experience. Requires that the
+					terminal support ANSI control codes (most do).
+					Defaults to <literal>true</literal>.
 				</para>
 			</sect1>
 			<sect1 id="setting_fastconnect">
 				<title>fastconnect</title>
 				<para>
+					When <literal>false</literal>, any new connection
+					will cause SQLLine to
+					access information about the available tables and columns
+					in order to provide them as candidates for tab-completion.
+					This can be a very slow operation for some databases, do
+					by default it is off. Table and column information can
+					always be explicitely retrieved using the
+					<link linkend="command_rehash">rehash</link> command.
+				</para>
+			</sect1>
+			<sect1 id="setting_force">
+				<title>force</title>
+				<para>
+					When set to <literal>false</literal>,
+					any failures during the
+					execution of the <link linkend="command_run">run</link>
+					or <link linkend="command_record">record</link> commands
+					will cause execution to abort, preventing the execution
+					of subsequent commands. When set to
+					<literal>true</literal>, errors
+					will be displayed but otherwise ignored.
+					Defaults to <literal>false</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_headerinterval">
+				<title>headerinterval</title>
+				<para>
+					The interval between which the column headers will be
+					redisplayed when using the "table"
+					<link linkend="setting_outputformat">outputformat</link>.
+					Defaults to 100.
+				</para>
+			</sect1>
+			<sect1 id="setting_historyfile">
+				<title>historyfile</title>
+				<para>
+					The file to which SQLLine will save a record of all the
+					commands issued. Defaults to HOME/sqlline/history on
+					Windows, and HOME/.sqlline/history on all other platforms.
+				</para>
+			</sect1>
+			<sect1 id="setting_isolation">
+				<title>isolation</title>
+				<para>
+					The default transaction isolation that will be
+					used for new connections. To change the isolation
+					level of the currently active connection, use the
+					<link linkend="command_isolation">isolation</link>
+					command instead.
+				</para>
+			</sect1>
+			<sect1 id="setting_maxcolumnwidth">
+				<title>maxcolumnwidth</title>
+				<para>
+					The maximum column width to display for each colummn
+					before truncating data when using the "table"
+					<link linkend="setting_outputformat">outputformat</link>.
+					Defaults to 15.
+				</para>
+			</sect1>
+			<sect1 id="setting_maxwidth">
+				<title>maxwidth</title>
+				<para>
+					The maximum width to display before truncating data
+					when using the "table"
+					<link linkend="setting_outputformat">outputformat</link>.
+					Defaults to attempting to query the terminal for the
+					current width, falls back to 80.
+				</para>
+			</sect1>
+			<sect1 id="setting_outputformat">
+				<title>outputformat</title>
+				<para>
+					The format for how results are displayed. For details,
+					see the information on the
+					<link linkend="command_outputformat">outputformat
+					command</link>.
+				</para>
+			</sect1>
+			<sect1 id="setting_showheader">
+				<title>showheader</title>
+				<para>
+					If <literal>true</literal>, display the names of the
+					columns when displaying results. Defaults to
+					<literal>true</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_showwarnings">
+				<title>showwarnings</title>
+				<para>
+					If <literal>true</literal>, display any warnings
+					that are reported on the connection after issuing
+					any database commands. Defaults to
+					<literal>false</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_silent">
+				<title>silent</title>
+				<para>
+					If <literal>true</literal>, then reduce the amount
+					of informational messages displayed. Useful for redirecting
+					a sqlline command to a file for later parsing. Defaults to
+					<literal>false</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_verbose">
+				<title>verbose</title>
+				<para>
+					If <literal>true</literal>, then print out the
+					entire java stack trace whenever an error occurs,
+					as well as displaying debugging information.
+					Defaults to <literal>false</literal>.
 				</para>
 			</sect1>
 		</chapter>

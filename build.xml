@@ -2,6 +2,7 @@
 	<property name="build" value="${basedir}/build"/>
 	<property name="src" value="${basedir}/src"/>
 	<property name="tmp" value="${basedir}/tmp"/>
+	<property name="doc" value="${basedir}/doc"/>
 	<property name="test" value="${basedir}/test"/>
 	<property name="reports" value="${basedir}/reports"/>
 	<property name="release" value="${basedir}/release"/>
@@ -10,8 +11,8 @@
 
 	<property name="name" value="sqlline"/>
 	<property name="version.major" value="0"/>
-	<property name="version.minor" value="6"/>
-	<property name="version.patch" value="0"/>
+	<property name="version.minor" value="7"/>
+	<property name="version.patch" value="3"/>
 	<property name="version.name"
 		value="${version.major}_${version.minor}_${version.patch}"/>
 	<property name="version.title"
@@ -77,7 +78,33 @@
 		</ftp>
 	</target>
 
-	<target name="release" depends="init,srcjar">
+	<target name="doc">
+		<!--
+		<xmlcatalog id="dtds">
+			<dtd publicId="-//OASIS//DTD DocBook XML V4.1.2//EN"
+				location="${common}/dtds/docbook/docbookx.dtd"/>
+		</xmlcatalog>
+		-->
+
+		<!-- man pages -->
+		<style basedir="${doc}"
+			destdir="${doc}"
+			extension=".man"
+			style="${doc}/manpage.xsl"
+			includes="manual.xml">
+		</style>
+
+		<!-- HTML documentation -->
+		<style basedir="${doc}"
+			destdir="${doc}"
+			extension=".html"
+			style="${doc}/manual.xsl"
+			includes="manual.xml">
+		</style>
+	</target>
+
+
+	<target name="release" depends="init,srcjar,doc">
 		<tstamp/>
 		<delete dir="${relbuild}"/>
 		<mkdir dir="${relbuild}"/>
