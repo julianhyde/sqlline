@@ -2091,11 +2091,21 @@ public class SqlLine
 	}
 
 	
+	private Statement createStatement ()
+		throws SQLException
+	{
+		Statement stmnt = con ().connection.createStatement ();
+		if (opts.timeout > -1)
+			stmnt.setQueryTimeout (opts.timeout);
+		return stmnt;
+	}
+
+
 	void runBatch (List statements)
 	{
 		try
 		{
-			Statement stmnt = con ().connection.createStatement ();
+			Statement stmnt = createStatement ();
 			try
 			{
 				for (Iterator i = statements.iterator (); i.hasNext (); )
@@ -2808,8 +2818,8 @@ public class SqlLine
 					return false;
 				}
 
-				Object res = Reflector.invoke (con ().meta, cmd,
-					Arrays.asList (args));
+				Object res = Reflector.invoke (con ().meta,
+					DatabaseMetaData.class, cmd, Arrays.asList (args));
 
 				if (res instanceof ResultSet)
 				{
@@ -3494,7 +3504,7 @@ public class SqlLine
 
 			try
 			{
-				Statement stmnt = con ().connection.createStatement ();
+				Statement stmnt = createStatement ();
 				try
 				{
 					long start = System.currentTimeMillis ();
@@ -4008,9 +4018,6 @@ public class SqlLine
 	
 			if (rs == null)
 				return false;
-	
-			if (rs.isAfterLast ())
-				return error ("No entries found for " + table [1]);
 	
 			print (rs);
 			rs.close ();
@@ -4617,6 +4624,7 @@ public class SqlLine
 		private int maxWidth = Terminal.setupTerminal ().getTerminalWidth ();
 		private int maxHeight = Terminal.setupTerminal ().getTerminalHeight ();
 		private int maxColumnWidth = 15;
+		private int timeout = -1;
 		private String isolation = "TRANSACTION_REPEATABLE_READ";
 		private String outputFormat = "table";
 
@@ -4910,6 +4918,20 @@ public class SqlLine
 
 
 
+		public void setTimeout (int timeout)
+		{
+			this.timeout = timeout;
+		}
+
+
+		public int getTimeout ()
+		{
+			return this.timeout;
+		}
+
+
+
+
 		public void setIsolation (String isolation)
 		{
 			this.isolation = isolation;
@@ -5055,7 +5077,17 @@ public class SqlLine
 			throws InvocationTargetException, IllegalAccessException,
 				ClassNotFoundException
 		{
-			Class c = on.getClass ();
+			return invoke (on, on == null ? null : on.getClass (),
+				method, args);
+		}
+
+
+		public static Object invoke (Object on, Class defClass,
+			String method, List args)
+			throws InvocationTargetException, IllegalAccessException,
+				ClassNotFoundException
+		{
+			Class c = defClass != null ? defClass : on.getClass ();
 			List candidateMethods = new LinkedList ();
 
 			Method [] m = c.getMethods ();
@@ -5078,6 +5110,9 @@ public class SqlLine
 
 				Object [] converted = convert (args, ptypes);
 				if (converted == null)
+					continue;
+
+				if (!Modifier.isPublic (meth.getModifiers ()))
 					continue;
 
 				return meth.invoke (on, converted);
