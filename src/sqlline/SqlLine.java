@@ -416,12 +416,28 @@ public class SqlLine
 	public static void main (String [] args)
 		throws IOException
 	{
+		mainWithInputRedirection (args, null);
+	}
+
+	/** 
+	 *  Starts the program with redirected input.  For redirected output,
+	 *  System.setOut and System.setErr can be used, but System.setIn
+	 *  will not work.
+	 *
+	 *  @param args same as main()
+	 *
+	 *  @param inputStream redirected input, or null to use standard input
+	 */
+	public static void mainWithInputRedirection (
+		String [] args, InputStream inputStream)
+		throws IOException
+	{
 		SqlLine sqlline = new SqlLine ();
-		sqlline.begin (args);
+		sqlline.begin (args, inputStream);
 
 		// exit the system: useful for Hypersonic and other
 		// badly-behaving systems
-		if (!Boolean.getBoolean ("sqlline.system.exit"))
+		if (!Boolean.getBoolean (Opts.PROPERTY_NAME_EXIT))
 			System.exit (0);
 	}
 
@@ -711,7 +727,7 @@ public class SqlLine
 	 *  to the appropriate {@link CommandHandler} until the
 	 *  global variable <code>exit</code> is true.
 	 */
-	void begin (String [] args)
+	void begin (String [] args, InputStream inputStream)
 		throws IOException
 	{
 		try
@@ -723,7 +739,7 @@ public class SqlLine
 		{
 		}
 
-		ConsoleReader reader = getConsoleReader ();
+		ConsoleReader reader = getConsoleReader (inputStream);
 		if (!(initArgs (args)))
 		{
 			usage ();
@@ -758,11 +774,22 @@ public class SqlLine
 	}
 
 
-	public ConsoleReader getConsoleReader ()
+	public ConsoleReader getConsoleReader (InputStream inputStream)
 		throws IOException
 	{
-		Terminal.setupTerminal ();
-		reader = new ConsoleReader ();
+		Terminal terminal = Terminal.setupTerminal ();
+
+		if (inputStream != null)
+		{
+			// ### NOTE:  fix for sf.net bug 879425.
+			reader = new ConsoleReader (
+				inputStream,
+				new PrintWriter (System.out));
+		}
+		else
+		{
+			reader = new ConsoleReader ();
+		}
 
 
 		// setup history
@@ -848,8 +875,7 @@ public class SqlLine
 		if (line.trim ().length () == 0)
 			return true;
 
-		// Comments start with a "#" character.
-		if (line.startsWith ("#"))
+		if (isComment (line))
 			return true;
 
 		line = line.trim ();
@@ -858,7 +884,7 @@ public class SqlLine
 		if (script != null)
 			script.addLine (line);
 
-		if (line.equals ("?") || line.equalsIgnoreCase ("help"))
+		if (isHelpRequest (line))
 			line = "!help";
 
 		if (line.startsWith (COMMAND_PREFIX))
@@ -885,9 +911,60 @@ public class SqlLine
 			return command.sql (line);
 	}
 
+	/**
+	 *  Test whether a line requires a continuation.
+	 *
+	 *  @param line the line to be tested
+	 *
+	 *  @return true if continuation required
+	 */
+	boolean needsContinuation (String line)
+	{
+		if (isHelpRequest (line))
+			return false;
+		
+		if (line.startsWith (COMMAND_PREFIX))
+			return false;
+
+		if (isComment (line))
+			return false;
+
+		String trimmed = line.trim();
+
+		if (trimmed.length () == 0)
+			return false;
+
+		return !trimmed.endsWith (";");
+	}
+
+	/**
+	 *  Test whether a line is a help request other than !help.
+	 *
+	 *  @param line the line to be tested
+	 *
+	 *  @return true if a help request
+	 */
+	boolean isHelpRequest (String line)
+	{
+		return line.equals ("?") || line.equalsIgnoreCase ("help");
+	}
+
+	/**
+	 *  Test whether a line is a comment.
+	 *
+	 *  @param line the line to be tested
+	 *
+	 *  @return true if a comment
+	 */
+	boolean isComment (String line)
+	{
+		// SQL92 comment prefix is "--"
+		// sqlline also supports shell-style "#" prefix
+		return line.startsWith ("#") || line.startsWith ("--");
+	}
 
 	/** 
-	 *  Pint the specified message to the console
+	 *  Print the specified message to the console
 	 *  
 	 *  @param  msg  the message to print
 	 */
@@ -3367,7 +3444,13 @@ public class SqlLine
 		{
 			if (line == null || line.length () == 0)
 				return false; // ???
-	
+
+			// ### FIXME:  doing the multi-line handling down here means
+			// higher-level logic never sees the extra lines.  So,
+			// for example, if a script is being saved, it won't include
+			// the continuation lines!  This is logged as sf.net
+			// bug 879518.
+			
 			// use multiple lines for statements not terminated by ";"
 			try
 			{
@@ -3680,6 +3763,7 @@ public class SqlLine
 			{
 				connections.setIndex (i);
 				output (loc ("executing-con", con ()));
+				// ### FIXME:  this is broken for multi-line SQL
 				success = sql (line.substring ("all ".length ())) && success;
 			}
 
@@ -3782,9 +3866,52 @@ public class SqlLine
 					parts [1]));
 				try
 				{
-					String cmd = null;
-					while ((cmd = reader.readLine ()) != null)
-						cmds.add (cmd);
+					// ### NOTE:  fix for sf.net bug 879427
+					StringBuffer cmd = null;
+					for (;;)
+					{
+						String scriptLine = reader.readLine ();
+						
+						if (scriptLine == null)
+							break;
+						
+						if (cmd != null)
+						{
+							// we're continuing an existing command
+							scriptLine = scriptLine.trim ();
+							cmd.append (" \n");
+							cmd.append (scriptLine);
+							if (scriptLine.endsWith (";"))
+							{
+								// this command has terminated
+								cmds.add( cmd.toString ());
+								cmd = null;
+							}
+						}
+						else
+						{
+							// we're starting a new command
+							if (needsContinuation (scriptLine))
+							{
+								// multi-line
+								cmd = new StringBuffer (scriptLine);
+							}
+							else
+							{
+								// single-line
+								cmds.add (scriptLine);
+							}
+						}
+					}
+					
+					if (cmd != null)
+					{
+						// ### REVIEW: oops, somebody left the last command
+						// unterminated; should we fix it for them or complain?
+						// For now be nice and fix it.
+						cmd.append (";");
+						cmds.add (cmd.toString ());
+					}
 				}
 				finally
 				{
@@ -4494,6 +4621,8 @@ public class SqlLine
 		private String outputFormat = "table";
 
 		public static final String PROPERTY_PREFIX = "sqlline.";
+		public static final String PROPERTY_NAME_EXIT =
+			PROPERTY_PREFIX + "system.exit";
 
 		private File rcFile = new File (saveDir (), "sqlline.properties");
 		private String historyFile = new File (saveDir (), "history")
@@ -4661,6 +4790,11 @@ public class SqlLine
 			for (Iterator i = props.keySet ().iterator (); i.hasNext (); )
 			{
 				String key = i.next ().toString ();
+				if (key.equals (PROPERTY_NAME_EXIT))
+				{
+					// fix for sf.net bug 879422
+					continue;
+				}
 				if (key.startsWith (PROPERTY_PREFIX))
 				{
 					set (key.substring (PROPERTY_PREFIX.length ()),
