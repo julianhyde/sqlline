@@ -1756,7 +1756,18 @@ public class SqlLine
 			f = new TableOutputFormat ();
 		}
 
-		return f.print (new Rows (rs));
+		Rows rows;
+
+		if (opts.getIncremental ())
+		{
+			rows = new IncrementalRows (rs);
+		}
+		else
+		{
+			rows = new BufferedRows (rs);
+		}
+
+		return f.print (rows);
 	}
 
 
@@ -1777,14 +1788,13 @@ public class SqlLine
 		public int print (Rows rows)
 		{
 			int count = 0;
-			Iterator i = rows.iterator ();
-			Rows.Row header = (Rows.Row)i.next ();
+			Rows.Row header = (Rows.Row)rows.next ();
 
 			printHeader (header);
 
-			while (i.hasNext ())
+			while (rows.hasNext ())
 			{
-				printRow (rows, header, (Rows.Row)i.next ());
+				printRow (rows, header, (Rows.Row)rows.next ());
 				count++;
 			}
 
@@ -1879,12 +1889,11 @@ public class SqlLine
 		public int print (Rows rows)
 		{
 			int count = 0;
-			Iterator i = rows.iterator ();
-			Rows.Row header = (Rows.Row)i.next ();
+			Rows.Row header = (Rows.Row)rows.next ();
 
-			while (i.hasNext ())
+			while (rows.hasNext ())
 			{
-				printRow (rows, header, (Rows.Row)i.next ());
+				printRow (rows, header, (Rows.Row)rows.next ());
 				count++;
 			}
 
@@ -1933,10 +1942,9 @@ public class SqlLine
 		public int print (Rows rows)
 		{
 			int count = 0;
-			Iterator i = rows.iterator ();
-			while (i.hasNext ())
+			while (rows.hasNext ())
 			{
-				printRow (rows, (Rows.Row)i.next ());
+				printRow (rows, (Rows.Row)rows.next ());
 				count++;
 			}
 
@@ -1991,9 +1999,9 @@ public class SqlLine
 			// normalize the columns sizes
 			rows.normalizeWidths ();
 	
-			for (Iterator i = rows.iterator (); i.hasNext (); )
+			for (; rows.hasNext (); )
 			{
-				Rows.Row row = (Rows.Row)i.next ();
+				Rows.Row row = (Rows.Row)rows.next ();
 				ColorBuffer cbuf = getOutputString (rows, row);
 				cbuf = cbuf.truncate (width);
 	
@@ -2165,8 +2173,10 @@ public class SqlLine
 	}
 
 
-	class Rows
-		extends LinkedList
+	/**
+	 *  Abstract base class representing a set of rows to be displayed.
+	 */
+	abstract class Rows implements Iterator
 	{
 		final ResultSetMetaData rsMeta;
 		final Boolean [] primaryKeys;
@@ -2174,25 +2184,25 @@ public class SqlLine
 		Rows (ResultSet rs)
 			throws SQLException
 		{
-			this.rsMeta = rs.getMetaData ();
-
+			rsMeta = rs.getMetaData ();
 			int count = rsMeta.getColumnCount ();
 			primaryKeys = new Boolean [count];
-
-			add (new Row (count));
-
-			while (rs.next ())
-				add (new Row (count, rs));
 		}
 
-
-		public int getRowCount ()
+		
+		public void remove ()
 		{
-			// the number of rows minus the header
-			return size () - 1;
+			throw new UnsupportedOperationException ();
 		}
 
+		
+		/** 
+		 *  Update all of the rows to have the same size, set to the
+		 *  maximum length of each column in the Rows. 
+		 */
+		abstract void normalizeWidths ();
 
+		
 		/** 
 		 *  Return whether the specified column (0-based index) is
 		 *  a primary key. Since this method depends on whether the
@@ -2247,34 +2257,7 @@ public class SqlLine
 			}
 		}
 
-
-		/** 
-		 *  Update all of the rows to have the same size, set to the
-		 *  maximum length of each column in the Rows. 
-		 */
-		void normalizeWidths ()
-		{
-			int [] max = null;
-			for (int i = 0; i < size (); i++)
-			{
-				Row row = (Row)get (i);
-				if (max == null)
-					max = new int [row.values.length];
-
-				for (int j = 0; j < max.length; j++)
-				{
-					max [j] = Math.max (max [j], row.sizes [j] + 1);
-				}
-			}
-
-			for (int i = 0; i < size (); i++)
-			{
-				Row row = (Row)get (i);
-				row.sizes = max;
-			}
-		}
-
-
+		
 		class Row
 		{
 			final String [] values;
@@ -2321,9 +2304,168 @@ public class SqlLine
 				}
 			}
 		}
+		
+	}
+
+	
+	/**
+	 *  Rows implementation which buffers all rows in a linked list.
+	 */
+	class BufferedRows
+		extends Rows
+	{
+		private final LinkedList list;
+
+		private final Iterator iterator;
+
+		BufferedRows (ResultSet rs)
+			throws SQLException
+		{
+			super (rs);
+
+			list = new LinkedList ();
+			
+			int count = rsMeta.getColumnCount ();
+
+			list.add (new Row (count));
+
+			while (rs.next ())
+				list.add (new Row (count, rs));
+
+			iterator = list.iterator ();
+		}
+
+
+		public boolean hasNext ()
+		{
+			return iterator.hasNext ();
+		}
+
+
+		public Object next ()
+		{
+			return iterator.next ();
+		}
+
+
+		void normalizeWidths ()
+		{
+			int [] max = null;
+			for (int i = 0; i < list.size (); i++)
+			{
+				Row row = (Row)list.get (i);
+				if (max == null)
+					max = new int [row.values.length];
+
+				for (int j = 0; j < max.length; j++)
+				{
+					max [j] = Math.max (max [j], row.sizes [j] + 1);
+				}
+			}
+
+			for (int i = 0; i < list.size (); i++)
+			{
+				Row row = (Row)list.get (i);
+				row.sizes = max;
+			}
+		}
+
 	}
 
 
+	/**
+	 *  Rows implementation which returns rows incrementally from result set
+	 *  without any buffering.
+	 */
+	class IncrementalRows
+		extends Rows
+	{
+		private final ResultSet rs;
+
+		private Row labelRow;
+
+		private Row maxRow;
+
+		private Row nextRow;
+
+		private boolean normalizingWidths;
+		
+
+		IncrementalRows (ResultSet rs)
+			throws SQLException
+		{
+			super (rs);
+			this.rs = rs;
+
+			labelRow = new Row (rsMeta.getColumnCount ());
+			maxRow = new Row (rsMeta.getColumnCount ());
+
+			// pre-compute normalization so we don't have to deal
+			// with SQLExceptions later
+			for (int i = 0; i < maxRow.sizes.length; ++i)
+			{
+				// normalized display width is based on maximum of display size
+				// and label size
+				maxRow.sizes [i] = Math.max(
+					maxRow.sizes [i],
+					rsMeta.getColumnDisplaySize (i + 1));
+			}
+			
+			nextRow = labelRow;
+		}
+
+		
+		public boolean hasNext ()
+		{
+			return (nextRow != null);
+		}
+
+
+		public Object next ()
+		{
+			if (!hasNext ())
+			{
+				throw new NoSuchElementException();
+			}
+
+			Object ret = nextRow;
+
+			try {
+				if (rs.next ())
+				{
+					nextRow = new Row (labelRow.sizes.length, rs);
+
+					if (normalizingWidths)
+					{
+						// perform incremental normalization
+						nextRow.sizes = labelRow.sizes;
+					}
+				}
+				else
+				{
+					nextRow = null;
+				}
+			} catch (SQLException ex) {
+				throw new RuntimeException(ex);
+			}
+
+			return ret;
+		}
+
+		
+		void normalizeWidths ()
+		{
+			// normalize label row
+			labelRow.sizes = maxRow.sizes;
+
+			// and remind ourselves to perform incremental normalization
+			// for each row as it is produced
+			normalizingWidths = true;
+		}
+		
+	}
+
+	
 	///////////////////////////////
 	// Console interaction classes
 	///////////////////////////////
@@ -4624,6 +4766,7 @@ public class SqlLine
 		private boolean autoCommit = true;
 		private boolean verbose = false;
 		private boolean force = false;
+		private boolean incremental = false;
 		private boolean showWarnings = false;
 		private int maxWidth = Terminal.setupTerminal ().getTerminalWidth ();
 		private int maxHeight = Terminal.setupTerminal ().getTerminalHeight ();
@@ -5008,6 +5151,18 @@ public class SqlLine
 		public boolean getForce ()
 		{
 			return this.force;
+		}
+
+
+		public void setIncremental (boolean incremental)
+		{
+			this.incremental = incremental;
+		}
+
+
+		public boolean getIncremental ()
+		{
+			return this.incremental;
 		}
 
 
