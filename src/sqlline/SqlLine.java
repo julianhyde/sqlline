@@ -3888,6 +3888,10 @@ public class SqlLine
 		private void setCompletions (boolean skipmeta)
 			throws SQLException, IOException
 		{
+			final String extraNameCharacters =
+				meta.getExtraNameCharacters () == null ? ""
+					: meta.getExtraNameCharacters ();
+
 			// setup the completor for the database
 			sqlLineSQLCompletor = new ArgumentCompletor (
 				new SQLLineSQLCompletor (skipmeta),
@@ -3895,13 +3899,14 @@ public class SqlLine
 				{
 					// deleimiters for SQL statements are any
 					// non-letter-or-number characters, except
-					// underscore and dollar.
+					// underscore and characters that are specified
+					// by the database to be valid name identifiers.
 					public boolean isDelimiterChar (String buf, int pos)
 					{
 						char c = buf.charAt (pos);
 						return !(Character.isLetterOrDigit (c))
 							&& c != '_'
-							&& c != '$';
+							&& extraNameCharacters.indexOf (c) == -1;
 					}
 				});
 
