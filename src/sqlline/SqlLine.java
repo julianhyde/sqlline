@@ -779,6 +779,10 @@ public class SqlLine
 				handleException (t);
 			}
 		}
+
+		// ### NOTE jvs 10-Aug-2004:  Clean up any outstanding
+		// connections automatically.
+		command.closeall (null);
 	}
 
 
