@@ -1770,7 +1770,7 @@ Connecting to jdbc:mysql://localhost/mydb
 Enter password for jdbc:mysql://localhost/mydb: *****
 
 Connected to: MySQL (version 3.23.52-log)
-Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2003/11/20 01:05:06 $, $Revision: 1.6 $ ))
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2004/07/22 07:31:36 $, $Revision: 1.7 $ ))
 Autocommit status: true
 Transaction isolation: TRANSACTION_READ_COMMITTED
 
@@ -2601,6 +2601,19 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					The file to which SQLLine will save a record of all the
 					commands issued. Defaults to HOME/sqlline/history on
 					Windows, and HOME/.sqlline/history on all other platforms.
+				</para>
+			</sect1>
+			<sect1 id="setting_incremental">
+				<title>incremental</title>
+				<para>
+					When set to <literal>false</literal>,
+					the entire result set is fetched and buffered
+					before being displayed, yielding optimal display
+					column sizing.  When set to <literal>true</literal>,
+					result rows are displayed immediately as they are
+					fetched, yielding lower latency and memory usage
+					at the price of extra display column padding.
+					Defaults to <literal>false</literal>.
 				</para>
 			</sect1>
 			<sect1 id="setting_isolation">
