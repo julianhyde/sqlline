@@ -1,0 +1,140 @@
+<project name="sqlline" default="all" basedir="."> 
+	<property name="build" value="${basedir}/build"/>
+	<property name="src" value="${basedir}/src"/>
+	<property name="tmp" value="${basedir}/tmp"/>
+	<property name="test" value="${basedir}/test"/>
+	<property name="reports" value="${basedir}/reports"/>
+	<property name="release" value="${basedir}/release"/>
+
+	<property name="author" value="Marc Prud'hommeaux"/>
+
+	<property name="name" value="sqlline"/>
+	<property name="version.major" value="0"/>
+	<property name="version.minor" value="6"/>
+	<property name="version.patch" value="0"/>
+	<property name="version.name"
+		value="${version.major}_${version.minor}_${version.patch}"/>
+	<property name="version.title"
+		value="${version.major}.${version.minor}.${version.patch}"/>
+
+	<property name="title" value="${name} ${version.title}"/>
+
+	<property name="sourcedirs" value="${src}:${test}"/>
+
+	<property name="srcprefix" value="${name}-${version.name}"/>
+
+	<property name="jarname" value="${name}.jar"/>
+	<property name="jarfile" value="${release}/${jarname}"/>
+
+	<property name="srcjarname" value="${name}-src-${version.name}.jar"/>
+	<property name="srcjarfile" value="${release}/${srcjarname}"/>
+
+	<property name="relbuild" value="${tmp}/release-build"/>
+
+	<target name="all" depends="build">
+	</target>
+
+	<target name="init">
+		<mkdir dir="${reports}" />
+		<mkdir dir="${build}" />
+		<mkdir dir="${release}"/>
+		<mkdir dir="${tmp}"/>
+	</target>
+
+	<target name="build" depends="init">
+		<javac listfiles="yes" srcdir="${sourcedirs}" 
+			debug="on" 
+			destdir="${build}"
+			fork="no">
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build}"/>
+		<mkdir dir="${build}"/>
+	</target>
+
+	<target name="rebuild" depends="clean,build"/>
+
+	<target name="srcjar">
+		<zip destfile="${srcjarfile}" update="no">
+			<zipfileset prefix="${srcprefix}/src" dir="${src}"
+				excludes="**/CVS/*,**/.*.swp"/>
+			<zipfileset prefix="${srcprefix}/test" dir="${test}"
+				excludes="**/CVS/*,**/.*.swp"/>
+			<zipfileset prefix="${srcprefix}" dir="${basedir}"
+				includes="CHANGELOG,AUTHORS,LICENSE,build.xml"/>
+		</zip>
+	</target>
+
+	<target name="release.upload" depends="release">
+		<ftp server="upload.sourceforge.net"
+			userid="anonymous"
+			password="sqlline@sourceforge.net"
+			remotedir="incoming">
+			<fileset dir="${release}"/>
+		</ftp>
+	</target>
+
+	<target name="release" depends="init,srcjar">
+		<tstamp/>
+		<delete dir="${relbuild}"/>
+		<mkdir dir="${relbuild}"/>
+		<javac listfiles="yes" srcdir="${src}" debug="on" 
+			destdir="${relbuild}" fork="no">
+			<include name="**/*.java"/>
+		</javac>
+		<copy todir="${relbuild}" flatten="no">
+			<fileset dir="${src}">
+				<include name="**/*.properties"/>
+				<include name="**/*.gz"/>
+			</fileset>
+		</copy>
+
+		<jar jarfile="${jarfile}" basedir="${relbuild}" update="no">
+			<manifest>
+				<attribute name="Main-Class" value="sqlline.SqlLine"/>
+				<attribute name="Class-Path" value="jline.jar"/>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
+
+				<section name="sqlline">
+					<attribute name="Sealed" value="true"/>
+					<attribute name="Extension-name"
+						value="${name}"/>
+					<attribute name="Specification-Title"
+						value="SQLLine"/>
+					<attribute name="Specification-Version"
+						value="${version.title}"/>
+					<attribute name="Specification-Vendor"
+						value="${author}"/>
+					<attribute name="Implementation-Title"
+						value="${name}"/>
+					<attribute name="Implementation-Version"
+						value="${version.title}"/>
+					<attribute name="Implementation-Vendor"
+						value="${author}"/>
+					<attribute name="Implementation-License"
+						value="GNU LGPL"/>
+				</section>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="retests" depends="rebuild,tests"/>
+
+	<target name="tests" depends="build">
+		<junit printsummary="withOutAndErr" haltonfailure="false"
+			fork="no" showoutput="yes" includeantruntime="yes"
+			errorproperty="build.errorprop">
+			<formatter type="plain" usefile="no"/>
+			<formatter type="xml" usefile="yes"/>
+			<batchtest fork="no" todir="${reports}">
+				<fileset dir="${test}">
+					<include name="**/Test*.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+</project>
