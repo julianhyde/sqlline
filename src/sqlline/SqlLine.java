@@ -23,11 +23,13 @@ package sqlline;
 
 import jline.*;
 import java.io.*;
+import java.net.*;
 import java.text.*;
 import java.sql.*;
 import java.util.*;
 import java.lang.reflect.*;
 import java.util.zip.*;
+import java.util.jar.*;
 
 /** 
  *  A console SQL shell with command completion.
@@ -51,12 +53,14 @@ public class SqlLine
 	private static final ResourceBundle loc = ResourceBundle.getBundle (
 		SqlLine.class.getName ());
 
+	/*
 	public static final String APP_NAME = "sqlline";
 	public static final String APP_VERSION = "0.7.3";
 	public static final String APP_AUTHOR = "Marc Prud'hommeaux";
 	public static final String APP_AUTHOR_EMAIL = "marc@apocalypse.org";
 	public static final String APP_TITLE = APP_NAME + " " + APP_VERSION
 											+ " by " + APP_AUTHOR;
+	*/
 
 	private static final String sep = System.getProperty ("line.separator");
 	private boolean exit = false;
@@ -102,6 +106,8 @@ public class SqlLine
 			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "exportedkeys" },
 			new Completor [] { new TableNameCompletor ()}),
+		new ReflectiveCommandHandler (new String [] { "manual" },
+			null),
 		new ReflectiveCommandHandler (new String [] { "importedkeys" },
 			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "procedures" },
@@ -256,14 +262,94 @@ public class SqlLine
 
 	static
 	{
+		Class jline;
+
 		try
 		{
-			Class.forName ("jline.ConsoleReader");
+			jline = Class.forName ("jline.ConsoleReader");
 		}
 		catch (Throwable t)
 		{
 			throw new ExceptionInInitializerError (loc ("jline-missing"));
 		}
+
+		/*
+		System.out.println ("JLine package: " + jline.getPackage ());
+
+		String required = "1.0.3";
+
+		if (!(jline.getPackage ().isCompatibleWith (required)))
+			throw new ExceptionInInitializerError (loc ("jline-version",
+				new Object [] { 
+					jline.getPackage ().getSpecificationTitle (),
+					jline.getPackage ().getSpecificationVersion (),
+					required,
+					}));
+		*/
+	}
+
+
+	static Manifest getManifest ()
+		throws IOException
+	{
+		URL base = SqlLine.class.getResource ("/META-INF/MANIFEST.MF");
+		URLConnection c = base.openConnection ();
+		if (c instanceof JarURLConnection)
+			return ((JarURLConnection)c).getManifest ();
+
+		return null;
+	}
+
+
+	static String getManifestAttribute (String name)
+	{
+		try
+		{
+			Manifest m = getManifest ();
+			if (m == null)
+				return "??";
+
+			Attributes attrs = m.getAttributes ("sqlline");
+			if (attrs == null)
+				return "???";
+
+			String val = attrs.getValue (name);
+			if (val == null || "".equals (val))
+				return "????";
+
+			return val;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace ();
+			return "?????";
+		}
+	}
+
+
+	static String getApplicationTitle ()
+	{
+		Package pack = SqlLine.class.getPackage ();
+
+		return loc ("app-introduction", new Object [] {
+			pack.getImplementationTitle () == null ? "sqlline"
+				: pack.getImplementationTitle (),
+			pack.getImplementationVersion () == null ? "???"
+				: pack.getImplementationVersion (),
+			pack.getImplementationVendor () == null ? "Marc Prud'hommeaux"
+				: pack.getImplementationVendor (),
+			// getManifestAttribute ("Specification-Title"),
+			// getManifestAttribute ("Implementation-Version"),
+			// getManifestAttribute ("Implementation-ReleaseDate"),
+			// getManifestAttribute ("Implementation-Vendor"),
+			// getManifestAttribute ("Implementation-License"),
+			});
+	}
+
+
+	static String getApplicationContactInformation ()
+	{
+		return getManifestAttribute ("Implementation-Vendor");
 	}
 
 
@@ -616,21 +702,22 @@ public class SqlLine
 	void begin (String [] args)
 		throws IOException
 	{
-		try
-		{
-			info (APP_TITLE);
-			command.load (null);
-		}
-		catch (Exception e)
-		{
-		}
-
 		ConsoleReader reader = getConsoleReader ();
 		if (!(initArgs (args)))
 		{
 			usage ();
 			return;
 		}
+
+		try
+		{
+			info (getApplicationTitle ());
+			opts.load ();
+		}
+		catch (Exception e)
+		{
+		}
+
 
 		while (!exit)
 		{
@@ -3631,8 +3718,39 @@ public class SqlLine
 			if (cmd.length () == 0)
 			{
 				output ("");
-				output (loc ("comments", APP_AUTHOR_EMAIL));
+				output (loc ("comments", getApplicationContactInformation ()));
 			}
+
+			return true;
+		}
+
+
+		public boolean manual (String line)
+			throws IOException
+		{
+			InputStream in = SqlLine.class.getResourceAsStream ("manual.txt");
+			if (in == null)
+				return error (loc ("no-manual"));
+
+			BufferedReader breader = new BufferedReader (
+				new InputStreamReader (in));
+			String man;
+			int index = 0;
+			while ((man = breader.readLine ()) != null)
+			{
+				index++;
+				output (man);
+
+				// silly little pager
+				if (index % (opts.getMaxHeight () - 1) == 0)
+				{
+					String ret = reader.readLine (loc ("enter-for-more"));
+					if (ret != null && ret.startsWith ("q"))
+						break;
+				}
+			}
+
+			breader.close ();
 
 			return true;
 		}
@@ -4173,6 +4291,7 @@ public class SqlLine
 		private boolean force = false;
 		private boolean showWarnings = false;
 		private int maxWidth = Terminal.setupTerminal ().getTerminalWidth ();
+		private int maxHeight = Terminal.setupTerminal ().getTerminalHeight ();
 		private int maxColumnWidth = 15;
 		private String isolation = "TRANSACTION_REPEATABLE_READ";
 		private String outputFormat = "table";
@@ -4271,7 +4390,7 @@ public class SqlLine
 				// the terminal configuration
 				props.remove (PROPERTY_PREFIX + "maxwidth");
 
-				props.store (out, APP_TITLE);
+				props.store (out, getApplicationTitle ());
 			}
 			catch (Exception e)
 			{
@@ -4571,6 +4690,20 @@ public class SqlLine
 		public String getOutputFormat ()
 		{
 			return this.outputFormat;
+		}
+
+
+
+
+		public void setMaxHeight (int maxHeight)
+		{
+			this.maxHeight = maxHeight;
+		}
+
+
+		public int getMaxHeight ()
+		{
+			return this.maxHeight;
 		}
 
 

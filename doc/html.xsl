@@ -9,8 +9,7 @@
 	<xsl:import
 	href="/Users/mprudhom/cvs/25/solarmetric/doc/styles/docbook/docbook-xsl/xhtml/docbook.xsl"/>
 	-->
-	<xsl:import
-	href="/Users/mprudhom/cvs/25/solarmetric/doc/styles/docbook/docbook-xsl/html/docbook.xsl"/>
+	<xsl:import href="docbook-xsl/html/docbook.xsl"/>
 
 	<xsl:param name="html.stylesheet">styles.css</xsl:param>
 	<xsl:param name="html.cleanup" select="1"/>
@@ -20,13 +19,20 @@
 	<!--
 	<xsl:param name="generate.section.toc.level" select="8"/>
 	-->
+
+	<!--
+	<xsl:param name="generate.book.toc" select="1"/>
+	<xsl:param name="generate.component.toc" select="1"/>
+	<xsl:param name="generate.division.toc" select="1"/>
+	-->
+
 	<xsl:param name="generate.index" select="1"/>
-	<xsl:param name="chapter.autolabel" select="1"/>
-	<xsl:param name="appendix.autolabel" select="1"/>
-	<xsl:param name="part.autolabel" select="1"/>
+	<xsl:param name="chapter.autolabel" select="0"/>
+	<xsl:param name="appendix.autolabel" select="0"/>
+	<xsl:param name="part.autolabel" select="0"/>
 	<xsl:param name="preface.autolabel" select="0"/>
 	<xsl:param name="qandadiv.autolabel" select="1"/>
-	<xsl:param name="section.autolabel" select="1"/>
+	<xsl:param name="section.autolabel" select="0"/>
 	<xsl:param name="section.label.includes.component.label" select="1"/>
 
 	<!--
@@ -35,6 +41,7 @@
 	<xsl:param name="admon.graphics.extension" select="'.gif'"/>
 
 	<xsl:param name="label.from.part" select="1"/>
+	-->
 
 	<xsl:param name="generate.toc">
 		appendix  toc    
@@ -46,9 +53,9 @@
 		qandadiv  toc    
 		qandaset  toc    
 		reference toc    
+		refentry  toc    
 		section   toc    
 		set       toc    
 	</xsl:param>     
-	-->
 </xsl:stylesheet>
 

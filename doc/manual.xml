@@ -1,6 +1,12 @@
 <!DOCTYPE book
   PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "docbook/docbookx.dtd">
+
+<!--
+<!DOCTYPE book
+  PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
   "http://www.docbook.org/xml/4.1.2/docbookx.dtd">
+-->
 <book>
 	<bookinfo>
 		<title>
@@ -17,6 +23,13 @@
 		<chapter id="introduction">
 			<title>Introduction</title>
 			<para>
+			SQLLine is a pure-Java console based utility for connecting
+			to relational databases and executing SQL commands. It is
+			similiar to other command-line database access utilities like
+			<filename>sqlplus</filename> for Oracle, <filename>mysql</filename>
+			for MySQL, and <filename>isql</filename> for Sybase/SQL Server.
+			Since it is pure-Java, it is platform independant, and will
+			run on any platform that can run Java 1.3 or higher.
 			</para>
 		</chapter>
 
@@ -40,10 +53,81 @@
 			</para>
 		</chapter>
 
+		<chapter id="obtaining">
+			<title>Obtaining SQLLine</title>
+			<para>
+				SQLLine is hosted on SourceForge, and is located at
+				<ulink url="http://sqlline.sf.net"/>.
+				The latest release can be downloaded from 
+				<ulink url="http://sqlline.sf.net/download.html"/>.
+			</para>
+		</chapter>
+
 		<chapter id="installation">
 			<title>Installation</title>
-			<para>
-			</para>
+			<sect1>
+				<title>Required software</title>
+				<para>
+					SQLLine depends on the following software:
+					<itemizedlist>
+						<listitem><para>
+						<trademark>Java</trademark> Virtual Machine -
+						SQLLine is a pure
+						java program, and requires Java version 1.3 or higher
+						in order to run. The latest JVM can be downloaded from
+						<ulink url="http://java.sun.com"/>.
+						</para></listitem>
+						<listitem><para>
+						JLine - SQLLine uses the JLine console reader for
+						command line editing, tab-completion, and command
+						history. It can be downloaded from
+						<ulink url="http://jline.sf.net"/>. Version
+						0.6.2 or higher is required.
+						</para></listitem>
+						<listitem><para>
+						<trademark>JDBC</trademark> Driver(s) - Since
+						SQLLine uses the Java Database
+						Connectivity package to connect to your database, you
+						need to obtain the correct JDBC driver libraries
+						for your database. Any JDBC compliant driver can be
+						used for this purpose. Drivers can be located by
+						referring to the section on 
+						<link linkend="known_drivers">known JDBC drivers</link>,
+						or else by referring to your database vendor's
+						web site.
+						</para></listitem>
+					</itemizedlist>
+				</para>
+			</sect1>
+			<sect1>
+				<title>Installing SQLLine</title>
+				<para>
+				There are currently no set standards for installing Java
+				software on different platforms. The simplest method for
+				installing SQLLine in a platform independant way is as follows:
+				<orderedlist>
+					<listitem><para>
+					Create a new directory/folder where you like. This
+					will be referred to as <filename>sqllinedir</filename>.
+					</para></listitem>
+					<listitem><para>
+					Download <filename>sqlline.jar</filename> into
+					<filename>sqllinedir</filename>.
+					</para></listitem>
+					<listitem><para>
+					Download the latest <filename>jline.jar</filename> from
+					<ulink url="http://jline.sf.net"/> into
+					<filename>sqllinedir</filename>.
+					</para></listitem>
+					<listitem><para>
+					Download your database's JDBC driver files into
+					<filename>sqllinedir</filename>. Note that some JDBC
+					drivers require some installation, such as uncompressing
+					or unzipping.
+					</para></listitem>
+				</orderedlist>
+				</para>
+			</sect1>
 		</chapter>
 
 		<chapter id="usage">
@@ -51,16 +135,111 @@
 			<sect1 id="usage_running">
 				<title>Running SQLLine</title>
 				<para>
+				SQLLine can be run with the following command:
+					<cmdsynopsis>
+					<command>java</command>
+					<arg choice="req">-Djava.ext.dirs=<replaceable>sqllinedir</replaceable></arg>
+					<arg choice="req"><replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
+					<arg rep="repeat" choice="opt"><replaceable>options</replaceable></arg>
+					</cmdsynopsis>
+
+				For example, if your <filename>sqllinedir</filename> is
+				<filename>/usr/share/java/</filename> (this is typical for
+				Debian Linux), then you might run:
+				<screen>
+java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
+				</screen>
+				</para>
+
+				<para>
+				Once you have started SQLLine, you will a prompt that
+				reads "sqlline> ". From here, you can enter either SQLLine
+				commands (beginning with a "!" character), or a SQL statement
+				(if you are currently connected to a database). For example,
+				entering "!help" will display a list of all the available
+				commands.
+				</para>
+			</sect1>
+			<sect1 id="connecting">
+				<title>Connecting to a database</title>
+				<para>
+				SQLLine is only useful once you are connected to a database.
+				In order to do so, you need to use the "!connect" command,
+				with the JDBC URL of the database you are going to
+				connect to, followed by the username and password (followed
+				optionally by the driver class name). The JDBC URL
+				is specific to the JDBC driver that you are using for
+				your database, but will always start with "jdbc:", and
+				usually has the machine name of the database and the
+				name of the database itself as part of the string.
+				Consult your driver's documentation for details on the
+				URL to use.
+				</para>
+				<para>
+				For example, to connect to an Oracle database, you might enter:
+				<screen>
+
+sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
+
+Connected to: Oracle (version Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the Partitioning, OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production)
+Driver: Oracle JDBC driver (version 9.0.1.0.0)
+Autocommit status: true
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+				</screen>
+
+				Once you are connected, the prompt will change the
+				reflect URL of the current connection.
+				</para>
+				<para>
+				SQLLine allows you to have multiple connections to databases
+				(either the same database, or a different database) open
+				at the same time. Issuing the
+				<link linkend="command_connect">connect</link> command
+				multiple times will add the new connection to the list
+				of open connections. The "current" connection (against which
+				all SQL statements will be executed) can be switched with
+				the <link linkend="command_go">go</link> command. The currently
+				open connections can be listed with the
+				<link linkend="command_list">list</link> command.
+				</para>
+			</sect1>
+			<sect1 id="issuing_sql">
+				<title>Issuing SQL commands</title>
+				<para>
+					Once you are connected to a database, you
+					can begin SQL statements against the current connection.
+					For example:
+				<example id="sql_example">
+				<title>Issuing SQL commands</title>
+				<screen>
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM MYTABLE;
+
++-----+
+| ID  |
++-----+
+| 1   |
+| 2   |
+| 3   |
+| 4   |
++-----+
+4 rows selected (0.012 seconds)
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+				</screen>
+				</example>
 				</para>
 			</sect1>
 			<sect1 id="completion">
 				<title>Command Completion</title>
 				<para>
-				</para>
-			</sect1>
-			<sect1 id="history">
-				<title>Command History</title>
-				<para>
+				On UNIX systems, SQLLine allows command-line completion
+				using the tab key. This will be familiar for users of such
+				popular shells as bash and tcsh. In general, hitting
+				the TAB key when part of the way through typing a command
+				will fill in the rest of the command, or else will display
+				a selection of appropriate possibilities.
 				</para>
 			</sect1>
 		</chapter>
@@ -68,47 +247,33 @@
 		<chapter id="commands">
 			<title>Command Reference</title>
 
-
-			<!--
-			<sect1 id="command_XXX">
-				<title>XXX</title>
-
-				<para>
-					Usage:
-					<cmdsynopsis>
-					<command>!XXX</command>
-					<arg choice="req"><replaceable>XXX</replaceable></arg>
-					</cmdsynopsis>
-				</para>
-
-				<para>
-					XXX
-				</para>
-				<example id="command_XXX_example">
-					<title>Example of "XXX" command</title>
-					<screen>
-0: jdbc:oracle:thin:@localhost:1521:mydb> !XXX XXX
-					</screen>
-				</example>
-			</sect1>
-			-->
-
-			<sect1 id="command_all">
-				<title>all</title>
-
-				<para>
-					Usage:
+			<section id="sect_command_all">
+			<title>all</title>
+			<refentry id="command_all">
+				<refmeta>
+				<refentrytitle>all</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+				<refnamediv>
+					<refname>all</refname>
+					<refpurpose>
+					Execute SQL against all active connections
+					</refpurpose>
+				</refnamediv>
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!all</command>
 					<arg choice="req"><replaceable>SQL statement</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+				<refsect1>
+					<title>Description</title>
+					<para>
 					Execute the specified SQL against all the
 					current connections.
-				</para>
-				<example id="command_all_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "all" command</title>
 					<screen>
 1: jdbc:mysql://localhost/mydb> !list
@@ -127,28 +292,44 @@ Executing SQL against: jdbc:mysql://localhost/mydb
 
 1: jdbc:mysql://localhost/mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_autocommit">
-				<title>autocommit</title>
+				</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_autocommit">
+			<title>autocommit</title>
+			<refentry id="command_autocommit">
+				<refmeta>
+				<refentrytitle>autocommit</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>autocommit</refname>
+					<refpurpose>
+					Enable or disable automatic transaction commit mode
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!autocommit</command>
 					<arg choice="req"><replaceable>on/off</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Set autocommit mode on or off. When autocommit is
 					on, every individual SQL statement will be committed
 					after it is issued. Otherwise, the
 					<link linkend="command_commit">commit</link>
 					command will need to be issued in order to commit any
 					changes to the database.
-				</para>
-				<example id="command_autocommit_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "autocommit" command</title>
 					<screen>
 1: jdbc:mysql://localhost/mydb> !autocommit off
@@ -157,27 +338,43 @@ Autocommit status: false
 
 1: jdbc:mysql://localhost/mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_batch">
-				<title>batch</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_batch">
+			<title>batch</title>
+			<refentry id="command_batch">
+				<refmeta>
+				<refentrytitle>batch</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>batch</refname>
+					<refpurpose>
+					Start or execute a batch of SQL statements
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!batch</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Start or execute a batch of SQL statements. The first time
 					the statement is issued, subsequent SQL statements will
 					be deferred until the batch command is issued again.
 					Databases can frequently optimize multiple batched
 					statements (e.g., for bulk data loading) in order to
 					speed up execution.
-				</para>
-				<example id="command_batch_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "batch" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !batch
@@ -210,23 +407,39 @@ COUNT   STATEMENT
 4 rows selected (0.012 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_brief">
-				<title>brief</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_brief">
+			<title>brief</title>
+			<refentry id="command_brief">
+				<refmeta>
+				<refentrytitle>brief</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>brief</refname>
+					<refpurpose>
+					Enable terse output mode
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!brief</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Set verbose mode off. This will prevent printing
 					of stack traces when errors occur.
-				</para>
-				<example id="command_brief_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "brief" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
@@ -257,23 +470,39 @@ Error: ORA-00942: table or view does not exist (state=42000,code=942)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_close">
-				<title>close</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_close">
+			<title>close</title>
+			<refentry id="command_close">
+				<refmeta>
+				<refentrytitle>close</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>close</refname>
+					<refpurpose>
+					Close the active connection
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!close</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Close the current connection and remote it from the
 					connection list.
-				</para>
-				<example id="command_close_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "close" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !list
@@ -291,54 +520,86 @@ No active connections
 
 sqlline>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_columns">
-				<title>columns</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_columns">
+			<title>columns</title>
+			<refentry id="command_columns">
+				<refmeta>
+				<refentrytitle>columns</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>columns</refname>
+					<refpurpose>
+					Display columns of a table
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!columns</command>
 					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List the columns in the specified table.
-				</para>
-				<example id="command_columns_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "columns" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !columns EMPLOYEE
 
-+------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
-| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | DATA_TYPE  | TYPE_NAME  | COLUMN_SIZE  | BUFFER_LENGTH  | DECIMAL_DIGITS  |
-+------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
-|            | MYDB         | EMPLOYEE    | EMPLOYEE_ID  | 3          | NUMBER     | 22           | 0              | 0               |
-|            | MYDB         | EMPLOYEE    | FIRST_NAME   | 12         | VARCHAR2   | 255          | 0              |                 |
-|            | MYDB         | EMPLOYEE    | LAST_NAME    | 12         | VARCHAR2   | 255          | 0              |                 |
-|            | MYDB         | EMPLOYEE    | DOB          | 93         | DATE       | 7            | 0              |                 |
-+------------+--------------+-------------+--------------+------------+------------+--------------+----------------+-----------------+
++-------------+--------------+------------+------------+
+| TABLE_NAME  | COLUMN_NAME  | DATA_TYPE  | TYPE_NAME  |
++-------------+--------------+------------+------------+
+| EMPLOYEE    | EMPLOYEE_ID  | 3          | NUMBER     |
+| EMPLOYEE    | FIRST_NAME   | 12         | VARCHAR2   |
+| EMPLOYEE    | LAST_NAME    | 12         | VARCHAR2   |
+| EMPLOYEE    | DOB          | 93         | DATE       |
++-------------+--------------+------------+------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_commit">
-				<title>commit</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_commit">
+			<title>commit</title>
+			<refentry id="command_commit">
+				<refmeta>
+				<refentrytitle>commit</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>commit</refname>
+					<refpurpose>
+					Commit the current transaction
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!commit</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Commit the current transaction, if autocommit is off.
-				</para>
-				<example id="command_commit_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "commit" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !autocommit off
@@ -363,13 +624,27 @@ Commit complete (0.661 seconds)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_connect">
-				<title>connect</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_connect">
+			<title>connect</title>
+			<refentry id="command_connect">
+				<refmeta>
+				<refentrytitle>connect</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>connect</refname>
+					<refpurpose>
+					Connect to a database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!connect</command>
 					<arg choice="req"><replaceable>url</replaceable></arg>
@@ -377,12 +652,14 @@ Commit complete (0.661 seconds)
 					<arg choice="req"><replaceable>password</replaceable></arg>
 					<arg choice="opt"><replaceable>driver class</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Connect to a database.
-				</para>
-				<example id="command_connect_oracle">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "commit" command</title>
 					<screen>
 sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
@@ -395,22 +672,38 @@ Autocommit status: true
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_dbinfo">
-				<title>dbinfo</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_dbinfo">
+			<title>dbinfo</title>
+			<refentry id="command_dbinfo">
+				<refmeta>
+				<refentrytitle>dbinfo</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>dbinfo</refname>
+					<refpurpose>
+					Provide information about the current database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!dbinfo</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List metadata information about the current connection.
-				</para>
-				<example id="command_dbinfo_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "dbinfo" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !dbinfo
@@ -569,46 +862,91 @@ usesLocalFiles                                    false
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_describe">
-				<title>describe</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_describe">
+			<title>describe</title>
+			<refentry id="command_describe">
+				<refmeta>
+				<refentrytitle>describe</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+				<refnamediv>
+					<refname>describe</refname>
+					<refpurpose>
+					Describe a table
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!describe</command>
 					<arg choice="opt"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
+				</refsynopsisdiv>
 
-				<para>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Synonym for
 					<link linkend="command_columns">columns</link> (if
 					an argument is specified)
 					or <link linkend="command_tables">tables</link>
 					 (if no argument is specified).
-				</para>
-			</sect1>
-			<sect1 id="command_dropall">
-				<title>dropall</title>
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "describe" command</title>
+					<screen>
+0: jdbc:oracle:thin:@localhost:1521:mydb> !describe EMPLOYEE
 
-				<para>
-					Usage:
++--------------+------------+-------------+-----------+------------+
+| TABLE_SCHEM  | TABLE_NAME | COLUMN_NAME | DATA_TYPE | TYPE_NAME  |
++--------------+------------+-------------+-----------+------------+
+| MYDB         | EMPLOYEE   | EMPLOYEE_ID | 3         | NUMBER     |
+| MYDB         | EMPLOYEE   | FIRST_NAME  | 12        | VARCHAR2   |
+| MYDB         | EMPLOYEE   | LAST_NAME   | 12        | VARCHAR2   |
+| MYDB         | EMPLOYEE   | DOB         | 93        | DATE       |
++--------------+------------+-------------+-----------+------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+					</screen>
+					</refsect1>
+
+			</refentry>
+			</section>
+
+			<section id="sect_command_dropall">
+			<title>dropall</title>
+			<refentry id="command_dropall">
+				<refmeta>
+				<refentrytitle>dropall</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>dropall</refname>
+					<refpurpose>
+					Drop all tables in the database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!dropall</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Drop every table in the database.
-				</para>
-				<warning><para>
-					This command will destroy all data in the
-					database (subject to access restrictions). Use
-					with extreme caution.
-				</para></warning>
-				<example id="command_dropall_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "dropall" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !dropall
@@ -623,53 +961,93 @@ Really drop every table in the database? (y/n) y
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_exportedkeys">
-				<title>exportedkeys</title>
+					</refsect1>
+					<refsect1>
+					<title>Warning on using "dropall"</title>
+				<warning><para>
+					This command will destroy all data in the
+					database (subject to access restrictions). Use
+					with extreme caution.
+				</para></warning>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_exportedkeys">
+			<title>exportedkeys</title>
+			<refentry id="command_exportedkeys">
+				<refmeta>
+				<refentrytitle>exportedkeys</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>exportedkeys</refname>
+					<refpurpose>
+					List exported foreign keys for a database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!exportedkeys</command>
 					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the foreign keys that are exported by the
 					specified table.
-				</para>
-				<example id="command_exportedkeys_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "exportedkeys" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !exportedkeys COMPANY
 
-+--------------+----------------+---------------+----------------+-------------+
-| PKTABLE_CAT  | PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
-+--------------+----------------+---------------+----------------+-------------+
-|              |                | COMPANY       | COMPANY_ID     |             |
-+--------------+----------------+---------------+----------------+-------------+
++----------------+---------------+----------------+-------------+
+| PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++----------------+---------------+----------------+-------------+
+|                | COMPANY       | COMPANY_ID     |             |
++----------------+---------------+----------------+-------------+
 
 0: jdbc:hsqldb:db-hypersonic>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_go">
-				<title>go</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_go">
+			<title>go</title>
+			<refentry id="command_go">
+				<refmeta>
+				<refentrytitle>go</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>go</refname>
+					<refpurpose>
+					Change to a different active connection
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!go</command>
 					<arg choice="req"><replaceable>connection number</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Switch to the specified connection.
-				</para>
-				<example id="command_go_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "go" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !list
@@ -685,115 +1063,260 @@ Really drop every table in the database? (y/n) y
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_help">
-				<title>help</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_help">
+			<title>help</title>
+			<refentry id="command_help">
+				<refmeta>
+				<refentrytitle>help</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>help</refname>
+					<refpurpose>
+					Display help information
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!help</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Display information about allowed commands.
-				</para>
-			</sect1>
-			<sect1 id="command_history">
-				<title>history</title>
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "help" command</title>
+					<screen>
+sqlline> !help
 
-				<para>
-					Usage:
+!all                Execute the specified SQL against all the current connections
+!autocommit         Set autocommit mode on or off
+!batch              Start or execute a batch of statements
+!brief              Set verbose mode off
+!close              Close the current connection to the database
+!columns            List all the columns for the specified table
+!commit             Commit the current transaction (if autocommit is off)
+!connect            Open a new connection to the database.
+!dbinfo             Give metadata information about the database
+!describe           Describe a table
+!dropall            Drop all tables in the current database
+!exportedkeys       List all the exported keys for the specified table
+!go                 Select the current connection
+!help               Print a summary of command usage
+!history            Display the command history
+!importedkeys       List all the imported keys for the specified table
+!indexes            List all the indexes for the specified table
+!isolation          Set the transaction isolation for this connection
+!list               List the current connections
+!metadata           Obtain metadata information
+!outputformat       Set the output format for displaying results
+                    (table,vertical,csv,tsv,xmlattrs,xmlelements)
+!primarykeys        List all the primary keys for the specified table
+!procedures         List all the procedures
+!quit               Exits the program
+!reconnect          Reconnect to the database
+!record             Record all output to the specified file
+!rehash             Fetch table and column names for command completion
+!rollback           Roll back the current transaction (if autocommit is off)
+!run                Run a script from the specified file
+!save               Save the current variabes and aliases
+!scan               Scan for installed JDBC drivers
+!script             Start saving a script to a file
+!set                Set a sqlline variable
+!sql                Execute a SQL command
+!tables             List all the tables in the database
+!verbose            Set verbose mode on
+
+Comments, bug reports, and patches go to marc@apocalypse.org
+
+sqlline> 
+
+					</screen>
+					</refsect1>
+			</refentry>
+			</section>
+
+			<section id="sect_command_history">
+			<title>history</title>
+			<refentry id="command_history">
+				<refmeta>
+				<refentrytitle>history</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>history</refname>
+					<refpurpose>
+					Display the command history
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!history</command>
 					</cmdsynopsis>
-				</para>
+				</refsynopsisdiv>
 
-				<para>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Display the command history.
-				</para>
-			</sect1>
-			<sect1 id="command_importedkeys">
-				<title>importedkeys</title>
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "history" command</title>
+					<screen>
+sqlline> !history
 
-				<para>
-					Usage:
+1.  !outputformat xmlelements 
+2.  SELECT * FROM PCPOINT;
+3.  !outputformat vertical 
+4.  SELECT * FROM PCPOINT;
+5.  !tables 
+
+sqlline> 
+
+					</screen>
+					</refsect1>
+			</refentry>
+			</section>
+
+			<section id="sect_command_importedkeys">
+			<title>importedkeys</title>
+			<refentry id="command_importedkeys">
+				<refmeta>
+				<refentrytitle>importedkeys</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>importedkeys</refname>
+					<refpurpose>
+					List imported foreign keys for a database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!importedkeys</command>
 					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the foreign keys that are imported by
 					the specified table.
-				</para>
-				<example id="command_importedkeys_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "importedkeys" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !importedkeys EMPLOYEE
 
-+--------------+----------------+---------------+----------------+-------------+
-| PKTABLE_CAT  | PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
-+--------------+----------------+---------------+----------------+-------------+
-|              |                | COMPANY       | COMPANY_ID     |             |
-+--------------+----------------+---------------+----------------+-------------+
++----------------+---------------+----------------+-------------+
+| PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++----------------+---------------+----------------+-------------+
+|                | COMPANY       | COMPANY_ID     |             |
++----------------+---------------+----------------+-------------+
 
 0: jdbc:hsqldb:db-hypersonic>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_indexes">
-				<title>indexes</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_indexes">
+			<title>indexes</title>
+			<refentry id="command_indexes">
+				<refmeta>
+				<refentrytitle>indexes</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>indexes</refname>
+					<refpurpose>
+					Display indexes for a table
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!indexes</command>
 					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the indexes on the specified table name.
-				</para>
-				<example id="command_indexes_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "indexes" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !indexes EMPLOYEE
 
-+--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
-| TABLE_SCHEM  | TABLE_NAME  | NON_UNIQUE  |   INDEX_NAME    | TYPE  | ORDINAL_POSITION  | COLUMN_NAME  |
-+--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
-| MYDB         | EMPLOYEE    | 0           |                 | 0     | 0                 |              |
-| MYDB         | EMPLOYEE    | 0           | SYS_C003115849  | 1     | 1                 | EMPLOYEE_ID  |
-| MYDB         | EMPLOYEE    | 1           | FIRST_NAME      | 1     | 1                 | FIRST_NAME   |
-| MYDB         | EMPLOYEE    | 1           | LAST_NAME       | 1     | 1                 | LAST_NAME    |
-+--------------+-------------+-------------+-----------------+-------+-------------------+--------------+
++-------------+-------------+-----------------+-------+--------------+
+| TABLE_NAME  | NON_UNIQUE  |   INDEX_NAME    | TYPE  | COLUMN_NAME  |
++-------------+-------------+-----------------+-------+--------------+
+| EMPLOYEE    | 0           |                 | 0     |              |
+| EMPLOYEE    | 0           | SYS_C003115849  | 1     | EMPLOYEE_ID  |
+| EMPLOYEE    | 1           | FIRST_NAME      | 1     | FIRST_NAME   |
+| EMPLOYEE    | 1           | LAST_NAME       | 1     | LAST_NAME    |
++-------------+-------------+-----------------+-------+--------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_isolation">
-				<title>isolation</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_isolation">
+			<title>isolation</title>
+			<refentry id="command_isolation">
+				<refmeta>
+				<refentrytitle>isolation</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>isolation</refname>
+					<refpurpose>
+					Set the transaction isolation mode for the active connection
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!isolation</command>
 					<arg choice="req"><replaceable>isolation level</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Set the isolation level for the current transaction. For
 					a description of the different isolation levels, see
 					<ulink url="http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail">http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail</ulink>.
-				</para>
-				<example id="command_isolation_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "isolation" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !isolation TRANSACTION_READ_UNCOMMITTED
@@ -806,22 +1329,38 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_list">
-				<title>list</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_list">
+			<title>list</title>
+			<refentry id="command_list">
+				<refmeta>
+				<refentrytitle>list</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>list</refname>
+					<refpurpose>
+					Display all active connections
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!list</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the current connections.
-				</para>
-				<example id="command_list_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "list" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !list
@@ -832,28 +1371,44 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_metadata">
-				<title>metadata</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_metadata">
+			<title>metadata</title>
+			<refentry id="command_metadata">
+				<refmeta>
+				<refentrytitle>metadata</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>metadata</refname>
+					<refpurpose>
+					Invoke arbitrary metadata commands 
+					</refpurpose>
+				</refnamediv>
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!metadata</command>
 					<arg choice="req"><replaceable>methodname</replaceable></arg>
-					<arg rep="repeat" choice="req"><replaceable>parameter</replaceable></arg>
+					<arg rep="repeat" choice="req"><replaceable>params</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Execute an arbitrary metadata method agains the current
-					connection. Parameters are separated by spaces.
+						connection. refpurpose are separated by spaces.
+
 					Use "" for a blank String, and null for a null parameter.
 					For information on available metadata methods, see
 					<ulink url="http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html">http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html</ulink>.
-				</para>
-				<example id="command_metadata_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "metadata" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !metadata supportsSelectForUpdate
@@ -862,64 +1417,81 @@ true
 
 0: jdbc:oracle:thin:@localhost:1521:mydb> !metadata getTypeInfo
 
-+------------+------------+-------------+-----------------+-----------------+--+
-| TYPE_NAME  | DATA_TYPE  |  PRECISION  | LITERAL_PREFIX  | LITERAL_SUFFIX  |  |
-+------------+------------+-------------+-----------------+-----------------+--+
-| NUMBER     | -7         | 1           |                 |                 |  |
-| NUMBER     | -6         | 3           |                 |                 |  |
-| NUMBER     | -5         | 38          |                 |                 |  |
-| LONG RAW   | -4         | 2147483647  | '               | '               |  |
-| RAW        | -3         | 2000        | '               | '               |  |
-| LONG       | -1         | 2147483647  | '               | '               |  |
-| CHAR       | 1          | 2000        | '               | '               |  |
-| NUMBER     | 2          | 38          |                 |                 |  |
-| NUMBER     | 4          | 10          |                 |                 |  |
-| NUMBER     | 5          | 5           |                 |                 |  |
-| FLOAT      | 6          | 63          |                 |                 |  |
-| REAL       | 7          | 63          |                 |                 |  |
-| VARCHAR2   | 12         | 4000        | '               | '               |  |
-| DATE       | 93         | 7           |                 |                 |  |
-| STRUCT     | 2002       | 0           | '               | '               |  |
-| ARRAY      | 2003       | 0           | '               | '               |  |
-| BLOB       | 2004       | 4294967295  |                 |                 |  |
-| CLOB       | 2005       | 4294967295  | '               | '               |  |
-| REF        | 2006       | 0           | '               | '               |  |
-+------------+------------+-------------+-----------------+-----------------+--+
++------------+------------+-------------+-----------------+-----------------+
+| TYPE_NAME  | DATA_TYPE  |  PRECISION  | LITERAL_PREFIX  | LITERAL_SUFFIX  |
++------------+------------+-------------+-----------------+-----------------+
+| NUMBER     | -7         | 1           |                 |                 |
+| NUMBER     | -6         | 3           |                 |                 |
+| NUMBER     | -5         | 38          |                 |                 |
+| LONG RAW   | -4         | 2147483647  | '               | '               |
+| RAW        | -3         | 2000        | '               | '               |
+| LONG       | -1         | 2147483647  | '               | '               |
+| CHAR       | 1          | 2000        | '               | '               |
+| NUMBER     | 2          | 38          |                 |                 |
+| NUMBER     | 4          | 10          |                 |                 |
+| NUMBER     | 5          | 5           |                 |                 |
+| FLOAT      | 6          | 63          |                 |                 |
+| REAL       | 7          | 63          |                 |                 |
+| VARCHAR2   | 12         | 4000        | '               | '               |
+| DATE       | 93         | 7           |                 |                 |
+| STRUCT     | 2002       | 0           | '               | '               |
+| ARRAY      | 2003       | 0           | '               | '               |
+| BLOB       | 2004       | 4294967295  |                 |                 |
+| CLOB       | 2005       | 4294967295  | '               | '               |
+| REF        | 2006       | 0           | '               | '               |
++------------+------------+-------------+-----------------+-----------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb> !meta getProcedureColumns null % %JAVA% %
 
-+----------------+------------------+------------------------+--------------+--+
-| PROCEDURE_CAT  | PROCEDURE_SCHEM  |     PROCEDURE_NAME     | COLUMN_NAME  |  |
-+----------------+------------------+------------------------+--------------+--+
-| DBMS_JAVA      | SYS              | DROPJAVA               | OPTIONS      |  |
-| XMLPARSER      | SYS              | GETJAVARELEASEVERSION  |              |  |
-| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |  |
-| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |  |
-| DBMS_JAVA      | SYS              | LOADJAVA               | RESOLVER     |  |
-+----------------+------------------+------------------------+--------------+--+
++----------------+------------------+------------------------+--------------+
+| PROCEDURE_CAT  | PROCEDURE_SCHEM  |     PROCEDURE_NAME     | COLUMN_NAME  |
++----------------+------------------+------------------------+--------------+
+| DBMS_JAVA      | SYS              | DROPJAVA               | OPTIONS      |
+| XMLPARSER      | SYS              | GETJAVARELEASEVERSION  |              |
+| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |
+| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |
+| DBMS_JAVA      | SYS              | LOADJAVA               | RESOLVER     |
++----------------+------------------+------------------------+--------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_outputformat">
-				<title>outputformat</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_outputformat">
+			<title>outputformat</title>
+			<refentry id="command_outputformat">
+				<refmeta>
+				<refentrytitle>outputformat</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>outputformat</refname>
+					<refpurpose>
+					Change the method for displaying SQL results
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!outputformat</command>
 					<arg choice="req"><replaceable>format name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
+				</refsynopsisdiv>
 
-				<para>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Set the mode for displaying results from statements.
 					This is useful for saving output from SQL statements to
 					either a visually pleasing format or an easily
 					parseable format.
-				</para>
-				<example id="command_outputformat_example_table">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of table output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat table
@@ -934,8 +1506,8 @@ true
 +-------------+------------+
 4 rows selected (0.012 seconds)
 					</screen>
-				</example>
-				<example id="command_outputformat_example_vertical">
+					</refsect1>
+				<refsect1>
 					<title>Example of vertical output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat vertical
@@ -954,8 +1526,8 @@ NAME        Microsoft
 
 4 rows selected (0.011 seconds)
 					</screen>
-				</example>
-				<example id="command_outputformat_example_csv">
+				</refsect1>
+				<refsect1>
 					<title>Example of CSV output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat csv
@@ -967,8 +1539,8 @@ NAME        Microsoft
 '4','Microsoft'
 4 rows selected (0.012 seconds)
 					</screen>
-				</example>
-				<example id="command_outputformat_example_tsv">
+				</refsect1>
+				<refsect1>
 					<title>Example of TSV output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat tsv
@@ -980,8 +1552,8 @@ NAME        Microsoft
 '4'     'Microsoft'
 4 rows selected (0.013 seconds)
 					</screen>
-				</example>
-				<example id="command_outputformat_example_xmlattrs">
+				</refsect1>
+				<refsect1>
 					<title>Example of XML attribute output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlattr
@@ -994,8 +1566,8 @@ NAME        Microsoft
 &lt;/resultset>
 4 rows selected (0.012 seconds)
 					</screen>
-				</example>
-				<example id="command_outputformat_example_xmlelements">
+				</refsect1>
+				<refsect1>
 					<title>Example of XML element output formatting</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlelements
@@ -1021,96 +1593,170 @@ NAME        Microsoft
 4 rows selected (0.02 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_primarykeys">
-				<title>primarykeys</title>
+				</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_primarykeys">
+			<title>primarykeys</title>
+			<refentry id="command_primarykeys">
+				<refmeta>
+				<refentrytitle>primarykeys</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>primarykeys</refname>
+					<refpurpose>
+					Display the primary key columns for a table
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!primarykeys</command>
 					<arg choice="req"><replaceable>table name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the primary keys for the specified table.
-				</para>
-				<example id="command_primarykeys_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "primarykeys" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !primarykeys COMPANY
 
-+------------+--------------+-------------+--------------+----------+----------+
-| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | KEY_SEQ  |     PK_N |
-+------------+--------------+-------------+--------------+----------+----------+
-|            |              | COMPANY     | COMPANY_ID   | 1        | SYS_PK_C |
-+------------+--------------+-------------+--------------+----------+----------+
++--------------+-------------+--------------+----------+----------+
+| TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | KEY_SEQ  |     PK_N |
++--------------+-------------+--------------+----------+----------+
+|              | COMPANY     | COMPANY_ID   | 1        | SYS_PK_C |
++--------------+-------------+--------------+----------+----------+
 
 0: jdbc:hsqldb:db-hypersonic>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_procedures">
-				<title>procedures</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_procedures">
+			<title>procedures</title>
+			<refentry id="command_procedures">
+				<refmeta>
+				<refentrytitle>procedures</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>procedures</refname>
+					<refpurpose>
+					List stored procedures
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!procedures</command>
 					<arg choice="opt"><replaceable>procedure name pattern</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Display a list of all the stored procedures that are
 					exposed by the current database.
-				</para>
-				<example id="command_procedures_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "procedures" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !procedures %JDBC%
 
-+----------------+------------------+------------------+-------+-------+-------+
-| PROCEDURE_CAT  | PROCEDURE_SCHEM  |  PROCEDURE_NAME  | NULL  | NULL  | NULL  |
-+----------------+------------------+------------------+-------+-------+-------+
-| WK_ADM         | WKSYS            | GET_JDBC_DRIVER  |       |       |       |
-| WK_ADM         | WKSYS            | SET_JDBC_DRIVER  |       |       |       |
-+----------------+------------------+------------------+-------+-------+-------+
++----------------+------------------+------------------+
+| PROCEDURE_CAT  | PROCEDURE_SCHEM  |  PROCEDURE_NAME  |
++----------------+------------------+------------------+
+| WK_ADM         | WKSYS            | GET_JDBC_DRIVER  |
+| WK_ADM         | WKSYS            | SET_JDBC_DRIVER  |
++----------------+------------------+------------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_quit">
-				<title>quit</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_quit">
+			<title>quit</title>
+			<refentry id="command_quit">
+				<refmeta>
+				<refentrytitle>quit</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>quit</refname>
+					<refpurpose>
+					Exit SQLLine
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!quit</command>
 					</cmdsynopsis>
-				</para>
+				</refsynopsisdiv>
 
-				<para>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Exit SQLLine.
-				</para>
-			</sect1>
-			<sect1 id="command_reconnect">
-				<title>reconnect</title>
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "reconnect" command</title>
+					<screen>
+0: jdbc:hsqldb:db-hypersonic> !quit
 
-				<para>
-					Usage:
+Closing: org.hsqldb.jdbcConnection
+					</screen>
+					</refsect1>
+			</refentry>
+			</section>
+
+
+			<section id="sect_command_reconnect">
+			<title>reconnect</title>
+			<refentry id="command_reconnect">
+				<refmeta>
+				<refentrytitle>reconnect</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>reconnect</refname>
+					<refpurpose>
+					Reconnect to the current database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!reconnect</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Reconnect to the current database.
-				</para>
-				<example id="command_reconnect_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "reconnect" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !reconnect
@@ -1127,23 +1773,39 @@ Autocommit status: true
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_record">
-				<title>record</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_record">
+			<title>record</title>
+			<refentry id="command_record">
+				<refmeta>
+				<refentrytitle>record</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>record</refname>
+					<refpurpose>
+					Begin recording all output from SQL commands
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!record</command>
 					<arg choice="req"><replaceable>file name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Save all output from the session to the specified file.
-				</para>
-				<example id="command_record_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "record" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !record /tmp/mysession.out
@@ -1161,52 +1823,101 @@ Saving all output to "/tmp/mysession.out". Enter "record" with no arguments to s
 +-------------+------------+
 4 rows selected (0.011 seconds)
 
-0: jdbc:oracle:thin:@localhost:1521:mydb> !record mysession.out
+0: jdbc:oracle:thin:@localhost:1521:mydb> !record
 
 Recording stopped.
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_rehash">
-				<title>rehash</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_rehash">
+			<title>rehash</title>
+			<refentry id="command_rehash">
+				<refmeta>
+				<refentrytitle>rehash</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>rehash</refname>
+					<refpurpose>
+					Obtain a list of all tables and columns from the database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!rehash</command>
 					</cmdsynopsis>
-				</para>
+				</refsynopsisdiv>
 
-				<para>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Get a list of all tables and columns from the database
 					in order to include them in the list for tab-completion
 					of SQL statements. This is done automatically on connect
 					when the
 					<link linkend="setting_fastconnect">fastconnect</link>
 					option is enabled.
-				</para>
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "rehash" command</title>
+					<screen>
+0: jdbc:hsqldb:db-hypersonic> !rehash
+
+Building list of tables and columns for tab-completion (set fastconnect to true to skip)...
+7/7 (100%) Done
+Done
+
+0: jdbc:hsqldb:db-hypersonic>
+
+					</screen>
+					</refsect1>
+					<refsect1>
+					<title>Warning on using "rehash"</title>
 				<caution>
 					<para>
 						This operation can be extremely slow for some databases.
 					</para>
 				</caution>
-			</sect1>
-			<sect1 id="command_rollback">
-				<title>rollback</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_rollback">
+			<title>rollback</title>
+			<refentry id="command_rollback">
+				<refmeta>
+				<refentrytitle>rollback</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>rollback</refname>
+					<refpurpose>
+					Roll back the current transaction
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!rollback</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Rollback the current transaction, if autocommit is off.
-				</para>
-				<example id="command_rollback_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "rollback" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !autocommit off
@@ -1255,81 +1966,110 @@ Rollback complete (0.016 seconds)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_run">
-				<title>run</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_run">
+			<title>run</title>
+			<refentry id="command_run">
+				<refmeta>
+				<refentrytitle>run</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>run</refname>
+					<refpurpose>
+					Execute a command script
+					</refpurpose>
+				</refnamediv>
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!run</command>
 					<arg choice="req"><replaceable>file name</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
-					Run the individual commands specified in the file name
-					parameter. The file should consist of individual SQL
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
+					Run the individual commands specified in the file name.
+					The file should consist of individual SQL
 					statements or SQLLine commands. Lines beginning with
 					"#" are interpreted as comments and ignored. If any
 					errors occur while running the script, the script will
 					be aborted, unless the
 					<link linkend="setting_force">force</link> preference is
 					set to <literal>true</literal>.
-				</para>
-				<example id="command_run_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "run" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !run example.sql
-1/12         CREATE TABLE COMPANY (COMPANY_ID INT PRIMARY KEY, NAME VARCHAR(255));
+1/11         CREATE TABLE COMPANY (COMPANY_ID INT PRIMARY KEY, NAME VARCHAR(255));
 No rows affected (0.001 seconds)
-2/12         INSERT INTO COMPANY VALUES (1, 'Apple');
+2/11         INSERT INTO COMPANY VALUES (1, 'Apple');
 1 row affected (0 seconds)
-3/12         INSERT INTO COMPANY VALUES (2, 'Sun');
+3/11         INSERT INTO COMPANY VALUES (2, 'Sun');
 1 row affected (0 seconds)
-4/12         INSERT INTO COMPANY VALUES (3, 'IBM');
+4/11         INSERT INTO COMPANY VALUES (3, 'IBM');
 1 row affected (0.001 seconds)
-5/12         INSERT INTO COMPANY VALUES (4, 'Microsoft');
+5/11         INSERT INTO COMPANY VALUES (4, 'Microsoft');
 1 row affected (0.015 seconds)
-6/12         CREATE TABLE EMPLOYEE (EMPLOYEE_ID INT PRIMARY KEY, FIRST_NAME VARCHAR(255), LAST_NAME VARCHAR(255), COMPANY INT, DOB DATE);
+6/11         CREATE TABLE EMPLOYEE (EMPLOYEE_ID INT PRIMARY KEY, FIRST_NAME VARCHAR(255), LAST_NAME VARCHAR(255), COMPANY INT, DOB DATE);
 No rows affected (0.004 seconds)
-7/12         ALTER TABLE EMPLOYEE ADD INDEX ON (FIRST_NAME);
-Error: Unexpected token: 37000 Unexpected token: ON in statement [ALTER TABLE EMPLOYEE ADD INDEX ON (FIRST_NAME)] (state=37000,code=-11)
-8/12         CREATE INDEX FIRST_NAME ON EMPLOYEE(FIRST_NAME);
+7/11         CREATE INDEX FIRST_NAME ON EMPLOYEE(FIRST_NAME);
 No rows affected (0 seconds)
-9/12         CREATE INDEX LAST_NAME ON EMPLOYEE(LAST_NAME);
+8/11         CREATE INDEX LAST_NAME ON EMPLOYEE(LAST_NAME);
 No rows affected (0.001 seconds)
-10/12        ALTER TABLE EMPLOYEE ADD CONSTRAINT EMP_COMPANY FOREIGN KEY (COMPANY) REFERENCES COMPANY (COMPANY_ID);
+9/11         ALTER TABLE EMPLOYEE ADD CONSTRAINT EMP_COMPANY FOREIGN KEY (COMPANY) REFERENCES COMPANY (COMPANY_ID);
 No rows affected (0 seconds)
-11/12        INSERT INTO EMPLOYEE (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, COMPANY) VALUES (234, 'William', 'Gates', 4);
+10/11        INSERT INTO EMPLOYEE (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, COMPANY) VALUES (234, 'William', 'Gates', 4);
 1 row affected (0.001 seconds)
-12/12        SELECT * FROM COMPANY,EMPLOYEE WHERE EMPLOYEE.COMPANY = COMPANY.COMPANY_ID;
-+-------------+------------+--------------+-------------+------------+---------+
-| COMPANY_ID  |    NAME    | EMPLOYEE_ID  | FIRST_NAME  | LAST_NAME  | COMPANY |
-+-------------+------------+--------------+-------------+------------+---------+
-| 4           | Microsoft  | 234          | William     | Gates      | 4       |
-+-------------+------------+--------------+-------------+------------+---------+
+11/11        SELECT * FROM COMPANY,EMPLOYEE WHERE EMPLOYEE.COMPANY = COMPANY.COMPANY_ID;
++------------+-----------+--------------+-------------+------------+---------+
+| COMPANY_ID |    NAME   | EMPLOYEE_ID  | FIRST_NAME  | LAST_NAME  | COMPANY |
++------------+-----------+--------------+-------------+------------+---------+
+| 4          | Microsoft | 234          | William     | Gates      | 4       |
++------------+-----------+--------------+-------------+------------+---------+
 1 row selected (0.001 seconds)
 0: jdbc:hsqldb:db-hypersonic>
 
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_save">
-				<title>save</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_save">
+			<title>save</title>
+			<refentry id="command_save">
+				<refmeta>
+				<refentrytitle>save</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>save</refname>
+					<refpurpose>
+					Save the current preferences
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!save</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Save the current preferences.
-				</para>
-				<example id="command_save_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "save" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !save
@@ -1338,23 +2078,39 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_scan">
-				<title>scan</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_scan">
+			<title>scan</title>
+			<refentry id="command_scan">
+				<refmeta>
+				<refentrytitle>scan</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>scan</refname>
+					<refpurpose>
+					Scan class path for JDBC drivers
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!scan</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Scans all the jar files in the CLASSPATH for any
 					JDBC drivers, and prints the class names of the drivers.
-				</para>
-				<example id="command_scan_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "scan" command</title>
 					<screen>
 sqlline> !scan
@@ -1399,27 +2155,43 @@ yes       0.9     org.sourceforge.jxdbcon.JXDBConDriver
 
 sqlline>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_script">
-				<title>script</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_script">
+			<title>script</title>
+			<refentry id="command_script">
+				<refmeta>
+				<refentrytitle>script</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>script</refname>
+					<refpurpose>
+					Save executed commands to a file
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!script</command>
 					<arg choice="req"><replaceable>filename</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Start saving all commands entered to the specified
 					file. Once scripting on, it can be finished
 					by entering the script command again with no arguments.
 					Saved scripts can be re-run using the
 					<link linkend="command_run">run</link> command.
-				</para>
-				<example id="command_script_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "script" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !script /tmp/mysession.script
@@ -1456,51 +2228,83 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
 
 0: jdbc:hsqldb:db-hypersonic>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_set">
-				<title>set</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_set">
+			<title>set</title>
+			<refentry id="command_set">
+				<refmeta>
+				<refentrytitle>set</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>set</refname>
+					<refpurpose>
+					Set a preference
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!set</command>
 					<arg choice="req"><replaceable>preference</replaceable></arg>
 					<arg choice="req"><replaceable>value</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Set the specified preference to the specified value. If
 					<link linkend="setting_autosave">autosave</link> is
 					on, then this will cause preferences to be
 					immediately saved. Otherwise, changed setting can be
 					saved for future SQLLine session eith the
 					<link linkend="command_save">save</link> command.
-				</para>
-				<example id="command_set_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "set" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !set color on
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_sql">
-				<title>sql</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_sql">
+			<title>sql</title>
+			<refentry id="command_sql">
+				<refmeta>
+				<refentrytitle>sql</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>sql</refname>
+					<refpurpose>
+					Execute a SQL against a database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!sql</command>
 					<arg choice="req"><replaceable>statement</replaceable></arg>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Issue the specified SQL statement. This is equivalent to
 					entering the statement by itself from the command line.
-				</para>
-				<example id="command_sql_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "sql" command</title>
 					<screen>
 0: jdbc:hsqldb:db-hypersonic> !sql DELETE FROM COMPANY;
@@ -1509,54 +2313,86 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
 
 0: jdbc:hsqldb:db-hypersonic>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_tables">
-				<title>tables</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_tables">
+			<title>tables</title>
+			<refentry id="command_tables">
+				<refmeta>
+				<refentrytitle>tables</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>tables</refname>
+					<refpurpose>
+					List all the tables in the database
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!tables</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					List all the tables in the database of the
 					current connection.
-				</para>
-				<example id="command_tables_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "tables" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !tables
 
-+------------+--------------+---------------------------------+-------------+--+
-| TABLE_CAT  | TABLE_SCHEM  |           TABLE_NAME            | TABLE_TYPE  |  |
-+------------+--------------+---------------------------------+-------------+--+
-|            | MYDB         | COMPANY                         | TABLE       |  |
-|            | MYDB         | EMPLOYEE                        | TABLE       |  |
-+------------+--------------+---------------------------------+-------------+--+
++------------+--------------+---------------------------------+-------------+
+| TABLE_CAT  | TABLE_SCHEM  |           TABLE_NAME            | TABLE_TYPE  |
++------------+--------------+---------------------------------+-------------+
+|            | MYDB         | COMPANY                         | TABLE       |
+|            | MYDB         | EMPLOYEE                        | TABLE       |
++------------+--------------+---------------------------------+-------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
-			<sect1 id="command_verbose">
-				<title>verbose</title>
+					</refsect1>
+			</refentry>
+			</section>
 
-				<para>
-					Usage:
+			<section id="sect_command_verbose">
+			<title>verbose</title>
+			<refentry id="command_verbose">
+				<refmeta>
+				<refentrytitle>verbose</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>verbose</refname>
+					<refpurpose>
+					Enable verbose output
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
 					<cmdsynopsis>
 					<command>!verbose</command>
 					</cmdsynopsis>
-				</para>
-
-				<para>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
 					Enable verbose mode, which causes stack traces
 					to be printed when errors occur, and enabled outputting
 					of debug information.
-				</para>
-				<example id="command_verbose_example">
+					</para>
+				</refsect1>
+				<refsect1>
 					<title>Example of "verbose" command</title>
 					<screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
@@ -1587,8 +2423,10 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 					</screen>
-				</example>
-			</sect1>
+					</refsect1>
+			</refentry>
+			</section>
+
 
 		</chapter>
 
@@ -1749,7 +2587,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 			</sect1>
 		</chapter>
 
-		<chapter id="supported_drivers">
+		<chapter id="known_drivers">
 			<title>JDBC Driver Support</title>
 			<para>
 			</para>

@@ -7,7 +7,7 @@
 	<property name="reports" value="${basedir}/reports"/>
 	<property name="release" value="${basedir}/release"/>
 
-	<property name="author" value="Marc Prud'hommeaux"/>
+	<property name="author" value="Marc Prud'hommeaux &lt;marc@apocalypse.org>"/>
 
 	<property name="name" value="sqlline"/>
 	<property name="version.major" value="0"/>
@@ -36,6 +36,7 @@
 	</target>
 
 	<target name="init">
+		<mkdir dir="${test}" />
 		<mkdir dir="${reports}" />
 		<mkdir dir="${build}" />
 		<mkdir dir="${release}"/>
@@ -64,6 +65,9 @@
 				excludes="**/CVS/*,**/.*.swp"/>
 			<zipfileset prefix="${srcprefix}/test" dir="${test}"
 				excludes="**/CVS/*,**/.*.swp"/>
+			<zipfileset prefix="${srcprefix}/doc" dir="${doc}"
+				excludes="**/CVS/*,**/.*.swp"
+				includes="*.*"/>
 			<zipfileset prefix="${srcprefix}" dir="${basedir}"
 				includes="CHANGELOG,AUTHORS,LICENSE,build.xml"/>
 		</zip>
@@ -87,20 +91,28 @@
 		-->
 
 		<!-- man pages -->
+		<!--
 		<style basedir="${doc}"
 			destdir="${doc}"
 			extension=".man"
 			style="${doc}/manpage.xsl"
 			includes="manual.xml">
 		</style>
+		-->
 
 		<!-- HTML documentation -->
 		<style basedir="${doc}"
 			destdir="${doc}"
 			extension=".html"
-			style="${doc}/manual.xsl"
+			style="${doc}/html.xsl"
 			includes="manual.xml">
 		</style>
+
+		<!-- convert to text. There is currently no good way of doing this,
+				short of invoking a text browser to render to text. -->
+		<exec executable="links" output="${doc}/manual.txt">
+			<arg line="-dump ${doc}/manual.html"/>
+		</exec>
 	</target>
 
 
@@ -118,6 +130,12 @@
 			</fileset>
 		</copy>
 
+		<copy todir="${relbuild}/sqlline/" flatten="no">
+			<fileset dir="${doc}">
+				<include name="**/*.txt"/>
+			</fileset>
+		</copy>
+
 		<jar jarfile="${jarfile}" basedir="${relbuild}" update="no">
 			<manifest>
 				<attribute name="Main-Class" value="sqlline.SqlLine"/>
@@ -125,24 +143,20 @@
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
 
-				<section name="sqlline">
+				<section name="sqlline/">
 					<attribute name="Sealed" value="true"/>
-					<attribute name="Extension-name"
-						value="${name}"/>
-					<attribute name="Specification-Title"
-						value="SQLLine"/>
+					<attribute name="Extension-name" value="${name}"/>
+					<attribute name="Specification-Title" value="SQLLine"/>
 					<attribute name="Specification-Version"
 						value="${version.title}"/>
-					<attribute name="Specification-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-Title"
-						value="${name}"/>
+					<attribute name="Specification-Vendor" value="${author}"/>
+					<attribute name="Implementation-Title" value="${name}"/>
 					<attribute name="Implementation-Version"
 						value="${version.title}"/>
-					<attribute name="Implementation-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-License"
-						value="GNU LGPL"/>
+					<attribute name="Implementation-Vendor" value="${author}"/>
+					<attribute name="Implementation-License" value="GNU LGPL"/>
+					<attribute name="Implementation-ReleaseDate"
+						value="${TODAY}"/>
 				</section>
 			</manifest>
 		</jar>
