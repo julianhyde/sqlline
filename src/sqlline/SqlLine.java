@@ -3726,8 +3726,6 @@ public class SqlLine
 						hasResults = stmnt.execute (sql);
 					}
 
-					long end = System.currentTimeMillis ();
-
 					showWarnings ();
 	
 					if (hasResults)
@@ -3738,7 +3736,8 @@ public class SqlLine
 							try
 							{
 								int count = print (rs);
-	
+								long end = System.currentTimeMillis ();
+
 								info (loc ("rows-selected", count) + " "
 									+ loc ("time-ms", new Object [] {
 										new Double ((end - start) / 1000d) }));
@@ -3752,6 +3751,7 @@ public class SqlLine
 					else
 					{
 						int count = stmnt.getUpdateCount ();
+						long end = System.currentTimeMillis ();
 						info (loc ("rows-affected", count)
 							+ " " + loc ("time-ms", new Object [] {
 								new Double ((end - start) / 1000d) }));
