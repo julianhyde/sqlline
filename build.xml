@@ -93,6 +93,9 @@
 		<mkdir dir="${release}"/>
 		<mkdir dir="${tmp}"/>
 		<mkdir dir="${doc-build}"/>
+
+		<echo append="false" file="${basedir}/VERSION.txt"
+			>${version.title}</echo>
 	</target>
 
 	<target name="build" depends="init">

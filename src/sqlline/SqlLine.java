@@ -4479,7 +4479,9 @@ public class SqlLine
 	{
 		private boolean autosave = false;
 		private boolean silent = false;
-		private boolean color = true;
+		// default to false for Windows, true for others
+		private boolean color = System.getProperty ("os.name")
+			.toLowerCase ().indexOf ("windows") != -1;
 		private boolean showHeader = true;
 		private int headerInterval = 100;
 		private boolean fastConnect = true;
