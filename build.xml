@@ -70,6 +70,12 @@
 		depends="init,release.files,release.sign,release.tag,release.upload"/>
 
 	<target name="init">
+		<!-- check for project.properties -->
+		<available property="project.properties.available"
+			file="${basedir}/project.properties"/>
+
+		<fail unless="project.properties.available">project.properties does not exist for this project</fail>
+
 		<!-- check for required parameters -->
 		<fail unless="name">"name" undefined</fail>
 		<fail unless="author">"author" undefined</fail>
