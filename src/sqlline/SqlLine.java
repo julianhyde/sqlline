@@ -80,6 +80,8 @@ public class SqlLine
 	private ConsoleReader reader;
 	private List batch = null;
 
+	private SqlLineSignalHandler signalHandler = null;
+	
 
 	private final Map formats = map (new Object [] {
 		"vertical",			new VerticalOutputFormat (),
@@ -455,6 +457,19 @@ public class SqlLine
 		// registerKnownDrivers ();
 
 		sqlLineCommandCompletor = new SQLLineCommandCompletor ();
+
+		// attempt to dynamically load signal handler
+		try
+		{
+			Class handlerClass =
+				Class.forName ("sqlline.SunSignalHandler");
+			signalHandler = (SqlLineSignalHandler)
+				handlerClass.newInstance ();
+		}
+		catch (Throwable t)
+		{
+			// ignore and leave cancel functionality disabled
+		}
 	}
 
 
@@ -2117,6 +2132,8 @@ public class SqlLine
 		Statement stmnt = con ().connection.createStatement ();
 		if (opts.timeout > -1)
 			stmnt.setQueryTimeout (opts.timeout);
+		if (signalHandler != null)
+			signalHandler.setStmt (stmnt);
 		return stmnt;
 	}
 
