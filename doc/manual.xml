@@ -1770,7 +1770,7 @@ Connecting to jdbc:mysql://localhost/mydb
 Enter password for jdbc:mysql://localhost/mydb: *****
 
 Connected to: MySQL (version 3.23.52-log)
-Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2003/11/20 00:23:58 $, $Revision: 1.5 $ ))
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2003/11/20 01:05:06 $, $Revision: 1.6 $ ))
 Autocommit status: true
 Transaction isolation: TRANSACTION_READ_COMMITTED
 
@@ -2556,8 +2556,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					the terminal will use color for
 					a more pleasing visual experience. Requires that the
 					terminal support ANSI control codes (most do).
-					Defaults to <literal>false</literal> for Windows,
-					true for all others.
+					Defaults to <literal>false</literal>.
 				</para>
 			</sect1>
 			<sect1 id="setting_fastconnect">
