@@ -52,7 +52,7 @@ public class SqlLine
 		SqlLine.class.getName ());
 
 	public static final String APP_NAME = "sqlline";
-	public static final String APP_VERSION = "0.6.9";
+	public static final String APP_VERSION = "0.7.3";
 	public static final String APP_AUTHOR = "Marc Prud'hommeaux";
 	public static final String APP_AUTHOR_EMAIL = "marc@apocalypse.org";
 	public static final String APP_TITLE = APP_NAME + " " + APP_VERSION
