@@ -114,6 +114,8 @@ public class SqlLine
 			null),
 		new ReflectiveCommandHandler (new String [] { "tables" },
 			null),
+		new ReflectiveCommandHandler (new String [] { "typeinfo" },
+			null),
 		new ReflectiveCommandHandler (new String [] { "columns" },
 			new Completor [] { new TableNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "reconnect" },
@@ -125,6 +127,8 @@ public class SqlLine
 		new ReflectiveCommandHandler (new String [] { "metadata" },
 			new Completor [] {
 				new SimpleCompletor (getMetadataMethodNames ())}),
+		new ReflectiveCommandHandler (new String [] { "nativesql" },
+			null),
 		new ReflectiveCommandHandler (new String [] { "dbinfo" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "rehash" },
@@ -149,6 +153,8 @@ public class SqlLine
 			null),
 		new ReflectiveCommandHandler (new String [] { "close" },
 			null),
+		new ReflectiveCommandHandler (new String [] { "closeall" },
+			null),
 		new ReflectiveCommandHandler (new String [] { "isolation" },
 			new Completor [] { new SimpleCompletor (getIsolationLevels ())}),
 		new ReflectiveCommandHandler (new String [] { "outputformat" },
@@ -171,6 +177,8 @@ public class SqlLine
 		new ReflectiveCommandHandler (new String [] { "scan" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "sql" },
+			null),
+		new ReflectiveCommandHandler (new String [] { "call" },
 			null),
 	};
 
@@ -2930,6 +2938,9 @@ public class SqlLine
 
 			String [] parts = split (line);
 			List params = new LinkedList (Arrays.asList (parts));
+			if (parts == null || parts.length == 0)
+				return dbinfo ("");
+
 			params.remove (0);
 			params.remove (0);
 			debug (params.toString ());
@@ -3084,6 +3095,30 @@ public class SqlLine
 			return metadata ("getTables", new String [] {
 				conn ().getCatalog (), null,
 				arg1 (line, "table name", "%"), null });
+		}
+
+
+		public boolean typeinfo (String line)
+			throws Exception
+		{
+			return metadata ("getTypeInfo", new String[0]);
+		}
+
+
+		public boolean nativesql (String sql)
+			throws Exception
+		{
+			if (sql.startsWith (COMMAND_PREFIX))
+				sql = sql.substring (1);
+	
+			if (sql.startsWith ("native"))
+				sql = sql.substring ("native".length () + 1);
+
+			String nat = con ().getConnection ().nativeSQL (sql);
+
+			output (nat);
+
+			return true;
 		}
 
 
@@ -3594,6 +3629,18 @@ public class SqlLine
 
 		public boolean sql (String line)
 		{
+			return execute (line, false);
+		}
+
+
+		public boolean call (String line)
+		{
+			return execute (line, true);
+		}
+
+
+		private boolean execute (String line, boolean call)
+		{
 			if (line == null || line.length () == 0)
 				return false; // ???
 
@@ -3638,8 +3685,10 @@ public class SqlLine
 			if (sql.startsWith (COMMAND_PREFIX))
 				sql = sql.substring (1);
 	
-			if (sql.startsWith ("sql"))
-				sql = sql.substring (4);
+			String prefix = call ? "call" : "sql";
+
+			if (sql.startsWith (prefix))
+				sql = sql.substring (prefix.length ());
 	
 			// batch statements?
 			if (batch != null)
@@ -3650,11 +3699,24 @@ public class SqlLine
 
 			try
 			{
-				Statement stmnt = createStatement ();
+				Statement stmnt = null;
+				boolean hasResults;
+
 				try
 				{
 					long start = System.currentTimeMillis ();
-					boolean hasResults = stmnt.execute (sql);
+
+					if (call)
+					{
+						stmnt = con ().connection.prepareCall (sql);
+						hasResults = ((CallableStatement)stmnt).execute ();
+					}
+					else
+					{
+						stmnt = createStatement ();
+						hasResults = stmnt.execute (sql);
+					}
+
 					long end = System.currentTimeMillis ();
 
 					showWarnings ();
@@ -3688,7 +3750,8 @@ public class SqlLine
 				}
 				finally
 				{
-					stmnt.close ();
+					if (stmnt != null)
+						stmnt.close ();
 				}
 			}
 			catch (Exception e)
@@ -3709,6 +3772,24 @@ public class SqlLine
 		}
 	
 	
+		/** 
+		 *  Close all connections.
+		 */
+		public boolean closeall (String line)
+		{
+			if (close (null))
+			{
+				while (close (null));
+				return true;
+			}
+
+			return false;
+		}
+
+
+		/** 
+		 *  Close the current connection.
+		 */
 		public boolean close (String line)
 		{
 			if (con () == null)
@@ -3738,6 +3819,9 @@ public class SqlLine
 		}
 
 
+		/** 
+		 *  Connect to the database defined in the specified properties file.
+		 */
 		public boolean properties (String line)
 			throws Exception
 		{
