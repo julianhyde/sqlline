@@ -3473,7 +3473,11 @@ public class SqlLine
 							prompt.setCharAt (i, i % 2 == 0 ? '.' : ' ');
 					}
 
-					line += " " + reader.readLine (prompt.toString ());
+					String extra = reader.readLine (prompt.toString ());
+					if (!isComment (extra))
+					{
+						line += " " + extra;
+					}
 				}
 			}
 			catch (Exception e)
