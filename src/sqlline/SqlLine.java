@@ -23,6 +23,7 @@ package sqlline;
 
 import jline.*;
 import java.io.*;
+import java.text.*;
 import java.sql.*;
 import java.util.*;
 import java.lang.reflect.*;
@@ -46,6 +47,9 @@ import java.util.zip.*;
  */
 public class SqlLine
 {
+	private static final ResourceBundle loc = ResourceBundle.getBundle (
+		SqlLine.class.getName ());
+
 	public static final String APP_NAME = "sqlline";
 	public static final String APP_VERSION = "0.6.3";
 	public static final String APP_AUTHOR = "Marc Prud'hommeaux";
@@ -71,59 +75,59 @@ public class SqlLine
 	private CommandHandler [] commands = new CommandHandler []
 	{
 		new ReflectiveCommandHandler (new String [] { "quit", "done", "exit" },
-			"Exits the program"),
+			loc ("help-quit")),
 		new ReflectiveCommandHandler (new String [] { "connect", "open" },
-			"Open a new connection to the database."),
+			loc ("help-connect")),
 		new ReflectiveCommandHandler (new String [] { "describe", "desc" },
-			"Describe a table"),
+			loc ("help-describe")),
 		new ReflectiveCommandHandler (new String [] { "reconnect" },
-			"Reconnect to the database"),
+			loc ("help-reconnect")),
 		new MetaDataCommandHandler (new String [] { "metadata", "meta" },
-			"Obtain metadata information"),
+			loc ("help-metadata")),
 		new ReflectiveCommandHandler (new String [] { "dbinfo" },
-			"Give metadata information about the database"),
+			loc ("help-dbinfo")),
 		new ReflectiveCommandHandler (new String [] { "rehash" },
-			"Fetch table and column names for command completion"),
+			loc ("help-rehash")),
 		new ReflectiveCommandHandler (new String [] { "verbose" },
-			"Set verbose mode on"),
+			loc ("help-verbose")),
 		new ReflectiveCommandHandler (new String [] { "run" },
-			"Run a script from the specified file"),
+			loc ("help-run")),
 		new ReflectiveCommandHandler (new String [] { "list" },
-			"List the current connections"),
+			loc ("help-list")),
 		new ReflectiveCommandHandler (new String [] { "all" },
-			"Execute the specified SQL against all the current connections"),
+			loc ("help-all")),
 		new ReflectiveCommandHandler (new String [] { "go", "#" },
-			"Select the current connection"),
+			loc ("help-go")),
 		new ReflectiveCommandHandler (new String [] { "script" },
-			"Start saving a script to a file"),
+			loc ("help-script")),
 		new ReflectiveCommandHandler (new String [] { "brief" },
-			"Set verbose mode off"),
+			loc ("help-brief")),
 		new ReflectiveCommandHandler (new String [] { "close" },
-			"Close the current connection to the database"),
+			loc ("help-close")),
 		new ReflectiveCommandHandler (new String [] { "isolation" },
-			"Set the transaction isolation for this connection"),
+			loc ("help-isolation")),
 		new ReflectiveCommandHandler (new String [] { "autocommit" },
-			"Set autocommit mode on or off"),
+			loc ("help-autocommit")),
 		new ReflectiveCommandHandler (new String [] { "driverinfo" },
-			"Print information about a JDBC driver class"),
+			loc ("help-driverinfo")),
 		new ReflectiveCommandHandler (new String [] { "commit" },
-			"Commit the current transaction (if autocommit is off)"),
+			loc ("help-commit")),
 		new ReflectiveCommandHandler (new String [] { "rollback" },
-			"Roll back the current transaction (if autocommit is off)"),
+			loc ("help-rollback")),
 		new ReflectiveCommandHandler (new String [] { "help", "?" },
-			"Print a summary of command usage"),
+			loc ("help-help")),
 		new ReflectiveCommandHandler (new String [] { "set" },
-			"Set a sqlline variable"),
+			loc ("help-set")),
 		new ReflectiveCommandHandler (new String [] { "save" },
-			"Save the current variabes and aliases"),
+			loc ("help-save")),
 		new ReflectiveCommandHandler (new String [] { "alias" },
-			"Create a new command alias"),
+			loc ("help-alias")),
 		new ReflectiveCommandHandler (new String [] { "unalias" },
-			"Unset a command alias"),
+			loc ("help-unalias")),
 		new ReflectiveCommandHandler (new String [] { "scan" },
-			"Scan for installed JDBC drivers"),
+			loc ("help-scan")),
 		new ReflectiveCommandHandler (new String [] { "sql" },
-			"Execute a SQL command"),
+			loc ("help-sql")),
 	};
 
 
@@ -223,8 +227,51 @@ public class SqlLine
 		}
 		catch (Throwable t)
 		{
-			throw new ExceptionInInitializerError ("The JLine "
-				+ "jar was not found. Please ensure it is installed.");
+			throw new ExceptionInInitializerError (loc ("jline-missing"));
+		}
+	}
+
+
+	static String loc (String res)
+	{
+		return loc (res, new Object [0]);
+	}
+
+
+	static String loc (String res, int param)
+	{
+		return loc (res, new Object [] { new Integer (param) });
+	}
+
+
+	static String loc (String res, Object param1)
+	{
+		return loc (res, new Object [] { param1 });
+	}
+
+
+	static String loc (String res, Object param1, Object param2)
+	{
+		return loc (res, new Object [] { param1, param2 });
+	}
+
+
+	static String loc (String res, Object [] params)
+	{
+		try
+		{
+			return MessageFormat.format (loc.getString (res), params);
+		}
+		catch (Exception e)
+		{
+			try
+			{
+				return res + ": " + Arrays.asList (params);
+			}
+			catch (Exception e2)
+			{
+				return res;
+			}
 		}
 	}
 
@@ -299,10 +346,11 @@ public class SqlLine
 
 		for (int i = 0; i < args.length; i++)
 		{
+			// -- arguments are treated as properties
 			if (args [i].startsWith ("--"))
 			{
 				String [] parts = split (args [i].substring (2), "=");
-				debug ("Setting property: " + Arrays.asList (parts));
+				debug (loc ("setting-prop", Arrays.asList (parts)));
 				if (parts.length > 0)
 				{
 					if (parts.length >= 2)
@@ -318,25 +366,15 @@ public class SqlLine
 				continue;
 
 			if (args [i].equals ("-d"))
-			{
 				driver = args [i++ + 1];
-			}
 			else if (args [i].equals ("-n"))
-			{
 				user = args [i++ + 1];
-			}
 			else if (args [i].equals ("-p"))
-			{
 				pass = args [i++ + 1];
-			}
 			else if (args [i].equals ("-u"))
-			{
 				url = args [i++ + 1];
-			}
 			else if (args [i].equals ("-e"))
-			{
 				command = args [i++ + 1];
-			}
 		}
 
 		for (Iterator i = props.keySet ().iterator (); i.hasNext (); )
@@ -355,7 +393,7 @@ public class SqlLine
 
 		if (command != null)
 		{
-			debug ("executing command: " + command);
+			debug (loc ("executing-command", command));
 			dispatch (command);
 		}
 	}
@@ -401,34 +439,35 @@ public class SqlLine
 		throws IOException
 	{
 		Terminal.setupTerminal ();
-		ConsoleReader reader = new ConsoleReader (
-			new FileInputStream (FileDescriptor.in),
-			new PrintWriter (System.out));
+		ConsoleReader reader = new ConsoleReader ();
 
 
 		// setup history
 		ByteArrayInputStream historyBuffer = null;
 
-		try
+		if (new File (opts.getHistoryFile ()).isFile ())
 		{
-			// save the current contents of the history buffer. This gets
-			// around a bug in JLine where setting the output before the
-			// input will clobber the history input, but setting the 
-			// input before the output will cause the previous commands
-			// to not be saved to the buffer.
-			FileInputStream historyIn = new FileInputStream (
-				opts.getHistoryFile ());
-			ByteArrayOutputStream hist = new ByteArrayOutputStream ();
-			int n;
-			while ((n = historyIn.read ()) != -1)
-				hist.write (n);
-			historyIn.close ();
-
-			historyBuffer = new ByteArrayInputStream (hist.toByteArray ());
-		}
-		catch (Exception e)
-		{
-			handleException (e);
+			try
+			{
+				// save the current contents of the history buffer. This gets
+				// around a bug in JLine where setting the output before the
+				// input will clobber the history input, but setting the 
+				// input before the output will cause the previous commands
+				// to not be saved to the buffer.
+				FileInputStream historyIn = new FileInputStream (
+					opts.getHistoryFile ());
+				ByteArrayOutputStream hist = new ByteArrayOutputStream ();
+				int n;
+				while ((n = historyIn.read ()) != -1)
+					hist.write (n);
+				historyIn.close ();
+	
+				historyBuffer = new ByteArrayInputStream (hist.toByteArray ());
+			}
+			catch (Exception e)
+			{
+				handleException (e);
+			}
 		}
 
 		try
@@ -504,7 +543,7 @@ public class SqlLine
 		}
 
 		if (line != null)
-			error ("Unknown command: " + line);
+			error (loc ("unknown-command", line));
 
 		return true;
 	}
@@ -581,7 +620,7 @@ public class SqlLine
 		{
 			if (con ().connection.getAutoCommit ())
 			{
-				error ("Operation requires that autocommit be turned off.");
+				error (loc ("autocommit-needs-off"));
 				return false;
 			}
 		}
@@ -607,19 +646,19 @@ public class SqlLine
 		{
 			if (con () == null || con ().connection == null)
 			{
-				error ("No current connection");
+				error (loc ("no-current-connection"));
 				return false;
 			}
 
 			if (con ().connection.isClosed ())
 			{
-				error ("Connection is closed");
+				error (loc ("connection-is-closed"));
 				return false;
 			}
 		}
 		catch (SQLException sqle)
 		{
-			error ("No current connection");
+			error (loc ("no-current-connection"));
 			return false;
 		}
 
@@ -1067,8 +1106,7 @@ public class SqlLine
 		for (Iterator i = paths.iterator (); i.hasNext (); )
 		{
 			File f = new File ((String)i.next ());
-			output (pad ("Scanning " + f.getAbsolutePath () + "... ", 60),
-				false);
+			output (pad (loc ("scanning", f.getAbsolutePath ()), 60), false);
 
 			try
 			{
@@ -1145,8 +1183,6 @@ public class SqlLine
 		// normalize the columns sizes
 		rows.normalizeWidths ();
 
-		int headerPeriod = 100;
-
 		for (Iterator i = rows.iterator (); i.hasNext (); )
 		{
 			Rows.Row row = (Rows.Row)i.next ();
@@ -1187,7 +1223,7 @@ public class SqlLine
 		if (header != null && opts.getShowHeader ())
 			printRow (header, true);
 
-		output (rows.getRowCount () + " rows selected");
+		output (loc ("rows-selected", rows.getRowCount ()));
 	}
 
 
@@ -1634,7 +1670,7 @@ public class SqlLine
 	 *  method after determining that the command is appropriate with
 	 *  the {@link #matches(java.lang.String)} method.
 	 *  
-	 *  @author  <a href="mailto:marc@solarmetric.com">Marc Prud'hommeaux</a>
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
 	 */
 	interface CommandHandler
 	{
@@ -1678,7 +1714,7 @@ public class SqlLine
 	/** 
 	 *  An abstract implementation of CommandHandler.
 	 *  
-	 *  @author  <a href="mailto:marc@solarmetric.com">Marc Prud'hommeaux</a>
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
 	 */
 	abstract class AbstractCommandHandler
 		implements CommandHandler
@@ -1734,7 +1770,7 @@ public class SqlLine
 	 *  A {@link Command} implementation that uses reflection to
 	 *  determine the method to dispatch the command.
 	 *  
-	 *  @author  <a href="mailto:marc@solarmetric.com">Marc Prud'hommeaux</a>
+	 *  @author  <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
 	 */
 	class ReflectiveCommandHandler
 		extends AbstractCommandHandler
@@ -1792,8 +1828,8 @@ public class SqlLine
 
 				if (!methodNamesUpper.contains (parts [1].toUpperCase ()))
 				{
-					error ("No such method \"" + parts [1] + "\"");
-					error ("Possible methods:");
+					error (loc ("no-such-method", parts [1]));
+					error (loc ("possible-methods"));
 					for (Iterator i = methodNames.iterator (); i.hasNext (); )
 						error ("   " + i.next ());
 					return;
@@ -1844,7 +1880,8 @@ public class SqlLine
 			if (drivers == null)
 				drivers = Arrays.asList (scanDrivers (line));
 
-			output (drivers.size () + " driver classes found");
+			output (loc ("divers-found-count", drivers.size ()));
+
 			// unique the list
 			for (Iterator i = drivers.iterator (); i.hasNext (); )
 				names.add (((Driver)i.next ()).getClass ().getName ());
@@ -1893,12 +1930,13 @@ public class SqlLine
 			try
 			{
 				Properties props = opts.toProperties ();
-				List keys = new LinkedList (props.keySet ());
-				Collections.sort (keys);
+				Set keys = new TreeSet (props.keySet ());
 				for (Iterator i = keys.iterator (); i.hasNext (); )
 				{
 					String key = (String)i.next ();
-					output (pad (key, 30) + props.getProperty (key));
+					output (color ()
+						.green (pad (key, 20).getMono ())
+						.append (props.getProperty (key)));
 				}
 			}
 			catch (Exception e)
@@ -2350,7 +2388,7 @@ public class SqlLine
 					showWarnings ();
 					int count = stmnt.getUpdateCount ();
 					if (count > -1)
-						output (count + " rows affected");
+						output (loc ("rows-affected", count));
 	
 					if (ret)
 					{
@@ -2396,8 +2434,8 @@ public class SqlLine
 			{
 				if (!(con ().connection.isClosed ()))
 				{
-					output ("Closing: " + con ().connection
-						.getClass ().getName ());
+					output (loc ("closing",
+						con ().connection.getClass ().getName ()));
 					con ().connection.close ();
 				}
 			}
@@ -2477,9 +2515,7 @@ public class SqlLine
 		public void list (String line)
 		{
 			int index = 0;
-			output (connections.size () + " active connection"
-				+ (connections.size () == 1 ? "" : "s")
-				+ (connections.size () == 0 ? "" : ":"));
+			output (loc ("active-connections", connections.size ()));
 
 			for (Iterator i = connections.iterator (); i.hasNext (); index++)
 			{
@@ -2495,7 +2531,7 @@ public class SqlLine
 				}
 
 				output (pad (" #" + index + "", 5).getMono ()
-					+ pad (closed ? "closed" : "open", 9).getMono ()
+					+ pad (closed ? loc ("closed") : loc ("open"), 9).getMono ()
 					+ c.url);
 			}
 		}
@@ -2508,7 +2544,7 @@ public class SqlLine
 			for (int i = 0; i < connections.size (); i++)
 			{
 				connections.setIndex (i);
-				output ("Executing SQL against: " + con ());
+				output (loc ("executing-con", con ()));
 				sql (line.substring ("all ".length ()));
 			}
 
@@ -2675,8 +2711,7 @@ public class SqlLine
 			if (cmd.length () == 0)
 			{
 				output ("");
-				output ("Comments, bug reports, and patches go to "
-					+ APP_AUTHOR_EMAIL);
+				output (loc ("comments", APP_AUTHOR_EMAIL));
 			}
 		}
 	}
