@@ -1,12 +1,6 @@
 <!DOCTYPE book
   PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-  "docbook/docbookx.dtd">
-
-<!--
-<!DOCTYPE book
-  PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-  "http://www.docbook.org/xml/4.1.2/docbookx.dtd">
--->
+  "http://www.docbook.org/xml/4.2/docbookx.dtd">
 <book>
 	<bookinfo>
 		<title>
@@ -49,7 +43,7 @@
 			<para>
 				For information on obtaining the software under another
 				license, contact the copyright holder:
-				<ulink url="mailto:marc@apocalypse.org">marc@apocalypse.org</ulink>.
+				<ulink url="mailto:mwp1@cornell.edu">mwp1@cornell.edu</ulink>.
 			</para>
 		</chapter>
 
@@ -141,6 +135,7 @@
 					<arg choice="req">-Djava.ext.dirs=<replaceable>sqllinedir</replaceable></arg>
 					<arg choice="req"><replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
 					<arg rep="repeat" choice="opt"><replaceable>options</replaceable></arg>
+					<arg rep="repeat" choice="opt"><replaceable>properties files</replaceable></arg>
 					</cmdsynopsis>
 
 				For example, if your <filename>sqllinedir</filename> is
@@ -193,6 +188,16 @@ Autocommit status: true
 				Once you are connected, the prompt will change the
 				reflect URL of the current connection.
 				</para>
+				<para>
+				SQLLine can also accept command line options to connect
+				to a database. If a file is specified on the command
+				line, it will be treated as a properties file, and
+				try to connect to the database specified therein.
+				For details, see the
+				<link linkend="sect_command_properties"
+				>properties command</link> documentation.
+				</para>
+				
 				<para>
 				SQLLine allows you to have multiple connections to databases
 				(either the same database, or a different database) open
@@ -1099,45 +1104,46 @@ Really drop every table in the database? (y/n) y
 					<screen>
 sqlline> !help
 
-!all                Execute the specified SQL against all the current connections
-!autocommit         Set autocommit mode on or off
-!batch              Start or execute a batch of statements
-!brief              Set verbose mode off
-!close              Close the current connection to the database
-!columns            List all the columns for the specified table
-!commit             Commit the current transaction (if autocommit is off)
-!connect            Open a new connection to the database.
-!dbinfo             Give metadata information about the database
-!describe           Describe a table
-!dropall            Drop all tables in the current database
-!exportedkeys       List all the exported keys for the specified table
-!go                 Select the current connection
-!help               Print a summary of command usage
-!history            Display the command history
-!importedkeys       List all the imported keys for the specified table
-!indexes            List all the indexes for the specified table
-!isolation          Set the transaction isolation for this connection
-!list               List the current connections
-!metadata           Obtain metadata information
-!outputformat       Set the output format for displaying results
-                    (table,vertical,csv,tsv,xmlattrs,xmlelements)
-!primarykeys        List all the primary keys for the specified table
-!procedures         List all the procedures
-!quit               Exits the program
-!reconnect          Reconnect to the database
-!record             Record all output to the specified file
-!rehash             Fetch table and column names for command completion
-!rollback           Roll back the current transaction (if autocommit is off)
-!run                Run a script from the specified file
-!save               Save the current variabes and aliases
-!scan               Scan for installed JDBC drivers
-!script             Start saving a script to a file
-!set                Set a sqlline variable
-!sql                Execute a SQL command
-!tables             List all the tables in the database
-!verbose            Set verbose mode on
+!all              Execute the specified SQL against all the current connections
+!autocommit       Set autocommit mode on or off
+!batch            Start or execute a batch of statements
+!brief            Set verbose mode off
+!close            Close the current connection to the database
+!columns          List all the columns for the specified table
+!commit           Commit the current transaction (if autocommit is off)
+!connect          Open a new connection to the database.
+!dbinfo           Give metadata information about the database
+!describe         Describe a table
+!dropall          Drop all tables in the current database
+!exportedkeys     List all the exported keys for the specified table
+!go               Select the current connection
+!help             Print a summary of command usage
+!history          Display the command history
+!importedkeys     List all the imported keys for the specified table
+!indexes          List all the indexes for the specified table
+!isolation        Set the transaction isolation for this connection
+!list             List the current connections
+!metadata         Obtain metadata information
+!outputformat     Set the output format for displaying results
+                  (table,vertical,csv,tsv,xmlattrs,xmlelements)
+!properties       Connect to the database specified in the properties file(s)
+!primarykeys      List all the primary keys for the specified table
+!procedures       List all the procedures
+!quit             Exits the program
+!reconnect        Reconnect to the database
+!record           Record all output to the specified file
+!rehash           Fetch table and column names for command completion
+!rollback         Roll back the current transaction (if autocommit is off)
+!run              Run a script from the specified file
+!save             Save the current variabes and aliases
+!scan             Scan for installed JDBC drivers
+!script           Start saving a script to a file
+!set              Set a sqlline variable
+!sql              Execute a SQL command
+!tables           List all the tables in the database
+!verbose          Set verbose mode on
 
-Comments, bug reports, and patches go to marc@apocalypse.org
+Comments, bug reports, and patches go to mwp1@cornell.edu
 
 sqlline> 
 
@@ -1684,6 +1690,88 @@ NAME        Microsoft
 +----------------+------------------+------------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+					</screen>
+					</refsect1>
+			</refentry>
+			</section>
+
+
+			<section id="sect_command_properties">
+			<title>properties</title>
+			<refentry id="command_properties">
+				<refmeta>
+				<refentrytitle>properties</refentrytitle>
+				<manvolnum>1</manvolnum>
+				</refmeta>
+
+
+				<refnamediv>
+					<refname>properties</refname>
+					<refpurpose>
+					Connect to the database defined in the
+					specified properties file.
+					</refpurpose>
+				</refnamediv>
+
+				<refsynopsisdiv>
+					<cmdsynopsis>
+					<command>!properties</command>
+					<arg choice="req"><replaceable>file</replaceable></arg>
+					</cmdsynopsis>
+				</refsynopsisdiv>
+					<refsect1>
+					<title>Description</title>
+					<para>
+					Connect to the database defined in the
+					specified properties file. The properties file is
+					expected to have the following values:
+					<itemizedlist>
+						<listitem><para>
+							url: the database URL to which to connect
+						</para></listitem>
+						<listitem><para>
+							driver: the driver class that handles the URL. If
+								unspecifed, SQLLine with automatically
+								scan the CLASSPATH for an appropriate driver
+						</para></listitem>
+						<listitem><para>
+							user: the username to use to connect to the
+								database. If unspecified, SQLLine will 
+								prompt for it.
+						</para></listitem>
+						<listitem><para>
+							password: the password to use to connect to the
+								database. If unspecified, SQLLine will 
+								prompt for it.
+						</para></listitem>
+					</itemizedlist>
+					</para>
+					<para>
+						The key names in the properties file can also
+						use JDO semantics for the properties. These
+						properties are 
+						"javax.jdo.option.ConnectionURL",
+						"javax.jdo.option.ConnectionDriverName",
+						"javax.jdo.option.ConnectionUserName",
+						and
+						"javax.jdo.option.ConnectionPassword".
+					</para>
+				</refsect1>
+				<refsect1>
+					<title>Example of "properties" command</title>
+					<screen>
+sqlline> !properties test.properties 
+
+Connecting to jdbc:mysql://localhost/mydb
+
+Enter password for jdbc:mysql://localhost/mydb: *****
+
+Connected to: MySQL (version 3.23.52-log)
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2003/11/19 23:58:04 $, $Revision: 1.4 $ ))
+Autocommit status: true
+Transaction isolation: TRANSACTION_READ_COMMITTED
+
+0: jdbc:mysql://localhost/mydb> 
 					</screen>
 					</refsect1>
 			</refentry>

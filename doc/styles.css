@@ -1,13 +1,64 @@
 body  
 {
-	/* background-color: #F1F1F1; */
+	background-color: #F1F1F1;
 	color: #000000;
-	font-family: verdana,arial,helvetica,sans-serif;
-	/* font-size: 14; */
+	font-family: helvetica,sans-serif;
+	font-size: 13;
 	margin-left: 8%;
 	margin-right: 4%;
 }
 
+
+.title { 
+	font-size: small;
+	background-color: #CCCCCC;
+	border-style: inset;
+	color: #163433;
+	padding: 3px;
+}
+
+
+pre.programlisting {
+	border: thin solid gray;
+	font-family: monospace;
+	background-color: #E0E0E0;
+	border: thin solid gray;
+	font-size: 11px;
+	padding: 10px;
+	margin-left: 10%;
+	margin-right: 10%;
+}
+
+pre.screen {
+	border: thin solid gray;
+	font-family: monospace;
+	background-color: #E0E0E0;
+	border: thin solid gray;
+	font-size: 11px;
+	padding: 10px;
+}
+
+
+div.note {
+	border: 1px solid green;
+}
+
+div.important {
+	color: red;
+	border: 1px solid red;
+}
+
+div.warning {
+	color: red;
+	border: 2px solid red;
+}
+
+div.caution {
+	color: #1111BB;
+	border: 1px solid #1111BB;
+}
+
+/*
 hr
 {
 	margin-left: -4%;
@@ -15,9 +66,8 @@ hr
 
 a:link        
 {
-	/* color: blue; */
-	color: #511112;
-	/* text-decoration: none; */
+	color: blue;
+	text-decoration: none;
 }
 
 a:visited     
@@ -39,45 +89,31 @@ a:hover
 }
 
 pre.programlisting {
+	border: thin solid gray;
 	font-family: monospace;
 	background-color: #E0E0E0;
 	border: thin solid gray;
-	/* width: 80%; */
-	/* margin-left: 10%; */
-	font-size: 12;
-	padding: 10px;
-}
-
-pre.screen {
-	font-family: monospace;
-	background-color: #E0E0E0;
-	border: thin solid gray;
-	/* width: 80%; */
-	/* margin-left: 10%; */
-	font-size: 12;
+	font-size: 11px;
 	padding: 10px;
 }
 
 div.note {
 	border: 1px solid green;
-	text-align: center:
 }
 
 div.important {
 	color: red;
 	border: 1px solid red;
-	text-align: center:
 }
 
 div.warning {
 	color: red;
 	border: 2px solid red;
-	text-align: center:
 }
 
 div.caution {
+	color: #1111BB;
 	border: 1px solid #1111BB;
-	text-align: center:
 }
 
 div.table
@@ -90,14 +126,15 @@ div.table
 	margin-bottom: 5px;
 }
 
+table
+{
+	width: 100%;
+}
+
 h1	{
 	font-family: verdana,arial,helvetica,sans-serif;
 	font-size: 24px;
 	margin-left: -4%;
-}
-
-pre.programlisting {
-	border: thin solid gray;
 }
 
 h2	{
@@ -110,18 +147,14 @@ h2.appendix	{
 	font-size: 24px;
 	margin-left: -4%;
 	color: gray;
-	text-align: center:
+	text-align: center;
 }
 
 .title { 
 	font-family: Arial, Helvetica, sans-serif;
 	font-variant: small-caps;
-	color: #511111;
+	color: #330099;
 	text-align: center;
-}
-
-h2.title { 
-	border: thin solid gray;
 }
 
 .author	{
@@ -147,4 +180,4 @@ div.chapter-divider
 	font-family: verdana,arial,helvetica,sans-serif;
 	font-size: 9px;
 }
-
+*/

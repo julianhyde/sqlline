@@ -158,6 +158,8 @@ public class SqlLine
 			null),
 		new ReflectiveCommandHandler (new String [] { "commit" },
 			null),
+		new ReflectiveCommandHandler (new String [] { "properties" },
+			new Completor [] { new FileNameCompletor ()}),
 		new ReflectiveCommandHandler (new String [] { "rollback" },
 			null),
 		new ReflectiveCommandHandler (new String [] { "help", "?" },
@@ -416,6 +418,11 @@ public class SqlLine
 	{
 		SqlLine sqlline = new SqlLine ();
 		sqlline.begin (args);
+
+		// exit the system: useful for Hypersonic and other
+		// badly-behaving systems
+		if (!Boolean.getBoolean ("sqlline.system.exit"))
+			System.exit (0);
 	}
 
 
@@ -616,6 +623,7 @@ public class SqlLine
 	boolean initArgs (String [] args)
 	{
 		List commands = new LinkedList ();
+		List files = new LinkedList ();
 		String driver = null, user = null, pass = null, url = null, cmd = null;
 
 		for (int i = 0; i < args.length; i++)
@@ -648,9 +656,6 @@ public class SqlLine
 				continue;
 			}
 
-			if (i + 1 >= args.length)
-				continue;
-
 			if (args [i].equals ("-d"))
 				driver = args [i++ + 1];
 			else if (args [i].equals ("-n"))
@@ -661,18 +666,25 @@ public class SqlLine
 				url = args [i++ + 1];
 			else if (args [i].equals ("-e"))
 				commands.add (args [i++ + 1]);
+			else
+				files.add (args [i]);
 		}
 
-		if (user != null && pass != null && url != null)
+		if (url != null)
 		{
 			String com = "!connect "
 				+ url + " "
-				+ (user.length () == 0 ? "''" : user) + " "
-				+ (pass.length () == 0 ? "''" : pass) + " "
+				+ (user == null || user.length () == 0 ? "''" : user) + " "
+				+ (pass == null || pass.length () == 0 ? "''" : pass) + " "
 				+ (driver == null ? "" : driver);
 			debug ("issuing: " + com);
 			dispatch (com);
 		}
+
+		// now load properties files
+		for (Iterator i = files.iterator (); i.hasNext (); )
+			dispatch ("!properties " + i.next ());
+
 
 		if (commands.size () > 0)
 		{
@@ -702,6 +714,15 @@ public class SqlLine
 	void begin (String [] args)
 		throws IOException
 	{
+		try
+		{
+			// load the options first, so we can override on the command line
+			opts.load ();
+		}
+		catch (Exception e)
+		{
+		}
+
 		ConsoleReader reader = getConsoleReader ();
 		if (!(initArgs (args)))
 		{
@@ -712,7 +733,6 @@ public class SqlLine
 		try
 		{
 			info (getApplicationTitle ());
-			opts.load ();
 		}
 		catch (Exception e)
 		{
@@ -1091,6 +1111,7 @@ public class SqlLine
 		if (url.length () > 45)
 			url = url.substring (0, 45);
 
+
 		return url;
 	}
 
@@ -1447,8 +1468,112 @@ public class SqlLine
 	}
 
 
-	Driver [] scanDrivers (String line)
+	private boolean scanForDriver (String url)
 	{
+		try
+		{
+			// already registered
+			if (findRegisteredDriver (url) != null)
+				return true;
+
+			// first try known drivers...
+			scanDrivers (true);
+
+			if (findRegisteredDriver (url) != null)
+				return true;
+
+			// now really scan...
+			scanDrivers (false);
+
+			if (findRegisteredDriver (url) != null)
+				return true;
+
+			return false;
+		}
+		catch (Exception e)
+		{
+			debug (e.toString ());
+			return false;
+		}
+	}
+
+
+	private Driver findRegisteredDriver (String url)
+	{
+		for (Enumeration drivers = DriverManager.getDrivers ();
+			drivers != null && drivers.hasMoreElements (); )
+		{
+			Driver driver = (Driver)drivers.nextElement ();
+			try
+			{
+				if (driver.acceptsURL (url))
+					return driver;
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		return null;
+	}
+
+
+	Driver [] scanDrivers (String line)
+		throws IOException
+	{
+		return scanDrivers (false);
+	}
+
+
+	Driver [] scanDrivers (boolean knownOnly)
+		throws IOException
+	{
+		long start = System.currentTimeMillis ();
+
+		Set classNames = new HashSet ();
+		
+		if (!knownOnly)
+			classNames.addAll (Arrays.asList (
+				ClassNameCompletor.getClassNames ()));
+
+		classNames.addAll (KNOWN_DRIVERS);
+
+		Set driverClasses = new HashSet ();
+
+		for (Iterator i = classNames.iterator (); i.hasNext (); )
+		{
+			String className = i.next ().toString ();
+
+			if (className.toLowerCase ().indexOf ("driver") == -1)
+				continue;
+
+			try
+			{
+				Class c = Class.forName (className, false,
+					Thread.currentThread ().getContextClassLoader ());
+				if (!Driver.class.isAssignableFrom (c))
+					continue;
+
+				if (Modifier.isAbstract (c.getModifiers ()))
+					continue;
+
+				// now instantiate and initialize it
+				driverClasses.add (c.newInstance ());
+			}
+			catch (Throwable t)
+			{
+			}
+		}
+		info ("scan complete in "
+			+ (System.currentTimeMillis () - start) + "ms");
+		return (Driver [])driverClasses.toArray (new Driver [0]);
+	}
+
+
+	Driver [] scanDriversOLD (String line)
+	{
+		long start = System.currentTimeMillis ();
+
 		Set paths = new HashSet ();
 		Set driverClasses = new HashSet ();
 
@@ -1529,6 +1654,8 @@ public class SqlLine
 			catch (Exception e) { }
 		}
 
+		info ("scan complete in "
+			+ (System.currentTimeMillis () - start) + "ms");
 		return (Driver [])driverClasses.toArray (new Driver [0]);
 	}
 
@@ -2794,13 +2921,14 @@ public class SqlLine
 
 
 		public boolean scan (String line)
+			throws IOException
 		{
 			TreeSet names = new TreeSet ();
 
 			if (drivers == null)
 				drivers = Arrays.asList (scanDrivers (line));
 
-			info (loc ("divers-found-count", drivers.size ()));
+			info (loc ("drivers-found-count", drivers.size ()));
 
 			// unique the list
 			for (Iterator i = drivers.iterator (); i.hasNext (); )
@@ -3369,6 +3497,33 @@ public class SqlLine
 			connections.remove ();
 			return true;
 		}
+
+
+		public boolean properties (String line)
+			throws Exception
+		{
+			String example = "";
+			example += "Usage: properties <properties file>" + sep;
+	
+			String [] parts = split (line);
+			if (parts.length < 2)
+				return error (example);
+	
+			int successes = 0;
+
+			for (int i = 1; i < parts.length; i++)
+			{
+				Properties props = new Properties ();
+				props.load (new FileInputStream (parts[i]));
+				if (connect (props))
+					successes++;
+			}
+
+			if (successes != (parts.length - 1))
+				return false;
+			else
+				return true;
+		}
 	
 	
 		public boolean connect (String line)
@@ -3395,18 +3550,60 @@ public class SqlLine
 			*/
 
 
-			String url = parts.length < 2 ? "" : parts [1];
-			String user = parts.length < 3 ? "" : parts [2];
-			String pass = parts.length < 4 ? "" : parts [3];
-			String driver = parts.length < 5 ? "" : parts [4];
+			String url = parts.length < 2 ? null : parts [1];
+			String user = parts.length < 3 ? null : parts [2];
+			String pass = parts.length < 4 ? null : parts [3];
+			String driver = parts.length < 5 ? null : parts [4];
 	
+			Properties props = new Properties ();
+			if (url != null)
+				props.setProperty ("url", url);
+			if (driver != null)
+				props.setProperty ("driver", driver);
+			if (user != null)
+				props.setProperty ("user", user);
+			if (pass != null)
+				props.setProperty ("password", pass);
+
+			return connect (props);
+		}
+
+
+		public boolean connect (Properties props)
+			throws IOException
+		{
+			String url = props.getProperty ("url",
+				props.getProperty ("javax.jdo.option.ConnectionURL"));
+			String driver = props.getProperty ("driver",
+				props.getProperty ("javax.jdo.option.ConnectionDriverName"));
+			String username = props.getProperty ("user",
+				props.getProperty ("javax.jdo.option.ConnectionUserName"));
+			String password = props.getProperty ("password",
+				props.getProperty ("javax.jdo.option.ConnectionPassword"));
+
+			if (url == null || url.length () == 0)
+				return error ("Property \"url\" is required");
+			if (driver == null || driver.length () == 0)
+			{
+				if (!scanForDriver (url))
+					return error (loc ("no-driver", url));
+			}
+
+			info ("Connecting to " + url);
+
+			if (username == null)
+				username = reader.readLine ("Enter username for " + url + ": ");
+			if (password == null)
+				password = reader.readLine ("Enter password for " + url + ": ",
+					new Character ('*'));
+
 			try
 			{
 				// clear old completions
 				completions.clear ();
 	
 				connections.setConnection (
-					new DatabaseConnection (driver, url, user, pass));
+					new DatabaseConnection (driver, url, username, password));
 				con ().getConnection ();
 	
 				setCompletions ();
