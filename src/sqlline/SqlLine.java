@@ -3894,10 +3894,14 @@ public class SqlLine
 				new ArgumentCompletor.AbstractArgumentDelimiter ()
 				{
 					// deleimiters for SQL statements are any
-					// non-letter-or-number characters
+					// non-letter-or-number characters, except
+					// underscore and dollar.
 					public boolean isDelimiterChar (String buf, int pos)
 					{
-						return !(Character.isLetterOrDigit (buf.charAt (pos)));
+						char c = buf.charAt (pos);
+						return !(Character.isLetterOrDigit (c))
+							&& c != '_'
+							&& c != '$';
 					}
 				});
 
