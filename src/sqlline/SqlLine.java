@@ -3904,6 +3904,9 @@ public class SqlLine
 					public boolean isDelimiterChar (String buf, int pos)
 					{
 						char c = buf.charAt (pos);
+						if (Character.isWhitespace (c))
+							return true;
+
 						return !(Character.isLetterOrDigit (c))
 							&& c != '_'
 							&& extraNameCharacters.indexOf (c) == -1;
