@@ -2396,6 +2396,8 @@ public class SqlLine
 
 		private Row nextRow;
 
+		private boolean endOfResult;
+
 		private boolean normalizingWidths;
 		
 
@@ -2420,46 +2422,53 @@ public class SqlLine
 			}
 			
 			nextRow = labelRow;
+			endOfResult = false;
 		}
 
 		
 		public boolean hasNext ()
 		{
+			if (endOfResult)
+			{
+				return false;
+			}
+			
+			if (nextRow == null)
+			{
+				try {
+					if (rs.next ())
+					{
+						nextRow = new Row (labelRow.sizes.length, rs);
+
+						if (normalizingWidths)
+						{
+							// perform incremental normalization
+							nextRow.sizes = labelRow.sizes;
+						}
+					}
+					else
+					{
+						endOfResult = true;
+					}
+				} catch (SQLException ex) {
+					throw new RuntimeException (ex);
+				}
+			}
+			
 			return (nextRow != null);
 		}
-
 
 		public Object next ()
 		{
 			if (!hasNext ())
 			{
-				throw new NoSuchElementException();
+				throw new NoSuchElementException ();
 			}
 
 			Object ret = nextRow;
-
-			try {
-				if (rs.next ())
-				{
-					nextRow = new Row (labelRow.sizes.length, rs);
-
-					if (normalizingWidths)
-					{
-						// perform incremental normalization
-						nextRow.sizes = labelRow.sizes;
-					}
-				}
-				else
-				{
-					nextRow = null;
-				}
-			} catch (SQLException ex) {
-				throw new RuntimeException(ex);
-			}
-
+			nextRow = null;
 			return ret;
 		}
-
 		
 		void normalizeWidths ()
 		{
