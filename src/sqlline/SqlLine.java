@@ -31,6 +31,7 @@ import java.lang.reflect.*;
 import java.util.zip.*;
 import java.util.jar.*;
 
+
 /** 
  *  A console SQL shell with command completion.
  *  <p>
@@ -80,8 +81,6 @@ public class SqlLine
 	private ConsoleReader reader;
 	private List batch = null;
 
-	private SqlLineSignalHandler signalHandler = null;
-	
 
 	private final Map formats = map (new Object [] {
 		"vertical",			new VerticalOutputFormat (),
@@ -457,19 +456,6 @@ public class SqlLine
 		// registerKnownDrivers ();
 
 		sqlLineCommandCompletor = new SQLLineCommandCompletor ();
-
-		// attempt to dynamically load signal handler
-		try
-		{
-			Class handlerClass =
-				Class.forName ("sqlline.SunSignalHandler");
-			signalHandler = (SqlLineSignalHandler)
-				handlerClass.newInstance ();
-		}
-		catch (Throwable t)
-		{
-			// ignore and leave cancel functionality disabled
-		}
 	}
 
 
@@ -1569,6 +1555,11 @@ public class SqlLine
 
 		if (opts.getVerbose ())
 			e.printStackTrace ();
+
+		for (SQLException nested = e.getNextException ();
+			nested != null && nested != e;
+			nested = nested.getNextException ())
+			handleSQLException (nested);
 	}
 
 
@@ -1786,13 +1777,9 @@ public class SqlLine
 		Rows rows;
 
 		if (opts.getIncremental ())
-		{
 			rows = new IncrementalRows (rs);
-		}
 		else
-		{
 			rows = new BufferedRows (rs);
-		}
 
 		return f.print (rows);
 	}
@@ -1800,7 +1787,7 @@ public class SqlLine
 
 	interface OutputFormat
 	{
-		int print (Rows rows);
+		int print (SqlLine.Rows rows);
 	}
 
 
@@ -2132,8 +2119,6 @@ public class SqlLine
 		Statement stmnt = con ().connection.createStatement ();
 		if (opts.timeout > -1)
 			stmnt.setQueryTimeout (opts.timeout);
-		if (signalHandler != null)
-			signalHandler.setStmt (stmnt);
 		return stmnt;
 	}
 
@@ -2205,7 +2190,8 @@ public class SqlLine
 	/**
 	 *  Abstract base class representing a set of rows to be displayed.
 	 */
-	abstract class Rows implements Iterator
+	abstract class Rows
+		implements Iterator
 	{
 		final ResultSetMetaData rsMeta;
 		final Boolean [] primaryKeys;
@@ -2410,15 +2396,10 @@ public class SqlLine
 		extends Rows
 	{
 		private final ResultSet rs;
-
 		private Row labelRow;
-
 		private Row maxRow;
-
 		private Row nextRow;
-
 		private boolean endOfResult;
-
 		private boolean normalizingWidths;
 		
 
@@ -2472,7 +2453,7 @@ public class SqlLine
 						endOfResult = true;
 					}
 				} catch (SQLException ex) {
-					throw new RuntimeException (ex);
+					throw new RuntimeException (ex.toString ());
 				}
 			}
 			
@@ -2487,8 +2468,30 @@ public class SqlLine
 			}
 
 			Object ret = nextRow;
-			nextRow = null;
-			return ret;
+
+			try
+			{
+				if (rs.next ())
+				{
+					nextRow = new Row (labelRow.sizes.length, rs);
+
+					if (normalizingWidths)
+					{
+						// perform incremental normalization
+						nextRow.sizes = labelRow.sizes;
+					}
+				}
+				else
+				{
+					nextRow = null;
+				}
+
+				return ret;
+			}
+			catch (SQLException e)
+			{
+				throw new NoSuchElementException (e.toString ());
+			}
 		}
 		
 		void normalizeWidths ()
@@ -3922,17 +3925,54 @@ public class SqlLine
 		}
 
 
+		private String getProperty (Properties props, String[] keys)
+		{
+			for (int i = 0; i < keys.length; i++)
+			{
+				String val = props.getProperty (keys[i]);
+				if (val != null)
+					return val;
+			}
+
+			for (Iterator i = props.keySet ().iterator (); i.hasNext (); )
+			{
+				String key = (String)i.next ();
+				for (int j = 0; j < keys.length; j++)
+				{
+					if (key.endsWith (keys[j]))
+					{
+						return props.getProperty (key);
+					}
+				}
+			}
+
+			return null;
+		}
+
+
 		public boolean connect (Properties props)
 			throws IOException
 		{
-			String url = props.getProperty ("url",
-				props.getProperty ("javax.jdo.option.ConnectionURL"));
-			String driver = props.getProperty ("driver",
-				props.getProperty ("javax.jdo.option.ConnectionDriverName"));
-			String username = props.getProperty ("user",
-				props.getProperty ("javax.jdo.option.ConnectionUserName"));
-			String password = props.getProperty ("password",
-				props.getProperty ("javax.jdo.option.ConnectionPassword"));
+			String url = getProperty (props, new String[] {
+				"url",
+				"javax.jdo.option.ConnectionURL",
+				"ConnectionURL",
+				});
+			String driver = getProperty (props, new String[] {
+				"driver",
+				"javax.jdo.option.ConnectionDriverName",
+				"ConnectionDriverName",
+				});
+			String username = getProperty (props, new String[] {
+				"user",
+				"javax.jdo.option.ConnectionUserName",
+				"ConnectionUserName",
+				});
+			String password = getProperty (props, new String[] {
+				"password",
+				"javax.jdo.option.ConnectionPassword",
+				"ConnectionPassword",
+				});
 
 			if (url == null || url.length () == 0)
 				return error ("Property \"url\" is required");
@@ -4500,10 +4540,10 @@ public class SqlLine
 		private final List connections = new ArrayList ();
 		private int index = -1;
 
-		public DatabaseConnection current ()
+		public SqlLine.DatabaseConnection current ()
 		{
 			if (index != -1)
-				return (DatabaseConnection)connections.get (index);
+				return (SqlLine.DatabaseConnection)connections.get (index);
 
 			return null;
 		}
@@ -4533,13 +4573,13 @@ public class SqlLine
 		}
 
 
-		public void addConnection (DatabaseConnection connection)
+		public void addConnection (SqlLine.DatabaseConnection connection)
 		{
 			connections.add (connection);
 		}
 
 
-		public void setConnection (DatabaseConnection connection)
+		public void setConnection (SqlLine.DatabaseConnection connection)
 		{
 			if (connections.indexOf (connection) == -1)
 				connections.add (connection);
@@ -4598,7 +4638,7 @@ public class SqlLine
 			throws SQLException, IOException
 		{
 			final String extraNameCharacters =
-				meta.getExtraNameCharacters () == null ? ""
+				meta == null || meta.getExtraNameCharacters () == null ? ""
 					: meta.getExtraNameCharacters ();
 
 			// setup the completor for the database

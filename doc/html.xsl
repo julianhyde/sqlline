@@ -1,7 +1,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	version='1.0'>
+
 	<xsl:import
 	href="http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl"/>
+	<!--
+	<xsl:import
+	href="file:///Users/mprudhom/cvs/31/solarmetric/doc/styles/docbook/docbook-xsl/html/docbook.xsl"/>
+	-->
 
 	<xsl:param name="html.stylesheet">styles.css</xsl:param>
 	<xsl:param name="html.cleanup" select="1"/>

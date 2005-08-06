@@ -1,3 +1,8 @@
+<!--
+	This is a generic build file. Any changes made to this file will
+	also be made to all other projects that link to this file, so
+	be very cautious when adding in new pieces.
+-->
 <project name="project" default="all" basedir="."> 
 	<!-- properties that are to be customized on a per-project basis -->
 	<property file="${basedir}/project.properties"/>
@@ -15,6 +20,8 @@
 	<property name="reports" value="${basedir}/reports"/>
 	<property name="release" value="${basedir}/release"/>
 
+	<property name="javac.source" value="1.3"/>
+
 
 	<property name="package.root" value="${name}"/>
 	<property name="packages" value="${package.root}"/>
@@ -29,7 +36,7 @@
 	<property name="javadoc.title"
 		value="API Documentation - ${title}"/>
 	<property name="javadoc.copyright"
-		value="Released under the terms of the GNU &lt;a href=&quot;http://www.gnu.org/copyleft/lesser.txt&quot;>LGPL&lt;/a>"/>
+		value="Released under the terms of the ${software.license} license"/>
 
 	<property name="sourcedirs" value="${src}:${test}"/>
 
@@ -66,8 +73,10 @@
 	</target>
 
 	<!-- perform the complete sourceforge release tasks -->
-	<target name="release"
-		depends="init,release.files,release.sign,release.tag,release.upload"/>
+	<target name="release" depends="init,release.files,release.sign"/>
+
+	<target name="release.complete"
+		depends="release,release.tag,release.upload"/>
 
 	<target name="init">
 		<!-- check for project.properties -->
@@ -90,8 +99,6 @@
 		<fail unless="version.minor">"version.minor" undefined</fail>
 		<fail unless="version.patch">"version.patch" undefined</fail>
 		<fail unless="software.license">"software.license" undefined</fail>
-		<fail unless="software.main.class">"software.main.class" undefined</fail>
-		<fail unless="software.class.path">"software.class.path" undefined</fail>
 
 
 		<mkdir dir="${reports}" />
@@ -106,6 +113,7 @@
 
 	<target name="build" depends="init">
 		<javac listfiles="yes" srcdir="${sourcedirs}" 
+			source="${javac.source}"
 			debug="on" 
 			destdir="${build}"
 			fork="no">
@@ -168,25 +176,56 @@
 				excludes="**/CVS/*,**/.DS_Store"/>
 			<zipfileset prefix="${srcprefix}/src" dir="${src}"
 				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
+			<zipfileset prefix="${srcprefix}/native" dir="${native}"
+				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
 			<zipfileset prefix="${srcprefix}/test" dir="${test}"
 				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
 			<zipfileset prefix="${srcprefix}" dir="${basedir}"
-				includes="CHANGELOG,AUTHORS,LICENSE,build.xml"/>
+				includes="CHANGELOG,AUTHORS,LICENSE,build.xml,project.properties"/>
 		</zip>
 	</target>
 
+	<target name="release.jnlp" if="release.jnlp.include">
+		<echo>Building jnlp properties</echo>
+
+		<fail unless="software.main.class">"software.main.class" undefined</fail>
+		<fail unless="software.class.path">"software.class.path" undefined</fail>
+
+		<echo append="false" file="${release}/${name}.jnlp"
+		><![CDATA[<?xml version="1.0+" encoding="utf-8"?>
+<jnlp spec="1.0"
+      codebase="http://${sf.project.webserver}" href="${name}.jnlp">
+   <information>
+      <title>${software.name}</title>
+      <vendor>${author.mail}</vendor>
+      <homepage href="http://${sf.project.webserver}"/>
+      <description>${software.description}</description>
+      <icon href="${name}.png"/>
+      <offline-allowed/>
+   </information>
+    <security>
+        <all-permissions/>
+    </security>
+   <resources>
+      <j2se version="1.4+"/>
+      <jar href="${jarname}" main="true" download="eager"/>
+   </resources>
+   <application-desc main-class="${software.main.class}"/>
+</jnlp>
+		]]></echo>
+	</target>
 
 	<target name="release.upload" depends="release.files"
 		unless="release.upload.skip">
 		<!-- upload the release files -->
 		<echo>Uploading files to FTP server...</echo>
+        <ftp server="${sf.ftp.server}"
+            userid="${sf.ftp.user}"
+            password="${sf.user.mail}"
+            remotedir="${sf.ftp.dir}">
+            <fileset dir="${release}"/>
+        </ftp>
 
-		<ftp server="${sf.ftp.server}"
-			userid="${sf.ftp.user}"
-			password="${sf.user.mail}"
-			remotedir="${sf.ftp.dir}">
-			<fileset dir="${release}"/>
-		</ftp>
 
 		<!-- upload the documentation to the core web site -->
 		<echo>Copying documentation files to web site via scp...</echo>
@@ -219,6 +258,7 @@
 
 	<target name="jars.init" depends="init">
 		<tstamp/>
+		<delete dir="${relbuild}"/>
 	</target>
 
 	<target name="jars.native" depends="init" unless="jars.native.skip">
@@ -233,9 +273,9 @@
 
 
 	<target name="jars.core.build" depends="jars.init" unless="jars.core.skip">
-		<delete dir="${relbuild}"/>
 		<mkdir dir="${relbuild}"/>
 		<javac listfiles="yes" srcdir="${src}" debug="off" 
+			source="${javac.source}"
 			destdir="${relbuild}" fork="no">
 			<include name="**/*.java"/>
 		</javac>
@@ -243,9 +283,26 @@
 			<fileset dir="${src}">
 				<include name="**/*.properties"/>
 				<include name="**/*.gz"/>
+				<include name="**/*.gif"/>
+				<include name="**/*.png"/>
+				<include name="**/*.jpg"/>
 			</fileset>
 		</copy>
+
+
+		<!-- now extract all the jars we want to include in the release build-->
+		<unzip dest="${relbuild}">
+			<fileset dir="${basedir}/lib-release">
+				<include name="**/*.jar"/>
+				<include name="**/*.zip"/>
+			</fileset>
+		</unzip>
+
+		<fail unless="software.main.class">"software.main.class" undefined</fail>
+		<fail unless="software.class.path">"software.class.path" undefined</fail>
+
 		<jar jarfile="${jarfile}" basedir="${relbuild}" update="no">
+
 			<manifest>
 				<attribute name="Main-Class" value="${software.main.class}"/>
 				<attribute name="Class-Path" value="${software.class.path}"/>
@@ -280,6 +337,7 @@
 		<delete dir="${relbuild}"/>
 		<mkdir dir="${relbuild}"/>
 		<javac listfiles="yes" srcdir="${test}" debug="off" 
+			source="${javac.source}"
 			destdir="${relbuild}" fork="no" classpath="${jarfile}">
 			<include name="**/*.java"/>
 		</javac>
@@ -287,6 +345,9 @@
 			<fileset dir="${test}">
 				<include name="**/*.properties"/>
 				<include name="**/*.gz"/>
+				<include name="**/*.gif"/>
+				<include name="**/*.png"/>
+				<include name="**/*.jpg"/>
 			</fileset>
 		</copy>
 
