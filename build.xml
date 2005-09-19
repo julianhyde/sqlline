@@ -42,7 +42,7 @@
 
 	<property name="srcprefix" value="${name}-${version.name}"/>
 
-	<property name="jarname" value="${name}.jar"/>
+	<property name="jarname" value="${name}-${version.name}.jar"/>
 	<property name="jarfile" value="${release}/${jarname}"/>
 
 	<property name="srcjarname" value="${name}-src-${version.name}.jar"/>
