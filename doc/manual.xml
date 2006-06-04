@@ -1773,7 +1773,7 @@ Connecting to jdbc:mysql://localhost/mydb
 Enter password for jdbc:mysql://localhost/mydb: *****
 
 Connected to: MySQL (version 3.23.52-log)
-Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2005/09/19 19:17:14 $, $Revision: 1.9 $ ))
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2006/06/04 03:32:42 $, $Revision: 1.10 $ ))
 Autocommit status: true
 Transaction isolation: TRANSACTION_READ_COMMITTED
 
@@ -2648,6 +2648,19 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					current width, falls back to 80.
 				</para>
 			</sect1>
+			<sect1 id="setting_numberformat">
+				<title>numberformat</title>
+				<para>
+					The format for how numeric values are displayed. Setting
+					to <literal>default</literal> causes numeric
+					values to be fetched and rendered via ResultSet.getString.
+					Any other setting results in fetch via ResultSet.getObject
+					and rendering via <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/DecimalFormat.html">
+					java.text.DecimalFormat</ulink>.  For example,
+					the setting "0.###E0" yields scientific notation
+					with up to three fractional digits.
+				</para>
+			</sect1>
 			<sect1 id="setting_outputformat">
 				<title>outputformat</title>
 				<para>
@@ -2663,6 +2676,16 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					If <literal>true</literal>, display the names of the
 					columns when displaying results. Defaults to
 					<literal>true</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_shownestederrs">
+				<title>shownestederrs</title>
+				<para>
+					If <literal>true</literal>, display any nested errors
+					that are reported on the connection after issuing
+					any database commands. Defaults to
+					<literal>false</literal>, meaning only the topmost
+					error is displayed.
 				</para>
 			</sect1>
 			<sect1 id="setting_showwarnings">
@@ -2681,6 +2704,15 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					of informational messages displayed. Useful for redirecting
 					a sqlline command to a file for later parsing. Defaults to
 					<literal>false</literal>.
+				</para>
+			</sect1>
+			<sect1 id="setting_trimscripts">
+				<title>trimscripts</title>
+				<para>
+					If <literal>true</literal>, then trim leading and
+					trailing whitespace from lines as they are processed
+					in scripts; otherwise, preserve whitespace.  Defaults to
+					<literal>true</literal>.
 				</para>
 			</sect1>
 			<sect1 id="setting_verbose">

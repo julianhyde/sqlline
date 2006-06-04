@@ -80,6 +80,8 @@ public class SqlLine
 											+ " by " + APP_AUTHOR;
 	*/
 
+	private SqlLineSignalHandler signalHandler = null;
+
 	private static final String sep = System.getProperty ("line.separator");
 	private boolean exit = false;
 	private final SqlLine sqlline = this;
@@ -473,6 +475,20 @@ public class SqlLine
 		// registerKnownDrivers ();
 
 		sqlLineCommandCompletor = new SQLLineCommandCompletor ();
+		
+		// attempt to dynamically load signal handler
+		try
+		{
+			Class handlerClass =
+				Class.forName ("sqlline.SunSignalHandler");
+			signalHandler = (SqlLineSignalHandler)
+				handlerClass.newInstance ();
+		}
+		catch (Throwable t)
+		{
+			// ignore and leave cancel functionality disabled
+		}
+
 	}
 
 
@@ -1572,6 +1588,9 @@ public class SqlLine
 
 		if (opts.getVerbose ())
 			e.printStackTrace ();
+		
+		if (!opts.getShowNestedErrs ())
+		    return;
 
 		for (SQLException nested = e.getNextException ();
 			nested != null && nested != e;
@@ -1720,10 +1739,10 @@ public class SqlLine
 				int total = zf.size ();
 				int index = 0;
 
-				for (Enumeration enum = zf.entries ();
-					enum.hasMoreElements (); )
+				for (Enumeration zfEnum = zf.entries ();
+					zfEnum.hasMoreElements (); )
 				{
-					ZipEntry entry = (ZipEntry)enum.nextElement ();
+					ZipEntry entry = (ZipEntry)zfEnum.nextElement ();
 					String name = entry.getName ();
 					progress (index++, total);
 
@@ -2136,6 +2155,8 @@ public class SqlLine
 		Statement stmnt = con ().connection.createStatement ();
 		if (opts.timeout > -1)
 			stmnt.setQueryTimeout (opts.timeout);
+		if (signalHandler != null)
+			signalHandler.setStmt (stmnt);
 		return stmnt;
 	}
 
@@ -2212,6 +2233,7 @@ public class SqlLine
 	{
 		final ResultSetMetaData rsMeta;
 		final Boolean [] primaryKeys;
+		final NumberFormat numberFormat;
 
 		Rows (ResultSet rs)
 			throws SQLException
@@ -2219,6 +2241,14 @@ public class SqlLine
 			rsMeta = rs.getMetaData ();
 			int count = rsMeta.getColumnCount ();
 			primaryKeys = new Boolean [count];
+			if (opts.getNumberFormat ().equals ("default"))
+			{
+				numberFormat = null;
+			}
+			else
+			{
+				numberFormat = new DecimalFormat (opts.getNumberFormat ());
+			}
 		}
 
 		
@@ -2331,7 +2361,26 @@ public class SqlLine
 
 				for (int i = 0; i < size; i++)
 				{
-					values [i] = rs.getString (i + 1);
+					if (numberFormat != null)
+					{
+						Object o = rs.getObject (i + 1);
+						if (o == null)
+						{
+							values [i] = null;
+						}
+						else if (o instanceof Number)
+						{
+							values [i] = numberFormat.format (o);
+						}
+						else
+						{
+							values [i] = o.toString();
+						}
+					}
+					else
+					{
+						values [i] = rs.getString (i + 1);
+					}
 					sizes [i] = values [i] == null ? 1 : values [i].length ();
 				}
 			}
@@ -2485,30 +2534,8 @@ public class SqlLine
 			}
 
 			Object ret = nextRow;
-
-			try
-			{
-				if (rs.next ())
-				{
-					nextRow = new Row (labelRow.sizes.length, rs);
-
-					if (normalizingWidths)
-					{
-						// perform incremental normalization
-						nextRow.sizes = labelRow.sizes;
-					}
-				}
-				else
-				{
-					nextRow = null;
-				}
-
-				return ret;
-			}
-			catch (SQLException e)
-			{
-				throw new NoSuchElementException (e.toString ());
-			}
+			nextRow = null;
+			return ret;
 		}
 		
 		void normalizeWidths ()
@@ -4202,13 +4229,16 @@ public class SqlLine
 						if (scriptLine == null)
 							break;
 						
+						String trimmedLine = scriptLine.trim ();
+						if (opts.getTrimScripts ())
+							scriptLine = trimmedLine;
+
 						if (cmd != null)
 						{
 							// we're continuing an existing command
-							scriptLine = scriptLine.trim ();
 							cmd.append (" \n");
 							cmd.append (scriptLine);
-							if (scriptLine.endsWith (";"))
+							if (trimmedLine.endsWith (";"))
 							{
 								// this command has terminated
 								cmds.add( cmd.toString ());
@@ -4939,12 +4969,15 @@ public class SqlLine
 		private boolean force = false;
 		private boolean incremental = false;
 		private boolean showWarnings = false;
+		private boolean showNestedErrs = false;
+		private String numberFormat = "default";
 		private int maxWidth = Terminal.setupTerminal ().getTerminalWidth ();
 		private int maxHeight = Terminal.setupTerminal ().getTerminalHeight ();
 		private int maxColumnWidth = 15;
 		private int timeout = -1;
 		private String isolation = "TRANSACTION_REPEATABLE_READ";
 		private String outputFormat = "table";
+		private boolean trimScripts = true;
 
 		public static final String PROPERTY_PREFIX = "sqlline.";
 		public static final String PROPERTY_NAME_EXIT =
@@ -5205,7 +5238,33 @@ public class SqlLine
 			return this.showWarnings;
 		}
 
+	    
 
+		public void setShowNestedErrs (boolean showNestedErrs)
+		{
+			this.showNestedErrs = showNestedErrs;
+		}
+
+
+		public boolean getShowNestedErrs ()
+		{
+			return this.showNestedErrs;
+		}
+
+
+	    
+		public void setNumberFormat (String numberFormat)
+		{
+			this.numberFormat = numberFormat;
+		}
+
+
+		public String getNumberFormat ()
+		{
+			return this.numberFormat;
+		}
+
+	    
 
 
 		public void setMaxWidth (int maxWidth)
@@ -5373,6 +5432,20 @@ public class SqlLine
 		public String getOutputFormat ()
 		{
 			return this.outputFormat;
+		}
+
+
+
+
+		public void setTrimScripts (boolean trimScripts)
+		{
+			this.trimScripts = trimScripts;
+		}
+
+
+		public boolean getTrimScripts ()
+		{
+			return this.trimScripts;
 		}
 
 
