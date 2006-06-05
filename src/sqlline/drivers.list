@@ -17,6 +17,7 @@ com.informix.jdbc.IfxDriver
 com.internetcds.jdbc.tds.Driver
 com.internetcds.jdbc.tds.SybaseDriver
 com.jnetdirect.jsql.JSQLDriver
+com.lucidera.jdbc.LucidDbRmiDriver
 com.mckoi.JDBCDriver
 com.merant.datadirect.jdbc.db2.DB2Driver
 com.merant.datadirect.jdbc.informix.InformixDriver
