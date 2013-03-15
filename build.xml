@@ -4,426 +4,443 @@
 	be very cautious when adding in new pieces.
 -->
 <project name="project" default="all" basedir="."> 
-	<!-- properties that are to be customized on a per-project basis -->
-	<property file="${basedir}/project.properties"/>
+  <!-- properties that are to be customized on a per-project basis -->
+  <property file="${basedir}/project.properties"/>
 
 
-	<!-- shouldn't need to touch the following properties -->
-	<property name="build" value="${basedir}/build"/>
-	<property name="src" value="${basedir}/src"/>
-	<property name="native" value="${basedir}/native"/>
-	<property name="tmp" value="${basedir}/tmp"/>
-	<property name="test" value="${basedir}/test"/>
-	<property name="doc" value="${basedir}/doc"/>
-	<property name="doc-build" value="${basedir}/doc-build"/>
-	<property name="javadoc" value="${doc-build}/javadoc"/>
-	<property name="reports" value="${basedir}/reports"/>
-	<property name="release" value="${basedir}/release"/>
+  <!-- shouldn't need to touch the following properties -->
+  <property name="build" value="${basedir}/build"/>
+  <property name="lib" value="${basedir}/lib"/>
+  <property name="src" value="${basedir}/src"/>
+  <property name="native" value="${basedir}/native"/>
+  <property name="tmp" value="${basedir}/tmp"/>
+  <property name="test" value="${basedir}/test"/>
+  <property name="doc" value="${basedir}/doc"/>
+  <property name="doc-build" value="${basedir}/doc-build"/>
+  <property name="javadoc" value="${doc-build}/javadoc"/>
+  <property name="reports" value="${basedir}/reports"/>
+  <property name="release" value="${basedir}/release"/>
 
-	<property name="javac.source" value="1.3"/>
-
-
-	<property name="package.root" value="${name}"/>
-	<property name="packages" value="${package.root}"/>
-
-	<property name="version.name"
-		value="${version.major}_${version.minor}_${version.patch}"/>
-	<property name="version.title"
-		value="${version.major}.${version.minor}.${version.patch}"/>
-
-	<property name="title" value="${name} ${version.title}"/>
-
-	<property name="javadoc.title"
-		value="API Documentation - ${title}"/>
-	<property name="javadoc.copyright"
-		value="Released under the terms of the ${software.license} license"/>
-
-	<property name="sourcedirs" value="${src}:${test}"/>
-
-	<property name="srcprefix" value="${name}-${version.name}"/>
-
-	<property name="jarname" value="${name}-${version.name}.jar"/>
-	<property name="jarfile" value="${release}/${jarname}"/>
-
-	<property name="srcjarname" value="${name}-src-${version.name}.jar"/>
-	<property name="srcjarfile" value="${release}/${srcjarname}"/>
-
-	<property name="demojarname" value="${name}-demo.jar"/>
-	<property name="demojarfile" value="${release}/${demojarname}"/>
+  <property name="javac.source" value="1.3"/>
 
 
-	<!-- SourceForge project information -->
+  <property name="package.root" value="${name}"/>
+  <property name="packages" value="${package.root}"/>
 
-	<property name="sf.server.name" value="sourceforge.net"/>
-	<property name="sf.ftp.server" value="upload.${sf.server.name}"/>
-	<property name="sf.ftp.dir" value="incoming"/>
-	<property name="sf.ftp.user" value="anonymous"/>
-	<property name="sf.project.webserver"
-		value="${sf.project.name}.${sf.server.name}"/>
-	<property name="sf.user.mail" value="${sf.userid}@${sf.server.name}"/>
+  <property name="version.name"
+    value="${version.major}_${version.minor}_${version.patch}"/>
+  <property name="version.title"
+    value="${version.major}.${version.minor}.${version.patch}"/>
 
+  <property name="title" value="${name} ${version.title}"/>
 
-	<property name="sf.web.directory" value="/home/groups/${sf.project.firstchar}/${sf.project.firstchar}${sf.project.secondchar}/${sf.project.name}/htdocs/"/>
+  <property name="javadoc.title"
+    value="API Documentation - ${title}"/>
+  <property name="javadoc.copyright"
+    value="Released under the terms of the ${software.license} license"/>
 
-	<property name="relbuild" value="${tmp}/release-build"/>
+  <property name="sourcedirs" value="${src}:${test}"/>
 
+  <property name="srcprefix" value="${name}-${version.name}"/>
 
+  <property name="jarname" value="${name}-${version.name}.jar"/>
+  <property name="jarfile" value="${release}/${jarname}"/>
 
-	<target name="all" depends="build">
-	</target>
+  <property name="srcjarname" value="${name}-src-${version.name}.jar"/>
+  <property name="srcjarfile" value="${release}/${srcjarname}"/>
 
-	<!-- perform the complete sourceforge release tasks -->
-	<target name="release" depends="init,release.files,release.sign"/>
-
-	<target name="release.complete"
-		depends="release,release.tag,release.upload"/>
-
-	<target name="init">
-		<!-- check for project.properties -->
-		<available property="project.properties.available"
-			file="${basedir}/project.properties"/>
-
-		<fail unless="project.properties.available">project.properties does not exist for this project</fail>
-
-		<!-- check for required parameters -->
-		<fail unless="name">"name" undefined</fail>
-		<fail unless="author">"author" undefined</fail>
-		<fail unless="author.mail">"author.mail" undefined</fail>
-		<fail unless="software.name">"software.name" undefined</fail>
-		<fail unless="key.alias">"key.alias" undefined</fail>
-		<fail unless="sf.userid">"sf.userid" undefined</fail>
-		<fail unless="sf.project.name">"sf.project.name" undefined</fail>
-		<fail unless="sf.project.firstchar">"sf.project.firstchar" undefined</fail>
-		<fail unless="sf.project.secondchar">"sf.project.secondchar" undefined</fail>
-		<fail unless="version.major">"version.major" undefined</fail>
-		<fail unless="version.minor">"version.minor" undefined</fail>
-		<fail unless="version.patch">"version.patch" undefined</fail>
-		<fail unless="software.license">"software.license" undefined</fail>
+  <property name="demojarname" value="${name}-demo.jar"/>
+  <property name="demojarfile" value="${release}/${demojarname}"/>
 
 
-		<mkdir dir="${reports}" />
-		<mkdir dir="${build}" />
-		<mkdir dir="${release}"/>
-		<mkdir dir="${tmp}"/>
-		<mkdir dir="${doc-build}"/>
+  <!-- SourceForge project information -->
 
-		<echo append="false" file="${basedir}/VERSION.txt"
-			>${version.title}</echo>
-	</target>
+  <property name="sf.server.name" value="sourceforge.net"/>
+  <property name="sf.ftp.server" value="upload.${sf.server.name}"/>
+  <property name="sf.ftp.dir" value="incoming"/>
+  <property name="sf.ftp.user" value="anonymous"/>
+  <property name="sf.project.webserver"
+    value="${sf.project.name}.${sf.server.name}"/>
+  <property name="sf.user.mail" value="${sf.userid}@${sf.server.name}"/>
 
-	<target name="build" depends="init">
-		<javac listfiles="yes" srcdir="${sourcedirs}" 
-			source="${javac.source}"
-			debug="on" 
-			destdir="${build}"
-			fork="no">
-			<include name="**/*.java"/>
-		</javac>
-	</target>
 
-	<target name="clean">
-		<delete dir="${build}"/>
-		<mkdir dir="${build}"/>
-	</target>
+  <property name="sf.web.directory" value="/home/groups/${sf.project.firstchar}/${sf.project.firstchar}${sf.project.secondchar}/${sf.project.name}/htdocs/"/>
 
-	<target name="rebuild" depends="clean,build"/>
+  <property name="relbuild" value="${tmp}/release-build"/>
 
-	<target name="doc" depends="init,docbook,javadoc">
-	</target>
+  <path id="build.classpath">
+    <pathelement location="${lib}/jline.jar"/>
+    <pathelement location="junit.jar"/>
+  </path>
 
-	<target name="docbook" depends="init" unless="docbook.skip">
-		<copy file="${doc}/styles.css" todir="${doc-build}"/>
 
-		<!-- make sure the documentation is valid -->
-		<xmlvalidate lenient="no" failonerror="yes" 
-			file="${doc}/manual.xml"/>
+  <target name="all" depends="build">
+  </target>
 
-		<!-- HTML documentation -->
-		<style basedir="${doc}"
-			destdir="${doc-build}"
-			extension=".html"
-			style="${doc}/html.xsl"
-			includes="manual.xml">
-		</style>
+  <!-- perform the complete sourceforge release tasks -->
+  <target name="release" depends="init,release.files,release.sign"/>
 
-		<!-- convert to text. There is currently no good way of doing this,
-				short of invoking a text browser to render to text. -->
-		<exec executable="links" output="${doc-build}/manual.txt">
-			<arg line="-dump ${doc-build}/manual.html"/>
-		</exec>
-	</target>
+  <target name="release.complete"
+    depends="release,release.tag,release.upload"/>
 
-	<target name="javadoc" depends="init" unless="javadoc.skip">
-		<tstamp/>
-		<javadoc package="yes" sourcepath="${src}" maxmemory="100M"
-			failonerror="true" packagenames="${packages}"
-			destdir="${javadoc}"
-			author="true" version="true" splitindex="false"
-			windowtitle="${javadoc.title}"
-			stylesheetfile="${doc-build}/styles.css"
-			bottom="${javadoc.copyright}"
-			additionalparam="-linksource">
-			<link href="http://java.sun.com/j2se/1.3/docs/api/"/>
-			<link href="http://java.sun.com/j2se/1.3/docs/api/"/>
-		</javadoc>
-	</target>
+  <target name="init">
+    <!-- check for project.properties -->
+    <available property="project.properties.available"
+      file="${basedir}/project.properties"/>
 
-	<target name="srcjar" depends="doc">
-		<zip destfile="${srcjarfile}" update="no">
-			<zipfileset prefix="${srcprefix}/doc" dir="${doc}"
-				excludes="**/CVS/*,**/.DS_Store"/>
-			<zipfileset prefix="${srcprefix}/doc-build" dir="${doc-build}"
-				excludes="**/CVS/*,**/.DS_Store"/>
-			<zipfileset prefix="${srcprefix}/src" dir="${src}"
-				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
-			<zipfileset prefix="${srcprefix}/native" dir="${native}"
-				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
-			<zipfileset prefix="${srcprefix}/test" dir="${test}"
-				excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
-			<zipfileset prefix="${srcprefix}" dir="${basedir}"
-				includes="CHANGELOG,AUTHORS,LICENSE,build.xml,project.properties"/>
-		</zip>
-	</target>
+    <fail unless="project.properties.available">project.properties does not exist for this project</fail>
 
-	<target name="release.jnlp" if="release.jnlp.include">
-		<echo>Building jnlp properties</echo>
+    <!-- check for required parameters -->
+    <fail unless="name">"name" undefined</fail>
+    <fail unless="author">"author" undefined</fail>
+    <fail unless="author.mail">"author.mail" undefined</fail>
+    <fail unless="software.name">"software.name" undefined</fail>
+    <fail unless="key.alias">"key.alias" undefined</fail>
+    <fail unless="sf.userid">"sf.userid" undefined</fail>
+    <fail unless="sf.project.name">"sf.project.name" undefined</fail>
+    <fail unless="sf.project.firstchar">"sf.project.firstchar" undefined</fail>
+    <fail unless="sf.project.secondchar">"sf.project.secondchar" undefined</fail>
+    <fail unless="version.major">"version.major" undefined</fail>
+    <fail unless="version.minor">"version.minor" undefined</fail>
+    <fail unless="version.patch">"version.patch" undefined</fail>
+    <fail unless="software.license">"software.license" undefined</fail>
 
-		<fail unless="software.main.class">"software.main.class" undefined</fail>
-		<fail unless="software.class.path">"software.class.path" undefined</fail>
 
-		<echo append="false" file="${release}/${name}.jnlp"
-		><![CDATA[<?xml version="1.0+" encoding="utf-8"?>
-<jnlp spec="1.0"
+    <mkdir dir="${reports}" />
+    <mkdir dir="${build}" />
+    <mkdir dir="${release}"/>
+    <mkdir dir="${tmp}"/>
+    <mkdir dir="${doc-build}"/>
+    <mkdir dir="${test}"/>
+
+    <echo append="false" file="${basedir}/VERSION.txt"
+      >${version.title}</echo>
+  </target>
+
+  <target name="build" depends="init">
+    <javac listfiles="yes" srcdir="${sourcedirs}" 
+      classpathref="build.classpath"
+      source="${javac.source}"
+      debug="on" 
+      destdir="${build}"
+      fork="no">
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="rebuild" depends="clean,build"/>
+
+  <target name="doc" depends="init,docbook,javadoc">
+  </target>
+
+  <target name="docbook" depends="init" unless="docbook.skip">
+    <copy file="${doc}/styles.css" todir="${doc-build}"/>
+
+    <!-- make sure the documentation is valid -->
+    <xmlvalidate lenient="no" failonerror="yes" 
+      file="${doc}/manual.xml"/>
+
+    <!-- HTML documentation -->
+    <style basedir="${doc}"
+      destdir="${doc-build}"
+      extension=".html"
+      style="${doc}/html.xsl"
+      includes="manual.xml">
+    </style>
+
+    <!-- convert to text. There is currently no good way of doing this,
+    short of invoking a text browser to render to text. -->
+    <exec executable="links" output="${doc-build}/manual.txt">
+      <arg line="-dump ${doc-build}/manual.html"/>
+    </exec>
+  </target>
+
+  <target name="javadoc" depends="init" unless="javadoc.skip">
+    <tstamp/>
+    <javadoc package="yes" sourcepath="${src}" maxmemory="100M"
+      failonerror="true" packagenames="${packages}"
+      destdir="${javadoc}"
+      author="true" version="true" splitindex="false"
+      windowtitle="${javadoc.title}"
+      stylesheetfile="${doc-build}/styles.css"
+      bottom="${javadoc.copyright}"
+      additionalparam="-linksource">
+      <link href="http://java.sun.com/j2se/1.3/docs/api/"/>
+      <link href="http://java.sun.com/j2se/1.3/docs/api/"/>
+    </javadoc>
+  </target>
+
+  <target name="srcjar" depends="doc">
+    <mkdir dir="${native}"/>
+    <zip destfile="${srcjarfile}" update="no">
+      <zipfileset prefix="${srcprefix}/doc" dir="${doc}"
+        excludes="**/CVS/*,**/.DS_Store"/>
+      <zipfileset prefix="${srcprefix}/doc-build" dir="${doc-build}"
+        excludes="**/CVS/*,**/.DS_Store"/>
+      <zipfileset prefix="${srcprefix}/src" dir="${src}"
+        excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
+      <zipfileset prefix="${srcprefix}/native" dir="${native}"
+        excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
+      <zipfileset prefix="${srcprefix}/test" dir="${test}"
+        excludes="**/CVS/*,**/.*.swp,**/.DS_Store"/>
+      <zipfileset prefix="${srcprefix}" dir="${basedir}"
+        includes="CHANGELOG,AUTHORS,LICENSE,build.xml,project.properties,README"/>
+    </zip>
+  </target>
+
+  <target name="release.jnlp" if="release.jnlp.include">
+    <echo>Building jnlp properties</echo>
+
+    <fail unless="software.main.class">"software.main.class" undefined</fail>
+    <fail unless="software.class.path">"software.class.path" undefined</fail>
+
+    <echo append="false" file="${release}/${name}.jnlp"
+      ><![CDATA[<?xml version="1.0+" encoding="utf-8"?>
+      <jnlp spec="1.0"
       codebase="http://${sf.project.webserver}" href="${name}.jnlp">
-   <information>
+      <information>
       <title>${software.name}</title>
       <vendor>${author.mail}</vendor>
       <homepage href="http://${sf.project.webserver}"/>
       <description>${software.description}</description>
       <icon href="${name}.png"/>
       <offline-allowed/>
-   </information>
-    <security>
-        <all-permissions/>
+    </information>
+      <security>
+      <all-permissions/>
     </security>
-   <resources>
+      <resources>
       <j2se version="1.4+"/>
       <jar href="${jarname}" main="true" download="eager"/>
-   </resources>
-   <application-desc main-class="${software.main.class}"/>
-</jnlp>
-		]]></echo>
-	</target>
+    </resources>
+      <application-desc main-class="${software.main.class}"/>
+    </jnlp>
+      ]]></echo>
+  </target>
 
-	<target name="release.upload" depends="release.files"
-		unless="release.upload.skip">
-		<!-- upload the release files -->
-		<echo>Uploading files to FTP server...</echo>
-        <ftp server="${sf.ftp.server}"
-            userid="${sf.ftp.user}"
-            password="${sf.user.mail}"
-            remotedir="${sf.ftp.dir}">
-            <fileset dir="${release}"/>
-        </ftp>
-
-
-		<!-- upload the documentation to the core web site -->
-		<echo>Copying documentation files to web site via scp...</echo>
-		<exec dir="${doc-build}" executable="scp">
-			<arg value="-r"/>
-			<arg value="."/>
-			<arg
-			value="${sf.userid}@${sf.project.webserver}:${sf.web.directory}"/>
-		</exec>
-	</target>
-
-	<target name="release.files" depends="init,reltests,srcjar,jars"/>
-
-	<!-- run the tests necessary before we can create a release -->
-	<target name="reltests" depends="init,checkstyle,rebuild,tests">
-	</target>
-
-	<target name="checkstyle" unless="checkstyle.skip">
-		<taskdef resource="checkstyletask.properties"
-			classpath="build-lib/checkstyle-all-3.2.jar"/>
-
-		<checkstyle config="${name}_style.xml" failOnViolation="true">
-			<fileset dir="${src}" includes="**/*.java"/>
-		</checkstyle>
-	</target>
-
-	<target name="jars"
-		depends="init,jars.init,jars.native,jars.core.build,jars.example.build">
-	</target>
-
-	<target name="jars.init" depends="init">
-		<tstamp/>
-		<delete dir="${relbuild}"/>
-	</target>
-
-	<target name="jars.native" depends="init" unless="jars.native.skip">
-
-		<!-- copy dll -->
-		<copy todir="${relbuild}/${package.root}/" flatten="yes">
-			<fileset dir="${native}">
-				<include name="${name}.dll"/>
-			</fileset>
-		</copy>
-	</target>
+  <target name="release.upload" depends="release.files"
+    unless="release.upload.skip">
+    <!-- upload the release files -->
+    <echo>Uploading files to FTP server...</echo>
+    <ftp server="${sf.ftp.server}"
+      userid="${sf.ftp.user}"
+      password="${sf.user.mail}"
+      remotedir="${sf.ftp.dir}">
+      <fileset dir="${release}"/>
+    </ftp>
 
 
-	<target name="jars.core.build" depends="jars.init" unless="jars.core.skip">
-		<mkdir dir="${relbuild}"/>
-		<javac listfiles="yes" srcdir="${src}" debug="off" 
-			source="${javac.source}"
-			destdir="${relbuild}" fork="no">
-			<include name="**/*.java"/>
-		</javac>
-		<copy todir="${relbuild}" flatten="no">
-			<fileset dir="${src}">
-				<include name="**/*.properties"/>
-				<include name="**/*.gz"/>
-				<include name="**/*.gif"/>
-				<include name="**/*.png"/>
-				<include name="**/*.jpg"/>
-			</fileset>
-		</copy>
+    <!-- upload the documentation to the core web site -->
+    <echo>Copying documentation files to web site via scp...</echo>
+    <exec dir="${doc-build}" executable="scp">
+      <arg value="-r"/>
+      <arg value="."/>
+      <arg
+        value="${sf.userid}@${sf.project.webserver}:${sf.web.directory}"/>
+    </exec>
+  </target>
+
+  <target name="release.files" depends="init,reltests,srcjar,jars"/>
+
+  <!-- run the tests necessary before we can create a release -->
+  <target name="reltests" depends="init,checkstyle,rebuild,tests">
+  </target>
+
+  <target name="checkstyle" unless="checkstyle.skip">
+    <taskdef resource="checkstyletask.properties"
+      classpath="build-lib/checkstyle-all-3.2.jar"/>
+
+    <checkstyle config="${name}_style.xml" failOnViolation="true">
+      <fileset dir="${src}" includes="**/*.java"/>
+    </checkstyle>
+  </target>
+
+  <target name="jars"
+    depends="init,jars.init,jars.native,jars.core.build,jars.example.build">
+  </target>
+
+  <target name="jars.init" depends="init">
+    <tstamp/>
+    <delete dir="${relbuild}"/>
+  </target>
+
+  <target name="jars.native" depends="init" unless="jars.native.skip">
+
+    <!-- copy dll -->
+    <copy todir="${relbuild}/${package.root}/" flatten="yes">
+      <fileset dir="${native}">
+        <include name="${name}.dll"/>
+      </fileset>
+    </copy>
+  </target>
 
 
-		<!-- now extract all the jars we want to include in the release build-->
-		<unzip dest="${relbuild}">
-			<fileset dir="${basedir}/lib-release">
-				<include name="**/*.jar"/>
-				<include name="**/*.zip"/>
-			</fileset>
-		</unzip>
+  <target name="jars.core.build" depends="jars.init" unless="jars.core.skip">
+    <mkdir dir="${relbuild}"/>
+    <javac listfiles="yes" srcdir="${src}"  
+      classpathref="build.classpath"
+      source="${javac.source}"
+      destdir="${relbuild}" fork="no">
+      <include name="**/*.java"/>
+    </javac>
+    <copy todir="${relbuild}" flatten="no">
+      <fileset dir="${src}">
+        <include name="**/*.properties"/>
+        <include name="**/*.gz"/>
+        <include name="**/*.gif"/>
+        <include name="**/*.png"/>
+        <include name="**/*.jpg"/>
+      </fileset>
+    </copy>
 
-		<fail unless="software.main.class">"software.main.class" undefined</fail>
-		<fail unless="software.class.path">"software.class.path" undefined</fail>
 
-		<jar jarfile="${jarfile}" basedir="${relbuild}" update="no">
+    <!-- now extract all the jars we want to include in the release build-->
+    <mkdir dir="${basedir}/lib-release"/>
+    <unzip dest="${relbuild}">
+      <fileset dir="${basedir}/lib-release">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+      </fileset>
+    </unzip>
 
-			<manifest>
-				<attribute name="Main-Class" value="${software.main.class}"/>
-				<attribute name="Class-Path" value="${software.class.path}"/>
-				<attribute name="Built-By" value="${user.name}"/>
-				<attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
+    <fail unless="software.main.class">"software.main.class" undefined</fail>
+    <fail unless="software.class.path">"software.class.path" undefined</fail>
 
-				<section name="${package.root}/">
-					<attribute name="Sealed" value="true"/>
-					<attribute name="Extension-name"
-						value="${name}"/>
-					<attribute name="Specification-Title"
-						value="${software.name}"/>
-					<attribute name="Specification-Version"
-						value="${version.title}"/>
-					<attribute name="Specification-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-Title"
-						value="${name}"/>
-					<attribute name="Implementation-Version"
-						value="${version.title}"/>
-					<attribute name="Implementation-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-License"
-						value="${software.license}"/>
-				</section>
-			</manifest>
-		</jar>
-	</target>
+    <jar jarfile="${jarfile}" basedir="${relbuild}" update="no">
 
-	<target name="jars.example.build" depends="jars.init"
-		unless="jars.example.skip">
-		<delete dir="${relbuild}"/>
-		<mkdir dir="${relbuild}"/>
-		<javac listfiles="yes" srcdir="${test}" debug="off" 
-			source="${javac.source}"
-			destdir="${relbuild}" fork="no" classpath="${jarfile}">
-			<include name="**/*.java"/>
-		</javac>
-		<copy todir="${relbuild}" flatten="no">
-			<fileset dir="${test}">
-				<include name="**/*.properties"/>
-				<include name="**/*.gz"/>
-				<include name="**/*.gif"/>
-				<include name="**/*.png"/>
-				<include name="**/*.jpg"/>
-			</fileset>
-		</copy>
+      <manifest>
+        <attribute name="Main-Class" value="${software.main.class}"/>
+        <attribute name="Class-Path" value="${software.class.path}"/>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
 
-		<jar jarfile="${demojarfile}" basedir="${relbuild}" update="no"
-			includes="${package.root}/example/*">
-			<manifest>
-				<attribute name="Built-By" value="${user.name}"/>
-				<attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
-				<attribute name="Main-Class"
-					value="${package.root}.example.Example"/>
-				<attribute name="Class-Path" value="${jarname}"/>
+        <section name="${package.root}/">
+          <attribute name="Sealed" value="true"/>
+          <attribute name="Extension-name"
+            value="${name}"/>
+          <attribute name="Specification-Title"
+            value="${software.name}"/>
+          <attribute name="Specification-Version"
+            value="${version.title}"/>
+          <attribute name="Specification-Vendor"
+            value="${author}"/>
+          <attribute name="Implementation-Title"
+            value="${name}"/>
+          <attribute name="Implementation-Version"
+            value="${version.title}"/>
+          <attribute name="Implementation-Vendor"
+            value="${author}"/>
+          <attribute name="Implementation-License"
+            value="${software.license}"/>
+        </section>
+      </manifest>
+    </jar>
+  </target>
 
-				<section name="${package.root}/example">
-					<attribute name="Sealed" value="true"/>
-					<attribute name="Extension-name"
-						value="${name}"/>
-					<attribute name="Specification-Title"
-						value="${software.name}"/>
-					<attribute name="Specification-Version"
-						value="${version.title}"/>
-					<attribute name="Specification-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-Title"
-						value="${name}"/>
-					<attribute name="Implementation-Version"
-						value="${version.title}"/>
-					<attribute name="Implementation-Vendor"
-						value="${author}"/>
-					<attribute name="Implementation-License"
-						value="${software.license}"/>
-				</section>
-			</manifest>
-		</jar>
-	</target>
+  <target name="jars.example.build" depends="jars.init"
+    unless="jars.example.skip">
+    <delete dir="${relbuild}"/>
+    <mkdir dir="${relbuild}"/>
+    <javac listfiles="yes" srcdir="${test}" 
+      classpathref="build.classpath"
+      source="${javac.source}"
+      destdir="${relbuild}" fork="no" classpath="${jarfile}">
+      <include name="**/*.java"/>
+    </javac>
+    <copy todir="${relbuild}" flatten="no">
+      <fileset dir="${test}">
+        <include name="**/*.properties"/>
+        <include name="**/*.gz"/>
+        <include name="**/*.gif"/>
+        <include name="**/*.png"/>
+        <include name="**/*.jpg"/>
+      </fileset>
+    </copy>
 
-	<target name="release.sign">
-		<echo>Signing jars...</echo>
-		<input message="Enter keystore password: "
-			addproperty="keystore.pass"/>
+    <jar jarfile="${demojarfile}" basedir="${relbuild}" update="no"
+      includes="${package.root}/example/*">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-On" value="${DSTAMP} ${TSTAMP}"/>
+        <attribute name="Main-Class"
+          value="${package.root}.example.Example"/>
+        <attribute name="Class-Path" value="${jarname}"/>
 
-		<signjar alias="${key.alias}" verbose="true"
-			keypass="${keystore.pass}"
-			storepass="${keystore.pass}">
-			<fileset dir="${release}">
-				<include name="*.jar"/>
-			</fileset>
-		</signjar>
-	</target>
+        <section name="${package.root}/example">
+          <attribute name="Sealed" value="true"/>
+          <attribute name="Extension-name"
+            value="${name}"/>
+          <attribute name="Specification-Title"
+            value="${software.name}"/>
+          <attribute name="Specification-Version"
+            value="${version.title}"/>
+          <attribute name="Specification-Vendor"
+            value="${author}"/>
+          <attribute name="Implementation-Title"
+            value="${name}"/>
+          <attribute name="Implementation-Version"
+            value="${version.title}"/>
+          <attribute name="Implementation-Vendor"
+            value="${author}"/>
+          <attribute name="Implementation-License"
+            value="${software.license}"/>
+        </section>
+      </manifest>
+    </jar>
+  </target>
 
-	<target name="release.tag">
-		<echo>Tagging CVS tree with: ${version.name}</echo>
+  <target name="release.sign">
+    <echo>Signing jars...</echo>
+    <input message="Enter keystore password: "
+      addproperty="keystore.pass"/>
 
-		<!-- first commit -->
-		<cvs command="commit -m 'Final changes for ${version.name}'"/>
+    <signjar alias="${key.alias}" verbose="true"
+      keypass="${keystore.pass}"
+      storepass="${keystore.pass}">
+      <fileset dir="${release}">
+        <include name="*.jar"/>
+      </fileset>
+    </signjar>
+  </target>
 
-		<!-- now tag -->
-		<cvs command="tag release-${version.name}"/>
-	</target>
+  <target name="release.tag">
+    <echo>Tagging CVS tree with: ${version.name}</echo>
 
-	<target name="retests" depends="rebuild,tests"/>
+    <!-- first commit -->
+    <cvs command="commit -m 'Final changes for ${version.name}'"/>
 
-	<target name="tests" depends="build" unless="tests.skip">
-		<junit printsummary="withOutAndErr" haltonfailure="false"
-			fork="no" showoutput="yes" includeantruntime="yes"
-			errorproperty="build.errors"
-			failureproperty="build.failures">
-			<formatter type="plain" usefile="no"/>
-			<formatter type="xml" usefile="yes"/>
-			<batchtest fork="no" todir="${reports}">
-				<fileset dir="${test}">
-					<include name="**/Test*.java"/>
-				</fileset>
-			</batchtest>
-		</junit>
+    <!-- now tag -->
+    <cvs command="tag release-${version.name}"/>
+  </target>
 
-		<fail if="build.errors">Tests has errors</fail>
-		<fail if="build.failures">Tests had failures</fail>
-	</target>
+  <target name="retests" depends="rebuild,tests"/>
+
+  <target name="tests" depends="build" unless="tests.skip">
+    <junit printsummary="withOutAndErr" haltonfailure="false"
+      fork="no" showoutput="yes" includeantruntime="yes"
+      errorproperty="build.errors"
+      failureproperty="build.failures">
+      <classpath>
+        <path refid="build.classpath"/>
+        <pathelement location="${build}"/>
+        <!-- resources live in source tree -->
+        <pathelement location="${src}"/>
+      </classpath>
+      <formatter type="plain" usefile="no"/>
+      <formatter type="xml" usefile="yes"/>
+      <batchtest fork="no" todir="${reports}">
+        <fileset dir="${test}">
+          <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <fail if="build.errors">Tests has errors</fail>
+    <fail if="build.failures">Tests had failures</fail>
+  </target>
+
 </project>

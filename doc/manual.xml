@@ -1773,7 +1773,7 @@ Connecting to jdbc:mysql://localhost/mydb
 Enter password for jdbc:mysql://localhost/mydb: *****
 
 Connected to: MySQL (version 3.23.52-log)
-Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2006/06/04 03:32:42 $, $Revision: 1.10 $ ))
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2008/12/10 $, $Revision: #3 $ ))
 Autocommit status: true
 Transaction isolation: TRANSACTION_READ_COMMITTED
 
@@ -2670,6 +2670,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					command</link>.
 				</para>
 			</sect1>
+			<sect1 id="setting_rowlimit">
+				<title>rowlimit</title>
+				<para>
+					The maximum number of rows to fetch per query.
+					Defaults to 0, which is interpreted as fetching all rows.
+				</para>
+			</sect1>
 			<sect1 id="setting_showheader">
 				<title>showheader</title>
 				<para>
@@ -2688,13 +2695,23 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					error is displayed.
 				</para>
 			</sect1>
+			<sect1 id="setting_showtime">
+				<title>showtime</title>
+				<para>
+					If <literal>true</literal>,
+					display execution time for
+					database commands when in
+					verbose mode.  Defaults to
+					<literal>true</literal>.
+				</para>
+			</sect1>
 			<sect1 id="setting_showwarnings">
 				<title>showwarnings</title>
 				<para>
 					If <literal>true</literal>, display any warnings
 					that are reported on the connection after issuing
 					any database commands. Defaults to
-					<literal>false</literal>.
+					<literal>true</literal>.
 				</para>
 			</sect1>
 			<sect1 id="setting_silent">

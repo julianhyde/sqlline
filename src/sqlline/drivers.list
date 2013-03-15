@@ -32,6 +32,7 @@ com.pointbase.jdbc.jdbcDriver
 com.pointbase.jdbc.jdbcEmbeddedDriver
 com.pointbase.jdbc.jdbcUniversalDriver
 com.sap.dbtech.jdbc.DriverSapDB
+com.sqlstream.jdbc.Driver
 com.sybase.jdbc.SybDriver
 com.sybase.jdbc2.jdbc.SybDriver
 com.thinweb.tds.Driver
@@ -48,6 +49,7 @@ org.enhydra.instantdb.jdbc.idbDriver
 org.gjt.mm.mysql.Driver
 org.hsql.jdbcDriver
 org.hsqldb.jdbcDriver
+org.luciddb.jdbc.LucidDbClientDriver
 org.postgresql.Driver
 org.sourceforge.jxdbcon.JXDBConDriver
 postgres95.PGDriver
