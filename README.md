@@ -17,6 +17,7 @@ Read [the manual](http://www.hydromatic.net/sqlline/manual.html).
 
 * [Project site](http://www.hydromatic.net/sqlline)
 * [API](http://www.hydromatic.net/sqlline/apidocs)
+* [Conjars maven repo](http://conjars.org/sqlline)
 
 ## Authors
 
