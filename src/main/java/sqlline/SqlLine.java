@@ -2450,7 +2450,7 @@ public class SqlLine
                             values[i] = o.toString();
                         }
                     } else {
-                        values[i] = rs.getString(i + 1);
+                      values[i] = String.valueOf(rs.getObject(i + 1));
                     }
                     sizes[i] = (values[i] == null) ? 1 : values[i].length();
                 }
