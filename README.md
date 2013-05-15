@@ -17,7 +17,7 @@ Read [the manual](http://www.hydromatic.net/sqlline/manual.html).
 
 * [Project site](http://www.hydromatic.net/sqlline)
 * [API](http://www.hydromatic.net/sqlline/apidocs)
-* 
+
 ## Authors
 
 * Marc Prud'hommeaux <marc@apocalypse.org>
