@@ -54,6 +54,15 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import jline.*;
+import jline.console.completer.AggregateCompleter;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.FileNameCompleter;
+import jline.console.completer.NullCompleter;
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
+import jline.console.history.FileHistory;
+import jline.console.history.History;
 
 
 /**
@@ -195,7 +204,7 @@ public class SqlLine
     private final SqlLine sqlline = this;
     private Collection drivers = null;
     private Connections connections = new Connections();
-    private Completor sqlLineCommandCompletor;
+    private Completer sqlLineCommandCompleter;
     private Map completions = new HashMap();
     private Opts opts = new Opts(System.getProperties());
     String lastProgress = null;
@@ -225,26 +234,26 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "connect", "open" },
-                new Completor[] {
-                    new SimpleCompletor(getConnectionURLExamples())
+                new Completer[] {
+                    new StringsCompleter(getConnectionURLExamples())
                 }),
             new ReflectiveCommandHandler(
                 new String[] { "describe" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "indexes" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "primarykeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "exportedkeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "manual" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "importedkeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "procedures" },
                 null),
             new ReflectiveCommandHandler(new String[] { "tables" },
@@ -253,18 +262,18 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "columns" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "reconnect" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "dropall" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "history" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "metadata" },
-                new Completor[] {
-                    new SimpleCompletor(getMetadataMethodNames())
+                new Completer[] {
+                    new StringsCompleter(getMetadataMethodNames())
                 }),
             new ReflectiveCommandHandler(new String[] { "nativesql" },
                 null),
@@ -276,7 +285,7 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "run" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "batch" },
                 null),
             new ReflectiveCommandHandler(new String[] { "list" },
@@ -287,10 +296,10 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "script" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "record" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "brief" },
                 null),
             new ReflectiveCommandHandler(new String[] { "close" },
@@ -299,11 +308,11 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "isolation" },
-                new Completor[] { new SimpleCompletor(getIsolationLevels()) }),
+                new Completer[] { new StringsCompleter(getIsolationLevels()) }),
             new ReflectiveCommandHandler(
                 new String[] { "outputformat" },
-                new Completor[] {
-                    new SimpleCompletor(
+                new Completer[] {
+                    new StringsCompleter(
                         (String []) formats.keySet().toArray(new String[0]))
                 }),
             new ReflectiveCommandHandler(new String[] { "autocommit" },
@@ -312,7 +321,7 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "properties" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "rollback" },
                 null),
             new ReflectiveCommandHandler(new String[] { "help", "?" },
@@ -336,7 +345,7 @@ public class SqlLine
     {
         // registerKnownDrivers ();
 
-        sqlLineCommandCompletor = new SQLLineCommandCompletor();
+        sqlLineCommandCompleter = (Completer) new SQLLineCommandCompleter();
 
         // attempt to dynamically load signal handler
         try {
@@ -738,14 +747,14 @@ public class SqlLine
     public ConsoleReader getConsoleReader(InputStream inputStream)
         throws IOException
     {
-        Terminal terminal = Terminal.setupTerminal();
+        Terminal terminal = TerminalFactory.create();
 
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
             reader =
                 new ConsoleReader(
                     inputStream,
-                    new PrintWriter(System.out));
+                    System.out);
         } else {
             reader = new ConsoleReader();
         }
@@ -760,9 +769,9 @@ public class SqlLine
                 // input will clobber the history input, but setting the
                 // input before the output will cause the previous commands
                 // to not be saved to the buffer.
-                FileInputStream historyIn =
+                InputStream historyIn = new BufferedInputStream(
                     new FileInputStream(
-                        opts.getHistoryFile());
+                        opts.getHistoryFile()));
                 ByteArrayOutputStream hist = new ByteArrayOutputStream();
                 int n;
                 while ((n = historyIn.read()) != -1) {
@@ -777,25 +786,16 @@ public class SqlLine
         }
 
         try {
-            // now set the output for the history
-            PrintWriter historyOut =
-                new PrintWriter(new FileWriter(
-                        opts.getHistoryFile()));
-            reader.getHistory().setOutput(historyOut);
-        } catch (Exception e) {
-            handleException(e);
-        }
-
-        try {
-            // now load in the previous history
-            if (historyBuffer != null) {
-                reader.getHistory().load(historyBuffer);
+            FileHistory history = new FileHistory( new File (opts.getHistoryFile() ) ) ;
+            if (null != historyBuffer) {
+              history.load( historyBuffer );
             }
+            reader.setHistory( history );
         } catch (Exception e) {
             handleException(e);
         }
 
-        reader.addCompletor(new SQLLineCompletor());
+        reader.addCompleter( new SQLLineCompleter() );
 
         return reader;
     }
@@ -1705,7 +1705,7 @@ public class SqlLine
         if (!knownOnly) {
             classNames.addAll(
                 Arrays.asList(
-                    ClassNameCompletor.getClassNames()));
+                    ClassNameCompleter.getClassNames()));
         }
 
         classNames.addAll(KNOWN_DRIVERS);
@@ -2001,7 +2001,7 @@ public class SqlLine
         /**
          * Returns the completors that can handle parameters.
          */
-        public Completor [] getParameterCompletors();
+        public Completer [] getParameterCompleters();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -2864,26 +2864,26 @@ public class SqlLine
         private final String name;
         private final String [] names;
         private final String helpText;
-        private Completor [] parameterCompletors = new Completor[0];
+        private Completer [] parameterCompleters = new Completer[0];
 
         public AbstractCommandHandler(
             String [] names,
             String helpText,
-            Completor [] completors)
+            Completer [] completors)
         {
             this.name = names[0];
             this.names = names;
             this.helpText = helpText;
             if ((completors == null) || (completors.length == 0)) {
-                this.parameterCompletors =
-                    new Completor[] {
-                        new NullCompletor()
+                this.parameterCompleters =
+                    new Completer[] {
+                        new NullCompleter()
                     };
             } else {
                 List c = new LinkedList(Arrays.asList(completors));
-                c.add(new NullCompletor());
-                this.parameterCompletors =
-                    (Completor []) c.toArray(new Completor[0]);
+                c.add(new NullCompleter());
+                this.parameterCompleters =
+                    (Completer []) c.toArray(new Completer[0]);
             }
         }
 
@@ -2922,14 +2922,14 @@ public class SqlLine
             return null;
         }
 
-        public void setParameterCompletors(Completor [] parameterCompletors)
+        public void setParameterCompleters(Completer [] parameterCompleters)
         {
-            this.parameterCompletors = parameterCompletors;
+            this.parameterCompleters = parameterCompleters;
         }
 
-        public Completor [] getParameterCompletors()
+        public Completer [] getParameterCompleters()
         {
-            return this.parameterCompletors;
+            return this.parameterCompleters;
         }
     }
 
@@ -2942,9 +2942,9 @@ public class SqlLine
     public class ReflectiveCommandHandler
         extends AbstractCommandHandler
     {
-        public ReflectiveCommandHandler(String [] cmds, Completor [] completor)
+        public ReflectiveCommandHandler(String [] cmds, Completer [] completer)
         {
-            super(cmds, loc("help-" + cmds[0]), completor);
+            super(cmds, loc("help-" + cmds[0]), completer);
         }
 
         public boolean execute(String line)
@@ -3035,10 +3035,11 @@ public class SqlLine
 
         public boolean history(String line)
         {
-            List hist = reader.getHistory().getHistoryList();
+            ListIterator<History.Entry> hist = reader.getHistory().entries();
             int index = 1;
-            for (Iterator i = hist.iterator(); i.hasNext(); index++) {
-                output(color().pad(index + ".", 6).append(i.next().toString()));
+            while( hist.hasNext() )  {
+                index++ ;
+                output(color().pad(index + ".", 6).append(hist.next().toString()));
             }
 
             return true;
@@ -4360,8 +4361,8 @@ public class SqlLine
      *
      * @author <a href="mailto:marc@apocalypse.org">Marc Prud'hommeaux</a>
      */
-    class SQLLineCompletor
-        implements Completor
+    class SQLLineCompleter
+        implements Completer
     {
         public int complete(String buf, int pos, List cand)
         {
@@ -4370,10 +4371,10 @@ public class SqlLine
                 && !buf.startsWith(COMMAND_PREFIX + "all")
                 && !buf.startsWith(COMMAND_PREFIX + "sql"))
             {
-                return sqlLineCommandCompletor.complete(buf, pos, cand);
+                return sqlLineCommandCompleter.complete(buf, pos, cand);
             } else {
-                if ((con() != null) && (con().sqlLineSQLCompletor != null)) {
-                    return con().sqlLineSQLCompletor.complete(buf, pos, cand);
+                if ((con() != null) && (con().sqlLineSQLCompleter != null)) {
+                    return con().sqlLineSQLCompleter.complete(buf, pos, cand);
                 } else {
                     return -1;
                 }
@@ -4381,34 +4382,32 @@ public class SqlLine
         }
     }
 
-    class SQLLineCommandCompletor
-        extends MultiCompletor
+    class SQLLineCommandCompleter
+        extends AggregateCompleter
     {
-        public SQLLineCommandCompletor()
+        public SQLLineCommandCompleter()
         {
-            List completors = new LinkedList();
+            List<Completer> completors = new LinkedList<Completer>();
 
             for (int i = 0; i < commands.length; i++) {
                 String [] cmds = commands[i].getNames();
                 for (int j = 0; (cmds != null) && (j < cmds.length); j++) {
-                    Completor [] comps = commands[i].getParameterCompletors();
-                    List compl = new LinkedList();
-                    compl.add(new SimpleCompletor(COMMAND_PREFIX + cmds[j]));
+                    Completer [] comps = commands[i].getParameterCompleters();
+                    List<Completer> compl = new LinkedList<Completer>();
+                    compl.add(new StringsCompleter(COMMAND_PREFIX + cmds[j]));
                     compl.addAll(Arrays.asList(comps));
-                    compl.add(new NullCompletor()); // last param no complete
+                    compl.add(new NullCompleter()); // last param no complete
 
-                    completors.add(
-                        new ArgumentCompletor(
-                            (Completor []) compl.toArray(new Completor[0])));
+                    completors.add( new ArgumentCompleter( compl ) );
                 }
             }
 
-            setCompletors((Completor []) completors.toArray(new Completor[0]));
+            getCompleters().addAll( completors );
         }
     }
 
-    class TableNameCompletor
-        implements Completor
+    class TableNameCompleter
+        implements Completer
     {
         public int complete(String buf, int pos, List cand)
         {
@@ -4416,7 +4415,7 @@ public class SqlLine
                 return -1;
             }
 
-            return new SimpleCompletor(con().getTableNames(true)).complete(
+            return new StringsCompleter(con().getTableNames(true)).complete(
                 buf,
                 pos,
                 cand);
@@ -4424,14 +4423,14 @@ public class SqlLine
     }
 
     class SQLLineSQLCompletor
-        extends SimpleCompletor
+        extends StringsCompleter
     {
         public SQLLineSQLCompletor(boolean skipmeta)
             throws IOException, SQLException
         {
             super(new String[0]);
 
-            Set completions = new TreeSet();
+            Set<String> completions = new TreeSet<String>();
 
             // add the default SQL completions
             String keywords =
@@ -4488,7 +4487,7 @@ public class SqlLine
             }
 
             // set the Strings that will be completed
-            setCandidateStrings((String []) completions.toArray(new String[0]));
+            getStrings().addAll(completions);
         }
     }
 
@@ -4567,7 +4566,7 @@ public class SqlLine
         private final String username;
         private final String password;
         private Schema schema = null;
-        private Completor sqlLineSQLCompletor = null;
+        private Completer sqlLineSQLCompleter = null;
 
         public DatabaseConnection(
             String driver,
@@ -4623,17 +4622,17 @@ public class SqlLine
                 : meta.getExtraNameCharacters();
 
             // setup the completor for the database
-            sqlLineSQLCompletor =
-                new ArgumentCompletor(
-                    new SQLLineSQLCompletor(skipmeta),
-                    new ArgumentCompletor.AbstractArgumentDelimiter() {
+               sqlLineSQLCompleter =
+                new ArgumentCompleter(
+                    new ArgumentCompleter.WhitespaceArgumentDelimiter() {
                         // delimiters for SQL statements are any
                         // non-letter-or-number characters, except
                         // underscore and characters that are specified
                         // by the database to be valid name identifiers.
-                        public boolean isDelimiterChar(String buf, int pos)
+                        @Override
+                        public boolean isDelimiterChar(final CharSequence buffer, int pos)
                         {
-                            char c = buf.charAt(pos);
+                            char c = buffer.charAt( pos ) ;
                             if (Character.isWhitespace(c)) {
                                 return true;
                             }
@@ -4642,10 +4641,11 @@ public class SqlLine
                                 && (c != '_')
                                 && (extraNameCharacters.indexOf(c) == -1);
                         }
-                    });
+                    }
+                    ,new SQLLineSQLCompletor(skipmeta));
 
             // not all argument elements need to hold true
-            ((ArgumentCompletor) sqlLineSQLCompletor).setStrict(false);
+            ((ArgumentCompleter) sqlLineSQLCompleter).setStrict(false);
         }
 
         /**
@@ -4874,7 +4874,7 @@ public class SqlLine
     }
 
     class Opts
-        implements Completor
+        implements Completer
     {
         public static final String PROPERTY_PREFIX = "sqlline.";
         public static final String PROPERTY_NAME_EXIT =
@@ -4893,8 +4893,8 @@ public class SqlLine
         private boolean showWarnings = true;
         private boolean showNestedErrs = false;
         private String numberFormat = "default";
-        private int maxWidth = Terminal.setupTerminal().getTerminalWidth();
-        private int maxHeight = Terminal.setupTerminal().getTerminalHeight();
+        private int maxWidth = TerminalFactory.get().getWidth();
+        private int maxHeight = TerminalFactory.get().getHeight();
         private int maxColumnWidth = 15;
         private int rowLimit = 0;
         private int timeout = -1;
@@ -4913,9 +4913,9 @@ public class SqlLine
             loadProperties(props);
         }
 
-        public Completor [] optionCompletors()
+        public Completer [] optionCompletors()
         {
-            return new Completor[] {
+            return new Completer[] {
                     this,
                     // new SimpleCompletor (possibleSettingValues ()),
                 };
@@ -4961,7 +4961,7 @@ public class SqlLine
         public int complete(String buf, int pos, List cand)
         {
             try {
-                return new SimpleCompletor(propertyNames()).complete(
+                return new StringsCompleter(propertyNames()).complete(
                     buf,
                     pos,
                     cand);
