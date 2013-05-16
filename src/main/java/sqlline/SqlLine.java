@@ -191,7 +191,7 @@ public class SqlLine
         Class jline;
 
         try {
-            jline = Class.forName("jline.ConsoleReader");
+            jline = Class.forName("jline.console.ConsoleReader");
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(loc("jline-missing"));
         }
