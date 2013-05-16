@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>sqlline</name>
-  <url>http://maven.apache.org</url>
+  <url>http://github.com/julianhyde/sqlline</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
