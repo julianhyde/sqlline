@@ -92,7 +92,7 @@ public class SqlLine
             SqlLine.class.getName());
 
     private static final String sep = System.getProperty("line.separator");
-    public static final String COMMAND_PREFIX = "!";
+    public static final String COMMAND_PREFIX = "^";
 
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
 
@@ -461,7 +461,7 @@ public class SqlLine
      * Starts the program.
      */
     public static void main(String [] args)
-        throws IOException
+        throws Exception
     {
         mainWithInputRedirection(args, null);
     }
@@ -477,7 +477,7 @@ public class SqlLine
     public static void mainWithInputRedirection(
         String [] args,
         InputStream inputStream)
-        throws IOException
+        throws Exception
     {
         SqlLine sqlline = new SqlLine();
         sqlline.begin(args, inputStream);
@@ -666,7 +666,7 @@ public class SqlLine
 
         if (url != null) {
             String com =
-                "!connect "
+                COMMAND_PREFIX + "connect "
                 + url + " "
                 + (((user == null) || (user.length() == 0)) ? "''" : user) + " "
                 + (((pass == null) || (pass.length() == 0)) ? "''" : pass) + " "
@@ -677,7 +677,7 @@ public class SqlLine
 
         // now load properties files
         for (Iterator i = files.iterator(); i.hasNext();) {
-            dispatch("!properties " + i.next());
+            dispatch(COMMAND_PREFIX + "properties " + i.next());
         }
 
         if (commands.size() > 0) {
@@ -696,8 +696,8 @@ public class SqlLine
 
         // if a script file was specified, run the file and quit
         if (opts.getRun() != null) {
-            dispatch("!run " + opts.getRun());
-            dispatch("!quit");
+            dispatch(COMMAND_PREFIX + "run " + opts.getRun());
+            dispatch(COMMAND_PREFIX + "quit");
         }
 
         return true;
@@ -709,7 +709,7 @@ public class SqlLine
      * true.
      */
     void begin(String [] args, InputStream inputStream)
-        throws IOException
+        throws Exception
     {
         try {
             // load the options first, so we can override on the command line
@@ -745,9 +745,10 @@ public class SqlLine
     }
 
     public ConsoleReader getConsoleReader(InputStream inputStream)
-        throws IOException
+        throws Exception
     {
         Terminal terminal = TerminalFactory.create();
+        terminal.init();
 
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
@@ -836,7 +837,7 @@ public class SqlLine
         }
 
         if (isHelpRequest(line)) {
-            line = "!help";
+            line = COMMAND_PREFIX + "help";
         }
 
         if (line.startsWith(COMMAND_PREFIX)) {
