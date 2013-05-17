@@ -37,12 +37,11 @@ public class DispatchCallback
     this.status = Status.UNSET;
   }
 
-  public Status getStatus()
-    {
-    return status;
-    }
-
-  public void prepSqlQuery(Statement statement) {
+  /**
+   * Sets the sql statement the callback should keep track of so that it can be canceled.
+   * @param statement the statement to track
+   */
+  public void trackSqlQuery( Statement statement ) {
     this.statement = statement;
     status = Status.RUNNING;
   }
@@ -67,6 +66,11 @@ public class DispatchCallback
     return Status.RUNNING == status;
   }
 
+  /**
+   * If a statement has been set by {@link #trackSqlQuery(java.sql.Statement)} then call {@link java.sql.Statement#cancel()}
+   * on it.
+   * @throws SQLException
+   */
   public void forceKillSqlQuery() throws SQLException {
     // regardless of whether it's necessary to actually call .cancel() set the flag to indicate a cancel was requested
     // so we can message the interactive shell if we want. If there is something to cancel, cancel it.
@@ -75,6 +79,11 @@ public class DispatchCallback
       statement.cancel();
     }
   }
+
+  public Status getStatus()
+    {
+    return status;
+    }
 
   public void setStatus( Status status )
     {

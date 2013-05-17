@@ -734,7 +734,7 @@ public class SqlLine
           handleException( e );
         }
 
-        // basic setup done. From this point on, honor opts value for showing exceptiosn
+        // basic setup done. From this point on, honor opts value for showing exception
         initComplete = true;
         reader.setHandleUserInterrupt( true ); // CTRL-C handling
 
@@ -750,7 +750,7 @@ public class SqlLine
                 // CTRL-C
                 try {
                   callback.forceKillSqlQuery();
-                  output( "Command Canceled" );
+                  output( loc( "command-canceled") );
                 } catch (SQLException sqle ){
                   handleException( sqle );
                 }
