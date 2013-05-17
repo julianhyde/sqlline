@@ -66,7 +66,7 @@ class SunSignalHandler
                 }
             }
         } catch (SQLException ex) {
-            // ignore?
+            throw new RuntimeException( ex ) ;
         }
     }
 }
