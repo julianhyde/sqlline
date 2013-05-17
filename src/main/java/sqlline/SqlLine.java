@@ -54,6 +54,7 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import jline.*;
+import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -735,6 +736,7 @@ public class SqlLine
 
         // basic setup done. From this point on, honor opts value for showing exceptiosn
         initComplete = true;
+        reader.setHandleUserInterrupt( true ); // CTRL-C handling
 
         while (!exit) {
             DispatchCallback callback = new DispatchCallback();
@@ -744,10 +746,14 @@ public class SqlLine
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
-            } catch (IOException ioe) {
-                // CTRL-C or any other io issue.
-                callback.forceKillSqlQuery();
-                output( "CTRL-C caught" );
+            } catch (UserInterruptException ioe) {
+                // CTRL-C
+                try {
+                  callback.forceKillSqlQuery();
+                  output( "Command Canceled" );
+                } catch (SQLException sqle ){
+                  handleException( sqle );
+                }
             } catch (Throwable t) {
                 handleException(t);
             }

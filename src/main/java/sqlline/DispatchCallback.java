@@ -21,6 +21,7 @@
 
 package sqlline;
 
+import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
@@ -62,12 +63,16 @@ public class DispatchCallback
     return Status.FAILURE == status;
   }
 
-  public void forceKillSqlQuery() throws Exception {
-    if ((null != statement) && (status == Status.RUNNING)) {
+  public boolean isRunning() {
+    return Status.RUNNING == status;
+  }
+
+  public void forceKillSqlQuery() throws SQLException {
+    // regardless of whether it's necessary to actually call .cancel() set the flag to indicate a cancel was requested
+    // so we can message the interactive shell if we want. If there is something to cancel, cancel it.
+    setStatus( Status.CANCELED );
+    if ((null != statement) && (status == Status.RUNNING) && (!statement.isClosed())) {
       statement.cancel();
-      setStatus( Status.CANCELED );
-    } else {
-      throw new UnsupportedOperationException( "Can't force kill a statement that isn't running" );
     }
   }
 
