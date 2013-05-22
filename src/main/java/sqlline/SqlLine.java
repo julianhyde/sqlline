@@ -325,9 +325,11 @@ public class SqlLine
         try {
             Class handlerClass = Class.forName("sqlline.SunSignalHandler");
             signalHandler = (SqlLineSignalHandler) handlerClass.newInstance();
-            output( "Loaded singnal handler: " + signalHandler.getClass().getSimpleName() );
+            output(
+                "Loaded singnal handler: "
+                + signalHandler.getClass().getSimpleName());
         } catch (Throwable t) {
-            handleException( t );
+            handleException(t);
         }
     }
 
@@ -690,7 +692,7 @@ public class SqlLine
             // load the options first, so we can override on the command line
             opts.load();
         } catch (Exception e) {
-          handleException( e );
+            handleException(e);
         }
 
         ConsoleReader reader = getConsoleReader(inputStream);
@@ -702,7 +704,7 @@ public class SqlLine
         try {
             info(getApplicationTitle());
         } catch (Exception e) {
-          handleException( e );
+            handleException(e);
         }
 
         // basic setup done. From this point on, honor opts value for showing exception
@@ -711,8 +713,8 @@ public class SqlLine
         while (!exit) {
             DispatchCallback callback = new DispatchCallback();
             try {
-                callback.setStatus( DispatchCallback.Status.RUNNING );
-                dispatch(reader.readLine(getPrompt()), callback );
+                callback.setStatus(DispatchCallback.Status.RUNNING);
+                dispatch(reader.readLine(getPrompt()), callback);
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
@@ -720,9 +722,9 @@ public class SqlLine
                 // CTRL-C
                 try {
                   callback.forceKillSqlQuery();
-                  output( loc( "command-canceled") );
-                } catch (SQLException sqle ){
-                  handleException( sqle );
+                  output(loc("command-canceled"));
+                } catch (SQLException sqle) {
+                  handleException(sqle);
                 }
             } catch (Throwable t) {
                 handleException(t);
@@ -743,9 +745,9 @@ public class SqlLine
           terminal.init();
         }
         catch (Exception e) {
-          // for backwards compatibility with code that used to use this lib and expected only
-          // IOExceptions, convert back to that.
-          throw new IOException( e );
+            // for backwards compatibility with code that used to use this lib
+            // and expected only IOExceptions, convert back to that.
+            throw new IOException(e);
         }
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
@@ -784,23 +786,27 @@ public class SqlLine
         }
 
         try {
-            FileHistory history = new FileHistory( new File (opts.getHistoryFile() ) ) ;
+            FileHistory history =
+                new FileHistory(new File(opts.getHistoryFile()));
             if (null != historyBuffer) {
-              history.load( historyBuffer );
+              history.load(historyBuffer);
             }
-            reader.setHistory( history );
+            reader.setHistory(history);
         } catch (Exception e) {
             handleException(e);
         }
 
-        reader.addCompleter( new SQLLineCompleter() );
+        reader.addCompleter(new SQLLineCompleter());
 
-        reader.setHandleUserInterrupt( true ); // CTRL-C handling
-        reader.setExpandEvents( false );
-        // override jline2's use of ! as shell-style "last command startign with" since we already designated it
-        // as the prefix for sql commands. The DO_LOWERCASE_VERSION is a hack since setting this to any string
-        // value or macro reader automatically triggers a reset of the visibile buffer, hiding the character.
-        //reader.getKeys().bind( "!", Operation.SELF_INSERT);
+        reader.setHandleUserInterrupt(true); // CTRL-C handling
+        reader.setExpandEvents(false);
+
+        // override jline2's use of ! as shell-style "last command starting
+        // with" since we already designated it as the prefix for sql commands.
+        // The DO_LOWERCASE_VERSION is a hack since setting this to any string
+        // value or macro reader automatically triggers a reset of the visible
+        // buffer, hiding the character.
+        //reader.getKeys().bind("!", Operation.SELF_INSERT);
 
         return reader;
     }
@@ -822,18 +828,18 @@ public class SqlLine
         if (line == null) {
             // exit
             exit = true;
-            callback.setStatus( DispatchCallback.Status.SUCCESS );
+            callback.setStatus(DispatchCallback.Status.SUCCESS);
             return;
         }
 
         if (line.trim().length() == 0) {
-          callback.setStatus( DispatchCallback.Status.SUCCESS );
-          return;
+            callback.setStatus(DispatchCallback.Status.SUCCESS);
+            return;
         }
 
         if (isComment(line)) {
-          callback.setStatus( DispatchCallback.Status.SUCCESS );
-          return;
+            callback.setStatus(DispatchCallback.Status.SUCCESS);
+            return;
         }
 
         line = line.trim();
@@ -858,10 +864,10 @@ public class SqlLine
             }
 
             if (cmdMap.size() == 0) {
-                callback.setStatus( DispatchCallback.Status.FAILURE );
-                error( loc( "unknown-command", line ) );
+                callback.setStatus(DispatchCallback.Status.FAILURE);
+                error(loc("unknown-command", line));
             } else if (cmdMap.size() > 1) {
-                callback.setStatus( DispatchCallback.Status.FAILURE );
+                callback.setStatus(DispatchCallback.Status.FAILURE);
                 error(
                     loc("multiple-matches",
                         cmdMap.keySet().toString()));
@@ -883,7 +889,7 @@ public class SqlLine
      */
     boolean needsContinuation(String line)
     {
-        if (null == line ) {
+        if (null == line) {
             // happens when CTRL-C used to exit a malformed.
             return false;
         }
@@ -2978,7 +2984,7 @@ public class SqlLine
             String [] parts = split(line);
             List params = new LinkedList(Arrays.asList(parts));
             if ((parts == null) || (parts.length == 0)) {
-                dbinfo( "", callback );
+                dbinfo("", callback);
                 return;
             }
 
@@ -3040,7 +3046,7 @@ public class SqlLine
         {
             ListIterator<History.Entry> hist = reader.getHistory().entries();
             int index = 1;
-            while( hist.hasNext() )  {
+            while (hist.hasNext()) {
                 index++ ;
                 output(color().pad(index + ".", 6).append(hist.next().toString()));
             }
@@ -3733,10 +3739,11 @@ public class SqlLine
             execute(line, true, callback);
         }
 
-        private void execute(String line, boolean call, DispatchCallback callback)
+        private void execute(
+            String line, boolean call, DispatchCallback callback)
         {
             if ((line == null) || (line.length() == 0)) {
-                callback.setStatus( DispatchCallback.Status.FAILURE );
+                callback.setStatus(DispatchCallback.Status.FAILURE);
             }
 
             // ### FIXME:  doing the multi-line handling down here means
@@ -3761,9 +3768,10 @@ public class SqlLine
                     }
                 }
             } catch (UserInterruptException uie) {
-              // CTRL-C'd out of the command. Note it, but don't call it an error.
-              callback.setStatus( DispatchCallback.Status.CANCELED );
-              output( loc( "command-canceled") );
+              // CTRL-C'd out of the command. Note it, but don't call it an
+              // error.
+              callback.setStatus(DispatchCallback.Status.CANCELED);
+              output(loc("command-canceled"));
               return;
             } catch (Exception e) {
                 handleException(e);
@@ -3846,9 +3854,10 @@ public class SqlLine
                     }
                 }
             } catch (UserInterruptException uie) {
-                // CTRL-C'd out of the command. Note it, but don't call it an error.
-                callback.setStatus( DispatchCallback.Status.CANCELED );
-                output( loc( "command-canceled") );
+                // CTRL-C'd out of the command. Note it, but don't call it an
+                // error.
+                callback.setStatus(DispatchCallback.Status.CANCELED);
+                output(loc("command-canceled"));
                 return;
             } catch (Exception e) {
                 callback.setToFailure();
@@ -3935,7 +3944,7 @@ public class SqlLine
             for (int i = 1; i < parts.length; i++) {
                 Properties props = new Properties();
                 props.load(new FileInputStream(parts[i]));
-                connect( props, callback );
+                connect(props, callback);
                 if (callback.isSuccess()) {
                     successes++;
                 }
@@ -4297,7 +4306,7 @@ public class SqlLine
                 }
 
                 // success only if all the commands were successful
-                if ( runCommands(cmds, callback) == cmds.size() ) {
+                if (runCommands(cmds, callback) == cmds.size()) {
                   callback.setToSuccess();
                 } else {
                   callback.setToFailure();
@@ -4486,11 +4495,11 @@ public class SqlLine
                     compl.addAll(Arrays.asList(comps));
                     compl.add(new NullCompleter()); // last param no complete
 
-                    completors.add( new ArgumentCompleter( compl ) );
+                    completors.add(new ArgumentCompleter(compl));
                 }
             }
 
-            getCompleters().addAll( completors );
+            getCompleters().addAll(completors);
         }
     }
 
@@ -4720,7 +4729,7 @@ public class SqlLine
                         @Override
                         public boolean isDelimiterChar(final CharSequence buffer, int pos)
                         {
-                            char c = buffer.charAt( pos ) ;
+                            char c = buffer.charAt(pos);
                             if (Character.isWhitespace(c)) {
                                 return true;
                             }
