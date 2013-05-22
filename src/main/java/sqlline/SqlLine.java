@@ -54,6 +54,7 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import jline.*;
+import jline.console.Operation;
 import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
@@ -93,7 +94,7 @@ public class SqlLine
             SqlLine.class.getName());
 
     private static final String sep = System.getProperty("line.separator");
-    public static final String COMMAND_PREFIX = "^";
+    public static final String COMMAND_PREFIX = "!";
 
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
 
@@ -465,7 +466,7 @@ public class SqlLine
      * Starts the program.
      */
     public static void main(String [] args)
-        throws Exception
+        throws IOException
     {
         mainWithInputRedirection(args, null);
     }
@@ -481,7 +482,7 @@ public class SqlLine
     public static void mainWithInputRedirection(
         String [] args,
         InputStream inputStream)
-        throws Exception
+        throws IOException
     {
         SqlLine sqlline = new SqlLine();
         sqlline.begin(args, inputStream);
@@ -713,7 +714,7 @@ public class SqlLine
      * true.
      */
     void begin(String [] args, InputStream inputStream)
-        throws Exception
+        throws IOException
     {
         try {
             // load the options first, so we can override on the command line
@@ -736,7 +737,6 @@ public class SqlLine
 
         // basic setup done. From this point on, honor opts value for showing exception
         initComplete = true;
-        reader.setHandleUserInterrupt( true ); // CTRL-C handling
 
         while (!exit) {
             DispatchCallback callback = new DispatchCallback();
@@ -766,11 +766,17 @@ public class SqlLine
     }
 
     public ConsoleReader getConsoleReader(InputStream inputStream)
-        throws Exception
+        throws IOException
     {
         Terminal terminal = TerminalFactory.create();
-        terminal.init();
-
+        try {
+          terminal.init();
+        }
+        catch (Exception e) {
+          // for backwards compatibility with code that used to use this lib and expected only
+          // IOExceptions, convert back to that.
+          throw new IOException( e );
+        }
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
             reader =
@@ -818,6 +824,13 @@ public class SqlLine
         }
 
         reader.addCompleter( new SQLLineCompleter() );
+
+        reader.setHandleUserInterrupt( true ); // CTRL-C handling
+        reader.setExpandEvents( false );
+        // override jline2's use of ! as shell-style "last command startign with" since we already designated it
+        // as the prefix for sql commands. The DO_LOWERCASE_VERSION is a hack since setting this to any string
+        // value or macro reader automatically triggers a reset of the visibile buffer, hiding the character.
+        //reader.getKeys().bind( "!", Operation.SELF_INSERT);
 
         return reader;
     }
@@ -900,6 +913,11 @@ public class SqlLine
      */
     boolean needsContinuation(String line)
     {
+        if (null == line ) {
+            // happens when CTRL-C used to exit a malformed.
+            return false;
+        }
+
         if (isHelpRequest(line)) {
             return false;
         }
@@ -3788,6 +3806,11 @@ public class SqlLine
                         line += sep + extra;
                     }
                 }
+            } catch (UserInterruptException uie) {
+              // CTRL-C'd out of the command. Note it, but don't call it an error.
+              callback.setStatus( DispatchCallback.Status.CANCELED );
+              output( loc( "command-canceled") );
+              return;
             } catch (Exception e) {
                 handleException(e);
             }
@@ -3868,6 +3891,11 @@ public class SqlLine
                         stmnt.close();
                     }
                 }
+            } catch (UserInterruptException uie) {
+                // CTRL-C'd out of the command. Note it, but don't call it an error.
+                callback.setStatus( DispatchCallback.Status.CANCELED );
+                output( loc( "command-canceled") );
+                return;
             } catch (Exception e) {
                 callback.setToFailure();
                 error(e);
