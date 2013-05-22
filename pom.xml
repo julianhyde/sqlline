@@ -8,11 +8,19 @@
   <packaging>jar</packaging>
 
   <name>sqlline</name>
-  <url>http://maven.apache.org</url>
+  <url>http://github.com/julianhyde/sqlline</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <licenses>
+    <license>
+      <name>Modified BSD License</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <distributionManagement>
     <repository>
@@ -40,6 +48,17 @@
               <goal>jar</goal>
             </goals>
           </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+           <execution>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+           </execution>
         </executions>
       </plugin>
     </plugins>
