@@ -26,6 +26,17 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import jline.*;
+import jline.console.Operation;
+import jline.console.UserInterruptException;
+import jline.console.completer.AggregateCompleter;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.FileNameCompleter;
+import jline.console.completer.NullCompleter;
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
+import jline.console.history.FileHistory;
+import jline.console.history.History;
 
 
 /**
@@ -56,6 +67,8 @@ public class SqlLine
     public static final String COMMAND_PREFIX = "!";
 
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
+
+    private static boolean initComplete = false;
 
     static final SortedSet KNOWN_DRIVERS =
         new TreeSet(
@@ -150,11 +163,11 @@ public class SqlLine
 
     static {
         Class jline;
-
+        String testClass = "jline.console.ConsoleReader";
         try {
-            jline = Class.forName("jline.ConsoleReader");
+            jline = Class.forName(testClass);
         } catch (Throwable t) {
-            throw new ExceptionInInitializerError(loc("jline-missing"));
+            throw new ExceptionInInitializerError(loc("jline-missing", testClass));
         }
     }
 
@@ -165,7 +178,7 @@ public class SqlLine
     private final SqlLine sqlline = this;
     private Collection drivers = null;
     private Connections connections = new Connections();
-    private Completor sqlLineCommandCompletor;
+    private Completer sqlLineCommandCompleter;
     private Map completions = new HashMap();
     private Opts opts = new Opts(System.getProperties());
     String lastProgress = null;
@@ -195,26 +208,26 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "connect", "open" },
-                new Completor[] {
-                    new SimpleCompletor(getConnectionURLExamples())
+                new Completer[] {
+                    new StringsCompleter(getConnectionURLExamples())
                 }),
             new ReflectiveCommandHandler(
                 new String[] { "describe" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "indexes" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "primarykeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "exportedkeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "manual" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "importedkeys" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "procedures" },
                 null),
             new ReflectiveCommandHandler(new String[] { "tables" },
@@ -223,18 +236,18 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "columns" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "reconnect" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "dropall" },
-                new Completor[] { new TableNameCompletor() }),
+                new Completer[] { new TableNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "history" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "metadata" },
-                new Completor[] {
-                    new SimpleCompletor(getMetadataMethodNames())
+                new Completer[] {
+                    new StringsCompleter(getMetadataMethodNames())
                 }),
             new ReflectiveCommandHandler(new String[] { "nativesql" },
                 null),
@@ -246,7 +259,7 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "run" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "batch" },
                 null),
             new ReflectiveCommandHandler(new String[] { "list" },
@@ -257,10 +270,10 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "script" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(
                 new String[] { "record" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "brief" },
                 null),
             new ReflectiveCommandHandler(new String[] { "close" },
@@ -269,11 +282,11 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "isolation" },
-                new Completor[] { new SimpleCompletor(getIsolationLevels()) }),
+                new Completer[] { new StringsCompleter(getIsolationLevels()) }),
             new ReflectiveCommandHandler(
                 new String[] { "outputformat" },
-                new Completor[] {
-                    new SimpleCompletor(
+                new Completer[] {
+                    new StringsCompleter(
                         (String []) formats.keySet().toArray(new String[0]))
                 }),
             new ReflectiveCommandHandler(new String[] { "autocommit" },
@@ -282,7 +295,7 @@ public class SqlLine
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "properties" },
-                new Completor[] { new FileNameCompletor() }),
+                new Completer[] { new FileNameCompleter() }),
             new ReflectiveCommandHandler(new String[] { "rollback" },
                 null),
             new ReflectiveCommandHandler(new String[] { "help", "?" },
@@ -306,14 +319,15 @@ public class SqlLine
     {
         // registerKnownDrivers ();
 
-        sqlLineCommandCompletor = new SQLLineCommandCompletor();
+        sqlLineCommandCompleter = new SQLLineCommandCompleter();
 
         // attempt to dynamically load signal handler
         try {
             Class handlerClass = Class.forName("sqlline.SunSignalHandler");
             signalHandler = (SqlLineSignalHandler) handlerClass.newInstance();
+            output( "Loaded singnal handler: " + signalHandler.getClass().getSimpleName() );
         } catch (Throwable t) {
-            // ignore and leave cancel functionality disabled
+            handleException( t );
         }
     }
 
@@ -627,18 +641,18 @@ public class SqlLine
 
         if (url != null) {
             String com =
-                "!connect "
+                COMMAND_PREFIX + "connect "
                 + url + " "
                 + (((user == null) || (user.length() == 0)) ? "''" : user) + " "
                 + (((pass == null) || (pass.length() == 0)) ? "''" : pass) + " "
                 + ((driver == null) ? "" : driver);
             debug("issuing: " + com);
-            dispatch(com);
+            dispatch(com, new DispatchCallback());
         }
 
         // now load properties files
         for (Iterator i = files.iterator(); i.hasNext();) {
-            dispatch("!properties " + i.next());
+            dispatch(COMMAND_PREFIX + "properties " + i.next(), new DispatchCallback());
         }
 
         if (commands.size() > 0) {
@@ -649,7 +663,7 @@ public class SqlLine
             for (Iterator i = commands.iterator(); i.hasNext();) {
                 String command = i.next().toString();
                 debug(loc("executing-command", command));
-                dispatch(command);
+                dispatch(command, new DispatchCallback());
             }
 
             exit = true; // execute and exit
@@ -657,8 +671,8 @@ public class SqlLine
 
         // if a script file was specified, run the file and quit
         if (opts.getRun() != null) {
-            dispatch("!run " + opts.getRun());
-            dispatch("!quit");
+            dispatch(COMMAND_PREFIX + "run " + opts.getRun(), new DispatchCallback());
+            dispatch(COMMAND_PREFIX + "quit", new DispatchCallback());
         }
 
         return true;
@@ -676,6 +690,7 @@ public class SqlLine
             // load the options first, so we can override on the command line
             opts.load();
         } catch (Exception e) {
+          handleException( e );
         }
 
         ConsoleReader reader = getConsoleReader(inputStream);
@@ -687,14 +702,28 @@ public class SqlLine
         try {
             info(getApplicationTitle());
         } catch (Exception e) {
+          handleException( e );
         }
 
+        // basic setup done. From this point on, honor opts value for showing exception
+        initComplete = true;
+
         while (!exit) {
+            DispatchCallback callback = new DispatchCallback();
             try {
-                dispatch(reader.readLine(getPrompt()));
+                callback.setStatus( DispatchCallback.Status.RUNNING );
+                dispatch(reader.readLine(getPrompt()), callback );
             } catch (EOFException eof) {
                 // CTRL-D
-                command.quit(null);
+                command.quit(null, callback);
+            } catch (UserInterruptException ioe) {
+                // CTRL-C
+                try {
+                  callback.forceKillSqlQuery();
+                  output( loc( "command-canceled") );
+                } catch (SQLException sqle ){
+                  handleException( sqle );
+                }
             } catch (Throwable t) {
                 handleException(t);
             }
@@ -702,20 +731,28 @@ public class SqlLine
 
         // ### NOTE jvs 10-Aug-2004:  Clean up any outstanding
         // connections automatically.
-        command.closeall(null);
+        // nothing is done with the callback beyond
+        command.closeall(null, new DispatchCallback());
     }
 
     public ConsoleReader getConsoleReader(InputStream inputStream)
         throws IOException
     {
-        Terminal terminal = Terminal.setupTerminal();
-
+        Terminal terminal = TerminalFactory.create();
+        try {
+          terminal.init();
+        }
+        catch (Exception e) {
+          // for backwards compatibility with code that used to use this lib and expected only
+          // IOExceptions, convert back to that.
+          throw new IOException( e );
+        }
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
             reader =
                 new ConsoleReader(
                     inputStream,
-                    new PrintWriter(System.out));
+                    System.out);
         } else {
             reader = new ConsoleReader();
         }
@@ -730,9 +767,9 @@ public class SqlLine
                 // input will clobber the history input, but setting the
                 // input before the output will cause the previous commands
                 // to not be saved to the buffer.
-                FileInputStream historyIn =
+                InputStream historyIn = new BufferedInputStream(
                     new FileInputStream(
-                        opts.getHistoryFile());
+                        opts.getHistoryFile()));
                 ByteArrayOutputStream hist = new ByteArrayOutputStream();
                 int n;
                 while ((n = historyIn.read()) != -1) {
@@ -747,25 +784,23 @@ public class SqlLine
         }
 
         try {
-            // now set the output for the history
-            PrintWriter historyOut =
-                new PrintWriter(new FileWriter(
-                        opts.getHistoryFile()));
-            reader.getHistory().setOutput(historyOut);
-        } catch (Exception e) {
-            handleException(e);
-        }
-
-        try {
-            // now load in the previous history
-            if (historyBuffer != null) {
-                reader.getHistory().load(historyBuffer);
+            FileHistory history = new FileHistory( new File (opts.getHistoryFile() ) ) ;
+            if (null != historyBuffer) {
+              history.load( historyBuffer );
             }
+            reader.setHistory( history );
         } catch (Exception e) {
             handleException(e);
         }
 
-        reader.addCompletor(new SQLLineCompletor());
+        reader.addCompleter( new SQLLineCompleter() );
+
+        reader.setHandleUserInterrupt( true ); // CTRL-C handling
+        reader.setExpandEvents( false );
+        // override jline2's use of ! as shell-style "last command startign with" since we already designated it
+        // as the prefix for sql commands. The DO_LOWERCASE_VERSION is a hack since setting this to any string
+        // value or macro reader automatically triggers a reset of the visibile buffer, hiding the character.
+        //reader.getKeys().bind( "!", Operation.SELF_INSERT);
 
         return reader;
     }
@@ -782,20 +817,23 @@ public class SqlLine
      *
      * @return true if the command was "successful"
      */
-    boolean dispatch(String line)
+    void dispatch(String line, DispatchCallback callback)
     {
         if (line == null) {
             // exit
             exit = true;
-            return true;
+            callback.setStatus( DispatchCallback.Status.SUCCESS );
+            return;
         }
 
         if (line.trim().length() == 0) {
-            return true;
+          callback.setStatus( DispatchCallback.Status.SUCCESS );
+          return;
         }
 
         if (isComment(line)) {
-            return true;
+          callback.setStatus( DispatchCallback.Status.SUCCESS );
+          return;
         }
 
         line = line.trim();
@@ -806,7 +844,7 @@ public class SqlLine
         }
 
         if (isHelpRequest(line)) {
-            line = "!help";
+            line = COMMAND_PREFIX + "help";
         }
 
         if (line.startsWith(COMMAND_PREFIX)) {
@@ -820,17 +858,19 @@ public class SqlLine
             }
 
             if (cmdMap.size() == 0) {
-                return error(loc("unknown-command", line));
+                callback.setStatus( DispatchCallback.Status.FAILURE );
+                error( loc( "unknown-command", line ) );
             } else if (cmdMap.size() > 1) {
-                return error(
+                callback.setStatus( DispatchCallback.Status.FAILURE );
+                error(
                     loc("multiple-matches",
                         cmdMap.keySet().toString()));
             } else {
-                return ((CommandHandler) cmdMap.values().iterator().next())
-                    .execute(line);
+                 ((CommandHandler) cmdMap.values().iterator().next())
+                    .execute(line, callback);
             }
         } else {
-            return command.sql(line);
+             command.sql(line, callback);
         }
     }
 
@@ -843,6 +883,11 @@ public class SqlLine
      */
     boolean needsContinuation(String line)
     {
+        if (null == line ) {
+            // happens when CTRL-C used to exit a malformed.
+            return false;
+        }
+
         if (isHelpRequest(line)) {
             return false;
         }
@@ -1567,7 +1612,7 @@ public class SqlLine
 
         if (e instanceof SQLException) {
             handleSQLException((SQLException) e);
-        } else if (!(opts.getVerbose())) {
+        } else if ((!initComplete) && !(opts.getVerbose())) { // all init errors must be verbose
             if (e.getMessage() == null) {
                 error(e.getClass().getName());
             } else {
@@ -1580,7 +1625,8 @@ public class SqlLine
 
     void handleSQLException(SQLException e)
     {
-        if ((e instanceof SQLWarning) && !(opts.getShowWarnings())) {
+        // all init errors must be verbose
+        if ((e instanceof SQLWarning) && (!initComplete) && !(opts.getShowWarnings())) {
             return;
         }
 
@@ -1594,11 +1640,13 @@ public class SqlLine
                     new Integer(e.getErrorCode())
                 }));
 
-        if (opts.getVerbose()) {
+        // all init errors must be verbose
+        if ((!initComplete) && (opts.getVerbose())) {
             e.printStackTrace();
         }
 
-        if (!opts.getShowNestedErrs()) {
+        // all init errors must be verbose
+        if (initComplete && (!opts.getShowNestedErrs())) {
             return;
         }
 
@@ -1675,7 +1723,7 @@ public class SqlLine
         if (!knownOnly) {
             classNames.addAll(
                 Arrays.asList(
-                    ClassNameCompletor.getClassNames()));
+                    ClassNameCompleter.getClassNames()));
         }
 
         classNames.addAll(KNOWN_DRIVERS);
@@ -1880,7 +1928,7 @@ public class SqlLine
         }
     }
 
-    public int runCommands(List cmds)
+    public int runCommands(List cmds, DispatchCallback callback)
     {
         int successCount = 0;
 
@@ -1890,8 +1938,8 @@ public class SqlLine
             for (Iterator i = cmds.iterator(); i.hasNext();) {
                 String cmd = i.next().toString();
                 info(color().pad((index++) + "/" + (size), 13).append(cmd));
-                boolean success = dispatch(cmd);
-
+                dispatch(cmd, callback);
+                boolean success = callback.isSuccess();
                 // if we do not force script execution, abort
                 // when a failure occurs.
                 if (!success && !opts.getForce()) {
@@ -1928,7 +1976,7 @@ public class SqlLine
 
     /**
      * A generic command to be executed. Execution of the command should be
-     * dispatched to the {@link #execute(java.lang.String)} method after
+     * dispatched to the {@link #execute(java.lang.String, DispatchCallback)} method after
      * determining that the command is appropriate with the {@link
      * #matches(java.lang.String)} method.
      */
@@ -1963,13 +2011,14 @@ public class SqlLine
          * Execute the specified command.
          *
          * @param line the full command line to execute.
+         * @param dispatchCallback the callback to check or interrupt the action
          */
-        public boolean execute(String line);
+        public void execute(String line, DispatchCallback dispatchCallback);
 
         /**
          * Returns the completors that can handle parameters.
          */
-        public Completor [] getParameterCompletors();
+        public Completer [] getParameterCompleters();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -2820,26 +2869,26 @@ public class SqlLine
         private final String name;
         private final String [] names;
         private final String helpText;
-        private Completor [] parameterCompletors = new Completor[0];
+        private Completer [] parameterCompleters = new Completer[0];
 
         public AbstractCommandHandler(
             String [] names,
             String helpText,
-            Completor [] completors)
+            Completer [] completors)
         {
             this.name = names[0];
             this.names = names;
             this.helpText = helpText;
             if ((completors == null) || (completors.length == 0)) {
-                this.parameterCompletors =
-                    new Completor[] {
-                        new NullCompletor()
+                this.parameterCompleters =
+                    new Completer[] {
+                        new NullCompleter()
                     };
             } else {
                 List c = new LinkedList(Arrays.asList(completors));
-                c.add(new NullCompletor());
-                this.parameterCompletors =
-                    (Completor []) c.toArray(new Completor[0]);
+                c.add(new NullCompleter());
+                this.parameterCompleters =
+                    (Completer []) c.toArray(new Completer[0]);
             }
         }
 
@@ -2878,14 +2927,14 @@ public class SqlLine
             return null;
         }
 
-        public void setParameterCompletors(Completor [] parameterCompletors)
+        public void setParameterCompleters(Completer [] parameterCompleters)
         {
-            this.parameterCompletors = parameterCompletors;
+            this.parameterCompleters = parameterCompleters;
         }
 
-        public Completor [] getParameterCompletors()
+        public Completer [] getParameterCompleters()
         {
-            return this.parameterCompletors;
+            return this.parameterCompleters;
         }
     }
 
@@ -2896,24 +2945,22 @@ public class SqlLine
     public class ReflectiveCommandHandler
         extends AbstractCommandHandler
     {
-        public ReflectiveCommandHandler(String [] cmds, Completor [] completor)
+        public ReflectiveCommandHandler(String [] cmds, Completer [] completer)
         {
-            super(cmds, loc("help-" + cmds[0]), completor);
+            super(cmds, loc("help-" + cmds[0]), completer);
         }
 
-        public boolean execute(String line)
+        public void execute(String line, DispatchCallback callback)
         {
             try {
-                Object ob =
                     command.getClass().getMethod(
                         getName(),
-                        new Class[] { String.class }).invoke(
+                        new Class[] { String.class, DispatchCallback.class }).invoke(
                         command,
-                        new Object[] { line });
-                return (ob != null) && (ob instanceof Boolean)
-                    && ((Boolean) ob).booleanValue();
+                        new Object[] { line, callback });
             } catch (Throwable e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
     }
@@ -2924,23 +2971,24 @@ public class SqlLine
 
     public class Commands
     {
-        public boolean metadata(String line)
+        public void metadata(String line, DispatchCallback callback)
         {
             debug(line);
 
             String [] parts = split(line);
             List params = new LinkedList(Arrays.asList(parts));
             if ((parts == null) || (parts.length == 0)) {
-                return dbinfo("");
+                dbinfo( "", callback );
+                return;
             }
 
             params.remove(0);
             params.remove(0);
             debug(params.toString());
-            return metadata(parts[1], params);
+            metadata(parts[1], params, callback);
         }
 
-        public boolean metadata(String cmd, List argList)
+        public void metadata(String cmd, List argList, DispatchCallback callback)
         {
             try {
                 Method [] m = con().meta.getClass().getMethods();
@@ -2957,7 +3005,8 @@ public class SqlLine
                     for (Iterator i = methodNames.iterator(); i.hasNext();) {
                         error("   " + i.next());
                     }
-                    return false;
+                    callback.setToFailure();
+                    return;
                 }
 
                 Object res =
@@ -2981,21 +3030,21 @@ public class SqlLine
                     output(res.toString());
                 }
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
-
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean history(String line)
+        public void history(String line, DispatchCallback callback)
         {
-            List hist = reader.getHistory().getHistoryList();
+            ListIterator<History.Entry> hist = reader.getHistory().entries();
             int index = 1;
-            for (Iterator i = hist.iterator(); i.hasNext(); index++) {
-                output(color().pad(index + ".", 6).append(i.next().toString()));
+            while( hist.hasNext() )  {
+                index++ ;
+                output(color().pad(index + ".", 6).append(hist.next().toString()));
             }
-
-            return true;
+            callback.setToSuccess();
         }
 
         String arg1(String line, String paramname)
@@ -3074,65 +3123,65 @@ public class SqlLine
             return list;
         }
 
-        public boolean indexes(String line)
+        public void indexes(String line, DispatchCallback callback)
             throws Exception
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
             args.add(Boolean.FALSE);
             args.add(Boolean.TRUE);
-            return metadata("getIndexInfo", args);
+            metadata("getIndexInfo", args, callback);
         }
 
-        public boolean primarykeys(String line)
+        public void primarykeys(String line, DispatchCallback callback)
             throws Exception
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
-            return metadata("getPrimaryKeys", args);
+            metadata("getPrimaryKeys", args, callback);
         }
 
-        public boolean exportedkeys(String line)
+        public void exportedkeys(String line, DispatchCallback callback)
             throws Exception
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
-            return metadata("getExportedKeys", args);
+            metadata("getExportedKeys", args, callback);
         }
 
-        public boolean importedkeys(String line)
+        public void importedkeys(String line, DispatchCallback callback)
             throws Exception
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
-            return metadata("getImportedKeys", args);
+            metadata("getImportedKeys", args, callback);
         }
 
-        public boolean procedures(String line)
+        public void procedures(String line, DispatchCallback callback)
             throws Exception
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args =
                 buildMetadataArgs(line, "procedure name pattern", strings);
-            return metadata("getProcedures", args);
+            metadata("getProcedures", args, callback);
         }
 
-        public boolean tables(String line)
+        public void tables(String line, DispatchCallback callback)
             throws SQLException
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
             args.add(null);
-            return metadata("getTables", args);
+            metadata("getTables", args, callback);
         }
 
-        public boolean typeinfo(String line)
+        public void typeinfo(String line, DispatchCallback callback)
             throws Exception
         {
-            return metadata("getTypeInfo", Collections.EMPTY_LIST);
+            metadata("getTypeInfo", Collections.EMPTY_LIST, callback);
         }
 
-        public boolean nativesql(String sql)
+        public void nativesql(String sql, DispatchCallback callback)
             throws Exception
         {
             if (sql.startsWith(COMMAND_PREFIX)) {
@@ -3146,27 +3195,30 @@ public class SqlLine
             String nat = con().getConnection().nativeSQL(sql);
 
             output(nat);
-
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean columns(String line) throws SQLException
+        public void columns(String line, DispatchCallback callback) throws SQLException
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
             args.add("%");
-            return metadata("getColumns", args);
+            metadata("getColumns", args, callback);
         }
 
-        public boolean dropall(String line)
+        public void dropall(String line, DispatchCallback callback)
         {
             if ((con() == null) || (con().url == null)) {
-                return error(loc("no-current-connection"));
+                error(loc("no-current-connection"));
+                callback.setToFailure();
+                return;
             }
 
             try {
                 if (!(reader.readLine(loc("really-drop-all")).equals("y"))) {
-                    return error("abort-drop-all");
+                    error("abort-drop-all");
+                    callback.setToFailure();
+                    return;
                 }
 
                 List cmds = new LinkedList();
@@ -3185,29 +3237,38 @@ public class SqlLine
                 }
 
                 // run as a batch
-                return runCommands(cmds) == cmds.size();
+                if (runCommands(cmds, callback) == cmds.size()) {
+                  callback.setToSuccess();
+                } else {
+                  callback.setToFailure();
+                }
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
 
-        public boolean reconnect(String line)
+        public void reconnect(String line, DispatchCallback callback)
         {
             if ((con() == null) || (con().url == null)) {
-                return error(loc("no-current-connection"));
+                error(loc("no-current-connection"));
+                callback.setToFailure();
+                return;
             }
 
             info(loc("reconnecting", con().url));
             try {
                 con().reconnect();
             } catch (Exception e) {
-                return error(e);
+                error(e);
+                callback.setToFailure();
+                return;
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean scan(String line)
+        public void scan(String line, DispatchCallback callback)
             throws IOException
         {
             TreeSet names = new TreeSet();
@@ -3249,26 +3310,26 @@ public class SqlLine
                 }
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean save(String line)
+        public void save(String line, DispatchCallback callback)
             throws IOException
         {
             info(loc("saving-options", opts.rcFile));
             opts.save();
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean load(String line)
+        public void load(String line, DispatchCallback callback)
             throws IOException
         {
             opts.load();
             info(loc("loaded-options", opts.rcFile));
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean config(String line)
+        public void config(String line, DispatchCallback callback)
         {
             try {
                 Properties props = opts.toProperties();
@@ -3284,24 +3345,28 @@ public class SqlLine
                                    props.getProperty(key)));
                 }
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
+                return;
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean set(String line)
+        public void set(String line, DispatchCallback callback)
         {
             if ((line == null)
                 || line.trim().equals("set")
                 || (line.length() == 0))
             {
-                return config(null);
+                config(null, callback);
+                return;
             }
 
             String [] parts = split(line, 3, "Usage: set <key> <value>");
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             String key = parts[1];
@@ -3316,7 +3381,7 @@ public class SqlLine
                 }
             }
 
-            return success;
+            callback.setToSuccess();
         }
 
         private void reportResult(String action, long start, long end)
@@ -3335,14 +3400,16 @@ public class SqlLine
             }
         }
 
-        public boolean commit(String line)
+        public void commit(String line, DispatchCallback callback)
             throws SQLException
         {
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
             if (!(assertAutoCommit())) {
-                return false;
+                callback.setToFailure();
+                return ;
             }
 
             try {
@@ -3352,20 +3419,25 @@ public class SqlLine
                 showWarnings();
                 reportResult(loc("commit-complete"), start, end);
 
-                return true;
+                callback.setToSuccess();
+                return ;
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
+                return;
             }
         }
 
-        public boolean rollback(String line)
+        public void rollback(String line, DispatchCallback callback)
             throws SQLException
         {
             if (!(assertConnection())) {
-                return false;
+              callback.setToFailure();
+              return;
             }
             if (!(assertAutoCommit())) {
-                return false;
+              callback.setToFailure();
+              return ;
             }
 
             try {
@@ -3374,17 +3446,19 @@ public class SqlLine
                 long end = System.currentTimeMillis();
                 showWarnings();
                 reportResult(loc("rollback-complete"), start, end);
-                return true;
+                callback.setToSuccess();
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
 
-        public boolean autocommit(String line)
+        public void autocommit(String line, DispatchCallback callback)
             throws SQLException
         {
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             if (line.endsWith("on")) {
@@ -3395,13 +3469,14 @@ public class SqlLine
 
             showWarnings();
             autocommitStatus(con().connection);
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean dbinfo(String line)
+        public void dbinfo(String line, DispatchCallback callback)
         {
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             showWarnings();
@@ -3542,31 +3617,32 @@ public class SqlLine
                 }
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean verbose(String line)
+        public void verbose(String line, DispatchCallback callback)
         {
             info("verbose: on");
-            return set("set verbose true");
+            set("set verbose true", callback);
         }
 
-        public boolean outputformat(String line)
+        public void outputformat(String line, DispatchCallback callback)
         {
-            return set("set " + line);
+            set("set " + line, callback);
         }
 
-        public boolean brief(String line)
+        public void brief(String line, DispatchCallback callback)
         {
             info("verbose: off");
-            return set("set verbose false");
+            set("set verbose false", callback);
         }
 
-        public boolean isolation(String line)
+        public void isolation(String line, DispatchCallback callback)
             throws SQLException
         {
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             int i;
@@ -3582,12 +3658,14 @@ public class SqlLine
             } else if (line.endsWith("TRANSACTION_SERIALIZABLE")) {
                 i = Connection.TRANSACTION_SERIALIZABLE;
             } else {
-                return error(
+                callback.setToFailure();
+                error(
                     "Usage: isolation <TRANSACTION_NONE "
                     + "| TRANSACTION_READ_COMMITTED "
                     + "| TRANSACTION_READ_UNCOMMITTED "
                     + "| TRANSACTION_REPEATABLE_READ "
                     + "| TRANSACTION_SERIALIZABLE>");
+                return;
             }
 
             con().connection.setTransactionIsolation(i);
@@ -3615,46 +3693,50 @@ public class SqlLine
             }
 
             info(loc("isolation-status", isoldesc));
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean batch(String line)
+        public void batch(String line, DispatchCallback callback)
         {
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             if (batch == null) {
                 batch = new LinkedList();
                 info(loc("batch-start"));
-                return true;
+                callback.setToSuccess();
+                return;
             } else {
                 info(loc("running-batch"));
                 try {
                     runBatch(batch);
-                    return true;
+                    callback.setToSuccess();
+                    return;
                 } catch (Exception e) {
-                    return error(e);
+                    callback.setToFailure();
+                    error(e);
                 } finally {
                     batch = null;
                 }
             }
         }
 
-        public boolean sql(String line)
+        public void sql(String line, DispatchCallback callback)
         {
-            return execute(line, false);
+            execute(line, false, callback);
         }
 
-        public boolean call(String line)
+        public void call(String line, DispatchCallback callback)
         {
-            return execute(line, true);
+            execute(line, true, callback);
         }
 
-        private boolean execute(String line, boolean call)
+        private void execute(String line, boolean call, DispatchCallback callback)
         {
             if ((line == null) || (line.length() == 0)) {
-                return false; // ???
+                callback.setStatus( DispatchCallback.Status.FAILURE );
             }
 
             // ### FIXME:  doing the multi-line handling down here means
@@ -3678,6 +3760,11 @@ public class SqlLine
                         line += sep + extra;
                     }
                 }
+            } catch (UserInterruptException uie) {
+              // CTRL-C'd out of the command. Note it, but don't call it an error.
+              callback.setStatus( DispatchCallback.Status.CANCELED );
+              output( loc( "command-canceled") );
+              return;
             } catch (Exception e) {
                 handleException(e);
             }
@@ -3688,7 +3775,8 @@ public class SqlLine
             }
 
             if (!(assertConnection())) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             String sql = line;
@@ -3706,7 +3794,8 @@ public class SqlLine
             // batch statements?
             if (batch != null) {
                 batch.add(sql);
-                return true;
+                callback.setToSuccess();
+                return;
             }
 
             try {
@@ -3756,43 +3845,53 @@ public class SqlLine
                         stmnt.close();
                     }
                 }
+            } catch (UserInterruptException uie) {
+                // CTRL-C'd out of the command. Note it, but don't call it an error.
+                callback.setStatus( DispatchCallback.Status.CANCELED );
+                output( loc( "command-canceled") );
+                return;
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
+                return;
             }
 
             showWarnings();
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean quit(String line)
+        public void quit(String line, DispatchCallback callback)
         {
             exit = true;
-            close(null);
-            return true;
+            close(null, callback);
+            callback.setToSuccess();
         }
 
         /**
          * Close all connections.
          */
-        public boolean closeall(String line)
+        public void closeall(String line, DispatchCallback callback)
         {
-            if (close(null)) {
-                while (close(null)) {
-                    ;
+            close(null, callback);
+            if (callback.isSuccess()) {
+                while (callback.isSuccess()) {
+                  close(null, callback);
                 }
-                return true;
+                // the last "close" will set it to fail so reset it to success.
+                callback.setToSuccess();
             }
-
-            return false;
+            // probably a holdover of the old boolean returns.
+            callback.setToFailure();
         }
 
         /**
          * Close the current connection.
          */
-        public boolean close(String line)
+        public void close(String line, DispatchCallback callback)
         {
             if (con() == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             try {
@@ -3806,17 +3905,19 @@ public class SqlLine
                     info(loc("already-closed"));
                 }
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
+                return;
             }
 
             connections.remove();
-            return true;
+            callback.setToSuccess();
         }
 
         /**
          * Connect to the database defined in the specified properties file.
          */
-        public boolean properties(String line)
+        public void properties(String line, DispatchCallback callback)
             throws Exception
         {
             String example = "";
@@ -3824,7 +3925,9 @@ public class SqlLine
 
             String [] parts = split(line);
             if (parts.length < 2) {
-                return error(example);
+                callback.setToFailure();
+                error(example);
+                return;
             }
 
             int successes = 0;
@@ -3832,19 +3935,20 @@ public class SqlLine
             for (int i = 1; i < parts.length; i++) {
                 Properties props = new Properties();
                 props.load(new FileInputStream(parts[i]));
-                if (connect(props)) {
+                connect( props, callback );
+                if (callback.isSuccess()) {
                     successes++;
                 }
             }
 
             if (successes != (parts.length - 1)) {
-                return false;
+                callback.setToFailure();
             } else {
-                return true;
+                callback.setToSuccess();
             }
         }
 
-        public boolean connect(String line)
+        public void connect(String line, DispatchCallback callback)
             throws Exception
         {
             String example = "";
@@ -3854,11 +3958,14 @@ public class SqlLine
 
             String [] parts = split(line);
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             if (parts.length < 2) {
-                return error(example);
+                callback.setToFailure();
+                error(example);
+                return;
             }
 
             String url = (parts.length < 2) ? null : parts[1];
@@ -3880,7 +3987,7 @@ public class SqlLine
                 props.setProperty("password", pass);
             }
 
-            return connect(props);
+            connect(props, callback);
         }
 
         private String getProperty(Properties props, String [] keys)
@@ -3904,7 +4011,7 @@ public class SqlLine
             return null;
         }
 
-        public boolean connect(Properties props)
+        public void connect(Properties props, DispatchCallback callback)
             throws IOException
         {
             String url =
@@ -3941,11 +4048,15 @@ public class SqlLine
                     });
 
             if ((url == null) || (url.length() == 0)) {
-                return error("Property \"url\" is required");
+                callback.setToFailure();
+                error("Property \"url\" is required");
+                return;
             }
             if ((driver == null) || (driver.length() == 0)) {
                 if (!scanForDriver(url)) {
-                    return error(loc("no-driver", url));
+                    callback.setToFailure();
+                    error(loc("no-driver", url));
+                    return;
                 }
             }
 
@@ -3970,19 +4081,19 @@ public class SqlLine
                 con().getConnection();
 
                 setCompletions();
-                return true;
-            } catch (SQLException sqle) {
-                return error(sqle);
-            } catch (IOException ioe) {
-                return error(ioe);
+                callback.setToSuccess();
+            } catch (Exception e) {
+                callback.setToFailure();
+                error(e);
             }
         }
 
-        public boolean rehash(String line)
+        public void rehash(String line, DispatchCallback callback)
         {
             try {
                 if (!(assertConnection())) {
-                    return false;
+                    callback.setToFailure();
+
                 }
 
                 completions.clear();
@@ -3990,16 +4101,17 @@ public class SqlLine
                     con().setCompletions(false);
                 }
 
-                return true;
+                callback.setToSuccess();
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
 
         /**
          * List the current connections
          */
-        public boolean list(String line)
+        public void list(String line, DispatchCallback callback)
         {
             int index = 0;
             info(loc("active-connections", connections.size()));
@@ -4019,10 +4131,10 @@ public class SqlLine
                                c.url));
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean all(String line)
+        public void all(String line, DispatchCallback callback)
         {
             int index = connections.getIndex();
 
@@ -4033,47 +4145,54 @@ public class SqlLine
                 output(loc("executing-con", con()));
 
                 // ### FIXME:  this is broken for multi-line SQL
-                success = sql(line.substring("all ".length())) && success;
+                sql(line.substring("all ".length()), callback);
+                success = callback.isSuccess() && success;
             }
 
             // restore index
             connections.setIndex(index);
-            return success;
+            if (success) {
+              callback.setToSuccess();
+            } else {
+              callback.setToFailure();
+            }
         }
 
-        public boolean go(String line)
+        public void go(String line, DispatchCallback callback)
         {
             String [] parts = split(line, 2, "Usage: go <connection index>");
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             int index = Integer.parseInt(parts[1]);
             if (!(connections.setIndex(index))) {
                 error(loc("invalid-connection", "" + index));
-                list(""); // list the current connections
-                return false;
+                list("", callback); // list the current connections
+                callback.setToFailure();
+                return;
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
         /**
          * Save or stop saving a script to a file
          */
-        public boolean script(String line)
+        public void script(String line, DispatchCallback callback)
         {
             if (script == null) {
-                return startScript(line);
+                startScript(line, callback);
             } else {
-                return stopScript(line);
+                stopScript(line, callback);
             }
         }
 
         /**
          * Stop writing to the script file and close the script.
          */
-        private boolean stopScript(String line)
+        private void stopScript(String line, DispatchCallback callback)
         {
             try {
                 script.close();
@@ -4083,40 +4202,45 @@ public class SqlLine
 
             output(loc("script-closed", script));
             script = null;
-            return true;
+            callback.setToSuccess();
         }
 
         /**
          * Start writing to the specified script file.
          */
-        private boolean startScript(String line)
+        private void startScript(String line, DispatchCallback callback)
         {
             if (script != null) {
-                return error(loc("script-already-running", script));
+                callback.setToFailure();
+                error(loc("script-already-running", script));
+                return ;
             }
 
             String [] parts = split(line, 2, "Usage: script <filename>");
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return ;
             }
 
             try {
                 script = new OutputFile(parts[1]);
                 output(loc("script-started", script));
-                return true;
+                callback.setToSuccess();
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
 
         /**
          * Run a script from the specified file.
          */
-        public boolean run(String line)
+        public void run(String line, DispatchCallback callback)
         {
             String [] parts = split(line, 2, "Usage: run <scriptfile>");
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             List cmds = new LinkedList();
@@ -4173,28 +4297,34 @@ public class SqlLine
                 }
 
                 // success only if all the commands were successful
-                return runCommands(cmds) == cmds.size();
+                if ( runCommands(cmds, callback) == cmds.size() ) {
+                  callback.setToSuccess();
+                } else {
+                  callback.setToFailure();
+                }
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
+                return;
             }
         }
 
         /**
          * Save or stop saving all output to a file.
          */
-        public boolean record(String line)
+        public void record(String line, DispatchCallback callback)
         {
             if (record == null) {
-                return startRecording(line);
+                startRecording(line, callback);
             } else {
-                return stopRecording(line);
+                stopRecording(line, callback);
             }
         }
 
         /**
          * Stop writing output to the record file.
          */
-        private boolean stopRecording(String line)
+        private void stopRecording(String line, DispatchCallback callback)
         {
             try {
                 record.close();
@@ -4204,52 +4334,57 @@ public class SqlLine
 
             output(loc("record-closed", record));
             record = null;
-            return true;
+            callback.setToSuccess();
         }
 
         /**
          * Start writing to the specified record file.
          */
-        private boolean startRecording(String line)
+        private void startRecording(String line, DispatchCallback callback)
         {
             if (record != null) {
-                return error(loc("record-already-running", record));
+                callback.setToFailure();
+                error(loc("record-already-running", record));
+                return;
             }
 
             String [] parts = split(line, 2, "Usage: record <filename>");
             if (parts == null) {
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             try {
                 record = new OutputFile(parts[1]);
                 output(loc("record-started", record));
-                return true;
+                callback.setToSuccess();
             } catch (Exception e) {
-                return error(e);
+                callback.setToFailure();
+                error(e);
             }
         }
 
-        public boolean describe(String line)
+        public void describe(String line, DispatchCallback callback)
             throws SQLException
         {
             String[][] cmd = splitCompound(line);
             if (cmd.length != 2) {
                 error("Usage: describe <table name>");
-                return false;
+                callback.setToFailure();
+                return;
             }
 
             if (cmd[1].length == 1
                 && cmd[1][0] != null
                 && cmd[1][0].equalsIgnoreCase("tables"))
             {
-                return tables("tables");
+                tables("tables", callback);
             } else {
-                return columns(line);
+                columns(line, callback);
             }
         }
 
-        public boolean help(String line)
+        public void help(String line, DispatchCallback callback)
         {
             String [] parts = split(line);
             String cmd = (parts.length > 1) ? parts[1] : "";
@@ -4274,15 +4409,17 @@ public class SqlLine
                 output(loc("comments", getApplicationContactInformation()));
             }
 
-            return true;
+            callback.setToSuccess();
         }
 
-        public boolean manual(String line)
+        public void manual(String line, DispatchCallback callback)
             throws IOException
         {
             InputStream in = SqlLine.class.getResourceAsStream("manual.txt");
             if (in == null) {
-                return error(loc("no-manual"));
+                callback.setToFailure();
+                error(loc("no-manual"));
+                return;
             }
 
             BufferedReader breader =
@@ -4304,7 +4441,7 @@ public class SqlLine
 
             breader.close();
 
-            return true;
+            callback.setToSuccess();
         }
     }
 
@@ -4312,8 +4449,8 @@ public class SqlLine
      * Completor for SQLLine. It dispatches to sub-completors based on the
      * current arguments.
      */
-    class SQLLineCompletor
-        implements Completor
+    class SQLLineCompleter
+        implements Completer
     {
         public int complete(String buf, int pos, List cand)
         {
@@ -4322,10 +4459,10 @@ public class SqlLine
                 && !buf.startsWith(COMMAND_PREFIX + "all")
                 && !buf.startsWith(COMMAND_PREFIX + "sql"))
             {
-                return sqlLineCommandCompletor.complete(buf, pos, cand);
+                return sqlLineCommandCompleter.complete(buf, pos, cand);
             } else {
-                if ((con() != null) && (con().sqlLineSQLCompletor != null)) {
-                    return con().sqlLineSQLCompletor.complete(buf, pos, cand);
+                if ((con() != null) && (con().sqlLineSQLCompleter != null)) {
+                    return con().sqlLineSQLCompleter.complete(buf, pos, cand);
                 } else {
                     return -1;
                 }
@@ -4333,34 +4470,32 @@ public class SqlLine
         }
     }
 
-    class SQLLineCommandCompletor
-        extends MultiCompletor
+    class SQLLineCommandCompleter
+        extends AggregateCompleter
     {
-        public SQLLineCommandCompletor()
+        public SQLLineCommandCompleter()
         {
-            List completors = new LinkedList();
+            List<Completer> completors = new LinkedList<Completer>();
 
             for (int i = 0; i < commands.length; i++) {
                 String [] cmds = commands[i].getNames();
                 for (int j = 0; (cmds != null) && (j < cmds.length); j++) {
-                    Completor [] comps = commands[i].getParameterCompletors();
-                    List compl = new LinkedList();
-                    compl.add(new SimpleCompletor(COMMAND_PREFIX + cmds[j]));
+                    Completer [] comps = commands[i].getParameterCompleters();
+                    List<Completer> compl = new LinkedList<Completer>();
+                    compl.add(new StringsCompleter(COMMAND_PREFIX + cmds[j]));
                     compl.addAll(Arrays.asList(comps));
-                    compl.add(new NullCompletor()); // last param no complete
+                    compl.add(new NullCompleter()); // last param no complete
 
-                    completors.add(
-                        new ArgumentCompletor(
-                            (Completor []) compl.toArray(new Completor[0])));
+                    completors.add( new ArgumentCompleter( compl ) );
                 }
             }
 
-            setCompletors((Completor []) completors.toArray(new Completor[0]));
+            getCompleters().addAll( completors );
         }
     }
 
-    class TableNameCompletor
-        implements Completor
+    class TableNameCompleter
+        implements Completer
     {
         public int complete(String buf, int pos, List cand)
         {
@@ -4368,7 +4503,7 @@ public class SqlLine
                 return -1;
             }
 
-            return new SimpleCompletor(con().getTableNames(true)).complete(
+            return new StringsCompleter(con().getTableNames(true)).complete(
                 buf,
                 pos,
                 cand);
@@ -4376,14 +4511,14 @@ public class SqlLine
     }
 
     class SQLLineSQLCompletor
-        extends SimpleCompletor
+        extends StringsCompleter
     {
         public SQLLineSQLCompletor(boolean skipmeta)
             throws IOException, SQLException
         {
             super(new String[0]);
 
-            Set completions = new TreeSet();
+            Set<String> completions = new TreeSet<String>();
 
             // add the default SQL completions
             String keywords =
@@ -4440,7 +4575,7 @@ public class SqlLine
             }
 
             // set the Strings that will be completed
-            setCandidateStrings((String []) completions.toArray(new String[0]));
+            getStrings().addAll(completions);
         }
     }
 
@@ -4519,7 +4654,7 @@ public class SqlLine
         private final String username;
         private final String password;
         private Schema schema = null;
-        private Completor sqlLineSQLCompletor = null;
+        private Completer sqlLineSQLCompleter = null;
 
         public DatabaseConnection(
             String driver,
@@ -4575,17 +4710,17 @@ public class SqlLine
                 : meta.getExtraNameCharacters();
 
             // setup the completor for the database
-            sqlLineSQLCompletor =
-                new ArgumentCompletor(
-                    new SQLLineSQLCompletor(skipmeta),
-                    new ArgumentCompletor.AbstractArgumentDelimiter() {
+               sqlLineSQLCompleter =
+                new ArgumentCompleter(
+                    new ArgumentCompleter.WhitespaceArgumentDelimiter() {
                         // delimiters for SQL statements are any
                         // non-letter-or-number characters, except
                         // underscore and characters that are specified
                         // by the database to be valid name identifiers.
-                        public boolean isDelimiterChar(String buf, int pos)
+                        @Override
+                        public boolean isDelimiterChar(final CharSequence buffer, int pos)
                         {
-                            char c = buf.charAt(pos);
+                            char c = buffer.charAt( pos ) ;
                             if (Character.isWhitespace(c)) {
                                 return true;
                             }
@@ -4594,10 +4729,11 @@ public class SqlLine
                                 && (c != '_')
                                 && (extraNameCharacters.indexOf(c) == -1);
                         }
-                    });
+                    }
+                    ,new SQLLineSQLCompletor(skipmeta));
 
             // not all argument elements need to hold true
-            ((ArgumentCompletor) sqlLineSQLCompletor).setStrict(false);
+            ((ArgumentCompleter) sqlLineSQLCompleter).setStrict(false);
         }
 
         /**
@@ -4683,7 +4819,8 @@ public class SqlLine
             }
 
             try {
-                command.isolation("isolation: " + opts.getIsolation());
+                // nothing is done off of this command beyond the handle so no need to use the callback.
+                command.isolation("isolation: " + opts.getIsolation(), new DispatchCallback());
             } catch (Exception e) {
                 handleException(e);
             }
@@ -4826,7 +4963,7 @@ public class SqlLine
     }
 
     class Opts
-        implements Completor
+        implements Completer
     {
         public static final String PROPERTY_PREFIX = "sqlline.";
         public static final String PROPERTY_NAME_EXIT =
@@ -4845,8 +4982,8 @@ public class SqlLine
         private boolean showWarnings = true;
         private boolean showNestedErrs = false;
         private String numberFormat = "default";
-        private int maxWidth = Terminal.setupTerminal().getTerminalWidth();
-        private int maxHeight = Terminal.setupTerminal().getTerminalHeight();
+        private int maxWidth = TerminalFactory.get().getWidth();
+        private int maxHeight = TerminalFactory.get().getHeight();
         private int maxColumnWidth = 15;
         private int rowLimit = 0;
         private int timeout = -1;
@@ -4865,9 +5002,9 @@ public class SqlLine
             loadProperties(props);
         }
 
-        public Completor [] optionCompletors()
+        public Completer [] optionCompletors()
         {
-            return new Completor[] {
+            return new Completer[] {
                     this,
                     // new SimpleCompletor (possibleSettingValues ()),
                 };
@@ -4913,7 +5050,7 @@ public class SqlLine
         public int complete(String buf, int pos, List cand)
         {
             try {
-                return new SimpleCompletor(propertyNames()).complete(
+                return new StringsCompleter(propertyNames()).complete(
                     buf,
                     pos,
                     cand);
