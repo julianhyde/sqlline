@@ -11,6 +11,8 @@
 */
 package sqlline;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -19,6 +21,9 @@ import java.sql.Statement;
  */
 public class DispatchCallback
 {
+    private static final Method IS_CLOSED_METHOD =
+        getMethod(Statement.class, "isClosed");
+
     private Status status;
     private Statement statement;
 
@@ -79,9 +84,35 @@ public class DispatchCallback
         setStatus(Status.CANCELED);
         if ((null != statement)
             && (status == Status.RUNNING)
-            && (!statement.isClosed()))
+            && (!statementIsClosed(statement)))
         {
             statement.cancel();
+        }
+    }
+
+    /** Calls {@link Statement#isClosed} via reflection. Before JDK 1.6, the
+     * method does not exist, so this method returns false. */
+    private static boolean statementIsClosed(Statement statement)
+        throws SQLException
+    {
+        if (IS_CLOSED_METHOD != null) {
+            try {
+                return (Boolean) IS_CLOSED_METHOD.invoke(statement);
+            } catch (IllegalAccessException e) {
+                // ignore
+            } catch (InvocationTargetException e) {
+                // ignore
+            }
+        }
+        return false;
+    }
+
+    /** Looks up a method, and returns null if the method does not exist. */
+    private static Method getMethod(Class<?> clazz, String name) {
+        try {
+            return clazz.getMethod(name);
+        } catch (NoSuchMethodException e) {
+            return null;
         }
     }
 

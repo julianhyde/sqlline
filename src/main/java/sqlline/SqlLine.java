@@ -743,11 +743,14 @@ public class SqlLine
         Terminal terminal = TerminalFactory.create();
         try {
           terminal.init();
-        }
-        catch (Exception e) {
-            // for backwards compatibility with code that used to use this lib
-            // and expected only IOExceptions, convert back to that.
-            throw new IOException(e);
+        } catch (Exception e) {
+            // For backwards compatibility with code that used to use this lib
+            // and expected only IOExceptions, convert back to that. We can't
+            // use IOException(Throwable) constructor, which is only JDK 1.6 and
+            // later.
+            final IOException ioException = new IOException(e.toString());
+            ioException.initCause(e);
+            throw ioException;
         }
         if (inputStream != null) {
             // ### NOTE:  fix for sf.net bug 879425.
@@ -1182,9 +1185,8 @@ public class SqlLine
             return total;
         } catch (SQLException sqle) {
             return -1;
-        }
-        // JDBC 1 driver error
-        catch (AbstractMethodError ame) {
+        } catch (AbstractMethodError ame) {
+            // JDBC 1 driver error
             return -1;
         }
     }
@@ -2959,9 +2961,11 @@ public class SqlLine
         public void execute(String line, DispatchCallback callback)
         {
             try {
-                    command.getClass().getMethod(
+                command.getClass()
+                    .getMethod(
                         getName(),
-                        new Class[] { String.class, DispatchCallback.class }).invoke(
+                        new Class[] { String.class, DispatchCallback.class })
+                    .invoke(
                         command,
                         new Object[] { line, callback });
             } catch (Throwable e) {
