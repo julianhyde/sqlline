@@ -17,6 +17,33 @@ almost no restrictions.
 
 ## Getting started
 
+```bash
+$ sqlline -d com.mysql.jdbc.Driver
+sqlline> !connect jdbc:mysql:localhost/foodmart user password
+sqlline> !tables
++------------+--------------+-------------+---------------+----------+
+| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  |  TABLE_TYPE   | REMARKS  |
++------------+--------------+-------------+---------------+----------+
+| null       | SALES        | DEPTS       | TABLE         | null     |
+| null       | SALES        | EMPS        | TABLE         | null     |
+| null       | metadata     | COLUMNS     | SYSTEM_TABLE  | null     |
+| null       | metadata     | TABLES      | SYSTEM_TABLE  | null     |
++------------+--------------+-------------+---------------+----------+
+sqlline> SELECT 1 + 2 AS c;
++---+
+| C |
++---+
+| 3 |
++---+
+sqlline> !quit
+```
+
+To get help:
+
+```bash
+sqlline --help
+```
+
 Read [the manual](http://www.hydromatic.net/sqlline/manual.html).
 
 ## Maven Usage
@@ -26,7 +53,7 @@ Use the following definition to use sqlline in your maven project:
     <dependency>
       <groupId>sqlline</groupId>
       <artifactId>sqlline</artifactId>
-      <version>1.09</version>
+      <version>1.1.0</version>
     </dependency>
 
 ## Building
