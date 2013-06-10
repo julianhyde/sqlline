@@ -3819,9 +3819,11 @@ public class SqlLine
 
                     if (call) {
                         stmnt = con().connection.prepareCall(sql);
+                        callback.trackSqlQuery(stmnt);
                         hasResults = ((CallableStatement) stmnt).execute();
                     } else {
                         stmnt = createStatement();
+                        callback.trackSqlQuery(stmnt);
                         hasResults = stmnt.execute(sql);
                     }
 
