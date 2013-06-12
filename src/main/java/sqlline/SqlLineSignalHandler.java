@@ -24,11 +24,11 @@ public interface SqlLineSignalHandler
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Sets the statement to be affected by signals.
+     * Sets the dispatchCallback to be alerted of by signals.
      *
-     * @param stmt statement affected
+     * @param dispatchCallback statement affected
      */
-    public void setStmt(Statement stmt);
+    public void setCallback(DispatchCallback dispatchCallback);
 }
 
 // End SqlLineSignalHandler.java

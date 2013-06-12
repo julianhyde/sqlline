@@ -704,6 +704,7 @@ public class SqlLine
         while (!exit) {
             DispatchCallback callback = new DispatchCallback();
             try {
+                signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
             } catch (EOFException eof) {
@@ -794,13 +795,6 @@ public class SqlLine
 
         reader.setHandleUserInterrupt(true); // CTRL-C handling
         reader.setExpandEvents(false);
-
-        // override jline2's use of ! as shell-style "last command starting
-        // with" since we already designated it as the prefix for sql commands.
-        // The DO_LOWERCASE_VERSION is a hack since setting this to any string
-        // value or macro reader automatically triggers a reset of the visible
-        // buffer, hiding the character.
-        //reader.getKeys().bind("!", Operation.SELF_INSERT);
 
         return reader;
     }
@@ -1854,7 +1848,7 @@ public class SqlLine
     // ResultSet output formatting classes
     ///////////////////////////////////////
 
-    int print(ResultSet rs)
+    int print(ResultSet rs, DispatchCallback callback)
         throws SQLException
     {
         String format = opts.getOutputFormat();
@@ -1872,7 +1866,7 @@ public class SqlLine
         Rows rows;
 
         if (opts.getIncremental()) {
-            rows = new IncrementalRows(rs);
+            rows = new IncrementalRows(rs, callback);
         } else {
             rows = new BufferedRows(rs);
         }
@@ -1890,9 +1884,7 @@ public class SqlLine
         if (opts.rowLimit != 0) {
             stmnt.setMaxRows(opts.rowLimit);
         }
-        if (signalHandler != null) {
-            signalHandler.setStmt(stmnt);
-        }
+
         return stmnt;
     }
 
@@ -2538,12 +2530,14 @@ public class SqlLine
         private Row nextRow;
         private boolean endOfResult;
         private boolean normalizingWidths;
+        private DispatchCallback dispatchCallback;
 
-        IncrementalRows(ResultSet rs)
+        IncrementalRows(ResultSet rs, DispatchCallback dispatchCallback)
             throws SQLException
         {
             super(rs);
             this.rs = rs;
+            this.dispatchCallback = dispatchCallback;
 
             labelRow = new Row(rsMeta.getColumnCount());
             maxRow = new Row(rsMeta.getColumnCount());
@@ -2565,7 +2559,7 @@ public class SqlLine
 
         public boolean hasNext()
         {
-            if (endOfResult) {
+            if (endOfResult || dispatchCallback.isCanceled()) {
                 return false;
             }
 
@@ -2591,7 +2585,7 @@ public class SqlLine
 
         public Object next()
         {
-            if (!hasNext()) {
+            if (!hasNext() && !dispatchCallback.isCanceled()) {
                 throw new NoSuchElementException();
             }
 
@@ -3022,7 +3016,7 @@ public class SqlLine
 
                     if (rs != null) {
                         try {
-                            print(rs);
+                            print(rs, callback);
                         } finally {
                             rs.close();
                         }
@@ -3825,7 +3819,7 @@ public class SqlLine
                         do {
                             ResultSet rs = stmnt.getResultSet();
                             try {
-                                int count = print(rs);
+                                int count = print(rs, callback);
                                 long end = System.currentTimeMillis();
 
                                 reportResult(
@@ -4983,7 +4977,7 @@ public class SqlLine
         private boolean autoCommit = true;
         private boolean verbose = false;
         private boolean force = false;
-        private boolean incremental = false;
+        private boolean incremental = true;
         private boolean showTime = true;
         private boolean showWarnings = true;
         private boolean showNestedErrs = false;

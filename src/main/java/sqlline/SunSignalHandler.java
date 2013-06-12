@@ -27,7 +27,7 @@ class SunSignalHandler
 {
     //~ Instance fields --------------------------------------------------------
 
-    private Statement stmt = null;
+    private DispatchCallback dispatchCallback;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -39,9 +39,9 @@ class SunSignalHandler
     //~ Methods ----------------------------------------------------------------
 
     // implement SqlLineSignalHandler
-    public void setStmt(Statement stmt)
+    public void setCallback(DispatchCallback dispatchCallback)
     {
-        this.stmt = stmt;
+        this.dispatchCallback = dispatchCallback;
     }
 
     // implement sun.misc.SignalHandler
@@ -49,9 +49,9 @@ class SunSignalHandler
     {
         try {
             synchronized (this) {
-                if (stmt != null) {
-                    stmt.cancel();
-                    stmt = null;
+                if (dispatchCallback != null) {
+                    dispatchCallback.forceKillSqlQuery();
+                    dispatchCallback.setToCancel();
                 }
             }
         } catch (SQLException ex) {
