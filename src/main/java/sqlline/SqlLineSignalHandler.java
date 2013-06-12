@@ -11,9 +11,6 @@
 */
 package sqlline;
 
-import java.sql.*;
-
-
 /**
  * A signal handler interface for SqlLine. The interface is decoupled from the
  * implementation since signal handlers are not portable across JVM's, so we use
@@ -21,8 +18,6 @@ import java.sql.*;
  */
 public interface SqlLineSignalHandler
 {
-    //~ Methods ----------------------------------------------------------------
-
     /**
      * Sets the dispatchCallback to be alerted of by signals.
      *
@@ -31,4 +26,3 @@ public interface SqlLineSignalHandler
     public void setCallback(DispatchCallback dispatchCallback);
 }
 
-// End SqlLineSignalHandler.java

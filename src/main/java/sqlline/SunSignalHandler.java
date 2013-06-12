@@ -25,26 +25,20 @@ class SunSignalHandler
     implements SqlLineSignalHandler,
         SignalHandler
 {
-    //~ Instance fields --------------------------------------------------------
-
     private DispatchCallback dispatchCallback;
-
-    //~ Constructors -----------------------------------------------------------
 
     SunSignalHandler()
     {
         Signal.handle(new Signal("INT"), this);
     }
 
-    //~ Methods ----------------------------------------------------------------
-
-    // implement SqlLineSignalHandler
+    @Override
     public void setCallback(DispatchCallback dispatchCallback)
     {
         this.dispatchCallback = dispatchCallback;
     }
 
-    // implement sun.misc.SignalHandler
+    @Override
     public void handle(Signal sig)
     {
         try {
@@ -59,5 +53,3 @@ class SunSignalHandler
         }
     }
 }
-
-// End SunSignalHandler.java

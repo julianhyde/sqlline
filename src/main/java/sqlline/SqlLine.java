@@ -56,8 +56,6 @@ import jline.console.history.History;
  */
 public class SqlLine
 {
-    //~ Static fields/initializers ---------------------------------------------
-
     private static final ResourceBundle loc =
         ResourceBundle.getBundle(
             SqlLine.class.getName());
@@ -168,8 +166,6 @@ public class SqlLine
             throw new ExceptionInInitializerError(loc("jline-missing", testClass));
         }
     }
-
-    //~ Instance fields --------------------------------------------------------
 
     private SqlLineSignalHandler signalHandler = null;
     private boolean exit = false;
@@ -309,12 +305,8 @@ public class SqlLine
                 null),
         };
 
-    //~ Constructors -----------------------------------------------------------
-
     SqlLine()
     {
-        // registerKnownDrivers ();
-
         sqlLineCommandCompleter = new SQLLineCommandCompleter();
 
         // attempt to dynamically load signal handler
@@ -325,8 +317,6 @@ public class SqlLine
             handleException(t);
         }
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     static Manifest getManifest()
         throws IOException
@@ -1247,9 +1237,6 @@ public class SqlLine
         }
     }
 
-    ////////////////////
-    // String utilities
-    ////////////////////
 
     /**
      * Split the line into an array by tokenizing on space characters
@@ -1749,96 +1736,6 @@ public class SqlLine
             } catch (Throwable t) {
             }
         }
-        info("scan complete in "
-            + (System.currentTimeMillis() - start) + "ms");
-        return (Driver []) driverClasses.toArray(new Driver[0]);
-    }
-
-    Driver [] scanDriversOLD(String line)
-    {
-        long start = System.currentTimeMillis();
-
-        Set paths = new HashSet();
-        Set driverClasses = new HashSet();
-
-        for (
-            StringTokenizer tok =
-                new StringTokenizer(
-                    System.getProperty("java.ext.dirs"),
-                    System.getProperty("path.separator"));
-            tok.hasMoreTokens();)
-        {
-            File [] files = new File(tok.nextToken()).listFiles();
-            for (int i = 0; (files != null) && (i < files.length); i++) {
-                paths.add(files[i].getAbsolutePath());
-            }
-        }
-
-        for (
-            StringTokenizer tok =
-                new StringTokenizer(
-                    System.getProperty("java.class.path"),
-                    System.getProperty("path.separator"));
-            tok.hasMoreTokens();)
-        {
-            paths.add(new File(tok.nextToken()).getAbsolutePath());
-        }
-
-        for (Iterator i = paths.iterator(); i.hasNext();) {
-            File f = new File((String) i.next());
-            output(
-                color().pad(loc("scanning", f.getAbsolutePath()), 60),
-                false);
-
-            try {
-                ZipFile zf = new ZipFile(f);
-                int total = zf.size();
-                int index = 0;
-
-                for (
-                    Enumeration zfEnum = zf.entries();
-                    zfEnum.hasMoreElements();)
-                {
-                    ZipEntry entry = (ZipEntry) zfEnum.nextElement();
-                    String name = entry.getName();
-                    progress(index++, total);
-
-                    if (name.endsWith(".class")) {
-                        name = name.replace('/', '.');
-                        name = name.substring(0, name.length() - 6);
-
-                        try {
-                            // check for the string "driver" in the class
-                            // to see if we should load it. Not perfect, but
-                            // it is far too slow otherwise.
-                            if (name.toLowerCase().indexOf("driver") != -1) {
-                                Class c =
-                                    Class.forName(
-                                        name,
-                                        false,
-                                        getClass().getClassLoader());
-                                if (Driver.class.isAssignableFrom(c)
-                                    && !(Modifier.isAbstract(
-                                            c.getModifiers())))
-                                {
-                                    try {
-                                        // load and initialize
-                                        Class.forName(name);
-                                    } catch (Exception e) {
-                                    }
-                                    driverClasses.add(c.newInstance());
-                                }
-                            }
-                        } catch (Throwable t) {
-                        }
-                    }
-                }
-
-                progress(total, total);
-            } catch (Exception e) {
-            }
-        }
-
         info("scan complete in "
             + (System.currentTimeMillis() - start) + "ms");
         return (Driver []) driverClasses.toArray(new Driver[0]);
@@ -3687,7 +3584,7 @@ public class SqlLine
                 isoldesc = "UNKNOWN";
             }
 
-            debug( loc( "isolation-status", isoldesc ) );
+            debug(loc("isolation-status", isoldesc));
             callback.setToSuccess();
         }
 
@@ -4060,7 +3957,7 @@ public class SqlLine
                 }
             }
 
-            debug( "Connecting to " + url );
+            debug("Connecting to " + url);
 
             if (username == null) {
                 username = reader.readLine("Enter username for " + url + ": ");
@@ -5609,4 +5506,3 @@ public class SqlLine
     }
 }
 
-// End SqlLine.java
