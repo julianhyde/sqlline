@@ -681,8 +681,6 @@ public class SqlLine
         throws IOException
     {
         try {
-            // load the options first, so we can override on the command line
-            command.load(null, null);
             opts.load();
         } catch (Exception e) {
             handleException(e);
@@ -5140,9 +5138,11 @@ public class SqlLine
         public void load()
             throws IOException
         {
-            InputStream in = new FileInputStream(rcFile);
-            load(in);
-            in.close();
+              if (rcFile.exists()) {
+                  InputStream in = new FileInputStream(rcFile);
+                  load(in);
+                  in.close();
+              }
         }
 
         public void load(InputStream fin)
