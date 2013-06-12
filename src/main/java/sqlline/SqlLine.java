@@ -23,7 +23,6 @@ import java.text.*;
 
 import java.util.*;
 import java.util.jar.*;
-import java.util.zip.*;
 
 import jline.*;
 import jline.console.UserInterruptException;
@@ -676,7 +675,8 @@ public class SqlLine
             handleException(e);
         }
 
-        ConsoleReader reader = getConsoleReader(inputStream);
+        FileHistory fileHistory = new FileHistory(new File(opts.getHistoryFile())) ;
+        ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
         if (!(initArgs(args))) {
             usage();
             return;
@@ -697,6 +697,7 @@ public class SqlLine
                 signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
+                fileHistory.flush();
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
@@ -719,7 +720,7 @@ public class SqlLine
         command.closeall(null, new DispatchCallback());
     }
 
-    public ConsoleReader getConsoleReader(InputStream inputStream)
+    public ConsoleReader getConsoleReader(InputStream inputStream, FileHistory fileHistory)
         throws IOException
     {
         Terminal terminal = TerminalFactory.create();
@@ -744,45 +745,8 @@ public class SqlLine
             reader = new ConsoleReader();
         }
 
-        // setup history
-        ByteArrayInputStream historyBuffer = null;
-
-        if (new File(opts.getHistoryFile()).isFile()) {
-            try {
-                // save the current contents of the history buffer. This gets
-                // around a bug in JLine where setting the output before the
-                // input will clobber the history input, but setting the
-                // input before the output will cause the previous commands
-                // to not be saved to the buffer.
-                InputStream historyIn = new BufferedInputStream(
-                    new FileInputStream(
-                        opts.getHistoryFile()));
-                ByteArrayOutputStream hist = new ByteArrayOutputStream();
-                int n;
-                while ((n = historyIn.read()) != -1) {
-                    hist.write(n);
-                }
-                historyIn.close();
-
-                historyBuffer = new ByteArrayInputStream(hist.toByteArray());
-            } catch (Exception e) {
-                handleException(e);
-            }
-        }
-
-        try {
-            FileHistory history =
-                new FileHistory(new File(opts.getHistoryFile()));
-            if (null != historyBuffer) {
-              history.load(historyBuffer);
-            }
-            reader.setHistory(history);
-        } catch (Exception e) {
-            handleException(e);
-        }
-
         reader.addCompleter(new SQLLineCompleter());
-
+        reader.setHistory(fileHistory);
         reader.setHandleUserInterrupt(true); // CTRL-C handling
         reader.setExpandEvents(false);
 
