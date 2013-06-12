@@ -26,7 +26,6 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import jline.*;
-import jline.console.Operation;
 import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
@@ -162,10 +161,9 @@ public class SqlLine
                 }));
 
     static {
-        Class jline;
         String testClass = "jline.console.ConsoleReader";
         try {
-            jline = Class.forName(testClass);
+            Class.forName(testClass);
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(loc("jline-missing", testClass));
         }
@@ -175,14 +173,12 @@ public class SqlLine
 
     private SqlLineSignalHandler signalHandler = null;
     private boolean exit = false;
-    private final SqlLine sqlline = this;
     private Collection drivers = null;
     private Connections connections = new Connections();
     private Completer sqlLineCommandCompleter;
     private Map completions = new HashMap();
     private Opts opts = new Opts(System.getProperties());
     String lastProgress = null;
-    String prompt = "sqlline";
     private Map seenWarnings = new HashMap();
     private final Commands command = new Commands();
     private OutputFile script = null;
@@ -325,9 +321,6 @@ public class SqlLine
         try {
             Class handlerClass = Class.forName("sqlline.SunSignalHandler");
             signalHandler = (SqlLineSignalHandler) handlerClass.newInstance();
-            output(
-                "Loaded singnal handler: "
-                + signalHandler.getClass().getSimpleName());
         } catch (Throwable t) {
             handleException(t);
         }
@@ -372,20 +365,19 @@ public class SqlLine
         }
     }
 
-    static String getApplicationTitle()
+    private String getApplicationTitle()
     {
-        Package pack = SqlLine.class.getPackage();
+        InputStream inputStream = getClass().getResourceAsStream( "/META-INF/maven/sqlline/sqlline/pom.properties" );
+        Properties properties = new Properties();
+        properties.put("artifactId", "sqlline");
+        properties.put("version", "???");
+        try {
+          properties.load(inputStream);
+        } catch( IOException e ) {
+          handleException(e);
+        }
 
-        return loc(
-            "app-introduction",
-            new Object[] {
-                (pack.getImplementationTitle() == null) ? "sqlline"
-                : pack.getImplementationTitle(),
-                (pack.getImplementationVersion() == null) ? "???"
-                : pack.getImplementationVersion(),
-                (pack.getImplementationVendor() == null) ? "Marc Prud'hommeaux"
-                : pack.getImplementationVendor(),
-            });
+        return loc("app-introduction", properties.getProperty("artifactId"), properties.getProperty("version"));
     }
 
     static String getApplicationContactInformation()
@@ -690,6 +682,7 @@ public class SqlLine
     {
         try {
             // load the options first, so we can override on the command line
+            command.load(null, null);
             opts.load();
         } catch (Exception e) {
             handleException(e);
@@ -1042,7 +1035,7 @@ public class SqlLine
     void autocommitStatus(Connection c)
         throws SQLException
     {
-        info(loc("autocommit-status", c.getAutoCommit() + ""));
+        debug(loc("autocommit-status", c.getAutoCommit() + ""));
     }
 
     /**
@@ -3702,7 +3695,7 @@ public class SqlLine
                 isoldesc = "UNKNOWN";
             }
 
-            info(loc("isolation-status", isoldesc));
+            debug( loc( "isolation-status", isoldesc ) );
             callback.setToSuccess();
         }
 
@@ -4075,7 +4068,7 @@ public class SqlLine
                 }
             }
 
-            info("Connecting to " + url);
+            debug( "Connecting to " + url );
 
             if (username == null) {
                 username = reader.readLine("Enter username for " + url + ": ");
@@ -4805,23 +4798,23 @@ public class SqlLine
             meta = connection.getMetaData();
 
             try {
-                info(
-                    loc("connected",
-                        new Object[] {
-                            meta.getDatabaseProductName(),
-                            meta.getDatabaseProductVersion()
-                        }));
+                debug(
+                  loc( "connected",
+                    new Object[]{
+                      meta.getDatabaseProductName(),
+                      meta.getDatabaseProductVersion()
+                    } ) );
             } catch (Exception e) {
                 handleException(e);
             }
 
             try {
-                info(
-                    loc("driver",
-                        new Object[] {
-                            meta.getDriverName(),
-                            meta.getDriverVersion()
-                        }));
+                debug(
+                  loc( "driver",
+                    new Object[]{
+                      meta.getDriverName(),
+                      meta.getDriverVersion()
+                    } ) );
             } catch (Exception e) {
                 handleException(e);
             }
