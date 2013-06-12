@@ -69,6 +69,16 @@ public class DispatchCallback
         return Status.RUNNING == status;
     }
 
+    public void setToCancel()
+    {
+         status = Status.CANCELED;
+    }
+
+    public boolean isCanceled()
+    {
+      return Status.CANCELED == status;
+    }
+
     /**
      * If a statement has been set by {@link #trackSqlQuery(java.sql.Statement)}
      * then call {@link java.sql.Statement#cancel()} on it.
