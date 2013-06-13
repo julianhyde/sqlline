@@ -23,10 +23,8 @@ import java.text.*;
 
 import java.util.*;
 import java.util.jar.*;
-import java.util.zip.*;
 
 import jline.*;
-import jline.console.Operation;
 import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
@@ -57,8 +55,6 @@ import jline.console.history.History;
  */
 public class SqlLine
 {
-    //~ Static fields/initializers ---------------------------------------------
-
     private static final ResourceBundle loc =
         ResourceBundle.getBundle(
             SqlLine.class.getName());
@@ -162,27 +158,22 @@ public class SqlLine
                 }));
 
     static {
-        Class jline;
         String testClass = "jline.console.ConsoleReader";
         try {
-            jline = Class.forName(testClass);
+            Class.forName(testClass);
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(loc("jline-missing", testClass));
         }
     }
 
-    //~ Instance fields --------------------------------------------------------
-
     private SqlLineSignalHandler signalHandler = null;
     private boolean exit = false;
-    private final SqlLine sqlline = this;
     private Collection drivers = null;
     private Connections connections = new Connections();
     private Completer sqlLineCommandCompleter;
     private Map completions = new HashMap();
     private Opts opts = new Opts(System.getProperties());
     String lastProgress = null;
-    String prompt = "sqlline";
     private Map seenWarnings = new HashMap();
     private final Commands command = new Commands();
     private OutputFile script = null;
@@ -313,27 +304,18 @@ public class SqlLine
                 null),
         };
 
-    //~ Constructors -----------------------------------------------------------
-
     SqlLine()
     {
-        // registerKnownDrivers ();
-
         sqlLineCommandCompleter = new SQLLineCommandCompleter();
 
         // attempt to dynamically load signal handler
         try {
             Class handlerClass = Class.forName("sqlline.SunSignalHandler");
             signalHandler = (SqlLineSignalHandler) handlerClass.newInstance();
-            output(
-                "Loaded singnal handler: "
-                + signalHandler.getClass().getSimpleName());
         } catch (Throwable t) {
             handleException(t);
         }
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     static Manifest getManifest()
         throws IOException
@@ -372,20 +354,19 @@ public class SqlLine
         }
     }
 
-    static String getApplicationTitle()
+    private String getApplicationTitle()
     {
-        Package pack = SqlLine.class.getPackage();
+        InputStream inputStream = getClass().getResourceAsStream( "/META-INF/maven/sqlline/sqlline/pom.properties" );
+        Properties properties = new Properties();
+        properties.put("artifactId", "sqlline");
+        properties.put("version", "???");
+        try {
+          properties.load(inputStream);
+        } catch( IOException e ) {
+          handleException(e);
+        }
 
-        return loc(
-            "app-introduction",
-            new Object[] {
-                (pack.getImplementationTitle() == null) ? "sqlline"
-                : pack.getImplementationTitle(),
-                (pack.getImplementationVersion() == null) ? "???"
-                : pack.getImplementationVersion(),
-                (pack.getImplementationVendor() == null) ? "Marc Prud'hommeaux"
-                : pack.getImplementationVendor(),
-            });
+        return loc("app-introduction", properties.getProperty("artifactId"), properties.getProperty("version"));
     }
 
     static String getApplicationContactInformation()
@@ -689,13 +670,13 @@ public class SqlLine
         throws IOException
     {
         try {
-            // load the options first, so we can override on the command line
             opts.load();
         } catch (Exception e) {
             handleException(e);
         }
 
-        ConsoleReader reader = getConsoleReader(inputStream);
+        FileHistory fileHistory = new FileHistory(new File(opts.getHistoryFile())) ;
+        ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
         if (!(initArgs(args))) {
             usage();
             return;
@@ -713,8 +694,10 @@ public class SqlLine
         while (!exit) {
             DispatchCallback callback = new DispatchCallback();
             try {
+                signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
+                fileHistory.flush();
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
@@ -737,7 +720,7 @@ public class SqlLine
         command.closeall(null, new DispatchCallback());
     }
 
-    public ConsoleReader getConsoleReader(InputStream inputStream)
+    public ConsoleReader getConsoleReader(InputStream inputStream, FileHistory fileHistory)
         throws IOException
     {
         Terminal terminal = TerminalFactory.create();
@@ -762,54 +745,10 @@ public class SqlLine
             reader = new ConsoleReader();
         }
 
-        // setup history
-        ByteArrayInputStream historyBuffer = null;
-
-        if (new File(opts.getHistoryFile()).isFile()) {
-            try {
-                // save the current contents of the history buffer. This gets
-                // around a bug in JLine where setting the output before the
-                // input will clobber the history input, but setting the
-                // input before the output will cause the previous commands
-                // to not be saved to the buffer.
-                InputStream historyIn = new BufferedInputStream(
-                    new FileInputStream(
-                        opts.getHistoryFile()));
-                ByteArrayOutputStream hist = new ByteArrayOutputStream();
-                int n;
-                while ((n = historyIn.read()) != -1) {
-                    hist.write(n);
-                }
-                historyIn.close();
-
-                historyBuffer = new ByteArrayInputStream(hist.toByteArray());
-            } catch (Exception e) {
-                handleException(e);
-            }
-        }
-
-        try {
-            FileHistory history =
-                new FileHistory(new File(opts.getHistoryFile()));
-            if (null != historyBuffer) {
-              history.load(historyBuffer);
-            }
-            reader.setHistory(history);
-        } catch (Exception e) {
-            handleException(e);
-        }
-
         reader.addCompleter(new SQLLineCompleter());
-
+        reader.setHistory(fileHistory);
         reader.setHandleUserInterrupt(true); // CTRL-C handling
         reader.setExpandEvents(false);
-
-        // override jline2's use of ! as shell-style "last command starting
-        // with" since we already designated it as the prefix for sql commands.
-        // The DO_LOWERCASE_VERSION is a hack since setting this to any string
-        // value or macro reader automatically triggers a reset of the visible
-        // buffer, hiding the character.
-        //reader.getKeys().bind("!", Operation.SELF_INSERT);
 
         return reader;
     }
@@ -1042,7 +981,7 @@ public class SqlLine
     void autocommitStatus(Connection c)
         throws SQLException
     {
-        info(loc("autocommit-status", c.getAutoCommit() + ""));
+        debug(loc("autocommit-status", c.getAutoCommit() + ""));
     }
 
     /**
@@ -1262,9 +1201,6 @@ public class SqlLine
         }
     }
 
-    ////////////////////
-    // String utilities
-    ////////////////////
 
     /**
      * Split the line into an array by tokenizing on space characters
@@ -1769,101 +1705,11 @@ public class SqlLine
         return (Driver []) driverClasses.toArray(new Driver[0]);
     }
 
-    Driver [] scanDriversOLD(String line)
-    {
-        long start = System.currentTimeMillis();
-
-        Set paths = new HashSet();
-        Set driverClasses = new HashSet();
-
-        for (
-            StringTokenizer tok =
-                new StringTokenizer(
-                    System.getProperty("java.ext.dirs"),
-                    System.getProperty("path.separator"));
-            tok.hasMoreTokens();)
-        {
-            File [] files = new File(tok.nextToken()).listFiles();
-            for (int i = 0; (files != null) && (i < files.length); i++) {
-                paths.add(files[i].getAbsolutePath());
-            }
-        }
-
-        for (
-            StringTokenizer tok =
-                new StringTokenizer(
-                    System.getProperty("java.class.path"),
-                    System.getProperty("path.separator"));
-            tok.hasMoreTokens();)
-        {
-            paths.add(new File(tok.nextToken()).getAbsolutePath());
-        }
-
-        for (Iterator i = paths.iterator(); i.hasNext();) {
-            File f = new File((String) i.next());
-            output(
-                color().pad(loc("scanning", f.getAbsolutePath()), 60),
-                false);
-
-            try {
-                ZipFile zf = new ZipFile(f);
-                int total = zf.size();
-                int index = 0;
-
-                for (
-                    Enumeration zfEnum = zf.entries();
-                    zfEnum.hasMoreElements();)
-                {
-                    ZipEntry entry = (ZipEntry) zfEnum.nextElement();
-                    String name = entry.getName();
-                    progress(index++, total);
-
-                    if (name.endsWith(".class")) {
-                        name = name.replace('/', '.');
-                        name = name.substring(0, name.length() - 6);
-
-                        try {
-                            // check for the string "driver" in the class
-                            // to see if we should load it. Not perfect, but
-                            // it is far too slow otherwise.
-                            if (name.toLowerCase().indexOf("driver") != -1) {
-                                Class c =
-                                    Class.forName(
-                                        name,
-                                        false,
-                                        getClass().getClassLoader());
-                                if (Driver.class.isAssignableFrom(c)
-                                    && !(Modifier.isAbstract(
-                                            c.getModifiers())))
-                                {
-                                    try {
-                                        // load and initialize
-                                        Class.forName(name);
-                                    } catch (Exception e) {
-                                    }
-                                    driverClasses.add(c.newInstance());
-                                }
-                            }
-                        } catch (Throwable t) {
-                        }
-                    }
-                }
-
-                progress(total, total);
-            } catch (Exception e) {
-            }
-        }
-
-        info("scan complete in "
-            + (System.currentTimeMillis() - start) + "ms");
-        return (Driver []) driverClasses.toArray(new Driver[0]);
-    }
-
     ///////////////////////////////////////
     // ResultSet output formatting classes
     ///////////////////////////////////////
 
-    int print(ResultSet rs)
+    int print(ResultSet rs, DispatchCallback callback)
         throws SQLException
     {
         String format = opts.getOutputFormat();
@@ -1881,7 +1727,7 @@ public class SqlLine
         Rows rows;
 
         if (opts.getIncremental()) {
-            rows = new IncrementalRows(rs);
+            rows = new IncrementalRows(rs, callback);
         } else {
             rows = new BufferedRows(rs);
         }
@@ -1899,9 +1745,7 @@ public class SqlLine
         if (opts.rowLimit != 0) {
             stmnt.setMaxRows(opts.rowLimit);
         }
-        if (signalHandler != null) {
-            signalHandler.setStmt(stmnt);
-        }
+
         return stmnt;
     }
 
@@ -2547,12 +2391,14 @@ public class SqlLine
         private Row nextRow;
         private boolean endOfResult;
         private boolean normalizingWidths;
+        private DispatchCallback dispatchCallback;
 
-        IncrementalRows(ResultSet rs)
+        IncrementalRows(ResultSet rs, DispatchCallback dispatchCallback)
             throws SQLException
         {
             super(rs);
             this.rs = rs;
+            this.dispatchCallback = dispatchCallback;
 
             labelRow = new Row(rsMeta.getColumnCount());
             maxRow = new Row(rsMeta.getColumnCount());
@@ -2574,7 +2420,7 @@ public class SqlLine
 
         public boolean hasNext()
         {
-            if (endOfResult) {
+            if (endOfResult || dispatchCallback.isCanceled()) {
                 return false;
             }
 
@@ -2600,7 +2446,7 @@ public class SqlLine
 
         public Object next()
         {
-            if (!hasNext()) {
+            if (!hasNext() && !dispatchCallback.isCanceled()) {
                 throw new NoSuchElementException();
             }
 
@@ -3031,7 +2877,7 @@ public class SqlLine
 
                     if (rs != null) {
                         try {
-                            print(rs);
+                            print(rs, callback);
                         } finally {
                             rs.close();
                         }
@@ -3702,7 +3548,7 @@ public class SqlLine
                 isoldesc = "UNKNOWN";
             }
 
-            info(loc("isolation-status", isoldesc));
+            debug(loc("isolation-status", isoldesc));
             callback.setToSuccess();
         }
 
@@ -3834,7 +3680,7 @@ public class SqlLine
                         do {
                             ResultSet rs = stmnt.getResultSet();
                             try {
-                                int count = print(rs);
+                                int count = print(rs, callback);
                                 long end = System.currentTimeMillis();
 
                                 reportResult(
@@ -4075,7 +3921,7 @@ public class SqlLine
                 }
             }
 
-            info("Connecting to " + url);
+            debug("Connecting to " + url);
 
             if (username == null) {
                 username = reader.readLine("Enter username for " + url + ": ");
@@ -4805,23 +4651,23 @@ public class SqlLine
             meta = connection.getMetaData();
 
             try {
-                info(
-                    loc("connected",
-                        new Object[] {
-                            meta.getDatabaseProductName(),
-                            meta.getDatabaseProductVersion()
-                        }));
+                debug(
+                  loc( "connected",
+                    new Object[]{
+                      meta.getDatabaseProductName(),
+                      meta.getDatabaseProductVersion()
+                    } ) );
             } catch (Exception e) {
                 handleException(e);
             }
 
             try {
-                info(
-                    loc("driver",
-                        new Object[] {
-                            meta.getDriverName(),
-                            meta.getDriverVersion()
-                        }));
+                debug(
+                  loc( "driver",
+                    new Object[]{
+                      meta.getDriverName(),
+                      meta.getDriverVersion()
+                    } ) );
             } catch (Exception e) {
                 handleException(e);
             }
@@ -4992,7 +4838,7 @@ public class SqlLine
         private boolean autoCommit = true;
         private boolean verbose = false;
         private boolean force = false;
-        private boolean incremental = false;
+        private boolean incremental = true;
         private boolean showTime = true;
         private boolean showWarnings = true;
         private boolean showNestedErrs = false;
@@ -5147,9 +4993,11 @@ public class SqlLine
         public void load()
             throws IOException
         {
-            InputStream in = new FileInputStream(rcFile);
-            load(in);
-            in.close();
+              if (rcFile.exists()) {
+                  InputStream in = new FileInputStream(rcFile);
+                  load(in);
+                  in.close();
+              }
         }
 
         public void load(InputStream fin)
@@ -5622,4 +5470,3 @@ public class SqlLine
     }
 }
 
-// End SqlLine.java
