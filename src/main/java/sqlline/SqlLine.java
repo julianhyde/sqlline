@@ -421,7 +421,7 @@ public class SqlLine
     public static void main(String [] args)
         throws IOException
     {
-        mainWithInputRedirection(args, null);
+        start(args, null, true);
     }
 
     /**
@@ -437,15 +437,31 @@ public class SqlLine
         InputStream inputStream)
         throws IOException
     {
+        start(args, inputStream, false);
+    }
+
+    /**
+     * Backwards compatability method to allow {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied calls
+     * to keep method signature but add in new behavior of not saving queries.
+     * @param args
+     * @param inputStream
+     * @param saveHistory
+     * @throws IOException
+     */
+    public static void start(String [] args,
+                             InputStream inputStream,
+                             boolean saveHistory) throws IOException {
         SqlLine sqlline = new SqlLine();
-        sqlline.begin(args, inputStream);
+
+        sqlline.begin(args, inputStream, saveHistory);
 
         // exit the system: useful for Hypersonic and other
         // badly-behaving systems
         if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
-            System.exit(0);
+          System.exit(0);
         }
-    }
+     }
+
 
     DatabaseConnection con()
     {
@@ -666,7 +682,7 @@ public class SqlLine
      * {@link CommandHandler} until the global variable <code>exit</code> is
      * true.
      */
-    void begin(String [] args, InputStream inputStream)
+    void begin(String [] args, InputStream inputStream, boolean saveHistory)
         throws IOException
     {
         try {
@@ -697,7 +713,9 @@ public class SqlLine
                 signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
-                fileHistory.flush();
+                if (saveHistory) {
+                  fileHistory.flush();
+                }
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
