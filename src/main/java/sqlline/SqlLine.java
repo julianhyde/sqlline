@@ -447,11 +447,11 @@ public class SqlLine
     }
 
     /**
-     * Backwards compatability method to allow {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied calls
+     * Backwards compatibility method to allow {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied calls
      * to keep method signature but add in new behavior of not saving queries.
-     * @param args
-     * @param inputStream
-     * @param saveHistory
+     * @param args args[] passed in directly from {@link #main(String[])}
+     * @param inputStream Stream to read sql commands from (stdin or a file) or null for an interactive shell
+     * @param saveHistory whether or not the commands issued will be saved to sqlline's history file
      * @throws IOException
      */
     public static void start(String [] args,
@@ -464,7 +464,7 @@ public class SqlLine
         // exit the system: useful for Hypersonic and other
         // badly-behaving systems
         if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
-          System.exit(0);
+            System.exit(0);
         }
      }
 
@@ -720,7 +720,7 @@ public class SqlLine
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
                 if (saveHistory) {
-                  fileHistory.flush();
+                    fileHistory.flush();
                 }
             } catch (EOFException eof) {
                 // CTRL-D
@@ -5066,7 +5066,9 @@ public class SqlLine
                 return true;
             } catch (Exception e) {
                 if (!quiet) {
-                    // need to use error here since it's called before setup has the fancy output in place.
+                    // need to use System.err here because when bad command args are passed this is called before init
+                    // is done, meaning that sqlline's error() output chokes because it depends on properties like
+                    // text coloring that can get set in arbitrary order.
                     System.err.println(loc("error-setting", new Object[] { key, e }));
                 }
                 return false;
