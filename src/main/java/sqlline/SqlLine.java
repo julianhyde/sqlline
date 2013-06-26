@@ -62,6 +62,12 @@ public class SqlLine
     private static final String sep = System.getProperty("line.separator");
     public static final String COMMAND_PREFIX = "!";
 
+    // saveDir() is used in various opts that assume it's set. But that means
+    // properties starting with "sqlline" are read into props in unspecific order
+    // using reflection to find setter methods. Avoid confusion/NullPointer due to
+    // about order of config by prefixing it.
+    public static final String SQLLINE_BASE_DIR = "x.sqlline.basedir";
+
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
 
     private static boolean initComplete = false;
@@ -4869,7 +4875,6 @@ public class SqlLine
         private String isolation = "TRANSACTION_REPEATABLE_READ";
         private String outputFormat = "table";
         private boolean trimScripts = true;
-
         private File rcFile = new File(saveDir(), "sqlline.properties");
         private String historyFile =
             new File(saveDir(), "history").getAbsolutePath();
@@ -4910,6 +4915,13 @@ public class SqlLine
             String dir = System.getProperty("sqlline.rcfile");
             if ((dir != null) && (dir.length() > 0)) {
                 return new File(dir);
+            }
+
+            String baseDir = System.getProperty(SQLLINE_BASE_DIR);
+            if ((baseDir != null) && (baseDir.length() > 0)) {
+                File saveDir = new File(baseDir).getAbsoluteFile();
+                saveDir.mkdirs();
+                return saveDir;
             }
 
             File f =
@@ -5054,7 +5066,8 @@ public class SqlLine
                 return true;
             } catch (Exception e) {
                 if (!quiet) {
-                    error(loc("error-setting", new Object[] { key, e }));
+                    // need to use error here since it's called before setup has the fancy output in place.
+                    System.err.println(loc("error-setting", new Object[] { key, e }));
                 }
                 return false;
             }
