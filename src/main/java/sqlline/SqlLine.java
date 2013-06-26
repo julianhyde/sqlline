@@ -62,6 +62,12 @@ public class SqlLine
     private static final String sep = System.getProperty("line.separator");
     public static final String COMMAND_PREFIX = "!";
 
+    // saveDir() is used in various opts that assume it's set. But that means
+    // properties starting with "sqlline" are read into props in unspecific order
+    // using reflection to find setter methods. Avoid confusion/NullPointer due to
+    // about order of config by prefixing it.
+    public static final String SQLLINE_BASE_DIR = "x.sqlline.basedir";
+
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
 
     private static boolean initComplete = false;
@@ -421,7 +427,7 @@ public class SqlLine
     public static void main(String [] args)
         throws IOException
     {
-        mainWithInputRedirection(args, null);
+        start(args, null, true);
     }
 
     /**
@@ -437,15 +443,31 @@ public class SqlLine
         InputStream inputStream)
         throws IOException
     {
+        start(args, inputStream, false);
+    }
+
+    /**
+     * Backwards compatibility method to allow {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied calls
+     * to keep method signature but add in new behavior of not saving queries.
+     * @param args args[] passed in directly from {@link #main(String[])}
+     * @param inputStream Stream to read sql commands from (stdin or a file) or null for an interactive shell
+     * @param saveHistory whether or not the commands issued will be saved to sqlline's history file
+     * @throws IOException
+     */
+    public static void start(String [] args,
+                             InputStream inputStream,
+                             boolean saveHistory) throws IOException {
         SqlLine sqlline = new SqlLine();
-        sqlline.begin(args, inputStream);
+
+        sqlline.begin(args, inputStream, saveHistory);
 
         // exit the system: useful for Hypersonic and other
         // badly-behaving systems
         if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
             System.exit(0);
         }
-    }
+     }
+
 
     DatabaseConnection con()
     {
@@ -666,7 +688,7 @@ public class SqlLine
      * {@link CommandHandler} until the global variable <code>exit</code> is
      * true.
      */
-    void begin(String [] args, InputStream inputStream)
+    void begin(String [] args, InputStream inputStream, boolean saveHistory)
         throws IOException
     {
         try {
@@ -697,7 +719,9 @@ public class SqlLine
                 signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
-                fileHistory.flush();
+                if (saveHistory) {
+                    fileHistory.flush();
+                }
             } catch (EOFException eof) {
                 // CTRL-D
                 command.quit(null, callback);
@@ -4851,7 +4875,6 @@ public class SqlLine
         private String isolation = "TRANSACTION_REPEATABLE_READ";
         private String outputFormat = "table";
         private boolean trimScripts = true;
-
         private File rcFile = new File(saveDir(), "sqlline.properties");
         private String historyFile =
             new File(saveDir(), "history").getAbsolutePath();
@@ -4892,6 +4915,13 @@ public class SqlLine
             String dir = System.getProperty("sqlline.rcfile");
             if ((dir != null) && (dir.length() > 0)) {
                 return new File(dir);
+            }
+
+            String baseDir = System.getProperty(SQLLINE_BASE_DIR);
+            if ((baseDir != null) && (baseDir.length() > 0)) {
+                File saveDir = new File(baseDir).getAbsoluteFile();
+                saveDir.mkdirs();
+                return saveDir;
             }
 
             File f =
@@ -5036,7 +5066,10 @@ public class SqlLine
                 return true;
             } catch (Exception e) {
                 if (!quiet) {
-                    error(loc("error-setting", new Object[] { key, e }));
+                    // need to use System.err here because when bad command args are passed this is called before init
+                    // is done, meaning that sqlline's error() output chokes because it depends on properties like
+                    // text coloring that can get set in arbitrary order.
+                    System.err.println(loc("error-setting", new Object[] { key, e }));
                 }
                 return false;
             }
