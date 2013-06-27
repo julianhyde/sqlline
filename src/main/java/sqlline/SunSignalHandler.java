@@ -32,13 +32,11 @@ class SunSignalHandler
         Signal.handle(new Signal("INT"), this);
     }
 
-    @Override
     public void setCallback(DispatchCallback dispatchCallback)
     {
         this.dispatchCallback = dispatchCallback;
     }
 
-    @Override
     public void handle(Signal sig)
     {
         try {
