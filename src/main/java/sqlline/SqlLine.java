@@ -3637,6 +3637,9 @@ public class SqlLine
                     }
 
                     String extra = reader.readLine(prompt.toString());
+                    if (null == extra) {
+                        break; // reader is at the end of data
+                    }
                     if (!isComment(extra)) {
                         line += sep + extra;
                     }
