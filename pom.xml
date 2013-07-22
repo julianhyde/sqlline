@@ -4,7 +4,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-  <version>1.1.4</version>
+  <version>TRUNK-SNAPSHOT</version>
   <name>sqlline</name>
   <url>http://github.com/julianhyde/sqlline</url>
 
@@ -81,7 +81,7 @@
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
     <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
     <url>http://github.com/julianhyde/sqlline/tree/master</url>
-    <tag>sqlline-1.1.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>
