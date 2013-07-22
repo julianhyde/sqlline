@@ -4,11 +4,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-
-  <!-- Version number. The version number committed to github should be
-       TRUNK-SNAPSHOT except, briefly, when making a release. Next: 1.1.4. -->
-  <version>1.1.4</version>
-
+  <version>TRUNK-SNAPSHOT</version>
   <name>sqlline</name>
   <url>http://github.com/julianhyde/sqlline</url>
 
@@ -83,8 +79,8 @@
 
   <scm>
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
+    <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
     <url>http://github.com/julianhyde/sqlline/tree/master</url>
-    <tag>sqlline-1.1.4</tag>
   </scm>
 
   <dependencies>
