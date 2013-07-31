@@ -1,3 +1,5 @@
+![Build Status](https://travis-ci.org/julianhyde/sqlline.png)](https://travis-ci.org/julianhyde/sqlline)
+
 Command-line shell for issuing SQL to relational databases via JDBC.
 
 ## History
