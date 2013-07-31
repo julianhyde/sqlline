@@ -25,17 +25,16 @@ import java.util.*;
 import java.util.jar.*;
 
 import jline.*;
+import jline.console.ConsoleReader;
 import jline.console.UserInterruptException;
 import jline.console.completer.AggregateCompleter;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
 import jline.console.completer.FileNameCompleter;
 import jline.console.completer.NullCompleter;
-import jline.console.ConsoleReader;
 import jline.console.completer.StringsCompleter;
 import jline.console.history.FileHistory;
 import jline.console.history.History;
-
 
 /**
  * A console SQL shell with command completion.
@@ -63,9 +62,9 @@ public class SqlLine
     public static final String COMMAND_PREFIX = "!";
 
     // saveDir() is used in various opts that assume it's set. But that means
-    // properties starting with "sqlline" are read into props in unspecific order
-    // using reflection to find setter methods. Avoid confusion/NullPointer due to
-    // about order of config by prefixing it.
+    // properties starting with "sqlline" are read into props in unspecific
+    // order using reflection to find setter methods. Avoid
+    // confusion/NullPointer due about order of config by prefixing it.
     public static final String SQLLINE_BASE_DIR = "x.sqlline.basedir";
 
     private static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
@@ -168,7 +167,8 @@ public class SqlLine
         try {
             Class.forName(testClass);
         } catch (Throwable t) {
-            throw new ExceptionInInitializerError(loc("jline-missing", testClass));
+            throw new ExceptionInInitializerError(
+                loc("jline-missing", testClass));
         }
     }
 
@@ -220,50 +220,64 @@ public class SqlLine
             new ReflectiveCommandHandler(
                 new String[] { "exportedkeys" },
                 new Completer[] { new TableNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "manual" },
+            new ReflectiveCommandHandler(
+                new String[] { "manual" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "importedkeys" },
                 new Completer[] { new TableNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "procedures" },
+            new ReflectiveCommandHandler(
+                new String[] { "procedures" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "tables" },
+            new ReflectiveCommandHandler(
+                new String[] { "tables" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "typeinfo" },
+            new ReflectiveCommandHandler(
+                new String[] { "typeinfo" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "columns" },
                 new Completer[] { new TableNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "reconnect" },
+            new ReflectiveCommandHandler(
+                new String[] { "reconnect" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "dropall" },
                 new Completer[] { new TableNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "history" },
+            new ReflectiveCommandHandler(
+                new String[] { "history" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "metadata" },
                 new Completer[] {
                     new StringsCompleter(getMetadataMethodNames())
                 }),
-            new ReflectiveCommandHandler(new String[] { "nativesql" },
+            new ReflectiveCommandHandler(
+                new String[] { "nativesql" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "dbinfo" },
+            new ReflectiveCommandHandler(
+                new String[] { "dbinfo" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "rehash" },
+            new ReflectiveCommandHandler(
+                new String[] { "rehash" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "verbose" },
+            new ReflectiveCommandHandler(
+                new String[] { "verbose" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "run" },
                 new Completer[] { new FileNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "batch" },
+            new ReflectiveCommandHandler(
+                new String[] { "batch" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "list" },
+            new ReflectiveCommandHandler(
+                new String[] { "list" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "all" },
+            new ReflectiveCommandHandler(
+                new String[] { "all" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "go", "#" },
+            new ReflectiveCommandHandler(
+                new String[] { "go", "#" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "script" },
@@ -271,11 +285,14 @@ public class SqlLine
             new ReflectiveCommandHandler(
                 new String[] { "record" },
                 new Completer[] { new FileNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "brief" },
+            new ReflectiveCommandHandler(
+                new String[] { "brief" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "close" },
+            new ReflectiveCommandHandler(
+                new String[] { "close" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "closeall" },
+            new ReflectiveCommandHandler(
+                new String[] { "closeall" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "isolation" },
@@ -286,27 +303,35 @@ public class SqlLine
                     new StringsCompleter(
                         (String []) formats.keySet().toArray(new String[0]))
                 }),
-            new ReflectiveCommandHandler(new String[] { "autocommit" },
+            new ReflectiveCommandHandler(
+                new String[] { "autocommit" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "commit" },
+            new ReflectiveCommandHandler(
+                new String[] { "commit" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "properties" },
                 new Completer[] { new FileNameCompleter() }),
-            new ReflectiveCommandHandler(new String[] { "rollback" },
+            new ReflectiveCommandHandler(
+                new String[] { "rollback" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "help", "?" },
+            new ReflectiveCommandHandler(
+                new String[] { "help", "?" },
                 null),
             new ReflectiveCommandHandler(
                 new String[] { "set" },
                 opts.optionCompletors()),
-            new ReflectiveCommandHandler(new String[] { "save" },
+            new ReflectiveCommandHandler(
+                new String[] { "save" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "scan" },
+            new ReflectiveCommandHandler(
+                new String[] { "scan" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "sql" },
+            new ReflectiveCommandHandler(
+                new String[] { "sql" },
                 null),
-            new ReflectiveCommandHandler(new String[] { "call" },
+            new ReflectiveCommandHandler(
+                new String[] { "call" },
                 null),
         };
 
@@ -362,17 +387,22 @@ public class SqlLine
 
     private String getApplicationTitle()
     {
-        InputStream inputStream = getClass().getResourceAsStream( "/META-INF/maven/sqlline/sqlline/pom.properties" );
+        InputStream inputStream =
+            getClass().getResourceAsStream(
+                "/META-INF/maven/sqlline/sqlline/pom.properties");
         Properties properties = new Properties();
         properties.put("artifactId", "sqlline");
         properties.put("version", "???");
         try {
-          properties.load(inputStream);
-        } catch( IOException e ) {
-          handleException(e);
+            properties.load(inputStream);
+        } catch (IOException e) {
+            handleException(e);
         }
 
-        return loc("app-introduction", properties.getProperty("artifactId"), properties.getProperty("version"));
+        return loc(
+            "app-introduction",
+            properties.getProperty("artifactId"),
+            properties.getProperty("version"));
     }
 
     static String getApplicationContactInformation()
@@ -447,16 +477,23 @@ public class SqlLine
     }
 
     /**
-     * Backwards compatibility method to allow {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied calls
-     * to keep method signature but add in new behavior of not saving queries.
+     * Backwards compatibility method to allow
+     * {@link #mainWithInputRedirection(String[], java.io.InputStream)} proxied
+     * calls to keep method signature but add in new behavior of not saving
+     * queries.
+
      * @param args args[] passed in directly from {@link #main(String[])}
-     * @param inputStream Stream to read sql commands from (stdin or a file) or null for an interactive shell
-     * @param saveHistory whether or not the commands issued will be saved to sqlline's history file
+     * @param inputStream Stream to read sql commands from (stdin or a file) or
+     * null for an interactive shell
+     * @param saveHistory whether or not the commands issued will be saved to
+     * sqlline's history file
      * @throws IOException
      */
-    public static void start(String [] args,
-                             InputStream inputStream,
-                             boolean saveHistory) throws IOException {
+    public static void start(
+        String [] args,
+        InputStream inputStream,
+        boolean saveHistory) throws IOException
+    {
         SqlLine sqlline = new SqlLine();
 
         sqlline.begin(args, inputStream, saveHistory);
@@ -657,7 +694,9 @@ public class SqlLine
 
         // now load properties files
         for (Iterator i = files.iterator(); i.hasNext();) {
-            dispatch(COMMAND_PREFIX + "properties " + i.next(), new DispatchCallback());
+            dispatch(
+                COMMAND_PREFIX + "properties " + i.next(),
+                new DispatchCallback());
         }
 
         if (commands.size() > 0) {
@@ -676,7 +715,9 @@ public class SqlLine
 
         // if a script file was specified, run the file and quit
         if (opts.getRun() != null) {
-            dispatch(COMMAND_PREFIX + "run " + opts.getRun(), new DispatchCallback());
+            dispatch(
+                COMMAND_PREFIX + "run " + opts.getRun(),
+                new DispatchCallback());
             dispatch(COMMAND_PREFIX + "quit", new DispatchCallback());
         }
 
@@ -697,7 +738,8 @@ public class SqlLine
             handleException(e);
         }
 
-        FileHistory fileHistory = new FileHistory(new File(opts.getHistoryFile())) ;
+        FileHistory fileHistory =
+            new FileHistory(new File(opts.getHistoryFile())) ;
         ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
         if (!(initArgs(args))) {
             usage();
@@ -710,7 +752,8 @@ public class SqlLine
             handleException(e);
         }
 
-        // basic setup done. From this point on, honor opts value for showing exception
+        // basic setup done. From this point on, honor opts value for showing
+        // exception
         initComplete = true;
 
         while (!exit) {
@@ -744,7 +787,8 @@ public class SqlLine
         command.closeall(null, new DispatchCallback());
     }
 
-    public ConsoleReader getConsoleReader(InputStream inputStream, FileHistory fileHistory)
+    public ConsoleReader getConsoleReader(
+        InputStream inputStream, FileHistory fileHistory)
         throws IOException
     {
         Terminal terminal = TerminalFactory.create();
@@ -835,7 +879,8 @@ public class SqlLine
             } else if (cmdMap.size() > 1) {
                 callback.setStatus(DispatchCallback.Status.FAILURE);
                 error(
-                    loc("multiple-matches",
+                    loc(
+                        "multiple-matches",
                         cmdMap.keySet().toString()));
             } else {
                  ((CommandHandler) cmdMap.values().iterator().next())
@@ -1102,8 +1147,7 @@ public class SqlLine
         if ((con() == null) || (con().url == null)) {
             return "sqlline> ";
         } else {
-            return getPrompt(connections.getIndex()
-                + ": " + con().url) + "> ";
+            return getPrompt(connections.getIndex() + ": " + con().url) + "> ";
         }
     }
 
@@ -1580,7 +1624,8 @@ public class SqlLine
 
         if (e instanceof SQLException) {
             handleSQLException((SQLException) e);
-        } else if ((!initComplete) && !(opts.getVerbose())) { // all init errors must be verbose
+        } else if ((!initComplete) && !(opts.getVerbose())) {
+            // all init errors must be verbose
             if (e.getMessage() == null) {
                 error(e.getClass().getName());
             } else {
@@ -1594,14 +1639,18 @@ public class SqlLine
     void handleSQLException(SQLException e)
     {
         // all init errors must be verbose
-        if ((e instanceof SQLWarning) && (!initComplete) && !(opts.getShowWarnings())) {
+        if ((e instanceof SQLWarning)
+            && (!initComplete)
+            && !(opts.getShowWarnings()))
+        {
             return;
         }
 
         String type = (e instanceof SQLWarning) ? loc("Warning") : loc("Error");
 
         error(
-            loc((e instanceof SQLWarning) ? "Warning" : "Error",
+            loc(
+                (e instanceof SQLWarning) ? "Warning" : "Error",
                 new Object[] {
                     (e.getMessage() == null) ? "" : e.getMessage().trim(),
                     (e.getSQLState() == null) ? "" : e.getSQLState().trim(),
@@ -1724,7 +1773,8 @@ public class SqlLine
             } catch (Throwable t) {
             }
         }
-        info("scan complete in "
+        info(
+            "scan complete in "
             + (System.currentTimeMillis() - start) + "ms");
         return (Driver []) driverClasses.toArray(new Driver[0]);
     }
@@ -1741,7 +1791,8 @@ public class SqlLine
 
         if (f == null) {
             error(
-                loc("unknown-format",
+                loc(
+                    "unknown-format",
                     new Object[] {
                         format, formats.keySet()
                     }));
@@ -2024,7 +2075,7 @@ public class SqlLine
                 output(
                     color().bold(
                         color().pad(head[i], headwidth).getMono()).append(
-                               (vals[i] == null) ? "" : vals[i]));
+                            (vals[i] == null) ? "" : vals[i]));
             }
 
             output(""); // spacing
@@ -2497,7 +2548,7 @@ public class SqlLine
     /**
      * A buffer that can output segments using ANSI color.
      */
-    final static class ColorBuffer
+    static final class ColorBuffer
         implements Comparable
     {
         private static final ColorAttr BOLD = new ColorAttr("\033[1m");
@@ -2868,7 +2919,8 @@ public class SqlLine
             metadata(parts[1], params, callback);
         }
 
-        public void metadata(String cmd, List argList, DispatchCallback callback)
+        public void metadata(
+            String cmd, List argList, DispatchCallback callback)
         {
             try {
                 Method [] m = con().meta.getClass().getMethods();
@@ -2921,8 +2973,9 @@ public class SqlLine
             ListIterator<History.Entry> hist = reader.getHistory().entries();
             int index = 1;
             while (hist.hasNext()) {
-                index++ ;
-                output(color().pad(index + ".", 6).append(hist.next().toString()));
+                index++;
+                output(
+                    color().pad(index + ".", 6).append(hist.next().toString()));
             }
             callback.setToSuccess();
         }
@@ -2942,7 +2995,8 @@ public class SqlLine
                 }
 
                 throw new IllegalArgumentException(
-                    loc("arg-usage",
+                    loc(
+                        "arg-usage",
                         new Object[] {
                             (ret.length == 0) ? "" : ret[0],
                             paramname
@@ -2981,7 +3035,8 @@ public class SqlLine
             if ((ret == null) || (ret.length != 2)) {
                 if (defaultValues[defaultValues.length - 1] == null) {
                     throw new IllegalArgumentException(
-                        loc("arg-usage",
+                        loc(
+                            "arg-usage",
                             new Object[] {
                                 (ret.length == 0) ? "" : ret[0][0],
                                 paramname
@@ -3078,7 +3133,8 @@ public class SqlLine
             callback.setToSuccess();
         }
 
-        public void columns(String line, DispatchCallback callback) throws SQLException
+        public void columns(String line, DispatchCallback callback)
+            throws SQLException
         {
             String[] strings = {conn().getCatalog(), null, "%"};
             List args = buildMetadataArgs(line, "table name", strings);
@@ -3218,11 +3274,11 @@ public class SqlLine
                     String key = (String) i.next();
                     output(
                         color().green(
-                                   color().pad(
-                                       key.substring(
-                                           opts.PROPERTY_PREFIX.length()),
-                                       20).getMono()).append(
-                                   props.getProperty(key)));
+                            color().pad(
+                                key.substring(
+                                    opts.PROPERTY_PREFIX.length()),
+                                20).getMono())
+                        .append(props.getProperty(key)));
                 }
             } catch (Exception e) {
                 callback.setToFailure();
@@ -3786,7 +3842,9 @@ public class SqlLine
                 if ((con().connection != null)
                     && !(con().connection.isClosed()))
                 {
-                    info(loc("closing",
+                    info(
+                        loc(
+                            "closing",
                             con().connection.getClass().getName()));
                     con().connection.close();
                 } else {
@@ -3981,7 +4039,6 @@ public class SqlLine
             try {
                 if (!(assertConnection())) {
                     callback.setToFailure();
-
                 }
 
                 completions.clear();
@@ -4135,8 +4192,7 @@ public class SqlLine
 
             try {
                 BufferedReader reader =
-                    new BufferedReader(new FileReader(
-                            parts[1]));
+                    new BufferedReader(new FileReader(parts[1]));
                 try {
                     // ### NOTE:  fix for sf.net bug 879427
                     StringBuffer cmd = null;
@@ -4606,7 +4662,8 @@ public class SqlLine
                         // underscore and characters that are specified
                         // by the database to be valid name identifiers.
                         @Override
-                        public boolean isDelimiterChar(final CharSequence buffer, int pos)
+                        public boolean isDelimiterChar(
+                            final CharSequence buffer, int pos)
                         {
                             char c = buffer.charAt(pos);
                             if (Character.isWhitespace(c)) {
@@ -4617,8 +4674,8 @@ public class SqlLine
                                 && (c != '_')
                                 && (extraNameCharacters.indexOf(c) == -1);
                         }
-                    }
-                    ,new SQLLineSQLCompletor(skipmeta));
+                    },
+                    new SQLLineSQLCompletor(skipmeta));
 
             // not all argument elements need to hold true
             ((ArgumentCompleter) sqlLineSQLCompleter).setStrict(false);
@@ -4665,10 +4722,9 @@ public class SqlLine
             // DriverManager.getDriver(). Because RJDriverServer.connect runs in
             // a different thread (RMI) than the getConnection() caller (here),
             // this sequence will hang every time.
-
-            //connection = DriverManager.getConnection (url, username,
-            //password);
-
+/*
+            connection = DriverManager.getConnection (url, username, password);
+*/
             // Instead, we use the driver instance to make the connection
 
             final Properties info = new Properties();
@@ -4679,22 +4735,22 @@ public class SqlLine
 
             try {
                 debug(
-                  loc( "connected",
-                    new Object[]{
-                      meta.getDatabaseProductName(),
-                      meta.getDatabaseProductVersion()
-                    } ) );
+                    loc(
+                        "connected",
+                        new Object[]{
+                            meta.getDatabaseProductName(),
+                            meta.getDatabaseProductVersion()}));
             } catch (Exception e) {
                 handleException(e);
             }
 
             try {
                 debug(
-                  loc( "driver",
-                    new Object[]{
-                      meta.getDriverName(),
-                      meta.getDriverVersion()
-                    } ) );
+                    loc(
+                        "driver",
+                        new Object[]{
+                            meta.getDriverName(),
+                            meta.getDriverVersion()}));
             } catch (Exception e) {
                 handleException(e);
             }
@@ -4707,8 +4763,11 @@ public class SqlLine
             }
 
             try {
-                // nothing is done off of this command beyond the handle so no need to use the callback.
-                command.isolation("isolation: " + opts.getIsolation(), new DispatchCallback());
+                // nothing is done off of this command beyond the handle so no
+                // need to use the callback.
+                command.isolation(
+                    "isolation: " + opts.getIsolation(),
+                    new DispatchCallback());
             } catch (Exception e) {
                 handleException(e);
             }
@@ -4794,8 +4853,7 @@ public class SqlLine
                             new String[] { "TABLE" });
                     try {
                         while (rs.next()) {
-                            tnames.add(new Table(
-                                    rs.getString("TABLE_NAME")));
+                            tnames.add(new Table(rs.getString("TABLE_NAME")));
                         }
                     } finally {
                         try {
@@ -4900,12 +4958,12 @@ public class SqlLine
         public String [] possibleSettingValues()
         {
             List vals = new LinkedList();
-            vals.addAll(Arrays.asList(
+            vals.addAll(
+                Arrays.asList(
                     new String[] {
                         "yes",
                         "no",
                     }));
-
             return (String []) vals.toArray(new String[vals.size()]);
         }
 
@@ -4930,8 +4988,8 @@ public class SqlLine
             File f =
                 new File(
                     System.getProperty("user.home"),
-                    ((System.getProperty("os.name").toLowerCase().indexOf(
-                                "windows") != -1) ? "" : ".") + "sqlline")
+                    ((System.getProperty("os.name").toLowerCase()
+                      .indexOf("windows") != -1) ? "" : ".") + "sqlline")
                 .getAbsoluteFile();
             try {
                 f.mkdirs();
@@ -5069,10 +5127,13 @@ public class SqlLine
                 return true;
             } catch (Exception e) {
                 if (!quiet) {
-                    // need to use System.err here because when bad command args are passed this is called before init
-                    // is done, meaning that sqlline's error() output chokes because it depends on properties like
-                    // text coloring that can get set in arbitrary order.
-                    System.err.println(loc("error-setting", new Object[] { key, e }));
+                    // need to use System.err here because when bad command args
+                    // are passed this is called before init is done, meaning
+                    // that sqlline's error() output chokes because it depends
+                    // on properties like text coloring that can get set in
+                    // arbitrary order.
+                    System.err.println(
+                        loc("error-setting", new Object[] { key, e }));
                 }
                 return false;
             }
@@ -5506,3 +5567,4 @@ public class SqlLine
     }
 }
 
+// End SqlLine.java

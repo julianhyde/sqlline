@@ -78,7 +78,8 @@ public class DispatchCallback
     /**
      * If a statement has been set by {@link #trackSqlQuery(java.sql.Statement)}
      * then call {@link java.sql.Statement#cancel()} on it.As with {@link java.sql.Statement#cancel()}
-     * the effect of calling this is dependent on the underlying DBMS and driver.
+     * the effect of calling this is dependent on the underlying DBMS and
+     * driver.
      *
      * @throws SQLException
      */
@@ -89,8 +90,7 @@ public class DispatchCallback
         // interactive shell if we want. If there is something to cancel, cancel
         // it.
         setStatus(Status.CANCELED);
-        if (null != statement)
-        {
+        if (null != statement) {
             statement.cancel();
         }
     }
@@ -110,3 +110,5 @@ public class DispatchCallback
         UNSET, RUNNING, SUCCESS, FAILURE, CANCELED
     }
 }
+
+// End DispatchCallback.java

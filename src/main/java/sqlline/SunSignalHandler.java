@@ -15,7 +15,6 @@ import java.sql.*;
 
 import sun.misc.*;
 
-
 /**
  * A signal handler for SqlLine which interprets Ctrl+C as a request to cancel
  * the currently executing query. Adapted from <a
@@ -51,3 +50,5 @@ class SunSignalHandler
         }
     }
 }
+
+// End SunSignalHandler.java

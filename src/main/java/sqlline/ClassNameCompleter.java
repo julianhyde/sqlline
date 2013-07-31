@@ -77,7 +77,8 @@ public class ClassNameCompleter extends StringsCompleter
             File file = new File(url.getFile());
 
             if (file.isDirectory()) {
-                Set files = getClassFiles(file.getAbsolutePath(),
+                Set files = getClassFiles(
+                    file.getAbsolutePath(),
                     new HashSet(), file, new int[]{200});
                 classes.addAll(files);
 

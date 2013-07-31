@@ -26,3 +26,4 @@ public interface SqlLineSignalHandler
     public void setCallback(DispatchCallback dispatchCallback);
 }
 
+// End SqlLineSignalHandler.java
