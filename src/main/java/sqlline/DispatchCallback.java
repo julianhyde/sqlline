@@ -11,8 +11,6 @@
 */
 package sqlline;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -21,8 +19,6 @@ import java.sql.Statement;
  */
 public class DispatchCallback
 {
-    private static final Method IS_CLOSED_METHOD =
-        getMethod(Statement.class, "isClosed");
 
     private Status status;
     private Statement statement;
@@ -81,7 +77,8 @@ public class DispatchCallback
 
     /**
      * If a statement has been set by {@link #trackSqlQuery(java.sql.Statement)}
-     * then call {@link java.sql.Statement#cancel()} on it.
+     * then call {@link java.sql.Statement#cancel()} on it.As with {@link java.sql.Statement#cancel()}
+     * the effect of calling this is dependent on the underlying DBMS and driver.
      *
      * @throws SQLException
      */
@@ -92,37 +89,9 @@ public class DispatchCallback
         // interactive shell if we want. If there is something to cancel, cancel
         // it.
         setStatus(Status.CANCELED);
-        if ((null != statement)
-            && (status == Status.RUNNING)
-            && (!statementIsClosed(statement)))
+        if (null != statement)
         {
             statement.cancel();
-        }
-    }
-
-    /** Calls {@link Statement#isClosed} via reflection. Before JDK 1.6, the
-     * method does not exist, so this method returns false. */
-    private static boolean statementIsClosed(Statement statement)
-        throws SQLException
-    {
-        if (IS_CLOSED_METHOD != null) {
-            try {
-                return (Boolean) IS_CLOSED_METHOD.invoke(statement);
-            } catch (IllegalAccessException e) {
-                // ignore
-            } catch (InvocationTargetException e) {
-                // ignore
-            }
-        }
-        return false;
-    }
-
-    /** Looks up a method, and returns null if the method does not exist. */
-    private static Method getMethod(Class<?> clazz, String name) {
-        try {
-            return clazz.getMethod(name);
-        } catch (NoSuchMethodException e) {
-            return null;
         }
     }
 
@@ -141,5 +110,3 @@ public class DispatchCallback
         UNSET, RUNNING, SUCCESS, FAILURE, CANCELED
     }
 }
-
-// End DispatchCallback.java
