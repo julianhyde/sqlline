@@ -468,12 +468,12 @@ public class SqlLine
      * @param args same as main()
      * @param inputStream redirected input, or null to use standard input
      */
-    public static void mainWithInputRedirection(
+    public static boolean mainWithInputRedirection(
         String [] args,
         InputStream inputStream)
         throws IOException
     {
-        start(args, inputStream, false);
+        return start(args, inputStream, false);
     }
 
     /**
@@ -489,20 +489,21 @@ public class SqlLine
      * sqlline's history file
      * @throws IOException
      */
-    public static void start(
+    public static boolean start(
         String [] args,
         InputStream inputStream,
         boolean saveHistory) throws IOException
     {
         SqlLine sqlline = new SqlLine();
-
-        sqlline.begin(args, inputStream, saveHistory);
+        boolean retVal = sqlline.begin(args, inputStream, saveHistory);
 
         // exit the system: useful for Hypersonic and other
         // badly-behaving systems
         if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
-            System.exit(0);
+            System.exit(retVal? 1 : 0);
         }
+
+        return retVal;
      }
 
 
@@ -729,7 +730,7 @@ public class SqlLine
      * {@link CommandHandler} until the global variable <code>exit</code> is
      * true.
      */
-    void begin(String [] args, InputStream inputStream, boolean saveHistory)
+    boolean begin(String [] args, InputStream inputStream, boolean saveHistory)
         throws IOException
     {
         try {
@@ -743,7 +744,7 @@ public class SqlLine
         ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
         if (!(initArgs(args))) {
             usage();
-            return;
+            return false;
         }
 
         try {
@@ -755,12 +756,10 @@ public class SqlLine
         // basic setup done. From this point on, honor opts value for showing
         // exception
         initComplete = true;
-
+        DispatchCallback callback = new DispatchCallback();
         while (!exit) {
-            DispatchCallback callback = new DispatchCallback();
             try {
                 signalHandler.setCallback(callback);
-                callback.setStatus(DispatchCallback.Status.RUNNING);
                 dispatch(reader.readLine(getPrompt()), callback);
                 if (saveHistory) {
                     fileHistory.flush();
@@ -771,20 +770,22 @@ public class SqlLine
             } catch (UserInterruptException ioe) {
                 // CTRL-C
                 try {
-                  callback.forceKillSqlQuery();
-                  output(loc("command-canceled"));
+                    callback.forceKillSqlQuery();
+                    callback.setToCancel();
+                    output(loc("command-canceled"));
                 } catch (SQLException sqle) {
-                  handleException(sqle);
+                    handleException(sqle);
                 }
             } catch (Throwable t) {
                 handleException(t);
+                callback.setToFailure();
             }
         }
-
         // ### NOTE jvs 10-Aug-2004:  Clean up any outstanding
         // connections automatically.
         // nothing is done with the callback beyond
         command.closeall(null, new DispatchCallback());
+        return callback.isSuccess();
     }
 
     public ConsoleReader getConsoleReader(
@@ -838,17 +839,14 @@ public class SqlLine
         if (line == null) {
             // exit
             exit = true;
-            callback.setStatus(DispatchCallback.Status.SUCCESS);
             return;
         }
 
         if (line.trim().length() == 0) {
-            callback.setStatus(DispatchCallback.Status.SUCCESS);
             return;
         }
 
         if (isComment(line)) {
-            callback.setStatus(DispatchCallback.Status.SUCCESS);
             return;
         }
 
@@ -883,11 +881,12 @@ public class SqlLine
                         "multiple-matches",
                         cmdMap.keySet().toString()));
             } else {
-                 ((CommandHandler) cmdMap.values().iterator().next())
-                    .execute(line, callback);
+                callback.setStatus(DispatchCallback.Status.RUNNING);
+                ((CommandHandler) cmdMap.values().iterator().next()).execute(line, callback);
             }
         } else {
-             command.sql(line, callback);
+            callback.setStatus(DispatchCallback.Status.RUNNING);
+            command.sql(line, callback);
         }
     }
 
@@ -3754,6 +3753,7 @@ public class SqlLine
                         stmnt = createStatement();
                         callback.trackSqlQuery(stmnt);
                         hasResults = stmnt.execute(sql);
+                        callback.setToSuccess();
                     }
 
                     showWarnings();
@@ -3808,7 +3808,6 @@ public class SqlLine
         {
             exit = true;
             close(null, callback);
-            callback.setToSuccess();
         }
 
         /**
