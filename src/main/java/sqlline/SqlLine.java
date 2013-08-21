@@ -458,6 +458,11 @@ public class SqlLine
         throws IOException
     {
         start(args, null, true);
+        // exit the system: useful for Hypersonic and other
+        // badly-behaving systems
+        if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
+            System.exit(0);
+        }
     }
 
     /**
@@ -468,12 +473,12 @@ public class SqlLine
      * @param args same as main()
      * @param inputStream redirected input, or null to use standard input
      */
-    public static void mainWithInputRedirection(
+    public static boolean mainWithInputRedirection(
         String [] args,
         InputStream inputStream)
         throws IOException
     {
-        start(args, inputStream, false);
+        return start(args, inputStream, false);
     }
 
     /**
@@ -489,20 +494,14 @@ public class SqlLine
      * sqlline's history file
      * @throws IOException
      */
-    public static void start(
+    public static boolean start(
         String [] args,
         InputStream inputStream,
         boolean saveHistory) throws IOException
     {
         SqlLine sqlline = new SqlLine();
 
-        sqlline.begin(args, inputStream, saveHistory);
-
-        // exit the system: useful for Hypersonic and other
-        // badly-behaving systems
-        if (!Boolean.getBoolean(Opts.PROPERTY_NAME_EXIT)) {
-            System.exit(0);
-        }
+        return sqlline.begin(args, inputStream, saveHistory);
      }
 
 
@@ -729,7 +728,7 @@ public class SqlLine
      * {@link CommandHandler} until the global variable <code>exit</code> is
      * true.
      */
-    void begin(String [] args, InputStream inputStream, boolean saveHistory)
+    boolean begin(String [] args, InputStream inputStream, boolean saveHistory)
         throws IOException
     {
         try {
@@ -743,7 +742,7 @@ public class SqlLine
         ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
         if (!(initArgs(args))) {
             usage();
-            return;
+            return false;
         }
 
         try {
@@ -755,9 +754,9 @@ public class SqlLine
         // basic setup done. From this point on, honor opts value for showing
         // exception
         initComplete = true;
-
+        DispatchCallback callback = new DispatchCallback();
         while (!exit) {
-            DispatchCallback callback = new DispatchCallback();
+            callback = new DispatchCallback();
             try {
                 signalHandler.setCallback(callback);
                 callback.setStatus(DispatchCallback.Status.RUNNING);
@@ -780,11 +779,11 @@ public class SqlLine
                 handleException(t);
             }
         }
-
         // ### NOTE jvs 10-Aug-2004:  Clean up any outstanding
         // connections automatically.
         // nothing is done with the callback beyond
         command.closeall(null, new DispatchCallback());
+        return callback.isSuccess();
     }
 
     public ConsoleReader getConsoleReader(
