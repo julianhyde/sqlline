@@ -1638,10 +1638,11 @@ public class SqlLine
     void handleSQLException(SQLException e)
     {
         // all init errors must be verbose
-        if ((e instanceof SQLWarning)
-            && (!initComplete)
-            && !(opts.getShowWarnings()))
-        {
+        final boolean showWarnings = !initComplete || opts.getShowWarnings();
+        final boolean verbose = !initComplete || opts.getVerbose();
+        final boolean showNested = !initComplete || opts.getShowNestedErrs();
+
+        if ((e instanceof SQLWarning) && !showWarnings) {
             return;
         }
 
@@ -1656,13 +1657,11 @@ public class SqlLine
                     new Integer(e.getErrorCode())
                 }));
 
-        // all init errors must be verbose
-        if ((!initComplete) && (opts.getVerbose())) {
+        if (verbose) {
             e.printStackTrace();
         }
 
-        // all init errors must be verbose
-        if (initComplete && (!opts.getShowNestedErrs())) {
+        if (!showNested) {
             return;
         }
 
