@@ -26,8 +26,10 @@ import jline.console.completer.StringsCompleter;
  */
 public class ClassNameCompleter extends StringsCompleter {
   /**
-   * Complete candidates using all the classes available in the
+   * Completes candidates using all the classes available in the
    * java <em>CLASSPATH</em>.
+   *
+   * @throws IOException on error
    */
   public ClassNameCompleter() throws IOException {
     super(getClassNames());

@@ -37,7 +37,7 @@ interface CommandHandler {
   String getHelpText();
 
   /**
-   * Check to see if the specified string can be dispatched to this
+   * Checks to see if the specified string can be dispatched to this
    * command.
    *
    * @param line
@@ -47,7 +47,7 @@ interface CommandHandler {
   String matches(String line);
 
   /**
-   * Execute the specified command.
+   * Executes the specified command.
    *
    * @param line
    *          the full command line to execute.
@@ -57,6 +57,8 @@ interface CommandHandler {
 
   /**
    * Returns the completers that can handle parameters.
+   *
+   * @return Completers that can handle parameters
    */
   Completer[] getParameterCompleters();
 }

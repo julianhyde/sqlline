@@ -66,12 +66,12 @@ public class DispatchCallback {
 
   /**
    * If a statement has been set by {@link #trackSqlQuery(java.sql.Statement)}
-   * then call {@link java.sql.Statement#cancel()} on it.
+   * then calls {@link java.sql.Statement#cancel()} on it.
    * As with {@link java.sql.Statement#cancel()}
    * the effect of calling this is dependent on the underlying DBMS and
    * driver.
    *
-   * @throws SQLException
+   * @throws SQLException on database error
    */
   public void forceKillSqlQuery() throws SQLException {
     // regardless of whether it's necessary to actually call .cancel() set

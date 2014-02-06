@@ -377,6 +377,9 @@ public class SqlLine {
 
   /**
    * Starts the program.
+   *
+   * @param args Arguments specified on the command-line
+   * @throws IOException on error
    */
   public static void main(String[] args)
       throws IOException {
@@ -390,6 +393,8 @@ public class SqlLine {
    *
    * @param args        same as main()
    * @param inputStream redirected input, or null to use standard input
+   * @return Whether successful
+   * @throws IOException on error
    */
   public static boolean mainWithInputRedirection(
       String[] args,
@@ -422,7 +427,8 @@ public class SqlLine {
    *                    null for an interactive shell
    * @param saveHistory whether or not the commands issued will be saved to
    *                    sqlline's history file
-   * @throws IOException
+   * @return Whether successful
+   * @throws IOException on error
    */
   public static boolean start(
       String[] args,
@@ -1170,14 +1176,14 @@ public class SqlLine {
   /**
    * Splits the line into an array of possibly-compound identifiers, observing
    * the database's quoting syntax.
-   * <p/>
+   *
    * <p>For example, on Oracle, which uses double-quote (&quot;) as quote
-   * character,
-   * <p/>
+   * character,</p>
+   *
    * <blockquote>!tables "My Schema"."My Table"</blockquote>
-   * <p/>
-   * returns
-   * <p/>
+   *
+   * <p>returns</p>
+   *
    * <blockquote>{ {"!tables"}, {"My Schema", "My Table"} }</blockquote>
    *
    * @param line the line to break up

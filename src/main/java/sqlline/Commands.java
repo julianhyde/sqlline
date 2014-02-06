@@ -856,7 +856,10 @@ public class Commands {
   }
 
   /**
-   * Close all connections.
+   * Closes all connections.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void closeall(String line, DispatchCallback callback) {
     close(null, callback);
@@ -872,7 +875,10 @@ public class Commands {
   }
 
   /**
-   * Close the current connection.
+   * Closes the current connection.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void close(String line, DispatchCallback callback) {
     if (sqlLine.getDatabaseConnection() == null) {
@@ -900,7 +906,11 @@ public class Commands {
   }
 
   /**
-   * Connect to the database defined in the specified properties file.
+   * Connects to the database defined in the specified properties file.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
+   * @throws Exception on error
    */
   public void properties(String line, DispatchCallback callback)
       throws Exception {
@@ -1066,7 +1076,10 @@ public class Commands {
   }
 
   /**
-   * List the current connections
+   * Lists the current connections.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void list(String line, DispatchCallback callback) {
     int index = 0;
@@ -1132,7 +1145,10 @@ public class Commands {
   }
 
   /**
-   * Save or stop saving a script to a file
+   * Starts or stops saving a script to a file.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void script(String line, DispatchCallback callback) {
     if (sqlLine.getScriptOutputFile() == null) {
@@ -1184,7 +1200,10 @@ public class Commands {
   }
 
   /**
-   * Run a script from the specified file.
+   * Runs a script from the specified file.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void run(String line, DispatchCallback callback) {
     String[] parts = sqlLine.split(line, 2, "Usage: run <scriptfile>");
@@ -1259,7 +1278,10 @@ public class Commands {
   }
 
   /**
-   * Save or stop saving all output to a file.
+   * Starts or stops saving all output to a file.
+   *
+   * @param line Command line
+   * @param callback Callback for command status
    */
   public void record(String line, DispatchCallback callback) {
     if (sqlLine.getRecordOutputFile() == null) {
