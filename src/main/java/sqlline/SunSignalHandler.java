@@ -20,35 +20,29 @@ import sun.misc.*;
  * the currently executing query. Adapted from <a
  * href="http://www.smotricz.com/kabutz/Issue043.html">TJSN</a>.
  */
-class SunSignalHandler
-    implements SqlLineSignalHandler,
-        SignalHandler
-{
-    private DispatchCallback dispatchCallback;
+class SunSignalHandler implements SqlLineSignalHandler, SignalHandler {
+  private DispatchCallback dispatchCallback;
 
-    SunSignalHandler()
-    {
-        Signal.handle(new Signal("INT"), this);
-    }
+  SunSignalHandler() {
+    Signal.handle(new Signal("INT"), this);
+  }
 
-    public void setCallback(DispatchCallback dispatchCallback)
-    {
-        this.dispatchCallback = dispatchCallback;
-    }
+  public void setCallback(DispatchCallback dispatchCallback) {
+    this.dispatchCallback = dispatchCallback;
+  }
 
-    public void handle(Signal sig)
-    {
-        try {
-            synchronized (this) {
-                if (dispatchCallback != null) {
-                    dispatchCallback.forceKillSqlQuery();
-                    dispatchCallback.setToCancel();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+  public void handle(Signal sig) {
+    try {
+      synchronized (this) {
+        if (dispatchCallback != null) {
+          dispatchCallback.forceKillSqlQuery();
+          dispatchCallback.setToCancel();
         }
+      }
+    } catch (SQLException ex) {
+      throw new RuntimeException(ex);
     }
+  }
 }
 
 // End SunSignalHandler.java

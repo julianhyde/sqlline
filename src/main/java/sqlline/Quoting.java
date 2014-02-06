@@ -12,17 +12,20 @@
 package sqlline;
 
 /**
- * A signal handler interface for SqlLine. The interface is decoupled from the
- * implementation since signal handlers are not portable across JVMs, so we use
- * dynamic class-loading.
+ * Quoting strategy.
  */
-public interface SqlLineSignalHandler {
-  /**
-   * Sets the dispatchCallback to be alerted of by signals.
-   *
-   * @param dispatchCallback statement affected
-   */
-  void setCallback(DispatchCallback dispatchCallback);
+class Quoting {
+  final char start;
+  final char end;
+  final boolean upper;
+
+  Quoting(char start, char end, boolean upper) {
+    this.start = start;
+    this.end = end;
+    this.upper = upper;
+  }
+
+  public static final Quoting DEFAULT = new Quoting('"', '"', true);
 }
 
-// End SqlLineSignalHandler.java
+// End Quoting.java

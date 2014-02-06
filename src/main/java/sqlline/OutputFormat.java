@@ -12,17 +12,10 @@
 package sqlline;
 
 /**
- * A signal handler interface for SqlLine. The interface is decoupled from the
- * implementation since signal handlers are not portable across JVMs, so we use
- * dynamic class-loading.
+ * Converts a collection of rows into text.
  */
-public interface SqlLineSignalHandler {
-  /**
-   * Sets the dispatchCallback to be alerted of by signals.
-   *
-   * @param dispatchCallback statement affected
-   */
-  void setCallback(DispatchCallback dispatchCallback);
+interface OutputFormat {
+  int print(Rows rows);
 }
 
-// End SqlLineSignalHandler.java
+// End OutputFormat.java
