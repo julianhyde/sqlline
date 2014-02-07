@@ -23,6 +23,126 @@ import jline.console.history.History;
  * Collection of available commands.
  */
 public class Commands {
+  private static final String[] METHODS = {
+    "allProceduresAreCallable",
+    "allTablesAreSelectable",
+    "dataDefinitionCausesTransactionCommit",
+    "dataDefinitionIgnoredInTransactions",
+    "doesMaxRowSizeIncludeBlobs",
+    "getCatalogSeparator",
+    "getCatalogTerm",
+    "getDatabaseProductName",
+    "getDatabaseProductVersion",
+    "getDefaultTransactionIsolation",
+    "getDriverMajorVersion",
+    "getDriverMinorVersion",
+    "getDriverName",
+    "getDriverVersion",
+    "getExtraNameCharacters",
+    "getIdentifierQuoteString",
+    "getMaxBinaryLiteralLength",
+    "getMaxCatalogNameLength",
+    "getMaxCharLiteralLength",
+    "getMaxColumnNameLength",
+    "getMaxColumnsInGroupBy",
+    "getMaxColumnsInIndex",
+    "getMaxColumnsInOrderBy",
+    "getMaxColumnsInSelect",
+    "getMaxColumnsInTable",
+    "getMaxConnections",
+    "getMaxCursorNameLength",
+    "getMaxIndexLength",
+    "getMaxProcedureNameLength",
+    "getMaxRowSize",
+    "getMaxSchemaNameLength",
+    "getMaxStatementLength",
+    "getMaxStatements",
+    "getMaxTableNameLength",
+    "getMaxTablesInSelect",
+    "getMaxUserNameLength",
+    "getNumericFunctions",
+    "getProcedureTerm",
+    "getSchemaTerm",
+    "getSearchStringEscape",
+    "getSQLKeywords",
+    "getStringFunctions",
+    "getSystemFunctions",
+    "getTimeDateFunctions",
+    "getURL",
+    "getUserName",
+    "isCatalogAtStart",
+    "isReadOnly",
+    "nullPlusNonNullIsNull",
+    "nullsAreSortedAtEnd",
+    "nullsAreSortedAtStart",
+    "nullsAreSortedHigh",
+    "nullsAreSortedLow",
+    "storesLowerCaseIdentifiers",
+    "storesLowerCaseQuotedIdentifiers",
+    "storesMixedCaseIdentifiers",
+    "storesMixedCaseQuotedIdentifiers",
+    "storesUpperCaseIdentifiers",
+    "storesUpperCaseQuotedIdentifiers",
+    "supportsAlterTableWithAddColumn",
+    "supportsAlterTableWithDropColumn",
+    "supportsANSI92EntryLevelSQL",
+    "supportsANSI92FullSQL",
+    "supportsANSI92IntermediateSQL",
+    "supportsBatchUpdates",
+    "supportsCatalogsInDataManipulation",
+    "supportsCatalogsInIndexDefinitions",
+    "supportsCatalogsInPrivilegeDefinitions",
+    "supportsCatalogsInProcedureCalls",
+    "supportsCatalogsInTableDefinitions",
+    "supportsColumnAliasing",
+    "supportsConvert",
+    "supportsCoreSQLGrammar",
+    "supportsCorrelatedSubqueries",
+    "supportsDataDefinitionAndDataManipulationTransactions",
+    "supportsDataManipulationTransactionsOnly",
+    "supportsDifferentTableCorrelationNames",
+    "supportsExpressionsInOrderBy",
+    "supportsExtendedSQLGrammar",
+    "supportsFullOuterJoins",
+    "supportsGroupBy",
+    "supportsGroupByBeyondSelect",
+    "supportsGroupByUnrelated",
+    "supportsIntegrityEnhancementFacility",
+    "supportsLikeEscapeClause",
+    "supportsLimitedOuterJoins",
+    "supportsMinimumSQLGrammar",
+    "supportsMixedCaseIdentifiers",
+    "supportsMixedCaseQuotedIdentifiers",
+    "supportsMultipleResultSets",
+    "supportsMultipleTransactions",
+    "supportsNonNullableColumns",
+    "supportsOpenCursorsAcrossCommit",
+    "supportsOpenCursorsAcrossRollback",
+    "supportsOpenStatementsAcrossCommit",
+    "supportsOpenStatementsAcrossRollback",
+    "supportsOrderByUnrelated",
+    "supportsOuterJoins",
+    "supportsPositionedDelete",
+    "supportsPositionedUpdate",
+    "supportsSchemasInDataManipulation",
+    "supportsSchemasInIndexDefinitions",
+    "supportsSchemasInPrivilegeDefinitions",
+    "supportsSchemasInProcedureCalls",
+    "supportsSchemasInTableDefinitions",
+    "supportsSelectForUpdate",
+    "supportsStoredProcedures",
+    "supportsSubqueriesInComparisons",
+    "supportsSubqueriesInExists",
+    "supportsSubqueriesInIns",
+    "supportsSubqueriesInQuantifieds",
+    "supportsTableCorrelationNames",
+    "supportsTransactions",
+    "supportsUnion",
+    "supportsUnionAll",
+    "usesLocalFilePerTable",
+    "usesLocalFiles",
+  };
+
   private final SqlLine sqlLine;
 
   Commands(SqlLine sqlLine) {
@@ -101,11 +221,11 @@ public class Commands {
     callback.setToSuccess();
   }
 
-  String arg1(String line, String paramname) {
-    return arg1(line, paramname, null);
+  String arg1(String line, String paramName) {
+    return arg1(line, paramName, null);
   }
 
-  String arg1(String line, String paramname, String def) {
+  String arg1(String line, String paramName, String def) {
     String[] ret = sqlLine.split(line);
 
     if (ret == null || ret.length != 2) {
@@ -114,7 +234,7 @@ public class Commands {
       }
       throw new IllegalArgumentException(
           sqlLine.loc("arg-usage",
-              new Object[] {ret.length == 0 ? "" : ret[0], paramname}));
+              ret == null || ret.length == 0 ? "" : ret[0], paramName));
     }
     return ret[1];
   }
@@ -147,8 +267,9 @@ public class Commands {
     String[] compound;
     if (ret == null || ret.length != 2) {
       if (defaultValues[defaultValues.length - 1] == null) {
-        throw new IllegalArgumentException(sqlLine.loc("arg-usage",
-            new Object[] {ret.length == 0 ? "" : ret[0][0], paramName}));
+        throw new IllegalArgumentException(
+            sqlLine.loc("arg-usage",
+                ret == null || ret.length == 0 ? "" : ret[0][0], paramName));
       }
       compound = new String[0];
     } else {
@@ -174,43 +295,50 @@ public class Commands {
     metadata("getIndexInfo", args, callback);
   }
 
-  public void primarykeys(String line, DispatchCallback callback) throws Exception {
+  public void primarykeys(String line, DispatchCallback callback)
+    throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getPrimaryKeys", args, callback);
   }
 
-  public void exportedkeys(String line, DispatchCallback callback) throws Exception {
+  public void exportedkeys(String line, DispatchCallback callback)
+    throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getExportedKeys", args, callback);
   }
 
-  public void importedkeys(String line, DispatchCallback callback) throws Exception {
+  public void importedkeys(String line, DispatchCallback callback)
+    throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getImportedKeys", args, callback);
   }
 
-  public void procedures(String line, DispatchCallback callback) throws Exception {
+  public void procedures(String line, DispatchCallback callback)
+    throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args =
         buildMetadataArgs(line, "procedure name pattern", strings);
     metadata("getProcedures", args, callback);
   }
 
-  public void tables(String line, DispatchCallback callback) throws SQLException {
+  public void tables(String line, DispatchCallback callback)
+    throws SQLException {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     args.add(null);
     metadata("getTables", args, callback);
   }
 
-  public void typeinfo(String line, DispatchCallback callback) throws Exception {
+  public void typeinfo(String line, DispatchCallback callback)
+    throws Exception {
     metadata("getTypeInfo", Collections.EMPTY_LIST, callback);
   }
 
-  public void nativesql(String sql, DispatchCallback callback) throws Exception {
+  public void nativesql(String sql, DispatchCallback callback)
+    throws Exception {
     if (sql.startsWith(SqlLine.COMMAND_PREFIX)) {
       sql = sql.substring(1);
     }
@@ -224,7 +352,8 @@ public class Commands {
     callback.setToSuccess();
   }
 
-  public void columns(String line, DispatchCallback callback) throws SQLException {
+  public void columns(String line, DispatchCallback callback)
+    throws SQLException {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     args.add("%");
@@ -232,13 +361,15 @@ public class Commands {
   }
 
   public void dropall(String line, DispatchCallback callback) {
-    if (sqlLine.getDatabaseConnection() == null || sqlLine.getDatabaseConnection().getUrl() == null) {
+    DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
+    if (databaseConnection == null || databaseConnection.getUrl() == null) {
       sqlLine.error(sqlLine.loc("no-current-connection"));
       callback.setToFailure();
       return;
     }
     try {
-      if (!(sqlLine.getConsoleReader().readLine(sqlLine.loc("really-drop-all")).equals("y"))) {
+      String question = sqlLine.loc("really-drop-all");
+      if (!sqlLine.getConsoleReader().readLine(question).equals("y")) {
         sqlLine.error("abort-drop-all");
         callback.setToFailure();
         return;
@@ -271,15 +402,16 @@ public class Commands {
   }
 
   public void reconnect(String line, DispatchCallback callback) {
-    if (sqlLine.getDatabaseConnection() == null || sqlLine.getDatabaseConnection().getUrl() == null) {
+    DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
+    if (databaseConnection == null || databaseConnection.getUrl() == null) {
       sqlLine.error(sqlLine.loc("no-current-connection"));
       callback.setToFailure();
       return;
     }
 
-    sqlLine.info(sqlLine.loc("reconnecting", sqlLine.getDatabaseConnection().getUrl()));
+    sqlLine.info(sqlLine.loc("reconnecting", databaseConnection.getUrl()));
     try {
-      sqlLine.getDatabaseConnection().reconnect();
+      databaseConnection.reconnect();
     } catch (Exception e) {
       sqlLine.error(e);
       callback.setToFailure();
@@ -290,23 +422,25 @@ public class Commands {
   }
 
   public void scan(String line, DispatchCallback callback)
-      throws IOException {
+    throws IOException {
     TreeSet<String> names = new TreeSet<String>();
 
     if (sqlLine.getDrivers() == null) {
       sqlLine.setDrivers(Arrays.asList(sqlLine.scanDrivers(line)));
     }
 
-    sqlLine.info(sqlLine.loc("drivers-found-count", sqlLine.getDrivers().size()));
+    sqlLine.info(
+        sqlLine.loc("drivers-found-count", sqlLine.getDrivers().size()));
 
     // unique the list
     for (Iterator<Driver> i = sqlLine.getDrivers().iterator(); i.hasNext();) {
       names.add(i.next().getClass().getName());
     }
 
-    sqlLine.output(sqlLine.getColorBuffer()
-        .bold(sqlLine.getColorBuffer().pad(sqlLine.loc("compliant"), 10).getMono())
-        .bold(sqlLine.getColorBuffer().pad(sqlLine.loc("jdbc-version"), 8).getMono())
+    final ColorBuffer colorBuffer = sqlLine.getColorBuffer();
+    sqlLine.output(colorBuffer
+        .bold(colorBuffer.pad(sqlLine.loc("compliant"), 10).getMono())
+        .bold(colorBuffer.pad(sqlLine.loc("jdbc-version"), 8).getMono())
         .bold(sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono()));
 
     for (Iterator<String> i = names.iterator(); i.hasNext();) {
@@ -315,7 +449,7 @@ public class Commands {
       try {
         Driver driver = (Driver) Class.forName(name).newInstance();
         ColorBuffer msg =
-            sqlLine.getColorBuffer()
+            colorBuffer
                 .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
                 .pad(driver.getMajorVersion() + "."
                     + driver.getMinorVersion(), 8)
@@ -323,10 +457,10 @@ public class Commands {
         if (driver.jdbcCompliant()) {
           sqlLine.output(msg);
         } else {
-          sqlLine.output(sqlLine.getColorBuffer().red(msg.getMono()));
+          sqlLine.output(colorBuffer.red(msg.getMono()));
         }
       } catch (Throwable t) {
-        sqlLine.output(sqlLine.getColorBuffer().red(name)); // error with driver
+        sqlLine.output(colorBuffer.red(name)); // error with driver
       }
     }
 
@@ -334,16 +468,17 @@ public class Commands {
   }
 
   public void save(String line, DispatchCallback callback)
-      throws IOException {
-    sqlLine.info(sqlLine.loc("saving-options", sqlLine.getOpts().getPropertiesFile()));
+    throws IOException {
+    sqlLine.info(
+        sqlLine.loc("saving-options", sqlLine.getOpts().getPropertiesFile()));
     sqlLine.getOpts().save();
     callback.setToSuccess();
   }
 
-  public void load(String line, DispatchCallback callback)
-      throws IOException {
+  public void load(String line, DispatchCallback callback) throws IOException {
     sqlLine.getOpts().load();
-    sqlLine.info(sqlLine.loc("loaded-options", sqlLine.getOpts().getPropertiesFile()));
+    sqlLine.info(sqlLine.loc("loaded-options",
+        sqlLine.getOpts().getPropertiesFile()));
     callback.setToSuccess();
   }
 
@@ -406,7 +541,8 @@ public class Commands {
     }
   }
 
-  public void commit(String line, DispatchCallback callback) throws SQLException {
+  public void commit(String line, DispatchCallback callback)
+    throws SQLException {
     if (!(sqlLine.assertConnection())) {
       callback.setToFailure();
       return;
@@ -433,7 +569,7 @@ public class Commands {
   }
 
   public void rollback(String line, DispatchCallback callback)
-      throws SQLException {
+    throws SQLException {
     if (!(sqlLine.assertConnection())) {
       callback.setToFailure();
       return;
@@ -457,7 +593,7 @@ public class Commands {
   }
 
   public void autocommit(String line, DispatchCallback callback)
-      throws SQLException {
+    throws SQLException {
     if (!(sqlLine.assertConnection())) {
       callback.setToFailure();
       return;
@@ -475,7 +611,7 @@ public class Commands {
   }
 
   public void dbinfo(String line, DispatchCallback callback) {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
@@ -483,132 +619,13 @@ public class Commands {
     sqlLine.showWarnings();
     int padlen = 50;
 
-    String[] m = new String[] {
-        "allProceduresAreCallable",
-        "allTablesAreSelectable",
-        "dataDefinitionCausesTransactionCommit",
-        "dataDefinitionIgnoredInTransactions",
-        "doesMaxRowSizeIncludeBlobs",
-        "getCatalogSeparator",
-        "getCatalogTerm",
-        "getDatabaseProductName",
-        "getDatabaseProductVersion",
-        "getDefaultTransactionIsolation",
-        "getDriverMajorVersion",
-        "getDriverMinorVersion",
-        "getDriverName",
-        "getDriverVersion",
-        "getExtraNameCharacters",
-        "getIdentifierQuoteString",
-        "getMaxBinaryLiteralLength",
-        "getMaxCatalogNameLength",
-        "getMaxCharLiteralLength",
-        "getMaxColumnNameLength",
-        "getMaxColumnsInGroupBy",
-        "getMaxColumnsInIndex",
-        "getMaxColumnsInOrderBy",
-        "getMaxColumnsInSelect",
-        "getMaxColumnsInTable",
-        "getMaxConnections",
-        "getMaxCursorNameLength",
-        "getMaxIndexLength",
-        "getMaxProcedureNameLength",
-        "getMaxRowSize",
-        "getMaxSchemaNameLength",
-        "getMaxStatementLength",
-        "getMaxStatements",
-        "getMaxTableNameLength",
-        "getMaxTablesInSelect",
-        "getMaxUserNameLength",
-        "getNumericFunctions",
-        "getProcedureTerm",
-        "getSchemaTerm",
-        "getSearchStringEscape",
-        "getSQLKeywords",
-        "getStringFunctions",
-        "getSystemFunctions",
-        "getTimeDateFunctions",
-        "getURL",
-        "getUserName",
-        "isCatalogAtStart",
-        "isReadOnly",
-        "nullPlusNonNullIsNull",
-        "nullsAreSortedAtEnd",
-        "nullsAreSortedAtStart",
-        "nullsAreSortedHigh",
-        "nullsAreSortedLow",
-        "storesLowerCaseIdentifiers",
-        "storesLowerCaseQuotedIdentifiers",
-        "storesMixedCaseIdentifiers",
-        "storesMixedCaseQuotedIdentifiers",
-        "storesUpperCaseIdentifiers",
-        "storesUpperCaseQuotedIdentifiers",
-        "supportsAlterTableWithAddColumn",
-        "supportsAlterTableWithDropColumn",
-        "supportsANSI92EntryLevelSQL",
-        "supportsANSI92FullSQL",
-        "supportsANSI92IntermediateSQL",
-        "supportsBatchUpdates",
-        "supportsCatalogsInDataManipulation",
-        "supportsCatalogsInIndexDefinitions",
-        "supportsCatalogsInPrivilegeDefinitions",
-        "supportsCatalogsInProcedureCalls",
-        "supportsCatalogsInTableDefinitions",
-        "supportsColumnAliasing",
-        "supportsConvert",
-        "supportsCoreSQLGrammar",
-        "supportsCorrelatedSubqueries",
-        "supportsDataDefinitionAndDataManipulationTransactions",
-        "supportsDataManipulationTransactionsOnly",
-        "supportsDifferentTableCorrelationNames",
-        "supportsExpressionsInOrderBy",
-        "supportsExtendedSQLGrammar",
-        "supportsFullOuterJoins",
-        "supportsGroupBy",
-        "supportsGroupByBeyondSelect",
-        "supportsGroupByUnrelated",
-        "supportsIntegrityEnhancementFacility",
-        "supportsLikeEscapeClause",
-        "supportsLimitedOuterJoins",
-        "supportsMinimumSQLGrammar",
-        "supportsMixedCaseIdentifiers",
-        "supportsMixedCaseQuotedIdentifiers",
-        "supportsMultipleResultSets",
-        "supportsMultipleTransactions",
-        "supportsNonNullableColumns",
-        "supportsOpenCursorsAcrossCommit",
-        "supportsOpenCursorsAcrossRollback",
-        "supportsOpenStatementsAcrossCommit",
-        "supportsOpenStatementsAcrossRollback",
-        "supportsOrderByUnrelated",
-        "supportsOuterJoins",
-        "supportsPositionedDelete",
-        "supportsPositionedUpdate",
-        "supportsSchemasInDataManipulation",
-        "supportsSchemasInIndexDefinitions",
-        "supportsSchemasInPrivilegeDefinitions",
-        "supportsSchemasInProcedureCalls",
-        "supportsSchemasInTableDefinitions",
-        "supportsSelectForUpdate",
-        "supportsStoredProcedures",
-        "supportsSubqueriesInComparisons",
-        "supportsSubqueriesInExists",
-        "supportsSubqueriesInIns",
-        "supportsSubqueriesInQuantifieds",
-        "supportsTableCorrelationNames",
-        "supportsTransactions",
-        "supportsUnion",
-        "supportsUnionAll",
-        "usesLocalFilePerTable",
-        "usesLocalFiles",
-    };
-
-    for (int i = 0; i < m.length; i++) {
+    for (String method : METHODS) {
       try {
         sqlLine.output(
-            sqlLine.getColorBuffer().pad(m[i], padlen).append(
-                "" + sqlLine.getReflector().invoke(sqlLine.getDatabaseMetaData(),
-                    m[i], SqlLine.EMPTY_OBJ_ARRAY)));
+            sqlLine.getColorBuffer()
+                .pad(method, padlen)
+                .append("" + sqlLine.getReflector()
+                    .invoke(sqlLine.getDatabaseMetaData(), method)));
       } catch (Exception e) {
         sqlLine.handleException(e);
       }
@@ -632,7 +649,7 @@ public class Commands {
   }
 
   public void isolation(String line, DispatchCallback callback)
-      throws SQLException {
+    throws SQLException {
     if (!(sqlLine.assertConnection())) {
       callback.setToFailure();
       return;
@@ -661,31 +678,32 @@ public class Commands {
       return;
     }
 
-    sqlLine.getDatabaseConnection().getConnection().setTransactionIsolation(i);
+    Connection connection = sqlLine.getDatabaseConnection().getConnection();
+    connection.setTransactionIsolation(i);
 
-    int isol = sqlLine.getDatabaseConnection().getConnection().getTransactionIsolation();
-    final String isoldesc;
+    int isol = connection.getTransactionIsolation();
+    final String isolDesc;
     switch (i) {
     case Connection.TRANSACTION_NONE:
-      isoldesc = "TRANSACTION_NONE";
+      isolDesc = "TRANSACTION_NONE";
       break;
     case Connection.TRANSACTION_READ_COMMITTED:
-      isoldesc = "TRANSACTION_READ_COMMITTED";
+      isolDesc = "TRANSACTION_READ_COMMITTED";
       break;
     case Connection.TRANSACTION_READ_UNCOMMITTED:
-      isoldesc = "TRANSACTION_READ_UNCOMMITTED";
+      isolDesc = "TRANSACTION_READ_UNCOMMITTED";
       break;
     case Connection.TRANSACTION_REPEATABLE_READ:
-      isoldesc = "TRANSACTION_REPEATABLE_READ";
+      isolDesc = "TRANSACTION_REPEATABLE_READ";
       break;
     case Connection.TRANSACTION_SERIALIZABLE:
-      isoldesc = "TRANSACTION_SERIALIZABLE";
+      isolDesc = "TRANSACTION_SERIALIZABLE";
       break;
     default:
-      isoldesc = "UNKNOWN";
+      isolDesc = "UNKNOWN";
     }
 
-    sqlLine.debug(sqlLine.loc("isolation-status", isoldesc));
+    sqlLine.debug(sqlLine.loc("isolation-status", isolDesc));
     callback.setToSuccess();
   }
 
@@ -881,17 +899,18 @@ public class Commands {
    * @param callback Callback for command status
    */
   public void close(String line, DispatchCallback callback) {
-    if (sqlLine.getDatabaseConnection() == null) {
+    DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
+    if (databaseConnection == null) {
       callback.setToFailure();
       return;
     }
 
     try {
-      if (sqlLine.getDatabaseConnection().getConnection() != null
-          && !sqlLine.getDatabaseConnection().getConnection().isClosed()) {
-        sqlLine.info(sqlLine.loc("closing",
-            sqlLine.getDatabaseConnection().getConnection().getClass().getName()));
-        sqlLine.getDatabaseConnection().getConnection().close();
+      Connection connection = databaseConnection.getConnection();
+      if (connection != null && !connection.isClosed()) {
+        sqlLine.info(
+            sqlLine.loc("closing", connection.getClass().getName()));
+        connection.close();
       } else {
         sqlLine.info(sqlLine.loc("already-closed"));
       }
@@ -913,7 +932,7 @@ public class Commands {
    * @throws Exception on error
    */
   public void properties(String line, DispatchCallback callback)
-      throws Exception {
+    throws Exception {
     String example = "";
     example += "Usage: properties <properties file>" + SqlLine.getSeparator();
 
@@ -980,7 +999,7 @@ public class Commands {
     connect(props, callback);
   }
 
-  private String getProperty(Properties props, String[] keys) {
+  private String getProperty(Properties props, String... keys) {
     for (int i = 0; i < keys.length; i++) {
       String val = props.getProperty(keys[i]);
       if (val != null) {
@@ -1001,27 +1020,23 @@ public class Commands {
   }
 
   public void connect(Properties props, DispatchCallback callback)
-      throws IOException {
-    String url = getProperty(props, new String[] {
+    throws IOException {
+    String url = getProperty(props,
         "url",
         "javax.jdo.option.ConnectionURL",
-        "ConnectionURL",
-    });
-    String driver = getProperty(props, new String[] {
+        "ConnectionURL");
+    String driver = getProperty(props,
         "driver",
         "javax.jdo.option.ConnectionDriverName",
-        "ConnectionDriverName",
-    });
-    String username = getProperty(props, new String[] {
+        "ConnectionDriverName");
+    String username = getProperty(props,
         "user",
         "javax.jdo.option.ConnectionUserName",
-        "ConnectionUserName",
-    });
-    String password = getProperty(props, new String[] {
+        "ConnectionUserName");
+    String password = getProperty(props,
         "password",
         "javax.jdo.option.ConnectionPassword",
-        "ConnectionPassword",
-    });
+        "ConnectionPassword");
 
     if (url == null || url.length() == 0) {
       callback.setToFailure();
@@ -1039,10 +1054,12 @@ public class Commands {
     sqlLine.debug("Connecting to " + url);
 
     if (username == null) {
-      username = sqlLine.getConsoleReader().readLine("Enter username for " + url + ": ");
+      username = sqlLine.getConsoleReader()
+          .readLine("Enter username for " + url + ": ");
     }
     if (password == null) {
-      password = sqlLine.getConsoleReader().readLine("Enter password for " + url + ": ", '*');
+      password = sqlLine.getConsoleReader()
+          .readLine("Enter password for " + url + ": ", '*');
     }
 
     try {
@@ -1060,7 +1077,7 @@ public class Commands {
 
   public void rehash(String line, DispatchCallback callback) {
     try {
-      if (!(sqlLine.assertConnection())) {
+      if (!sqlLine.assertConnection()) {
         callback.setToFailure();
       }
 
@@ -1083,22 +1100,23 @@ public class Commands {
    */
   public void list(String line, DispatchCallback callback) {
     int index = 0;
-    sqlLine.info(sqlLine.loc("active-connections", sqlLine.getDatabaseConnections().size()));
+    DatabaseConnections databaseConnections = sqlLine.getDatabaseConnections();
+    sqlLine.info(
+        sqlLine.loc("active-connections", databaseConnections.size()));
 
-    for (Iterator<DatabaseConnection> i = sqlLine.getDatabaseConnections().iterator(); i.hasNext(); index++) {
-      DatabaseConnection c = i.next();
+    for (DatabaseConnection databaseConnection : databaseConnections) {
       boolean closed;
       try {
-        closed = c.connection.isClosed();
+        closed = databaseConnection.connection.isClosed();
       } catch (Exception e) {
         closed = true;
       }
 
       sqlLine.output(
           sqlLine.getColorBuffer()
-              .pad(" #" + index + "", 5)
+              .pad(" #" + index++ + "", 5)
               .pad(closed ? sqlLine.loc("closed") : sqlLine.loc("open"), 9)
-              .append(c.getUrl()));
+              .append(databaseConnection.getUrl()));
     }
 
     callback.setToSuccess();
@@ -1110,7 +1128,8 @@ public class Commands {
 
     for (int i = 0; i < sqlLine.getDatabaseConnections().size(); i++) {
       sqlLine.getDatabaseConnections().setIndex(i);
-      sqlLine.output(sqlLine.loc("executing-con", sqlLine.getDatabaseConnection()));
+      sqlLine.output(
+          sqlLine.loc("executing-con", sqlLine.getDatabaseConnection()));
 
       // ### FIXME:  this is broken for multi-line SQL
       sql(line.substring("all ".length()), callback);
@@ -1134,7 +1153,7 @@ public class Commands {
     }
 
     int index = Integer.parseInt(parts[1]);
-    if (!(sqlLine.getDatabaseConnections().setIndex(index))) {
+    if (!sqlLine.getDatabaseConnections().setIndex(index)) {
       sqlLine.error(sqlLine.loc("invalid-connection", "" + index));
       list("", callback); // list the current connections
       callback.setToFailure();
@@ -1177,9 +1196,10 @@ public class Commands {
    * Start writing to the specified script file.
    */
   private void startScript(String line, DispatchCallback callback) {
-    if (sqlLine.getScriptOutputFile() != null) {
+    OutputFile outFile = sqlLine.getScriptOutputFile();
+    if (outFile != null) {
       callback.setToFailure();
-      sqlLine.error(sqlLine.loc("script-already-running", sqlLine.getScriptOutputFile()));
+      sqlLine.error(sqlLine.loc("script-already-running", outFile));
       return;
     }
 
@@ -1190,8 +1210,9 @@ public class Commands {
     }
 
     try {
-      sqlLine.setScriptOutputFile(new OutputFile(parts[1]));
-      sqlLine.output(sqlLine.loc("script-started", sqlLine.getScriptOutputFile()));
+      outFile = new OutputFile(parts[1]);
+      sqlLine.setScriptOutputFile(outFile);
+      sqlLine.output(sqlLine.loc("script-started", outFile));
       callback.setToSuccess();
     } catch (Exception e) {
       callback.setToFailure();
@@ -1273,7 +1294,6 @@ public class Commands {
     } catch (Exception e) {
       callback.setToFailure();
       sqlLine.error(e);
-      return;
     }
   }
 
@@ -1310,9 +1330,10 @@ public class Commands {
    * Start writing to the specified record file.
    */
   private void startRecording(String line, DispatchCallback callback) {
-    if (sqlLine.getRecordOutputFile() != null) {
+    OutputFile outputFile = sqlLine.getRecordOutputFile();
+    if (outputFile != null) {
       callback.setToFailure();
-      sqlLine.error(sqlLine.loc("record-already-running", sqlLine.getRecordOutputFile()));
+      sqlLine.error(sqlLine.loc("record-already-running", outputFile));
       return;
     }
 
@@ -1323,8 +1344,9 @@ public class Commands {
     }
 
     try {
-      sqlLine.setRecordOutputFile(new OutputFile(parts[1]));
-      sqlLine.output(sqlLine.loc("record-started", sqlLine.getRecordOutputFile()));
+      outputFile = new OutputFile(parts[1]);
+      sqlLine.setRecordOutputFile(outputFile);
+      sqlLine.output(sqlLine.loc("record-started", outputFile));
       callback.setToSuccess();
     } catch (Exception e) {
       callback.setToFailure();
@@ -1333,7 +1355,7 @@ public class Commands {
   }
 
   public void describe(String line, DispatchCallback callback)
-      throws SQLException {
+    throws SQLException {
     String[][] cmd = sqlLine.splitCompound(line);
     if (cmd.length != 2) {
       sqlLine.error("Usage: describe <table name>");
@@ -1355,31 +1377,30 @@ public class Commands {
     String cmd = parts.length > 1 ? parts[1] : "";
     TreeSet<ColorBuffer> clist = new TreeSet<ColorBuffer>();
 
-    for (int i = 0; i < sqlLine.commandHandlers.length; i++) {
+    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
       if (cmd.length() == 0
-          || Arrays.asList(sqlLine.commandHandlers[i].getNames()).contains(cmd)) {
-        clist.add(sqlLine.getColorBuffer().pad("!" + sqlLine.commandHandlers[i].getName(), 20)
-            .append(sqlLine.wrap(sqlLine.commandHandlers[i].getHelpText(),
-                60,
-                20)));
+          || Arrays.asList(commandHandler.getNames()).contains(cmd)) {
+        clist.add(sqlLine.getColorBuffer()
+            .pad("!" + commandHandler.getName(), 20)
+            .append(sqlLine.wrap(commandHandler.getHelpText(), 60, 20)));
       }
     }
 
-    for (Iterator<ColorBuffer> i = clist.iterator(); i.hasNext();) {
-      sqlLine.output(i.next());
+    for (ColorBuffer c : clist) {
+      sqlLine.output(c);
     }
 
     if (cmd.length() == 0) {
       sqlLine.output("");
-      sqlLine.output(sqlLine.loc("comments",
-          SqlLine.getApplicationContactInformation()));
+      sqlLine.output(
+          sqlLine.loc("comments", SqlLine.getApplicationContactInformation()));
     }
 
     callback.setToSuccess();
   }
 
   public void manual(String line, DispatchCallback callback)
-      throws IOException {
+    throws IOException {
     InputStream in = SqlLine.class.getResourceAsStream("manual.txt");
     if (in == null) {
       callback.setToFailure();
@@ -1397,7 +1418,8 @@ public class Commands {
 
       // silly little pager
       if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
-        String ret = sqlLine.getConsoleReader().readLine(sqlLine.loc("enter-for-more"));
+        String prompt = sqlLine.loc("enter-for-more");
+        String ret = sqlLine.getConsoleReader().readLine(prompt);
         if (ret != null && ret.startsWith("q")) {
           break;
         }

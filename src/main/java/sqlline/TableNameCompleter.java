@@ -31,7 +31,8 @@ class TableNameCompleter implements Completer {
       return -1;
     }
 
-    return new StringsCompleter(sqlLine.getDatabaseConnection().getTableNames(true))
+    return new StringsCompleter(
+          sqlLine.getDatabaseConnection().getTableNames(true))
         .complete(buf, pos, candidates);
   }
 }

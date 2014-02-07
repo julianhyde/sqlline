@@ -13,7 +13,7 @@ package sqlline;
 
 import java.sql.*;
 
-import sun.misc.*;
+import sun.misc.*; // CHECKSTYLE: IGNORE 0
 
 /**
  * A signal handler for SqlLine which interprets Ctrl+C as a request to cancel

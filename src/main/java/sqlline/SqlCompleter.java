@@ -14,6 +14,7 @@ package sqlline;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -26,7 +27,7 @@ import jline.console.completer.StringsCompleter;
  */
 class SqlCompleter extends StringsCompleter {
   public SqlCompleter(SqlLine sqlLine, boolean skipMeta)
-      throws IOException, SQLException {
+    throws IOException, SQLException {
     super(new String[0]);
 
     Set<String> completions = new TreeSet<String>();
@@ -40,24 +41,25 @@ class SqlCompleter extends StringsCompleter {
 
     // now add the keywords from the current connection
 
+    DatabaseMetaData meta = sqlLine.getDatabaseConnection().meta;
     try {
-      keywords += "," + sqlLine.getDatabaseConnection().meta.getSQLKeywords();
+      keywords += "," + meta.getSQLKeywords();
     } catch (Throwable t) {
     }
     try {
-      keywords += "," + sqlLine.getDatabaseConnection().meta.getStringFunctions();
+      keywords += "," + meta.getStringFunctions();
     } catch (Throwable t) {
     }
     try {
-      keywords += "," + sqlLine.getDatabaseConnection().meta.getNumericFunctions();
+      keywords += "," + meta.getNumericFunctions();
     } catch (Throwable t) {
     }
     try {
-      keywords += "," + sqlLine.getDatabaseConnection().meta.getSystemFunctions();
+      keywords += "," + meta.getSystemFunctions();
     } catch (Throwable t) {
     }
     try {
-      keywords += "," + sqlLine.getDatabaseConnection().meta.getTimeDateFunctions();
+      keywords += "," + meta.getTimeDateFunctions();
     } catch (Throwable t) {
     }
 
@@ -65,14 +67,13 @@ class SqlCompleter extends StringsCompleter {
     keywords += "," + keywords.toLowerCase();
 
     for (StringTokenizer tok = new StringTokenizer(keywords, ", ");
-        tok.hasMoreTokens();
-        completions.add(tok.nextToken())) {
-      ;
+        tok.hasMoreTokens();) {
+      completions.add(tok.nextToken());
     }
 
     // now add the tables and columns from the current connection
     if (!skipMeta) {
-      String[] columns = sqlLine.getColumnNames(sqlLine.getDatabaseConnection().meta);
+      String[] columns = sqlLine.getColumnNames(meta);
       for (int i = 0; columns != null && i < columns.length; i++) {
         completions.add(columns[i++]);
       }

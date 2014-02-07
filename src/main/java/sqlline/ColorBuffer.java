@@ -19,18 +19,27 @@ import java.util.List;
  * A buffer that can output segments using ANSI color.
  */
 final class ColorBuffer implements Comparable {
-  private static final ColorAttr BOLD = new ColorAttr("\033[1m");
-  private static final ColorAttr NORMAL = new ColorAttr("\033[m");
-  private static final ColorAttr REVERS = new ColorAttr("\033[7m");
-  private static final ColorAttr LINED = new ColorAttr("\033[4m");
-  private static final ColorAttr GREY = new ColorAttr("\033[1;30m");
-  private static final ColorAttr RED = new ColorAttr("\033[1;31m");
-  private static final ColorAttr GREEN = new ColorAttr("\033[1;32m");
-  private static final ColorAttr BLUE = new ColorAttr("\033[1;34m");
-  private static final ColorAttr CYAN = new ColorAttr("\033[1;36m");
-  private static final ColorAttr YELLOW = new ColorAttr("\033[1;33m");
-  private static final ColorAttr MAGENTA = new ColorAttr("\033[1;35m");
-  private static final ColorAttr INVISIBLE = new ColorAttr("\033[8m");
+  /** Style attribute. */
+  enum ColorAttr {
+    BOLD("\033[1m"),
+    NORMAL("\033[m"),
+    REVERS("\033[7m"),
+    LINED("\033[4m"),
+    GREY("\033[1;30m"),
+    RED("\033[1;31m"),
+    GREEN("\033[1;32m"),
+    BLUE("\033[1;34m"),
+    CYAN("\033[1;36m"),
+    YELLOW("\033[1;33m"),
+    MAGENTA("\033[1;35m"),
+    INVISIBLE("\033[8m");
+
+    private final String style;
+
+    ColorAttr(String style) {
+      this.style = style;
+    }
+  }
 
   private final List<Object> parts = new LinkedList<Object>();
 
@@ -131,8 +140,8 @@ final class ColorBuffer implements Comparable {
     }
 
     // close off the buffer with a normal tag
-    if (lastAttr != null && lastAttr != NORMAL) {
-      cbuff.append(NORMAL);
+    if (lastAttr != null && lastAttr != ColorAttr.NORMAL) {
+      cbuff.append(ColorAttr.NORMAL);
     }
 
     return cbuff;
@@ -164,61 +173,48 @@ final class ColorBuffer implements Comparable {
   public ColorBuffer append(ColorAttr attr, String val) {
     parts.add(attr);
     parts.add(val);
-    parts.add(NORMAL);
+    parts.add(ColorAttr.NORMAL);
     return this;
   }
 
   public ColorBuffer bold(String str) {
-    return append(BOLD, str);
+    return append(ColorAttr.BOLD, str);
   }
 
   public ColorBuffer lined(String str) {
-    return append(LINED, str);
+    return append(ColorAttr.LINED, str);
   }
 
   public ColorBuffer grey(String str) {
-    return append(GREY, str);
+    return append(ColorAttr.GREY, str);
   }
 
   public ColorBuffer red(String str) {
-    return append(RED, str);
+    return append(ColorAttr.RED, str);
   }
 
   public ColorBuffer blue(String str) {
-    return append(BLUE, str);
+    return append(ColorAttr.BLUE, str);
   }
 
   public ColorBuffer green(String str) {
-    return append(GREEN, str);
+    return append(ColorAttr.GREEN, str);
   }
 
   public ColorBuffer cyan(String str) {
-    return append(CYAN, str);
+    return append(ColorAttr.CYAN, str);
   }
 
   public ColorBuffer yellow(String str) {
-    return append(YELLOW, str);
+    return append(ColorAttr.YELLOW, str);
   }
 
   public ColorBuffer magenta(String str) {
-    return append(MAGENTA, str);
+    return append(ColorAttr.MAGENTA, str);
   }
 
   public int compareTo(Object other) {
     return getMono().compareTo(((ColorBuffer) other).getMono());
-  }
-
-  /** Style attribute. */
-  private static class ColorAttr {
-    private final String attr;
-
-    public ColorAttr(String attr) {
-      this.attr = attr;
-    }
-
-    public String toString() {
-      return attr;
-    }
   }
 }
 

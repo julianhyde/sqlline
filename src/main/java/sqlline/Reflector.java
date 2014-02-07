@@ -29,21 +29,20 @@ class Reflector {
     this.sqlLine = sqlLine;
   }
 
-  public Object invoke(Object on, String method, Object[] args)
-      throws InvocationTargetException, IllegalAccessException,
+  public Object invoke(Object on, String method, Object... args)
+    throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     return invoke(on, method, Arrays.asList(args));
   }
 
   public Object invoke(Object on, String method, List args)
-      throws InvocationTargetException, IllegalAccessException,
+    throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     return invoke(on, on == null ? null : on.getClass(), method, args);
   }
 
-  public Object invoke(Object on, Class defClass,
-      String method, List args)
-      throws InvocationTargetException, IllegalAccessException,
+  public Object invoke(Object on, Class defClass, String method, List args)
+    throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     Class c = defClass != null ? defClass : on.getClass();
     List<Method> candidateMethods = new LinkedList<Method>();
@@ -56,8 +55,8 @@ class Reflector {
     }
 
     if (candidateMethods.size() == 0) {
-      throw new IllegalArgumentException(sqlLine.loc("no-method",
-          new Object[]{method, c.getName()}));
+      throw new IllegalArgumentException(
+          sqlLine.loc("no-method", method, c.getName()));
     }
 
     for (Iterator<Method> i = candidateMethods.iterator(); i.hasNext();) {
@@ -83,7 +82,7 @@ class Reflector {
   }
 
   public static Object[] convert(List objects, Class[] toTypes)
-      throws ClassNotFoundException {
+    throws ClassNotFoundException {
     Object[] converted = new Object[objects.size()];
     for (int i = 0; i < converted.length; i++) {
       converted[i] = convert(objects.get(i), toTypes[i]);
@@ -92,7 +91,7 @@ class Reflector {
   }
 
   public static Object convert(Object ob, Class toType)
-      throws ClassNotFoundException {
+    throws ClassNotFoundException {
     if (ob == null || ob.toString().equals("null")) {
       return null;
     }

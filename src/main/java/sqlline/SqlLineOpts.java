@@ -53,8 +53,6 @@ class SqlLineOpts implements Completer {
   private File rcFile = new File(saveDir(), "sqlline.properties");
   private String historyFile =
       new File(saveDir(), "history").getAbsolutePath();
-  private String scriptFile = null;
-
   private String runFile;
 
   public SqlLineOpts(SqlLine sqlLine, Properties props) {
@@ -135,12 +133,12 @@ class SqlLineOpts implements Completer {
 
   String[] propertyNames()
     throws IllegalAccessException, InvocationTargetException {
-    TreeSet names = new TreeSet();
+    TreeSet<String> names = new TreeSet<String>();
 
     // get all the values from getXXX methods
     Method[] m = getClass().getDeclaredMethods();
-    for (int i = 0; (m != null) && (i < m.length); i++) {
-      if (!(m[i].getName().startsWith("get"))) {
+    for (int i = 0; m != null && i < m.length; i++) {
+      if (!m[i].getName().startsWith("get")) {
         continue;
       }
 
@@ -156,7 +154,7 @@ class SqlLineOpts implements Completer {
       names.add(propName);
     }
 
-    return (String[]) names.toArray(new String[names.size()]);
+    return names.toArray(new String[names.size()]);
   }
 
   public Properties toProperties()
@@ -166,10 +164,9 @@ class SqlLineOpts implements Completer {
     Properties props = new Properties();
 
     String[] names = propertyNames();
-    for (int i = 0; (names != null) && (i < names.length); i++) {
+    for (int i = 0; names != null && i < names.length; i++) {
       props.setProperty(PROPERTY_PREFIX + names[i],
-          sqlLine.getReflector().invoke(this, "get" + names[i], new Object[0])
-              .toString());
+          sqlLine.getReflector().invoke(this, "get" + names[i]).toString());
     }
 
     sqlLine.debug("properties: " + props.toString());
@@ -211,7 +208,7 @@ class SqlLineOpts implements Completer {
 
   public boolean set(String key, String value, boolean quiet) {
     try {
-      sqlLine.getReflector().invoke(this, "set" + key, new Object[]{value});
+      sqlLine.getReflector().invoke(this, "set" + key, value);
       return true;
     } catch (Exception e) {
       if (!quiet) {
@@ -220,8 +217,7 @@ class SqlLineOpts implements Completer {
         // that sqlline's error() output chokes because it depends
         // on properties like text coloring that can get set in
         // arbitrary order.
-        System.err.println(
-            sqlLine.loc("error-setting", new Object[]{key, e}));
+        System.err.println(sqlLine.loc("error-setting", key, e));
       }
       return false;
     }
@@ -329,14 +325,6 @@ class SqlLineOpts implements Completer {
 
   public String getHistoryFile() {
     return this.historyFile;
-  }
-
-  public void setScriptFile(String scriptFile) {
-    setRun(scriptFile);
-  }
-
-  public String getScriptFile() {
-    return getRun();
   }
 
   public void setColor(boolean color) {
