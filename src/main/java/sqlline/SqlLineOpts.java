@@ -53,6 +53,7 @@ class SqlLineOpts implements Completer {
   private File rcFile = new File(saveDir(), "sqlline.properties");
   private String historyFile =
       new File(saveDir(), "history").getAbsolutePath();
+  private String scriptFile = null;
 
   private String runFile;
 
@@ -97,6 +98,7 @@ class SqlLineOpts implements Completer {
     try {
       f.mkdirs();
     } catch (Exception e) {
+      // ignore
     }
 
     return f;
@@ -132,7 +134,7 @@ class SqlLineOpts implements Completer {
   }
 
   String[] propertyNames()
-      throws IllegalAccessException, InvocationTargetException {
+    throws IllegalAccessException, InvocationTargetException {
     TreeSet names = new TreeSet();
 
     // get all the values from getXXX methods
@@ -158,7 +160,7 @@ class SqlLineOpts implements Completer {
   }
 
   public Properties toProperties()
-      throws IllegalAccessException,
+    throws IllegalAccessException,
       InvocationTargetException,
       ClassNotFoundException {
     Properties props = new Properties();
@@ -174,8 +176,7 @@ class SqlLineOpts implements Completer {
     return props;
   }
 
-  public void load()
-      throws IOException {
+  public void load() throws IOException {
     if (rcFile.exists()) {
       InputStream in = new FileInputStream(rcFile);
       load(in);
@@ -183,8 +184,7 @@ class SqlLineOpts implements Completer {
     }
   }
 
-  public void load(InputStream fin)
-      throws IOException {
+  public void load(InputStream fin) throws IOException {
     Properties p = new Properties();
     p.load(fin);
     loadProperties(p);
@@ -329,6 +329,14 @@ class SqlLineOpts implements Completer {
 
   public String getHistoryFile() {
     return this.historyFile;
+  }
+
+  public void setScriptFile(String scriptFile) {
+    setRun(scriptFile);
+  }
+
+  public String getScriptFile() {
+    return getRun();
   }
 
   public void setColor(boolean color) {

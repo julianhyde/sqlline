@@ -44,10 +44,10 @@ import jline.console.history.FileHistory;
  * </ul>
  */
 public class SqlLine {
-  private static final ResourceBundle resourceBundle =
+  private static final ResourceBundle RESOURCE_BUNDLE =
       ResourceBundle.getBundle(SqlLine.class.getName());
 
-  private static final String separator = System.getProperty("line.separator");
+  private static final String SEPARATOR = System.getProperty("line.separator");
   private boolean exit = false;
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
@@ -268,7 +268,7 @@ public class SqlLine {
     try {
       Class.forName(testClass);
     } catch (Throwable t) {
-      String message = locStatic(resourceBundle, System.err, "jline-missing", testClass);
+      String message = locStatic(RESOURCE_BUNDLE, System.err, "jline-missing", testClass);
       throw new ExceptionInInitializerError(message);
     }
   }
@@ -315,10 +315,14 @@ public class SqlLine {
     Properties properties = new Properties();
     properties.put("artifactId", "sqlline");
     properties.put("version", "???");
-    try {
-      properties.load(inputStream);
-    } catch (IOException e) {
-      handleException(e);
+    if (inputStream != null) {
+      // If not running from a .jar, pom.properties will not exist, and
+      // inputStream is null.
+      try {
+        properties.load(inputStream);
+      } catch (IOException e) {
+        handleException(e);
+      }
     }
 
     return loc(
@@ -338,7 +342,7 @@ public class SqlLine {
   String loc(String res, int param) {
     try {
       return MessageFormat.format(
-          new ChoiceFormat(resourceBundle.getString(res)).format(param),
+          new ChoiceFormat(RESOURCE_BUNDLE.getString(res)).format(param),
           param);
     } catch (Exception e) {
       return res + ": " + param;
@@ -354,7 +358,7 @@ public class SqlLine {
   }
 
   String loc(String res, Object[] params) {
-    return locStatic(resourceBundle, getErrorStream(), res, params);
+    return locStatic(RESOURCE_BUNDLE, getErrorStream(), res, params);
   }
 
   static String locStatic(ResourceBundle resourceBundle, PrintStream err, String res, Object... params) {
@@ -606,6 +610,8 @@ public class SqlLine {
         url = args[i++ + 1];
       } else if (args[i].equals("-e")) {
         commands.add(args[i++ + 1]);
+      } else if (args[i].equals("-f")) {
+        getOpts().setScriptFile(args[i++ + 1]);
       } else {
         files.add(args[i]);
       }
@@ -658,8 +664,8 @@ public class SqlLine {
    * {@link CommandHandler} until the global variable <code>exit</code> is
    * true.
    */
-  boolean begin(String[] args, InputStream inputStream, boolean saveHistory)
-      throws IOException {
+  boolean begin(String[] args, InputStream inputStream,
+      boolean saveHistory) throws IOException {
     try {
       opts.load();
     } catch (Exception e) {
@@ -668,7 +674,23 @@ public class SqlLine {
 
     FileHistory fileHistory =
         new FileHistory(new File(opts.getHistoryFile()));
-    ConsoleReader reader = getConsoleReader(inputStream, fileHistory);
+
+    ConsoleReader reader;
+    boolean runningScript = getOpts().getScriptFile() != null;
+    if (runningScript) {
+      try {
+        FileInputStream scriptStream =
+            new FileInputStream(getOpts().getScriptFile());
+        reader = getConsoleReader(scriptStream, fileHistory);
+      } catch (Throwable t) {
+        handleException(t);
+        commands.quit(null, new DispatchCallback());
+        return false;
+      }
+    } else {
+      reader = getConsoleReader(inputStream, fileHistory);
+    }
+
     if (!initArgs(args)) {
       usage();
       return false;
@@ -686,10 +708,15 @@ public class SqlLine {
     DispatchCallback callback = new DispatchCallback();
     while (!exit) {
       try {
+        // Execute one instruction; terminate on executing a script if
+        // there is an error.
         signalHandler.setCallback(callback);
         dispatch(reader.readLine(getPrompt()), callback);
         if (saveHistory) {
           fileHistory.flush();
+        }
+        if (!callback.isSuccess() && runningScript) {
+          commands.quit(null, callback);
         }
       } catch (EOFException eof) {
         // CTRL-D
@@ -732,10 +759,7 @@ public class SqlLine {
     }
     if (inputStream != null) {
       // ### NOTE:  fix for sf.net bug 879425.
-      consoleReader =
-          new ConsoleReader(
-              inputStream,
-              System.out);
+      consoleReader = new ConsoleReader(inputStream, System.out);
     } else {
       consoleReader = new ConsoleReader();
     }
@@ -880,13 +904,13 @@ public class SqlLine {
 
   void info(String msg) {
     if (!opts.getSilent()) {
-      output(msg, true, System.err);
+      output(msg, true, getErrorStream());
     }
   }
 
   void info(ColorBuffer msg) {
     if (!opts.getSilent()) {
-      output(msg, true, System.err);
+      output(msg, true, getErrorStream());
     }
   }
 
@@ -921,7 +945,7 @@ public class SqlLine {
   }
 
   void output(ColorBuffer msg, boolean newline) {
-    output(msg, newline, System.out);
+    output(msg, newline, getOutputStream());
   }
 
   void output(ColorBuffer msg, boolean newline, PrintStream out) {
@@ -1448,7 +1472,7 @@ public class SqlLine {
         tok.hasMoreTokens();) {
       String next = tok.nextToken();
       if (line.length() + next.length() > len) {
-        buff.append(line).append(separator).append(head);
+        buff.append(line).append(SEPARATOR).append(head);
         line.setLength(0);
       }
 
@@ -1481,7 +1505,7 @@ public class SqlLine {
             : "(" + cur * 100 / (max == 0 ? 1 : max) + "%)");
 
     if (cur >= max && max != -1) {
-      progress += " " + loc("done") + separator;
+      progress += " " + loc("done") + SEPARATOR;
       lastProgress = null;
     } else {
       lastProgress = progress;
@@ -1489,8 +1513,8 @@ public class SqlLine {
 
     out.append(progress);
 
-    System.out.print(out.toString());
-    System.out.flush();
+    getOutputStream().print(out.toString());
+    getOutputStream().flush();
   }
 
   ///////////////////////////////
@@ -1766,7 +1790,7 @@ public class SqlLine {
   }
 
   public static String getSeparator() {
-    return separator;
+    return SEPARATOR;
   }
 
   Commands getCommands() {
