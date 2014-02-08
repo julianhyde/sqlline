@@ -32,24 +32,24 @@ public class SqlLineArgsTest {
   private static final ConnectionSpec CONNECTION_SPEC = ConnectionSpec.HSQLDB;
 
   /**
-   * Execute a script with "beeline -f"
+   * Execute a script with "beeline -f".
+   *
    * @throws java.lang.Throwable On error
    * @return The stderr and stdout from running the script
-   *
    * @param args Script arguments
    */
-  private static String run(String... args) throws Throwable {
+  private static Pair run(String... args) throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     PrintStream beelineOutputStream = new PrintStream(os);
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
-    beeLine.begin(args, null, false);
+    SqlLine.Status status = beeLine.begin(args, null, false);
 
-    return os.toString("UTF8");
+    return new Pair(status, os.toString("UTF8"));
   }
 
-  private static String runScript(File scriptFile, boolean flag)
+  private static Pair runScript(File scriptFile, boolean flag)
     throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
@@ -67,17 +67,18 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Attempt to execute a simple script file with the -f option to SqlLine
-   * Test for presence of an expected pattern
-   * in the output (stdout or stderr), fail if not found
-   * Print PASSED or FAILED.
+   * Attempts to execute a simple script file with the -f option to SqlLine.
+   * Tests for presence of an expected pattern in the output (stdout or stderr).
    *
-   * @param matcher Matches whether the test output is as desired
-   * @param flag Command flag (-run or -f)
+   * @param scriptText Script text
+   * @param flag Command flag (--run or -f)
+   * @param statusMatcher Checks whether status is as expected
+   * @param outputMatcher Checks whether output is as expected
    * @throws Exception on command execution error
    */
-  private void testScriptFile(String scriptText, Matcher<String> matcher,
-      boolean flag) throws Throwable {
+  private void checkScriptFile(String scriptText, boolean flag,
+      Matcher<SqlLine.Status> statusMatcher,
+      Matcher<String> outputMatcher) throws Throwable {
     // Put the script content in a temp file
     File scriptFile = File.createTempFile("foo", "temp");
     scriptFile.deleteOnExit();
@@ -85,21 +86,24 @@ public class SqlLineArgsTest {
     os.print(scriptText);
     os.close();
 
-    String output = runScript(scriptFile, flag);
-    Assert.assertThat(output, matcher);
+    Pair pair = runScript(scriptFile, flag);
+    Assert.assertThat(pair.status, statusMatcher);
+    Assert.assertThat(pair.output, outputMatcher);
     final boolean delete = scriptFile.delete();
     Assert.assertThat(delete, is(true));
   }
 
   /**
-   * Attempt to execute a simple script file with the -f option to SqlLine
+   * Attempt to execute a simple script file with the -f option to SqlLine.
    * Test for presence of an expected pattern
-   * in the output (stdout or stderr), fail if not found
-   * Print PASSED or FAILED
+   * in the output (stdout or stderr), fail if not found.
    */
   @Test
   public void testPositiveScriptFile() throws Throwable {
-    testScriptFile("call 100 + 23;\n", containsString(" 123 "), true);
+    checkScriptFile("call 100 + 23;\n",
+        true,
+        equalTo(SqlLine.Status.OK),
+        containsString(" 123 "));
   }
 
   /**
@@ -107,7 +111,10 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testPositiveScriptFileUsingRun() throws Throwable {
-    testScriptFile("call 100 + 23;\n", containsString(" 123 "), false);
+    checkScriptFile("call 100 + 23;\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        containsString(" 123 "));
   }
 
   /**
@@ -116,8 +123,10 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testBreakOnErrorScriptFile() throws Throwable {
-    testScriptFile("select * from abcdefg01;\ncall 100 + 23;\n",
-        not(containsString(" 123 ")), true);
+    checkScriptFile("select * from abcdefg01;\ncall 100 + 23;\n",
+        true,
+        equalTo(SqlLine.Status.OTHER),
+        not(containsString(" 123 ")));
   }
 
   /**
@@ -126,19 +135,53 @@ public class SqlLineArgsTest {
   @Test
   public void testNegativeScriptFile() throws Throwable {
     // Create and delete a temp file
-    File scriptFile = File.createTempFile("beelinenegative", "temp");
+    File scriptFile = File.createTempFile("sqllinenegative", "temp");
     final boolean delete = scriptFile.delete();
     Assert.assertThat(delete, is(true));
 
-    String output = runScript(scriptFile, true);
-    Assert.assertThat(output, not(containsString(" 123 ")));
+    Pair pair = runScript(scriptFile, true);
+    Assert.assertThat(pair.status, equalTo(SqlLine.Status.OTHER));
+    Assert.assertThat(pair.output, not(containsString(" 123 ")));
   }
 
   /** Displays usage. */
   @Test
   public void testUsage() throws Throwable {
-    String result = run("--help");
-    Assert.assertThat(result, containsString("-f <file>"));
+    Pair pair = run("--help");
+    Assert.assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
+    Assert.assertThat(pair.output, containsString("-f <file>"));
+    Assert.assertThat(countUsage(pair.output), equalTo(1));
+  }
+
+  private int countUsage(String output) {
+    int n = 0;
+    for (String line : output.split("\n")) {
+      if (line.contains("Usage")) {
+        ++n;
+      }
+    }
+    return n;
+  }
+
+  /** Invalid arugments. */
+  @Test
+  public void testInvalidArguments() throws Throwable {
+    Pair pair = run("--fuzz");
+    Assert.assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
+    Assert.assertThat(pair.output, containsString("-f <file>"));
+    Assert.assertThat(countUsage(pair.output), equalTo(1));
+  }
+
+  /** Result of executing sqlline: status code and output. */
+  static class Pair {
+    final SqlLine.Status status;
+    final String output;
+
+
+    Pair(SqlLine.Status status, String output) {
+      this.status = status;
+      this.output = output;
+    }
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run

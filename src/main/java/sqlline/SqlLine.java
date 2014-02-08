@@ -352,17 +352,20 @@ public class SqlLine {
   }
 
   /**
-   * Starts the program with redirected input. For redirected output,
-   * System.setOut and System.setErr can be used, but System.setIn will not
-   * work.
+   * Starts the program with redirected input.
+   *
+   * <p>For redirected output, use {@link #setOutputStream} and
+   * {@link #setErrorStream}.
+   *
+   * <p>Exits with 0 on success, 1 on invalid arguments, and 2 on any
+   * other error.
    *
    * @param args        same as main()
    * @param inputStream redirected input, or null to use standard input
-   * @return Whether successful
+   * @return Status code to be returned to the operating system
    * @throws IOException on error
    */
-  public static boolean mainWithInputRedirection(
-      String[] args,
+  public static Status mainWithInputRedirection(String[] args,
       InputStream inputStream) throws IOException {
     return start(args, inputStream, false);
   }
@@ -394,20 +397,17 @@ public class SqlLine {
    * @return Whether successful
    * @throws IOException on error
    */
-  public static boolean start(
-      String[] args,
+  public static Status start(String[] args,
       InputStream inputStream,
       boolean saveHistory) throws IOException {
     SqlLine sqlline = new SqlLine();
-    boolean retVal = sqlline.begin(args, inputStream, saveHistory);
+    Status status = sqlline.begin(args, inputStream, saveHistory);
 
-    // exit the system: useful for Hypersonic and other
-    // badly-behaving systems
     if (!Boolean.getBoolean(SqlLineOpts.PROPERTY_NAME_EXIT)) {
-      System.exit(retVal ? 1 : 0);
+      System.exit(status.ordinal());
     }
 
-    return retVal;
+    return status;
   }
 
   DatabaseConnection getDatabaseConnection() {
@@ -528,7 +528,13 @@ public class SqlLine {
     }
   }
 
-  boolean initArgs(String[] args) {
+  /** Parses arguments.
+   *
+   * @param args Command-line arguments
+   * @param callback Status callback
+   * @return Whether arguments parsed successfully
+   */
+  Status initArgs(String[] args, DispatchCallback callback) {
     List<String> commands = new LinkedList<String>();
     List<String> files = new LinkedList<String>();
     String driver = null;
@@ -538,8 +544,7 @@ public class SqlLine {
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
-        usage();
-        return false;
+        return Status.ARGS;
       }
 
       // -- arguments are treated as properties
@@ -556,7 +561,7 @@ public class SqlLine {
           }
 
           if (!ret) {
-            return false;
+            return Status.ARGS;
           }
         }
 
@@ -564,17 +569,17 @@ public class SqlLine {
       }
 
       if (args[i].equals("-d")) {
-        driver = args[i++ + 1];
+        driver = args[++i];
       } else if (args[i].equals("-n")) {
-        user = args[i++ + 1];
+        user = args[++i];
       } else if (args[i].equals("-p")) {
-        pass = args[i++ + 1];
+        pass = args[++i];
       } else if (args[i].equals("-u")) {
-        url = args[i++ + 1];
+        url = args[++i];
       } else if (args[i].equals("-e")) {
-        commands.add(args[i++ + 1]);
+        commands.add(args[++i]);
       } else if (args[i].equals("-f")) {
-        getOpts().setRun(args[i++ + 1]);
+        getOpts().setRun(args[++i]);
       } else {
         files.add(args[i]);
       }
@@ -611,15 +616,18 @@ public class SqlLine {
       exit = true; // execute and exit
     }
 
+    Status status = Status.OK;
+
     // if a script file was specified, run the file and quit
     if (opts.getRun() != null) {
-      dispatch(
-          COMMAND_PREFIX + "run " + opts.getRun(),
-          new DispatchCallback());
+      dispatch(COMMAND_PREFIX + "run " + opts.getRun(), callback);
+      if (callback.isFailure()) {
+        status = Status.OTHER;
+      }
       dispatch(COMMAND_PREFIX + "quit", new DispatchCallback());
     }
 
-    return true;
+    return status;
   }
 
   /**
@@ -627,7 +635,7 @@ public class SqlLine {
    * {@link CommandHandler} until the global variable <code>exit</code> is
    * true.
    */
-  boolean begin(String[] args, InputStream inputStream,
+  Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {
     try {
       opts.load();
@@ -648,15 +656,22 @@ public class SqlLine {
       } catch (Throwable t) {
         handleException(t);
         commands.quit(null, new DispatchCallback());
-        return false;
+        return Status.OTHER;
       }
     } else {
       reader = getConsoleReader(inputStream, fileHistory);
     }
 
-    if (!initArgs(args)) {
+    final DispatchCallback callback = new DispatchCallback();
+    Status status = initArgs(args, callback);
+    switch (status) {
+    case ARGS:
       usage();
-      return false;
+      // fall through
+    case OTHER:
+      return status;
+    default:
+      break;
     }
 
     try {
@@ -668,7 +683,6 @@ public class SqlLine {
     // basic setup done. From this point on, honor opts value for showing
     // exception
     initComplete = true;
-    DispatchCallback callback = new DispatchCallback();
     while (!exit) {
       try {
         // Execute one instruction; terminate on executing a script if
@@ -680,6 +694,7 @@ public class SqlLine {
         }
         if (!callback.isSuccess() && runningScript) {
           commands.quit(null, callback);
+          status = Status.OTHER;
         }
       } catch (EOFException eof) {
         // CTRL-D
@@ -702,7 +717,10 @@ public class SqlLine {
     // connections automatically.
     // nothing is done with the callback beyond
     commands.closeall(null, new DispatchCallback());
-    return callback.isSuccess();
+    if (callback.isFailure()) {
+      status = Status.OTHER;
+    }
+    return status;
   }
 
   public ConsoleReader getConsoleReader(
@@ -1810,6 +1828,12 @@ public class SqlLine {
 
   public Completer getCommandCompleter() {
     return sqlLineCommandCompleter;
+  }
+
+  /** Exit status returned to the operating system. OK, ARGS, OTHER
+   * correspond to 0, 1, 2. */
+  enum Status {
+    OK, ARGS, OTHER
   }
 }
 
