@@ -15,15 +15,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Matcher;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Executes tests of the command-line arguments to SqlLine.
@@ -87,10 +89,10 @@ public class SqlLineArgsTest {
     os.close();
 
     Pair pair = runScript(scriptFile, flag);
-    Assert.assertThat(pair.status, statusMatcher);
-    Assert.assertThat(pair.output, outputMatcher);
+    assertThat(pair.status, statusMatcher);
+    assertThat(pair.output, outputMatcher);
     final boolean delete = scriptFile.delete();
-    Assert.assertThat(delete, is(true));
+    assertThat(delete, is(true));
   }
 
   /**
@@ -137,20 +139,20 @@ public class SqlLineArgsTest {
     // Create and delete a temp file
     File scriptFile = File.createTempFile("sqllinenegative", "temp");
     final boolean delete = scriptFile.delete();
-    Assert.assertThat(delete, is(true));
+    assertThat(delete, is(true));
 
     Pair pair = runScript(scriptFile, true);
-    Assert.assertThat(pair.status, equalTo(SqlLine.Status.OTHER));
-    Assert.assertThat(pair.output, not(containsString(" 123 ")));
+    assertThat(pair.status, equalTo(SqlLine.Status.OTHER));
+    assertThat(pair.output, not(containsString(" 123 ")));
   }
 
   /** Displays usage. */
   @Test
   public void testUsage() throws Throwable {
     Pair pair = run("--help");
-    Assert.assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
-    Assert.assertThat(pair.output, containsString("-f <file>"));
-    Assert.assertThat(countUsage(pair.output), equalTo(1));
+    assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
+    assertThat(pair.output, containsString("-f <file>"));
+    assertThat(countUsage(pair.output), equalTo(1));
   }
 
   private int countUsage(String output) {
@@ -167,9 +169,9 @@ public class SqlLineArgsTest {
   @Test
   public void testInvalidArguments() throws Throwable {
     Pair pair = run("--fuzz");
-    Assert.assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
-    Assert.assertThat(pair.output, containsString("-f <file>"));
-    Assert.assertThat(countUsage(pair.output), equalTo(1));
+    assertThat(pair.status, equalTo(SqlLine.Status.ARGS));
+    assertThat(pair.output, containsString("-f <file>"));
+    assertThat(countUsage(pair.output), equalTo(1));
   }
 
   /** Result of executing sqlline: status code and output. */
@@ -182,6 +184,32 @@ public class SqlLineArgsTest {
       this.status = status;
       this.output = output;
     }
+  }
+
+  /**
+   * HIVE-4566, "NullPointerException if typeinfo and nativesql commands are
+   * executed at beeline before a DB connection is established".
+   *
+   * @throws UnsupportedEncodingException
+   */
+  @Test
+  public void testNPE() throws UnsupportedEncodingException {
+    SqlLine sqlLine = new SqlLine();
+
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+
+    sqlLine.runCommands(Arrays.asList("!typeinfo"), new DispatchCallback());
+    String output = os.toString("UTF8");
+    assertThat(output, not(containsString("java.lang.NullPointerException")));
+    assertThat(output, containsString("No current connection"));
+
+    sqlLine.runCommands(Arrays.asList("!nativesql"), new DispatchCallback());
+    output = os.toString("UTF8");
+    assertThat(output, not(containsString("java.lang.NullPointerException")));
+    assertThat(output, containsString("No current connection"));
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run

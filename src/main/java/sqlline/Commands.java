@@ -167,6 +167,11 @@ public class Commands {
 
   public void metadata(
       String cmd, List<Object> argList, DispatchCallback callback) {
+    if (!sqlLine.assertConnection()) {
+      callback.setToFailure();
+      return;
+    }
+
     try {
       Method[] m = sqlLine.getDatabaseMetaData().getClass().getMethods();
       Set<String> methodNames = new TreeSet<String>();
@@ -334,7 +339,7 @@ public class Commands {
 
   public void typeinfo(String line, DispatchCallback callback)
     throws Exception {
-    metadata("getTypeInfo", Collections.EMPTY_LIST, callback);
+    metadata("getTypeInfo", Collections.emptyList(), callback);
   }
 
   public void nativesql(String sql, DispatchCallback callback)
@@ -543,7 +548,7 @@ public class Commands {
 
   public void commit(String line, DispatchCallback callback)
     throws SQLException {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
@@ -570,7 +575,7 @@ public class Commands {
 
   public void rollback(String line, DispatchCallback callback)
     throws SQLException {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
@@ -594,7 +599,7 @@ public class Commands {
 
   public void autocommit(String line, DispatchCallback callback)
     throws SQLException {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
@@ -650,7 +655,7 @@ public class Commands {
 
   public void isolation(String line, DispatchCallback callback)
     throws SQLException {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
@@ -708,7 +713,7 @@ public class Commands {
   }
 
   public void batch(String line, DispatchCallback callback) {
-    if (!(sqlLine.assertConnection())) {
+    if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }

@@ -902,7 +902,7 @@ public class SqlLine {
    * @return false always
    */
   boolean error(String msg) {
-    output(getColorBuffer().red(msg), true, System.err);
+    output(getColorBuffer().red(msg), true, errorStream);
     return false;
   }
 
@@ -913,7 +913,7 @@ public class SqlLine {
 
   void debug(String msg) {
     if (opts.getVerbose()) {
-      output(getColorBuffer().blue(msg), true, System.err);
+      output(getColorBuffer().blue(msg), true, errorStream);
     }
   }
 
