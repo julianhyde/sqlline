@@ -173,19 +173,19 @@ public class Commands {
     }
 
     try {
-      Method[] m = sqlLine.getDatabaseMetaData().getClass().getMethods();
+      Method[] methods = sqlLine.getDatabaseMetaData().getClass().getMethods();
       Set<String> methodNames = new TreeSet<String>();
       Set<String> methodNamesUpper = new TreeSet<String>();
-      for (int i = 0; i < m.length; i++) {
-        methodNames.add(m[i].getName());
-        methodNamesUpper.add(m[i].getName().toUpperCase());
+      for (Method method : methods) {
+        methodNames.add(method.getName());
+        methodNamesUpper.add(method.getName().toUpperCase());
       }
 
       if (!methodNamesUpper.contains(cmd.toUpperCase())) {
         sqlLine.error(sqlLine.loc("no-such-method", cmd));
         sqlLine.error(sqlLine.loc("possible-methods"));
-        for (Iterator<String> i = methodNames.iterator(); i.hasNext();) {
-          sqlLine.error("   " + i.next());
+        for (String methodName : methodNames) {
+          sqlLine.error("   " + methodName);
         }
         callback.setToFailure();
         return;
@@ -195,13 +195,10 @@ public class Commands {
           DatabaseMetaData.class, cmd, argList);
       if (res instanceof ResultSet) {
         ResultSet rs = (ResultSet) res;
-
-        if (rs != null) {
-          try {
-            sqlLine.print(rs, callback);
-          } finally {
-            rs.close();
-          }
+        try {
+          sqlLine.print(rs, callback);
+        } finally {
+          rs.close();
         }
       } else if (res != null) {
         sqlLine.output(res.toString());
@@ -214,14 +211,12 @@ public class Commands {
   }
 
   public void history(String line, DispatchCallback callback) {
-    ListIterator<History.Entry> hist =
-        sqlLine.getConsoleReader().getHistory().entries();
     int index = 1;
-    while (hist.hasNext()) {
+    for (History.Entry entry : sqlLine.getConsoleReader().getHistory()) {
       index++;
       sqlLine.output(
           sqlLine.getColorBuffer().pad(index + ".", 6)
-              .append(hist.next().toString()));
+              .append(entry.toString()));
     }
     callback.setToSuccess();
   }
@@ -391,6 +386,7 @@ public class Commands {
         try {
           rs.close();
         } catch (Exception e) {
+          // ignore
         }
       }
 
@@ -438,8 +434,8 @@ public class Commands {
         sqlLine.loc("drivers-found-count", sqlLine.getDrivers().size()));
 
     // unique the list
-    for (Iterator<Driver> i = sqlLine.getDrivers().iterator(); i.hasNext();) {
-      names.add(i.next().getClass().getName());
+    for (Driver driver : sqlLine.getDrivers()) {
+      names.add(driver.getClass().getName());
     }
 
     final ColorBuffer colorBuffer = sqlLine.getColorBuffer();
@@ -448,9 +444,7 @@ public class Commands {
         .bold(colorBuffer.pad(sqlLine.loc("jdbc-version"), 8).getMono())
         .bold(sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono()));
 
-    for (Iterator<String> i = names.iterator(); i.hasNext();) {
-      String name = i.next();
-
+    for (String name : names) {
       try {
         Driver driver = (Driver) Class.forName(name).newInstance();
         ColorBuffer msg =
@@ -490,14 +484,13 @@ public class Commands {
   public void config(String line, DispatchCallback callback) {
     try {
       Properties props = sqlLine.getOpts().toProperties();
-      Set<String> keys = new TreeSet<String>((Set) props.keySet());
-      for (Iterator<String> i = keys.iterator(); i.hasNext();) {
-        String key = i.next();
+      Set<String> keys = new TreeSet<String>(asMap(props).keySet());
+      for (String key : keys) {
         sqlLine.output(sqlLine.getColorBuffer()
             .green(sqlLine.getColorBuffer()
                 .pad(
                     key.substring(
-                        sqlLine.getOpts().PROPERTY_PREFIX.length()), 20)
+                        SqlLineOpts.PROPERTY_PREFIX.length()), 20)
                 .getMono())
             .append(props.getProperty(key)));
       }
@@ -532,6 +525,7 @@ public class Commands {
       try {
         sqlLine.getOpts().save();
       } catch (Exception saveException) {
+        // ignore
       }
     }
 
@@ -565,11 +559,9 @@ public class Commands {
       reportResult(sqlLine.loc("commit-complete"), start, end);
 
       callback.setToSuccess();
-      return;
     } catch (Exception e) {
       callback.setToFailure();
       sqlLine.error(e);
-      return;
     }
   }
 
@@ -959,7 +951,7 @@ public class Commands {
       }
     }
 
-    if (successes != (parts.length - 1)) {
+    if (successes != parts.length - 1) {
       callback.setToFailure();
     } else {
       callback.setToSuccess();
@@ -1005,17 +997,16 @@ public class Commands {
   }
 
   private String getProperty(Properties props, String... keys) {
-    for (int i = 0; i < keys.length; i++) {
-      String val = props.getProperty(keys[i]);
+    for (String key : keys) {
+      String val = props.getProperty(key);
       if (val != null) {
         return val;
       }
     }
 
-    for (Iterator i = props.keySet().iterator(); i.hasNext();) {
-      String key = (String) i.next();
-      for (int j = 0; j < keys.length; j++) {
-        if (key.endsWith(keys[j])) {
+    for (String key : asMap(props).keySet()) {
+      for (String key1 : keys) {
+        if (key.endsWith(key1)) {
           return props.getProperty(key);
         }
       }
@@ -1434,6 +1425,11 @@ public class Commands {
     breader.close();
 
     callback.setToSuccess();
+  }
+
+  static Map<String, String> asMap(Properties properties) {
+    //noinspection unchecked
+    return (Map) properties;
   }
 }
 

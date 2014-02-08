@@ -45,14 +45,13 @@ class BufferedRows extends Rows {
     return iterator.hasNext();
   }
 
-  public Object next() {
+  public Row next() {
     return iterator.next();
   }
 
   void normalizeWidths() {
     int[] max = null;
-    for (int i = 0; i < list.size(); i++) {
-      Row row = list.get(i);
+    for (Row row : list) {
       if (max == null) {
         max = new int[row.values.length];
       }
@@ -62,8 +61,7 @@ class BufferedRows extends Rows {
       }
     }
 
-    for (int i = 0; i < list.size(); i++) {
-      Row row = list.get(i);
+    for (Row row : list) {
       row.sizes = max;
     }
   }

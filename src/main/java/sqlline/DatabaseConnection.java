@@ -124,6 +124,7 @@ class DatabaseConnection {
       theDriver = DriverManager.getDriver(url);
       foundDriver = theDriver != null;
     } catch (Exception e) {
+      // ignore
     }
 
     if (!foundDriver) {
@@ -226,10 +227,9 @@ class DatabaseConnection {
   }
 
   public String[] getTableNames(boolean force) {
-    Schema.Table[] t = getSchema().getTables();
     Set<String> names = new TreeSet<String>();
-    for (int i = 0; t != null && i < t.length; i++) {
-      names.add(t[i].getName());
+    for (Schema.Table table : getSchema().getTables()) {
+      names.add(table.getName());
     }
     return names.toArray(new String[names.size()]);
   }
@@ -277,19 +277,20 @@ class DatabaseConnection {
           try {
             rs.close();
           } catch (Exception e) {
+            // ignore
           }
         }
       } catch (Throwable t) {
+        // ignore
       }
 
       return tables = tnames.toArray(new Table[0]);
     }
 
     Table getTable(String name) {
-      Table[] t = getTables();
-      for (int i = 0; t != null && i < t.length; i++) {
-        if (name.equalsIgnoreCase(t[i].getName())) {
-          return t[i];
+      for (Table table : getTables()) {
+        if (name.equalsIgnoreCase(table.getName())) {
+          return table;
         }
       }
 

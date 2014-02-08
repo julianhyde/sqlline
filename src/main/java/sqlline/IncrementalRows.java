@@ -77,12 +77,12 @@ class IncrementalRows extends Rows {
     return nextRow != null;
   }
 
-  public Object next() {
+  public Row next() {
     if (!hasNext() && !dispatchCallback.isCanceled()) {
       throw new NoSuchElementException();
     }
 
-    Object ret = nextRow;
+    Row ret = nextRow;
     nextRow = null;
     return ret;
   }

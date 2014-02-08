@@ -32,7 +32,7 @@ class XmlAttributeOutputFormat extends AbstractOutputFormat {
     String[] head = header.values;
     String[] vals = row.values;
 
-    StringBuffer result = new StringBuffer("  <result");
+    StringBuilder result = new StringBuilder("  <result");
 
     for (int i = 0; (i < head.length) && (i < vals.length); i++) {
       result.append(' ').append(head[i]).append("=\"").append(

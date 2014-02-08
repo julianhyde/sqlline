@@ -21,7 +21,7 @@ import java.util.Iterator;
 /**
  * Abstract base class representing a set of rows to be displayed.
  */
-abstract class Rows implements Iterator {
+abstract class Rows implements Iterator<Rows.Row> {
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
@@ -128,14 +128,17 @@ abstract class Rows implements Iterator {
       try {
         deleted = rs.rowDeleted();
       } catch (Throwable t) {
+        // ignore
       }
       try {
         updated = rs.rowUpdated();
       } catch (Throwable t) {
+        // ignore
       }
       try {
         inserted = rs.rowInserted();
       } catch (Throwable t) {
+        // ignore
       }
 
       for (int i = 0; i < size; i++) {

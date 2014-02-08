@@ -29,7 +29,7 @@ class SeparatedValuesOutputFormat implements OutputFormat {
   public int print(Rows rows) {
     int count = 0;
     while (rows.hasNext()) {
-      printRow(rows, (Rows.Row) rows.next());
+      printRow(rows, rows.next());
       count++;
     }
 
@@ -39,10 +39,10 @@ class SeparatedValuesOutputFormat implements OutputFormat {
   public void printRow(Rows rows, Rows.Row row) {
     String[] vals = row.values;
     StringBuilder buf = new StringBuilder();
-    for (int i = 0; i < vals.length; i++) {
+    for (String val : vals) {
       buf.append(buf.length() == 0 ? "" : "" + getSeparator())
           .append('\'')
-          .append(vals[i] == null ? "" : vals[i])
+          .append(val == null ? "" : val)
           .append('\'');
     }
     sqlLine.output(buf.toString());

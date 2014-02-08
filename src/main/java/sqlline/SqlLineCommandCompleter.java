@@ -24,12 +24,11 @@ class SqlLineCommandCompleter extends AggregateCompleter {
   public SqlLineCommandCompleter(SqlLine sqlLine) {
     List<ArgumentCompleter> completers = new LinkedList<ArgumentCompleter>();
 
-    for (int i = 0; i < sqlLine.commandHandlers.length; i++) {
-      String[] cmds = sqlLine.commandHandlers[i].getNames();
-      for (int j = 0; cmds != null && j < cmds.length; j++) {
-        Completer[] comps = sqlLine.commandHandlers[i].getParameterCompleters();
+    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
+      for (String cmd : commandHandler.getNames()) {
+        Completer[] comps = commandHandler.getParameterCompleters();
         List<Completer> compl = new LinkedList<Completer>();
-        compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmds[j]));
+        compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
         compl.addAll(Arrays.asList(comps));
         compl.add(new NullCompleter()); // last param no complete
 

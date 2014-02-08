@@ -447,9 +447,8 @@ public class SqlLine {
   public String[] getMetadataMethodNames() {
     try {
       TreeSet<String> methodNames = new TreeSet<String>();
-      Method[] m = DatabaseMetaData.class.getDeclaredMethods();
-      for (int i = 0; m != null && i < m.length; i++) {
-        methodNames.add(m[i].getName());
+      for (Method method : DatabaseMetaData.class.getDeclaredMethods()) {
+        methodNames.add(method.getName());
       }
 
       return methodNames.toArray(new String[methodNames.size()]);
@@ -520,10 +519,11 @@ public class SqlLine {
    * Walk through all the known drivers and try to register them.
    */
   void registerKnownDrivers() {
-    for (Iterator<String> i = KNOWN_DRIVERS.iterator(); i.hasNext();) {
+    for (String driverName : KNOWN_DRIVERS) {
       try {
-        Class.forName(i.next());
+        Class.forName(driverName);
       } catch (Throwable t) {
+        // ignore
       }
     }
   }
@@ -597,9 +597,8 @@ public class SqlLine {
     }
 
     // now load properties files
-    for (Iterator<String> i = files.iterator(); i.hasNext();) {
-      dispatch(COMMAND_PREFIX + "properties " + i.next(),
-          new DispatchCallback());
+    for (String file : files) {
+      dispatch(COMMAND_PREFIX + "properties " + file, new DispatchCallback());
     }
 
     if (commands.size() > 0) {
@@ -607,8 +606,7 @@ public class SqlLine {
       opts.setColor(false);
       opts.setHeaderInterval(-1);
 
-      for (Iterator<String> i = commands.iterator(); i.hasNext();) {
-        String command = i.next();
+      for (String command : commands) {
         debug(loc("executing-command", command));
         dispatch(command, new DispatchCallback());
       }
@@ -793,10 +791,10 @@ public class SqlLine {
       Map<String, CommandHandler> cmdMap =
           new TreeMap<String, CommandHandler>();
       line = line.substring(1);
-      for (int i = 0; i < commandHandlers.length; i++) {
-        String match = commandHandlers[i].matches(line);
+      for (CommandHandler commandHandler : commandHandlers) {
+        String match = commandHandler.matches(line);
         if (match != null) {
-          cmdMap.put(match, commandHandlers[i]);
+          cmdMap.put(match, commandHandler);
         }
       }
 
@@ -1590,6 +1588,7 @@ public class SqlLine {
           return driver;
         }
       } catch (Exception e) {
+        // ignore
       }
     }
 
@@ -1615,9 +1614,7 @@ public class SqlLine {
 
     Set<Driver> driverClasses = new HashSet<Driver>();
 
-    for (Iterator<String> i = classNames.iterator(); i.hasNext();) {
-      String className = i.next();
-
+    for (String className : classNames) {
       if (!className.toLowerCase().contains("driver")) {
         continue;
       }
@@ -1637,6 +1634,7 @@ public class SqlLine {
         // now instantiate and initialize it
         driverClasses.add((Driver) c.newInstance());
       } catch (Throwable t) {
+        // ignore
       }
     }
     long end = System.currentTimeMillis();
@@ -1683,18 +1681,21 @@ public class SqlLine {
     try {
       Statement stmnt = createStatement();
       try {
-        for (Iterator<String> i = statements.iterator(); i.hasNext();) {
-          stmnt.addBatch(i.next());
+        for (String statement : statements) {
+          stmnt.addBatch(statement);
         }
 
         int[] counts = stmnt.executeBatch();
+        if (counts == null) {
+          counts = new int[0];
+        }
 
         output(
             getColorBuffer()
                 .pad(getColorBuffer().bold("COUNT"), 8)
                 .append(getColorBuffer().bold("STATEMENT")));
 
-        for (int i = 0; counts != null && i < counts.length; i++) {
+        for (int i = 0; i < counts.length; i++) {
           output(
               getColorBuffer().pad(counts[i] + "", 8)
                   .append(statements.get(i)));
@@ -1703,6 +1704,7 @@ public class SqlLine {
         try {
           stmnt.close();
         } catch (Exception e) {
+          // ignore
         }
       }
     } catch (Exception e) {
@@ -1716,8 +1718,7 @@ public class SqlLine {
     try {
       int index = 1;
       int size = cmds.size();
-      for (Iterator<String> i = cmds.iterator(); i.hasNext();) {
-        String cmd = i.next();
+      for (String cmd : cmds) {
         info(getColorBuffer().pad(index++ + "/" + size, 13).append(cmd));
         dispatch(cmd, callback);
         boolean success = callback.isSuccess();

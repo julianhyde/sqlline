@@ -70,7 +70,7 @@
               <suppressionsLocation>${top.dir}/src/main/config/checkstyle/suppressions.xml</suppressionsLocation>
               <consoleOutput>true</consoleOutput>
               <headerLocation>${top.dir}/src/main/config/checkstyle/header.txt</headerLocation>
-              <failOnViolation>false</failOnViolation>
+              <failOnViolation>true</failOnViolation>
               <includeTestSourceDirectory>true</includeTestSourceDirectory>
             </configuration>
             <goals>

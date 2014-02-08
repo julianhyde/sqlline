@@ -45,22 +45,27 @@ class SqlCompleter extends StringsCompleter {
     try {
       keywords += "," + meta.getSQLKeywords();
     } catch (Throwable t) {
+      // ignore
     }
     try {
       keywords += "," + meta.getStringFunctions();
     } catch (Throwable t) {
+      // ignore
     }
     try {
       keywords += "," + meta.getNumericFunctions();
     } catch (Throwable t) {
+      // ignore
     }
     try {
       keywords += "," + meta.getSystemFunctions();
     } catch (Throwable t) {
+      // ignore
     }
     try {
       keywords += "," + meta.getTimeDateFunctions();
     } catch (Throwable t) {
+      // ignore
     }
 
     // also allow lower-case versions of all the keywords
@@ -73,9 +78,8 @@ class SqlCompleter extends StringsCompleter {
 
     // now add the tables and columns from the current connection
     if (!skipMeta) {
-      String[] columns = sqlLine.getColumnNames(meta);
-      for (int i = 0; columns != null && i < columns.length; i++) {
-        completions.add(columns[i++]);
+      for (String column : sqlLine.getColumnNames(meta)) {
+        completions.add(column);
       }
     }
 

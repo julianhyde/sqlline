@@ -31,12 +31,12 @@ class TableOutputFormat implements OutputFormat {
     rows.normalizeWidths();
 
     for (; rows.hasNext();) {
-      Rows.Row row = (Rows.Row) rows.next();
+      Rows.Row row = rows.next();
       ColorBuffer cbuf = getOutputString(rows, row);
       cbuf = cbuf.truncate(width);
 
       if (index == 0) {
-        StringBuffer h = new StringBuffer();
+        StringBuilder h = new StringBuilder();
         for (int j = 0; j < row.sizes.length; j++) {
           for (int k = 0; k < row.sizes[j]; k++) {
             h.append('-');

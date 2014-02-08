@@ -23,10 +23,10 @@ class VerticalOutputFormat implements OutputFormat {
 
   public int print(Rows rows) {
     int count = 0;
-    Rows.Row header = (Rows.Row) rows.next();
+    Rows.Row header = rows.next();
 
     while (rows.hasNext()) {
-      printRow(rows, header, (Rows.Row) rows.next());
+      printRow(rows, header, rows.next());
       count++;
     }
 

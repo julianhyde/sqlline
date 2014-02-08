@@ -136,17 +136,16 @@ class SqlLineOpts implements Completer {
     TreeSet<String> names = new TreeSet<String>();
 
     // get all the values from getXXX methods
-    Method[] m = getClass().getDeclaredMethods();
-    for (int i = 0; m != null && i < m.length; i++) {
-      if (!m[i].getName().startsWith("get")) {
+    for (Method method : getClass().getDeclaredMethods()) {
+      if (!method.getName().startsWith("get")) {
         continue;
       }
 
-      if (m[i].getParameterTypes().length != 0) {
+      if (method.getParameterTypes().length != 0) {
         continue;
       }
 
-      String propName = m[i].getName().substring(3).toLowerCase();
+      String propName = method.getName().substring(3).toLowerCase();
       if (propName.equals("run")) {
         // Not a real property
         continue;
@@ -163,10 +162,9 @@ class SqlLineOpts implements Completer {
       ClassNotFoundException {
     Properties props = new Properties();
 
-    String[] names = propertyNames();
-    for (int i = 0; names != null && i < names.length; i++) {
-      props.setProperty(PROPERTY_PREFIX + names[i],
-          sqlLine.getReflector().invoke(this, "get" + names[i]).toString());
+    for (String name : propertyNames()) {
+      props.setProperty(PROPERTY_PREFIX + name,
+          sqlLine.getReflector().invoke(this, "get" + name).toString());
     }
 
     sqlLine.debug("properties: " + props.toString());
@@ -188,16 +186,13 @@ class SqlLineOpts implements Completer {
   }
 
   public void loadProperties(Properties props) {
-    for (Iterator i = props.keySet().iterator(); i.hasNext();) {
-      String key = i.next().toString();
+    for (String key : Commands.asMap(props).keySet()) {
       if (key.equals(PROPERTY_NAME_EXIT)) {
         // fix for sf.net bug 879422
         continue;
       }
       if (key.startsWith(PROPERTY_PREFIX)) {
-        set(
-            key.substring(PROPERTY_PREFIX.length()),
-            props.getProperty(key));
+        set(key.substring(PROPERTY_PREFIX.length()), props.getProperty(key));
       }
     }
   }

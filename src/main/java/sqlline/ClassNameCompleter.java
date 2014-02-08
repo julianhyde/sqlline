@@ -46,7 +46,7 @@ public class ClassNameCompleter extends StringsCompleter {
         continue;
       }
 
-      urls.addAll(Arrays.asList(((URLClassLoader) loader).getURLs()));
+      Collections.addAll(urls, ((URLClassLoader) loader).getURLs());
     }
 
     // Now add the URL that holds java.lang.String. This is because
@@ -56,10 +56,9 @@ public class ClassNameCompleter extends StringsCompleter {
       String.class, javax.swing.JFrame.class
     };
 
-    for (int i = 0; i < systemClasses.length; i++) {
-      URL classURL = systemClasses[i].getResource(
-          "/"
-              + systemClasses[i].getName().replace('.', '/') + ".class");
+    for (Class systemClass : systemClasses) {
+      URL classURL = systemClass.getResource(
+          "/" + systemClass.getName().replace('.', '/') + ".class");
 
       if (classURL != null) {
         URLConnection uc = classURL.openConnection();
@@ -70,20 +69,20 @@ public class ClassNameCompleter extends StringsCompleter {
     }
 
     Set<String> classes = new HashSet<String>();
-    for (Iterator<URL> i = urls.iterator(); i.hasNext();) {
-      URL url = i.next();
+    for (URL url : urls) {
       File file = new File(url.getFile());
 
       if (file.isDirectory()) {
-        Set<String> files = getClassFiles(
-            file.getAbsolutePath(),
-            new HashSet<String>(), file, new int[]{200});
+        Set<String> files = getClassFiles(file.getAbsolutePath(),
+            new HashSet<String>(),
+            file,
+            new int[]{200});
         classes.addAll(files);
 
         continue;
       }
 
-      if ((file == null) || !file.isFile()) {
+      if (!file.isFile()) {
         // TODO: handle directories
         continue;
       }
@@ -93,8 +92,8 @@ public class ClassNameCompleter extends StringsCompleter {
 
       JarFile jf = new JarFile(file);
 
-      for (Enumeration e = jf.entries(); e.hasMoreElements();) {
-        JarEntry entry = (JarEntry) e.nextElement();
+      for (Enumeration<JarEntry> e = jf.entries(); e.hasMoreElements();) {
+        JarEntry entry = e.nextElement();
 
         if (entry == null) {
           continue;
@@ -115,10 +114,8 @@ public class ClassNameCompleter extends StringsCompleter {
     // trailing ".class"
     Set<String> classNames = new TreeSet<String>();
 
-    for (Iterator<String> i = classes.iterator(); i.hasNext();) {
-      String name = i.next();
-      classNames.add(
-          name.replace('/', '.').substring(0, name.length() - 6));
+    for (String name : classes) {
+      classNames.add(name.replace('/', '.').substring(0, name.length() - 6));
     }
 
     return classNames.toArray(new String[classNames.size()]);
@@ -135,20 +132,21 @@ public class ClassNameCompleter extends StringsCompleter {
     }
 
     File[] files = directory.listFiles();
+    if (files == null) {
+      return holder;
+    }
 
-    for (int i = 0; files != null && i < files.length; i++) {
-      String name = files[i].getAbsolutePath();
+    for (File file : files) {
+      String name = file.getAbsolutePath();
 
       if (!name.startsWith(root)) {
         continue;
-      } else if (files[i].isDirectory()) {
-        getClassFiles(root, holder, files[i], maxDirectories);
-      } else if (files[i].getName().endsWith(".class")) {
-        holder.add(
-            files[i].getAbsolutePath().substring(root.length() + 1));
+      } else if (file.isDirectory()) {
+        getClassFiles(root, holder, file, maxDirectories);
+      } else if (file.getName().endsWith(".class")) {
+        holder.add(file.getAbsolutePath().substring(root.length() + 1));
       }
     }
-
     return holder;
   }
 }

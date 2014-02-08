@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,28 +40,26 @@ class Reflector {
     return invoke(on, on == null ? null : on.getClass(), method, args);
   }
 
-  public Object invoke(Object on, Class defClass, String method, List args)
+  public Object invoke(Object on, Class defClass, String methodName, List args)
     throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     Class c = defClass != null ? defClass : on.getClass();
     List<Method> candidateMethods = new LinkedList<Method>();
 
-    Method[] m = c.getMethods();
-    for (int i = 0; i < m.length; i++) {
-      if (m[i].getName().equalsIgnoreCase(method)) {
-        candidateMethods.add(m[i]);
+    for (Method method : c.getMethods()) {
+      if (method.getName().equalsIgnoreCase(methodName)) {
+        candidateMethods.add(method);
       }
     }
 
     if (candidateMethods.size() == 0) {
       throw new IllegalArgumentException(
-          sqlLine.loc("no-method", method, c.getName()));
+          sqlLine.loc("no-method", methodName, c.getName()));
     }
 
-    for (Iterator<Method> i = candidateMethods.iterator(); i.hasNext();) {
-      Method meth = i.next();
-      Class[] ptypes = meth.getParameterTypes();
-      if (!(ptypes.length == args.size())) {
+    for (Method method : candidateMethods) {
+      Class[] ptypes = method.getParameterTypes();
+      if (ptypes.length != args.size()) {
         continue;
       }
 
@@ -71,11 +68,11 @@ class Reflector {
         continue;
       }
 
-      if (!Modifier.isPublic(meth.getModifiers())) {
+      if (!Modifier.isPublic(method.getModifiers())) {
         continue;
       }
 
-      return meth.invoke(on, converted);
+      return method.invoke(on, converted);
     }
 
     return null;
