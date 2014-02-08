@@ -87,7 +87,8 @@ public class SqlLineArgsTest {
 
     String output = runScript(scriptFile, flag);
     Assert.assertThat(output, matcher);
-    scriptFile.delete();
+    final boolean delete = scriptFile.delete();
+    Assert.assertThat(delete, is(true));
   }
 
   /**
@@ -126,10 +127,18 @@ public class SqlLineArgsTest {
   public void testNegativeScriptFile() throws Throwable {
     // Create and delete a temp file
     File scriptFile = File.createTempFile("beelinenegative", "temp");
-    scriptFile.delete();
+    final boolean delete = scriptFile.delete();
+    Assert.assertThat(delete, is(true));
 
     String output = runScript(scriptFile, true);
     Assert.assertThat(output, not(containsString(" 123 ")));
+  }
+
+  /** Displays usage. */
+  @Test
+  public void testUsage() throws Throwable {
+    String result = run("--help");
+    Assert.assertThat(result, containsString("-f <file>"));
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run
@@ -160,4 +169,4 @@ public class SqlLineArgsTest {
   }
 }
 
-// End TestSqlLineWithArgs.java
+// End SqlLineArgsTest.java
