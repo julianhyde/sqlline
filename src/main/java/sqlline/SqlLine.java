@@ -51,7 +51,7 @@ public class SqlLine {
   private boolean exit = false;
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
-  private Collection<Driver> drivers = null;
+  private Set<Driver> drivers = null;
   private final SqlLineOpts opts =
       new SqlLineOpts(this, System.getProperties());
   private String lastProgress = null;
@@ -77,7 +77,7 @@ public class SqlLine {
   private static boolean initComplete = false;
 
   private SqlLineSignalHandler signalHandler = null;
-  private Completer sqlLineCommandCompleter;
+  private final Completer sqlLineCommandCompleter;
 
   private final Map<String, OutputFormat> formats = map(
       "vertical", (OutputFormat) new VerticalOutputFormat(this),
@@ -87,66 +87,7 @@ public class SqlLine {
       "xmlattr", new XmlAttributeOutputFormat(this),
       "xmlelements", new XmlElementOutputFormat(this));
 
-  private final Completer[] tableCompleters = {new TableNameCompleter(this)};
-
-  final CommandHandler[] commandHandlers = {
-    new ReflectiveCommandHandler(this, null, "quit", "done", "exit"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new StringsCompleter(getConnectionURLExamples())},
-        "connect", "open"),
-    new ReflectiveCommandHandler(this, tableCompleters, "describe"),
-    new ReflectiveCommandHandler(this, tableCompleters, "indexes"),
-    new ReflectiveCommandHandler(this, tableCompleters, "primarykeys"),
-    new ReflectiveCommandHandler(this, tableCompleters, "exportedkeys"),
-    new ReflectiveCommandHandler(this, null, "manual"),
-    new ReflectiveCommandHandler(this, tableCompleters, "importedkeys"),
-    new ReflectiveCommandHandler(this, null, "procedures"),
-    new ReflectiveCommandHandler(this, null, "tables"),
-    new ReflectiveCommandHandler(this, null, "typeinfo"),
-    new ReflectiveCommandHandler(this, tableCompleters, "columns"),
-    new ReflectiveCommandHandler(this, null, "reconnect"),
-    new ReflectiveCommandHandler(this, tableCompleters, "dropall"),
-    new ReflectiveCommandHandler(this, null, "history"),
-    new ReflectiveCommandHandler(this, new Completer[] {
-      new StringsCompleter(getMetadataMethodNames())}, "metadata"),
-    new ReflectiveCommandHandler(this, null, "nativesql"),
-    new ReflectiveCommandHandler(this, null, "dbinfo"),
-    new ReflectiveCommandHandler(this, null, "rehash"),
-    new ReflectiveCommandHandler(this, null, "verbose"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new FileNameCompleter()}, "run"),
-    new ReflectiveCommandHandler(this, null, "batch"),
-    new ReflectiveCommandHandler(this, null, "list"),
-    new ReflectiveCommandHandler(this, null, "all"),
-    new ReflectiveCommandHandler(this, null, "go", "#"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new FileNameCompleter()}, "script"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new FileNameCompleter()}, "record"),
-    new ReflectiveCommandHandler(this, null, "brief"),
-    new ReflectiveCommandHandler(this, null, "close"),
-    new ReflectiveCommandHandler(this, null, "closeall"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new StringsCompleter(getIsolationLevels())},
-        "isolation"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {
-          new StringsCompleter(
-              formats.keySet().toArray(new String[formats.size()]))},
-        "outputformat"),
-    new ReflectiveCommandHandler(this, null, "autocommit"),
-    new ReflectiveCommandHandler(this, null, "commit"),
-    new ReflectiveCommandHandler(this,
-        new Completer[] {new FileNameCompleter()},
-        "properties"),
-    new ReflectiveCommandHandler(this, null, "rollback"),
-    new ReflectiveCommandHandler(this, null, "help", "?"),
-    new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
-    new ReflectiveCommandHandler(this, null, "save"),
-    new ReflectiveCommandHandler(this, null, "scan"),
-    new ReflectiveCommandHandler(this, null, "sql"),
-    new ReflectiveCommandHandler(this, null, "call"),
-  };
+  final List<CommandHandler> commandHandlers;
 
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
       Arrays.asList(
@@ -330,7 +271,7 @@ public class SqlLine {
       e.printStackTrace(err);
 
       try {
-        return res + ": " + Arrays.asList(params);
+        return res + ": " + Arrays.toString(params);
       } catch (Exception e2) {
         return res;
       }
@@ -371,6 +312,59 @@ public class SqlLine {
   }
 
   public SqlLine() {
+    final TableNameCompleter tableCompleter = new TableNameCompleter(this);
+    final List<Completer> empty = Collections.emptyList();
+
+    commandHandlers = Arrays.<CommandHandler>asList(
+        new ReflectiveCommandHandler(this, empty, "quit", "done", "exit"),
+        new ReflectiveCommandHandler(this,
+            new StringsCompleter(getConnectionURLExamples()),
+            "connect", "open"),
+        new ReflectiveCommandHandler(this, tableCompleter, "describe"),
+        new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
+        new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
+        new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
+        new ReflectiveCommandHandler(this, empty, "manual"),
+        new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
+        new ReflectiveCommandHandler(this, empty, "procedures"),
+        new ReflectiveCommandHandler(this, empty, "tables"),
+        new ReflectiveCommandHandler(this, empty, "typeinfo"),
+        new ReflectiveCommandHandler(this, tableCompleter, "columns"),
+        new ReflectiveCommandHandler(this, empty, "reconnect"),
+        new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
+        new ReflectiveCommandHandler(this, empty, "history"),
+        new ReflectiveCommandHandler(this,
+            new StringsCompleter(getMetadataMethodNames()), "metadata"),
+        new ReflectiveCommandHandler(this, empty, "nativesql"),
+        new ReflectiveCommandHandler(this, empty, "dbinfo"),
+        new ReflectiveCommandHandler(this, empty, "rehash"),
+        new ReflectiveCommandHandler(this, empty, "verbose"),
+        new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
+        new ReflectiveCommandHandler(this, empty, "batch"),
+        new ReflectiveCommandHandler(this, empty, "list"),
+        new ReflectiveCommandHandler(this, empty, "all"),
+        new ReflectiveCommandHandler(this, empty, "go", "#"),
+        new ReflectiveCommandHandler(this, new FileNameCompleter(), "script"),
+        new ReflectiveCommandHandler(this, new FileNameCompleter(), "record"),
+        new ReflectiveCommandHandler(this, empty, "brief"),
+        new ReflectiveCommandHandler(this, empty, "close"),
+        new ReflectiveCommandHandler(this, empty, "closeall"),
+        new ReflectiveCommandHandler(this,
+            new StringsCompleter(getIsolationLevels()), "isolation"),
+        new ReflectiveCommandHandler(this,
+            new StringsCompleter(formats.keySet()), "outputformat"),
+        new ReflectiveCommandHandler(this, empty, "autocommit"),
+        new ReflectiveCommandHandler(this, empty, "commit"),
+        new ReflectiveCommandHandler(this, new FileNameCompleter(),
+            "properties"),
+        new ReflectiveCommandHandler(this, empty, "rollback"),
+        new ReflectiveCommandHandler(this, empty, "help", "?"),
+        new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
+        new ReflectiveCommandHandler(this, empty, "save"),
+        new ReflectiveCommandHandler(this, empty, "scan"),
+        new ReflectiveCommandHandler(this, empty, "sql"),
+        new ReflectiveCommandHandler(this, empty, "call"));
+
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
     reflector = new Reflector(this);
 
@@ -434,31 +428,30 @@ public class SqlLine {
     return connections.current().getDatabaseMetaData();
   }
 
-  public String[] getIsolationLevels() {
-    return new String[] {
+  public List<String> getIsolationLevels() {
+    return Arrays.asList(
       "TRANSACTION_NONE",
       "TRANSACTION_READ_COMMITTED",
       "TRANSACTION_READ_UNCOMMITTED",
       "TRANSACTION_REPEATABLE_READ",
-      "TRANSACTION_SERIALIZABLE",
-    };
+      "TRANSACTION_SERIALIZABLE");
   }
 
-  public String[] getMetadataMethodNames() {
+  public Set<String> getMetadataMethodNames() {
     try {
       TreeSet<String> methodNames = new TreeSet<String>();
       for (Method method : DatabaseMetaData.class.getDeclaredMethods()) {
         methodNames.add(method.getName());
       }
 
-      return methodNames.toArray(new String[methodNames.size()]);
+      return methodNames;
     } catch (Throwable t) {
-      return new String[0];
+      return Collections.emptySet();
     }
   }
 
-  public String[] getConnectionURLExamples() {
-    return new String[] {
+  public List<String> getConnectionURLExamples() {
+    return Arrays.asList(
       "jdbc:JSQLConnect://<hostname>/database=<database>",
       "jdbc:cloudscape:<database>;create=true",
       "jdbc:twtds:sqlserver://<hostname>/<database>",
@@ -495,8 +488,7 @@ public class SqlLine {
           + "Database=<database>",
       "jdbc:openlink://<hostname>/DSN=SQLServerDB/UID=sa/PWD=",
       "jdbc:solid://<hostname>:<port>/<UID>/<PWD>",
-      "jdbc:dbaw://<hostname>:8889/<database>",
-    };
+      "jdbc:dbaw://<hostname>:8889/<database>");
   }
 
   /**
@@ -1122,9 +1114,8 @@ public class SqlLine {
         new String[] {"TABLE"});
   }
 
-  String[] getColumnNames(DatabaseMetaData meta) throws SQLException {
+  Set<String> getColumnNames(DatabaseMetaData meta) throws SQLException {
     Set<String> names = new HashSet<String>();
-
     info(loc("building-tables"));
 
     try {
@@ -1141,12 +1132,11 @@ public class SqlLine {
           // 3. tablename.columnname
 
           progress(index++, total);
-          String name = columns.getString("TABLE_NAME");
-          names.add(name);
-          names.add(columns.getString("COLUMN_NAME"));
-          names.add(
-              columns.getString("TABLE_NAME") + "."
-                  + columns.getString("COLUMN_NAME"));
+          final String tableName = columns.getString("TABLE_NAME");
+          final String columnName = columns.getString("COLUMN_NAME");
+          names.add(tableName);
+          names.add(columnName);
+          names.add(tableName + "." + columnName);
         }
 
         progress(index, index);
@@ -1156,10 +1146,10 @@ public class SqlLine {
 
       info(loc("done"));
 
-      return names.toArray(new String[names.size()]);
+      return names;
     } catch (Throwable t) {
       handleException(t);
-      return new String[0];
+      return Collections.emptySet();
     }
   }
 
@@ -1595,19 +1585,17 @@ public class SqlLine {
     return null;
   }
 
-  Driver[] scanDrivers(String line) throws IOException {
+  Set<Driver> scanDrivers(String line) throws IOException {
     return scanDrivers(false);
   }
 
-  Driver[] scanDrivers(boolean knownOnly) throws IOException {
+  Set<Driver> scanDrivers(boolean knownOnly) throws IOException {
     long start = System.currentTimeMillis();
 
     Set<String> classNames = new HashSet<String>();
 
     if (!knownOnly) {
-      classNames.addAll(
-          Arrays.asList(
-              ClassNameCompleter.getClassNames()));
+      classNames.addAll(ClassNameCompleter.getClassNames());
     }
 
     classNames.addAll(KNOWN_DRIVERS);
@@ -1639,7 +1627,7 @@ public class SqlLine {
     }
     long end = System.currentTimeMillis();
     info("scan complete in " + (end - start) + "ms");
-    return driverClasses.toArray(new Driver[driverClasses.size()]);
+    return driverClasses;
   }
 
   ///////////////////////////////////////
@@ -1648,7 +1636,7 @@ public class SqlLine {
 
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
     String format = opts.getOutputFormat();
-    OutputFormat f = (OutputFormat) formats.get(format);
+    OutputFormat f = formats.get(format);
 
     if (f == null) {
       error(loc("unknown-format", format, formats.keySet()));
@@ -1759,11 +1747,11 @@ public class SqlLine {
     this.exit = exit;
   }
 
-  Collection<Driver> getDrivers() {
+  Set<Driver> getDrivers() {
     return drivers;
   }
 
-  void setDrivers(Collection<Driver> drivers) {
+  void setDrivers(Set<Driver> drivers) {
     this.drivers = drivers;
   }
 

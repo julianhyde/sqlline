@@ -226,12 +226,12 @@ class DatabaseConnection {
     }
   }
 
-  public String[] getTableNames(boolean force) {
+  public Collection<String> getTableNames(boolean force) {
     Set<String> names = new TreeSet<String>();
     for (Schema.Table table : getSchema().getTables()) {
       names.add(table.getName());
     }
-    return names.toArray(new String[names.size()]);
+    return names;
   }
 
   Schema getSchema() {
@@ -256,14 +256,14 @@ class DatabaseConnection {
 
   /** Schema. */
   class Schema {
-    private Table[] tables = null;
+    private List<Table> tables;
 
-    Table[] getTables() {
+    List<Table> getTables() {
       if (tables != null) {
         return tables;
       }
 
-      List<Table> tnames = new LinkedList<Table>();
+      tables = new LinkedList<Table>();
 
       try {
         ResultSet rs =
@@ -271,7 +271,7 @@ class DatabaseConnection {
                 null, "%", new String[]{"TABLE"});
         try {
           while (rs.next()) {
-            tnames.add(new Table(rs.getString("TABLE_NAME")));
+            tables.add(new Table(rs.getString("TABLE_NAME")));
           }
         } finally {
           try {
@@ -284,7 +284,7 @@ class DatabaseConnection {
         // ignore
       }
 
-      return tables = tnames.toArray(new Table[0]);
+      return tables;
     }
 
     Table getTable(String name) {

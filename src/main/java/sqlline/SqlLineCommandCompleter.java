@@ -11,7 +11,6 @@
 */
 package sqlline;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,10 +25,9 @@ class SqlLineCommandCompleter extends AggregateCompleter {
 
     for (CommandHandler commandHandler : sqlLine.commandHandlers) {
       for (String cmd : commandHandler.getNames()) {
-        Completer[] comps = commandHandler.getParameterCompleters();
         List<Completer> compl = new LinkedList<Completer>();
         compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
-        compl.addAll(Arrays.asList(comps));
+        compl.addAll(commandHandler.getParameterCompleters());
         compl.add(new NullCompleter()); // last param no complete
 
         completers.add(new ArgumentCompleter(compl));

@@ -11,6 +11,9 @@
 */
 package sqlline;
 
+import java.util.Collections;
+import java.util.List;
+
 import jline.console.completer.Completer;
 
 /**
@@ -18,9 +21,14 @@ import jline.console.completer.Completer;
  * uses reflection to determine the method to dispatch the command.
  */
 public class ReflectiveCommandHandler extends AbstractCommandHandler {
-  public ReflectiveCommandHandler(SqlLine sqlLine, Completer[] completer,
+  public ReflectiveCommandHandler(SqlLine sqlLine, List<Completer> completers,
       String... cmds) {
-    super(sqlLine, cmds, sqlLine.loc("help-" + cmds[0]), completer);
+    super(sqlLine, cmds, sqlLine.loc("help-" + cmds[0]), completers);
+  }
+
+  public ReflectiveCommandHandler(SqlLine sqlLine, Completer completer,
+      String... cmds) {
+    this(sqlLine, Collections.<Completer>singletonList(completer), cmds);
   }
 
   public void execute(String line, DispatchCallback callback) {

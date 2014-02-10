@@ -11,6 +11,8 @@
 */
 package sqlline;
 
+import java.util.List;
+
 import jline.console.completer.Completer;
 
 /**
@@ -29,7 +31,7 @@ interface CommandHandler {
   /**
    * @return all the possible names of this command.
    */
-  String[] getNames();
+  List<String> getNames();
 
   /**
    * @return the short help description for this command.
@@ -60,7 +62,7 @@ interface CommandHandler {
    *
    * @return Completers that can handle parameters
    */
-  Completer[] getParameterCompleters();
+  List<Completer> getParameterCompleters();
 }
 
 // End CommandHandler.java

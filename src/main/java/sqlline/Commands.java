@@ -153,12 +153,12 @@ public class Commands {
     sqlLine.debug(line);
 
     String[] parts = sqlLine.split(line);
-    List<Object> params = new LinkedList<Object>(Arrays.asList(parts));
     if (parts == null || parts.length == 0) {
       dbinfo("", callback);
       return;
     }
 
+    List<Object> params = new LinkedList<Object>(Arrays.asList(parts));
     params.remove(0);
     params.remove(0);
     sqlLine.debug(params.toString());
@@ -427,7 +427,7 @@ public class Commands {
     TreeSet<String> names = new TreeSet<String>();
 
     if (sqlLine.getDrivers() == null) {
-      sqlLine.setDrivers(Arrays.asList(sqlLine.scanDrivers(line)));
+      sqlLine.setDrivers(sqlLine.scanDrivers(line));
     }
 
     sqlLine.info(
@@ -1375,7 +1375,7 @@ public class Commands {
 
     for (CommandHandler commandHandler : sqlLine.commandHandlers) {
       if (cmd.length() == 0
-          || Arrays.asList(commandHandler.getNames()).contains(cmd)) {
+          || commandHandler.getNames().contains(cmd)) {
         clist.add(sqlLine.getColorBuffer()
             .pad("!" + commandHandler.getName(), 20)
             .append(sqlLine.wrap(commandHandler.getHelpText(), 60, 20)));

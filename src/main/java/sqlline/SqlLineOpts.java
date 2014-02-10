@@ -60,14 +60,12 @@ class SqlLineOpts implements Completer {
     loadProperties(props);
   }
 
-  public Completer[] optionCompleters() {
-    return new Completer[] {this};
+  public List<Completer> optionCompleters() {
+    return Collections.<Completer>singletonList(this);
   }
 
-  public String[] possibleSettingValues() {
-    List<String> vals = new LinkedList<String>();
-    vals.addAll(Arrays.asList("yes", "no"));
-    return vals.toArray(new String[vals.size()]);
+  public List<String> possibleSettingValues() {
+    return Arrays.asList("yes", "no");
   }
 
   /**
@@ -131,7 +129,7 @@ class SqlLineOpts implements Completer {
     }
   }
 
-  String[] propertyNames()
+  Set<String> propertyNames()
     throws IllegalAccessException, InvocationTargetException {
     TreeSet<String> names = new TreeSet<String>();
 
@@ -153,7 +151,7 @@ class SqlLineOpts implements Completer {
       names.add(propName);
     }
 
-    return names.toArray(new String[names.size()]);
+    return names;
   }
 
   public Properties toProperties()

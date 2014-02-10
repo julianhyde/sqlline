@@ -36,7 +36,7 @@ public class ClassNameCompleter extends StringsCompleter {
     getStrings().add(".");
   }
 
-  public static String[] getClassNames() throws IOException {
+  public static Set<String> getClassNames() throws IOException {
     Set<URL> urls = new HashSet<URL>();
 
     for (ClassLoader loader = ClassNameCompleter.class.getClassLoader();
@@ -118,7 +118,7 @@ public class ClassNameCompleter extends StringsCompleter {
       classNames.add(name.replace('/', '.').substring(0, name.length() - 6));
     }
 
-    return classNames.toArray(new String[classNames.size()]);
+    return classNames;
   }
 
   private static Set<String> getClassFiles(

@@ -11,8 +11,9 @@
 */
 package sqlline;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import jline.console.completer.Completer;
@@ -24,22 +25,23 @@ import jline.console.completer.NullCompleter;
 public abstract class AbstractCommandHandler implements CommandHandler {
   protected final SqlLine sqlLine;
   private final String name;
-  private final String[] names;
+  private final List<String> names;
   private final String helpText;
-  private Completer[] parameterCompleters = new Completer[0];
+  private final List<Completer> parameterCompleters;
 
   public AbstractCommandHandler(SqlLine sqlLine, String[] names,
-      String helpText, Completer[] completers) {
+      String helpText, List<Completer> completers) {
     this.sqlLine = sqlLine;
     name = names[0];
-    this.names = names;
+    this.names = Arrays.asList(names);
     this.helpText = helpText;
-    if (completers == null || completers.length == 0) {
-      this.parameterCompleters = new Completer[] { new NullCompleter() };
+    if (completers == null || completers.size() == 0) {
+      this.parameterCompleters =
+          Collections.singletonList((Completer) new NullCompleter());
     } else {
-      List<Completer> c = new LinkedList<Completer>(Arrays.asList(completers));
+      List<Completer> c = new ArrayList<Completer>(completers);
       c.add(new NullCompleter());
-      this.parameterCompleters = c.toArray(new Completer[0]);
+      this.parameterCompleters = c;
     }
   }
 
@@ -51,7 +53,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     return this.name;
   }
 
-  public String[] getNames() {
+  public List<String> getNames() {
     return this.names;
   }
 
@@ -74,11 +76,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     return null;
   }
 
-  public void setParameterCompleters(Completer[] parameterCompleters) {
-    this.parameterCompleters = parameterCompleters;
-  }
-
-  public Completer[] getParameterCompleters() {
+  public List<Completer> getParameterCompleters() {
     return parameterCompleters;
   }
 }

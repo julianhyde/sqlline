@@ -78,9 +78,7 @@ class SqlCompleter extends StringsCompleter {
 
     // now add the tables and columns from the current connection
     if (!skipMeta) {
-      for (String column : sqlLine.getColumnNames(meta)) {
-        completions.add(column);
-      }
+      completions.addAll(sqlLine.getColumnNames(meta));
     }
 
     // set the Strings that will be completed
