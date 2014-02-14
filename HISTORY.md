@@ -2,8 +2,23 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
-## HEAD
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.7">1.1.7</a> (2014-02-14)
 
+Bugs and functional changes:
+* Fix bug: SqlCompleter was skipping every other column.
+* Fix <a href="https://issues.apache.org/jira/browse/HIVE-4566">HIVE-4566</a>, "NullPointerException if typeinfo and nativesql commands are executed at beeline before a DB connection is established" (Xuefu Zhang via Ashutosh Chauhan and Julian Hyde)
+* Fix <a href="https://issues.apache.org/jira/browse/HIVE-4364">HIVE-4364</a>, "beeline always exits with 0 status, should exit with non-zero status on error" (Rob Weltman via Ashutosh Chauhan and Julian Hyde)
+* Fix <a href="https://issues.apache.org/jira/browse/HIVE-4268">HIVE-4268</a>, "Beeline should support the -f option" (Rob Weltman via cws and Julian Hyde). SqlLine options '-f file' and '--run=file' are now equivalent.
+* Add SqlLineArgsTest, copied from BeeLineArgsTest, but testing against hsqldb rather than Hive.
+
+Code re-organization:
+* Break out inner classes.
+* Re-format in Apache style (indent 2).
+* Enable maven-checkstyle-plugin, and fix code to comply.
+* Modern Java style: add generics; use `StringBuilder` rather than `StringBuffer`; convert arrays to collections; convert some array parameters to varargs; convert loops to `foreach`; remove paranoid `!= null` checks; convert `ColorAttr` to an enum.
+* Fix javadoc errors and warnings.
+
+Other:
 * Add release history.
 * Enable oraclejdk8 in Travis CI.
 * Fix verbose mode.
