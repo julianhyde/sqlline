@@ -1821,7 +1821,7 @@ public class SqlLine {
 
   /** Exit status returned to the operating system. OK, ARGS, OTHER
    * correspond to 0, 1, 2. */
-  enum Status {
+  public enum Status {
     OK, ARGS, OTHER
   }
 }
