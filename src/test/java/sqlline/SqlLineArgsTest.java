@@ -120,6 +120,23 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Values that contain null.
+   */
+  @Test
+  public void testNull() throws Throwable {
+    checkScriptFile(
+        "values (1, cast(null as integer), cast(null as varchar(3));\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        containsString(
+            "+-------------+-------------+-----+\n"
+            + "|     C1      |     C2      | C3  |\n"
+            + "+-------------+-------------+-----+\n"
+            + "| 1           | null        |     |\n"
+            + "+-------------+-------------+-----+\n"));
+  }
+
+  /**
    * Attempts to execute a simple script file with the -f option to SqlLine.
    * The first command should fail and the second command should not execute.
    */
