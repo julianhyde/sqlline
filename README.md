@@ -91,5 +91,6 @@ mvn install
 
 * [Project site](http://www.hydromatic.net/sqlline)
 * [API](http://www.hydromatic.net/sqlline/apidocs)
+* Mailing list: sqlline-dev@googlegroups.com (<a href="http://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>, <a href="http://groups.google.com/group/sqlline-dev/topics">archive</a>)
 * <a href="HISTORY.md">Release notes and history</a>
 

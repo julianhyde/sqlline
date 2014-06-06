@@ -30,6 +30,16 @@
     </repository>
   </distributionManagement>
 
+  <mailingLists>
+    <mailingList>
+      <name>sqlline-dev</name>
+      <archive>http://groups.google.com/group/sqlline-dev/topics</archive>
+      <subscribe>http://groups.google.com/group/sqlline-dev/subscribe</subscribe>
+      <unsubscribe>http://groups.google.com/group/sqlline-dev/subscribe</unsubscribe>
+      <post>http://groups.google.com/group/sqlline-dev/post</post>
+    </mailingList>
+  </mailingLists>
+
   <repositories>
     <repository>
       <releases>
