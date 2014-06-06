@@ -14,6 +14,7 @@ package sqlline;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
@@ -97,6 +98,70 @@ abstract class Rows implements Iterator<Rows.Row> {
     }
   }
 
+  static Object readResult(ResultSet rs, int col) throws SQLException {
+    switch (rs.getMetaData().getColumnType(col)) {
+    case Types.ARRAY:
+      return rs.getArray(col);
+    case Types.BIGINT:
+      return rs.getLong(col);
+    case Types.BINARY:
+    case Types.LONGVARBINARY:
+    case Types.VARBINARY:
+      return rs.getBytes(col);
+    case Types.BIT:
+    case Types.BOOLEAN:
+      return rs.getBoolean(col);
+    case Types.BLOB:
+      return rs.getBlob(col);
+    case Types.CHAR:
+    case Types.LONGNVARCHAR:
+    case Types.LONGVARCHAR:
+    case Types.NCHAR:
+    case Types.NVARCHAR:
+    case Types.VARCHAR:
+      return rs.getString(col);
+    case Types.CLOB:
+      return rs.getClob(col);
+    case Types.DATALINK:
+      return rs.getURL(col);
+    case Types.DATE:
+      return rs.getDate(col);
+    case Types.DECIMAL:
+    case Types.NUMERIC:
+      return rs.getBigDecimal(col);
+    case Types.DISTINCT:
+    case Types.STRUCT:
+    case Types.JAVA_OBJECT:
+    case Types.NULL:
+    case Types.OTHER:
+    default:
+      return rs.getObject(col);
+    case Types.DOUBLE:
+      return rs.getDouble(col);
+    case Types.FLOAT:
+    case Types.REAL:
+      return rs.getFloat(col);
+    case Types.INTEGER:
+      return rs.getInt(col);
+    case Types.NCLOB:
+      return rs.getNClob(col);
+    case Types.REF:
+      return rs.getRef(col);
+    case Types.ROWID:
+      return rs.getRowId(col);
+    case Types.SMALLINT:
+      return rs.getShort(col);
+    case Types.SQLXML:
+      return rs.getSQLXML(col);
+    case Types.TIME:
+      return rs.getTime(col);
+    case Types.TIMESTAMP:
+      return rs.getTimestamp(col);
+    case Types.TINYINT:
+      return rs.getByte(col);
+    }
+  }
+
   /** Row from a result set. */
   class Row {
     final String[] values;
@@ -142,8 +207,8 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
 
       for (int i = 0; i < size; i++) {
+        Object o = readResult(rs, i + 1);
         if (numberFormat != null) {
-          Object o = rs.getObject(i + 1);
           if (o == null) {
             values[i] = null;
           } else if (o instanceof Number) {
@@ -154,7 +219,7 @@ abstract class Rows implements Iterator<Rows.Row> {
         } else {
           // Use ResultSet.getObject and let Java do the conversion rather than
           // assuming ResultSet.getString() can cast properly.
-          values[i] = String.valueOf(rs.getObject(i + 1));
+          values[i] = String.valueOf(o);
         }
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
