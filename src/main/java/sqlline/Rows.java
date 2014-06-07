@@ -162,6 +162,22 @@ abstract class Rows implements Iterator<Rows.Row> {
     }
   }
 
+  static String toBinaryString(byte []buf) {
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < buf.length; ++i) {
+      int ch = buf[i] & 0xFF;
+      if ((ch >= '0' && ch <= '9')
+          || (ch >= 'A' && ch <= 'Z')
+          || (ch >= 'a' && ch <= 'z')
+          || " `~!@#$%^&*()-_=+[]{}|;:'\",.<>/?".indexOf(ch) >= 0) {
+        result.append((char) ch);
+      } else {
+        result.append(String.format("\\x%02X", ch));
+      }
+    }
+    return result.toString();
+  }
+
   /** Row from a result set. */
   class Row {
     final String[] values;
@@ -208,14 +224,17 @@ abstract class Rows implements Iterator<Rows.Row> {
 
       for (int i = 0; i < size; i++) {
         Object o = readResult(rs, i + 1);
-        if (numberFormat != null) {
-          if (o == null) {
-            values[i] = null;
-          } else if (o instanceof Number) {
+
+        if (o == null) {
+          values[i] = null;
+        } else if (o instanceof Number) {
+          if (numberFormat != null) {
             values[i] = numberFormat.format(o);
           } else {
             values[i] = o.toString();
           }
+        } else if (o instanceof byte[]) {
+          values[i] = toBinaryString((byte []) o);
         } else {
           // Use ResultSet.getObject and let Java do the conversion rather than
           // assuming ResultSet.getString() can cast properly.
