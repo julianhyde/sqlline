@@ -143,24 +143,36 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
 
       for (int i = 0; i < size; i++) {
-        Object o = rs.getObject(i + 1);
-
         switch (rs.getMetaData().getColumnType(i + 1)) {
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-          o = rs.getString(i + 1);
+        case Types.TINYINT:
+        case Types.SMALLINT:
+        case Types.INTEGER:
+        case Types.BIGINT:
+        case Types.REAL:
+        case Types.FLOAT:
+        case Types.DOUBLE:
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+          if (numberFormat != null) {
+            values[i] = numberFormat.format(rs.getObject(i + 1));
+          } else {
+            values[i] = rs.getObject(i + 1).toString();
+          }
+          break;
+        case Types.BIT:
+        case Types.CLOB:
+        case Types.BLOB:
+        case Types.REF:
+        case Types.JAVA_OBJECT:
+        case Types.STRUCT:
+        case Types.ROWID:
+        case Types.NCLOB:
+        case Types.SQLXML:
+          values[i] = rs.getObject(i + 1).toString();
           break;
         default:
-          o = rs.getObject(i + 1);
-        }
-
-        if (o == null) {
-          values[i] = null;
-        } else if (o instanceof Number && numberFormat != null) {
-          values[i] = numberFormat.format(o);
-        } else {
-          values[i] = o.toString();
+          values[i] = rs.getString(i + 1);
+          break;
         }
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
