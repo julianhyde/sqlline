@@ -70,7 +70,7 @@ public class ClassNameCompleter extends StringsCompleter {
 
     Set<String> classes = new HashSet<String>();
     for (URL url : urls) {
-      File file = new File(url.getFile());
+      File file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
 
       if (file.isDirectory()) {
         Set<String> files = getClassFiles(file.getAbsolutePath(),
