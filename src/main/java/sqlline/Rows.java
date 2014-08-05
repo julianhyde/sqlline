@@ -14,6 +14,7 @@ package sqlline;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
@@ -142,19 +143,36 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
 
       for (int i = 0; i < size; i++) {
-        if (numberFormat != null) {
-          Object o = rs.getObject(i + 1);
-          if (o == null) {
-            values[i] = null;
-          } else if (o instanceof Number) {
-            values[i] = numberFormat.format(o);
+        switch (rs.getMetaData().getColumnType(i + 1)) {
+        case Types.TINYINT:
+        case Types.SMALLINT:
+        case Types.INTEGER:
+        case Types.BIGINT:
+        case Types.REAL:
+        case Types.FLOAT:
+        case Types.DOUBLE:
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+          if (numberFormat != null) {
+            values[i] = numberFormat.format(rs.getObject(i + 1));
           } else {
-            values[i] = o.toString();
+            values[i] = rs.getObject(i + 1).toString();
           }
-        } else {
-          // Use ResultSet.getObject and let Java do the conversion rather than
-          // assuming ResultSet.getString() can cast properly.
-          values[i] = String.valueOf(rs.getObject(i + 1));
+          break;
+        case Types.BIT:
+        case Types.CLOB:
+        case Types.BLOB:
+        case Types.REF:
+        case Types.JAVA_OBJECT:
+        case Types.STRUCT:
+        case Types.ROWID:
+        case Types.NCLOB:
+        case Types.SQLXML:
+          values[i] = rs.getObject(i + 1).toString();
+          break;
+        default:
+          values[i] = rs.getString(i + 1);
+          break;
         }
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
