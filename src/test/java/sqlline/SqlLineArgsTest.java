@@ -14,13 +14,17 @@ package sqlline;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
@@ -137,6 +141,72 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Test case for [SQLLINE-26] Flush output for each command when using !record
+   * command.
+   */
+  @Test
+  public void testRecord() throws Throwable {
+    File file = File.createTempFile("sqlline", ".log");
+    checkScriptFile(
+        "values 1;\n"
+        + "!record " + file.getAbsolutePath() + "\n"
+        + "!set outputformat csv\n"
+        + "values 2;\n"
+        + "!record\n"
+        + "!set outputformat csv\n"
+        + "values 3;\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        RegexMatcher.of("(?s)1/7          values 1;\n"
+            + "\\+-------------\\+\n"
+            + "\\|     C1      \\|\n"
+            + "\\+-------------\\+\n"
+            + "\\| 1           \\|\n"
+            + "\\+-------------\\+\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "2/7          !record .*.log\n"
+            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"
+            + "Recording stopped.\n"
+            + "6/7          !set outputformat csv\n"
+            + "7/7          values 3;\n"
+            + "'C1'\n"
+            + "'3'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+
+//            + (true
+//            ? ".*"
+//            : ""
+//            + "1 row selected \\([0-9.]+ seconds\\)\n")));
+
+    // Now check that the right stuff got into the file.
+    final FileReader fileReader = new FileReader(file);
+    final StringWriter stringWriter = new StringWriter();
+    final char[] chars = new char[1024];
+    for (;;) {
+      int c = fileReader.read(chars);
+      if (c < 0) {
+        break;
+      }
+      stringWriter.write(chars, 0, c);
+    }
+    assertThat(stringWriter.toString(),
+        RegexMatcher.of(
+            "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"));
+  }
+
+  /**
    * Attempts to execute a simple script file with the -f option to SqlLine.
    * The first command should fail and the second command should not execute.
    */
@@ -182,7 +252,7 @@ public class SqlLineArgsTest {
     return n;
   }
 
-  /** Invalid arugments. */
+  /** Invalid arguments. */
   @Test
   public void testInvalidArguments() throws Throwable {
     Pair pair = run("--fuzz");
@@ -195,7 +265,6 @@ public class SqlLineArgsTest {
   static class Pair {
     final SqlLine.Status status;
     final String output;
-
 
     Pair(SqlLine.Status status, String output) {
       this.status = status;
@@ -254,6 +323,29 @@ public class SqlLineArgsTest {
         new ConnectionSpec(
             "jdbc:mysql://localhost/foodmart", "foodmart", "foodmart",
             "com.mysql.jdbc.Driver");
+  }
+
+  /** Regular expression matcher. */
+  private static class RegexMatcher extends BaseMatcher<String> {
+    private final String pattern;
+
+    public RegexMatcher(String pattern) {
+      super();
+      this.pattern = pattern;
+    }
+
+    public static RegexMatcher of(String pattern) {
+      return new RegexMatcher(pattern);
+    }
+
+    public boolean matches(Object o) {
+      return o instanceof String
+          && ((String) o).matches(pattern);
+    }
+
+    public void describeTo(Description description) {
+      description.appendText("regular expression ").appendText(pattern);
+    }
   }
 }
 
