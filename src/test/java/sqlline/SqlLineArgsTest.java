@@ -26,6 +26,7 @@ import java.util.List;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -93,8 +94,10 @@ public class SqlLineArgsTest {
     os.close();
 
     Pair pair = runScript(scriptFile, flag);
-    assertThat(pair.status, statusMatcher);
+
+    // Check output before status. It gives a better clue what went wrong.
     assertThat(pair.output, outputMatcher);
+    assertThat(pair.status, statusMatcher);
     final boolean delete = scriptFile.delete();
     assertThat(delete, is(true));
   }
@@ -141,6 +144,17 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Tests the "close" command,
+   * [HIVE-5768] Beeline connection cannot be closed with '!close' command.
+   */
+  @Ignore
+  @Test
+  public void testClose() throws Throwable {
+    checkScriptFile("!close 1\n", false, equalTo(SqlLine.Status.OK),
+        equalTo("xx"));
+  }
+
+  /**
    * Test case for [SQLLINE-26] Flush output for each command when using !record
    * command.
    */
@@ -178,11 +192,6 @@ public class SqlLineArgsTest {
             + "'C1'\n"
             + "'3'\n"
             + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
-
-//            + (true
-//            ? ".*"
-//            : ""
-//            + "1 row selected \\([0-9.]+ seconds\\)\n")));
 
     // Now check that the right stuff got into the file.
     final FileReader fileReader = new FileReader(file);
