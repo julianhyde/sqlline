@@ -25,7 +25,7 @@ public class OutputFile {
 
   public OutputFile(String filename) throws IOException {
     file = new File(filename);
-    out = new PrintWriter(new FileWriter(file));
+    out = new PrintWriter(new FileWriter(file), true);
   }
 
   @Override
