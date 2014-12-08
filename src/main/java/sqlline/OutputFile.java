@@ -35,10 +35,12 @@ public class OutputFile {
 
   public void addLine(String command) {
     out.println(command);
+    out.flush();
   }
 
   public void print(String command) {
     out.print(command);
+    out.flush();
   }
 
   public void close() throws IOException {
