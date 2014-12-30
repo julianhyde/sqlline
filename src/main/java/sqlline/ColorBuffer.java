@@ -39,6 +39,11 @@ final class ColorBuffer implements Comparable {
     ColorAttr(String style) {
       this.style = style;
     }
+
+    @Override
+    public String toString() {
+      return style;
+    }
   }
 
   private final List<Object> parts = new LinkedList<Object>();
