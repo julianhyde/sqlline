@@ -19,9 +19,13 @@ almost no restrictions.
 
 ## Getting started
 
+Copy the `sqlline` script (or `sqlline.bat` for Windows),
+`sqlline-VERSION-jar-with-dependencies.jar` and a JDBC driver jar into
+the same directory. (Or just put `sqlline` on your `PATH`.)
+
 ```bash
 $ sqlline -d com.mysql.jdbc.Driver
-sqlline> !connect jdbc:mysql:localhost/foodmart user password
+sqlline> !connect jdbc:mysql://localhost:3306/foodmart user password
 sqlline> !tables
 +------------+--------------+-------------+---------------+----------+
 | TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  |  TABLE_TYPE   | REMARKS  |
@@ -44,6 +48,13 @@ To get help:
 
 ```bash
 sqlline --help
+```
+
+If you prefer, you can invoke Java directly, without using the
+`sqlline` script:
+
+```bash
+$ java -jar sqlline-VERSION-jar-with-dependencies.jar --help
 ```
 
 Read [the manual](http://www.hydromatic.net/sqlline/manual.html).
@@ -72,7 +83,7 @@ Check out and build:
 ```bash
 git clone git://github.com/julianhyde/sqlline.git
 cd sqlline
-mvn install
+mvn package
 ```
 
 ## Authors
