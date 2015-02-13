@@ -2,6 +2,26 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.8">1.1.8</a> (proposed)
+
+Bugs and functional changes:
+* Add `sqlline` and `sqlline.bat` scripts, and `jar-with-dependencies`
+  (Jongyeol Choi)
+* Fix color output: output style instead of name
+* Add test for
+  [<a href="https://issues.apache.org/jira/browse/HIVE-5768">HIVE-5768</a>]
+  Beeline connection cannot be closed with `!close` command
+* Test `!record` command
+* [<a href="https://github.com/julianhyde/sqlline/issues/26">SQLLINE-26</a>]
+  Flush output for each command when using `!record` command
+* Use `ResultSet.getString()` for types that support it,
+  `getObject().toString()` otherwise
+* [<a href="https://github.com/julianhyde/sqlline/issues/25">SQLLINE-25</a>]
+  Spaces in classpath
+* Add mailing list to maven
+* Upgrade `maven-release-plugin` to version 2.4.2
+* Make return code enum public so other code can check it
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.7">1.1.7</a> (2014-02-14)
 
 Bugs and functional changes:
