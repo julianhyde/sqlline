@@ -521,7 +521,7 @@ public class Commands {
     boolean success = sqlLine.getOpts().set(key, value, false);
 
     // if we autosave, then save
-    if (success && sqlLine.getOpts().getAutosave()) {
+    if (success && sqlLine.getOpts().getAutoSave()) {
       try {
         sqlLine.getOpts().save();
       } catch (Exception saveException) {
@@ -1376,9 +1376,14 @@ public class Commands {
     for (CommandHandler commandHandler : sqlLine.commandHandlers) {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
+        String help = commandHandler.getHelpText();
+        if (!help.contains("\n ")) {
+          // Do not wrap if text appears to be pre-formatted (e.g. '!help set')
+          help = sqlLine.wrap(help, 60, 20);
+        }
         clist.add(sqlLine.getColorBuffer()
             .pad("!" + commandHandler.getName(), 20)
-            .append(sqlLine.wrap(commandHandler.getHelpText(), 60, 20)));
+            .append(help));
       }
     }
 

@@ -28,7 +28,7 @@ class SqlLineOpts implements Completer {
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
   private SqlLine sqlLine;
-  private boolean autosave = false;
+  private boolean autoSave = false;
   private boolean silent = false;
   private boolean color = false;
   private boolean showHeader = true;
@@ -131,6 +131,15 @@ class SqlLineOpts implements Completer {
 
   Set<String> propertyNames()
     throws IllegalAccessException, InvocationTargetException {
+    final TreeSet<String> set = new TreeSet<String>();
+    for (String s : propertyNamesMixed()) {
+      set.add(s.toLowerCase());
+    }
+    return set;
+  }
+
+  Set<String> propertyNamesMixed()
+    throws IllegalAccessException, InvocationTargetException {
     TreeSet<String> names = new TreeSet<String>();
 
     // get all the values from getXXX methods
@@ -143,15 +152,25 @@ class SqlLineOpts implements Completer {
         continue;
       }
 
-      String propName = method.getName().substring(3).toLowerCase();
+      String propName = deCamel(method.getName().substring(3));
       if (propName.equals("run")) {
         // Not a real property
+        continue;
+      }
+      if (propName.equals("autosave")) {
+        // Deprecated; property is now "autoSave"
         continue;
       }
       names.add(propName);
     }
 
     return names;
+  }
+
+  /** Converts "CamelCase" to "camelCase". */
+  private static String deCamel(String s) {
+    return s.substring(0, 1).toLowerCase()
+        + s.substring(1);
   }
 
   public Properties toProperties()
@@ -368,12 +387,24 @@ class SqlLineOpts implements Completer {
     return this.silent;
   }
 
-  public void setAutosave(boolean autosave) {
-    this.autosave = autosave;
+  /** @deprecated Use {@link #setAutoSave(boolean)} */
+  @Deprecated
+  public void setAutosave(boolean autoSave) {
+    setAutoSave(autoSave);
   }
 
+  /** @deprecated Use {@link #getAutoSave()} */
+  @Deprecated
   public boolean getAutosave() {
-    return this.autosave;
+    return getAutoSave();
+  }
+
+  public void setAutoSave(boolean autoSave) {
+    this.autoSave = autoSave;
+  }
+
+  public boolean getAutoSave() {
+    return this.autoSave;
   }
 
   public void setOutputFormat(String outputFormat) {

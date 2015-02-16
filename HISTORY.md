@@ -2,9 +2,11 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
-## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.8">1.1.8</a> (proposed)
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.8">1.1.8</a> (2015-02-16)
 
 Bugs and functional changes:
+* [<a href="https://github.com/julianhyde/sqlline/issues/32">SQLLINE-32</a>]
+  `!help set` should print documentation for all variables
 * Add `sqlline` and `sqlline.bat` scripts, and `jar-with-dependencies`
   (Jongyeol Choi)
 * Fix color output: output style instead of name

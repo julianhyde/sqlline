@@ -155,8 +155,45 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-26] Flush output for each command when using !record
-   * command.
+   * Test case for [SQLLINE-32], "!help set' should print documentation for all
+   * variables".
+   */
+  @Test
+  public void testHelpSet() throws Throwable {
+    checkScriptFile("!help set\n", false, equalTo(SqlLine.Status.OK),
+        containsString(
+            "1/1          !help set\n"
+                + "!set                Set a sqlline variable\n"));
+
+    // Make sure that each variable (autoCommit, autoSave, color, etc.) has a
+    // line in the output of '!help set'
+    final SqlLine sqlLine = new SqlLine();
+    String help = sqlLine.loc("help-set");
+    for (String p : sqlLine.getOpts().propertyNamesMixed()) {
+      assertThat(help, containsString("\n" + p + " "));
+    }
+    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autoCommit"),
+        is(true));
+    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
+        is(false));
+    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
+        is(true));
+
+    while (!help.isEmpty()) {
+      int i = help.indexOf("\n", 1);
+      if (i < 0) {
+        break;
+      }
+      if (i > 61) {
+        fail("line exceeds 61 chars: " + help.substring(0, i));
+      }
+      help = help.substring(i);
+    }
+  }
+
+  /**
+   * Test case for [SQLLINE-26], "Flush output for each command when using
+   * !record command."
    */
   @Test
   public void testRecord() throws Throwable {

@@ -45,4 +45,4 @@ class SqlLineCompleter
   }
 }
 
-// End SqlLinecompleter.java
+// End SqlLineCompleter.java

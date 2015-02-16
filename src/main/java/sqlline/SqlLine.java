@@ -30,8 +30,8 @@ import jline.console.history.FileHistory;
 
 /**
  * A console SQL shell with command completion.
- * <p>
- * TODO:
+ *
+ * <p>TODO:
  * <ul>
  * <li>User-friendly connection prompts</li>
  * <li>Page results</li>
