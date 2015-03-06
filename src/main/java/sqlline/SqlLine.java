@@ -713,9 +713,8 @@ public class SqlLine {
     return status;
   }
 
-  public ConsoleReader getConsoleReader(
-      InputStream inputStream, FileHistory fileHistory)
-    throws IOException {
+  public ConsoleReader getConsoleReader(InputStream inputStream,
+      FileHistory fileHistory) throws IOException {
     Terminal terminal = TerminalFactory.create();
     try {
       terminal.init();

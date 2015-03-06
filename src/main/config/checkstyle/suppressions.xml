@@ -22,4 +22,6 @@
 */
 -->
 <suppressions>
+  <suppress checks="Header"
+            files=".properties"/>
 </suppressions>

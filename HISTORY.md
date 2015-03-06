@@ -2,6 +2,18 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.9">1.1.9</a> (2015-03-06)
+
+No bug fixes or other functional changes
+
+Other:
+* Publish releases to <a href="http://search.maven.org/">Maven Central</a>
+  (previous releases are in <a href="http://www.conjars.org/">Conjars</a>)
+* Sign jars
+* Use <a href="https://github.com/julianhyde/hydromatic-parent">net.hydromatic parent POM</a>,
+  upgrading several maven plugins
+* Fix code style for upgraded checkstyle
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.8">1.1.8</a> (2015-02-16)
 
 Bugs and functional changes:

@@ -296,28 +296,28 @@ public class Commands {
   }
 
   public void primarykeys(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getPrimaryKeys", args, callback);
   }
 
   public void exportedkeys(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getExportedKeys", args, callback);
   }
 
   public void importedkeys(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     metadata("getImportedKeys", args, callback);
   }
 
   public void procedures(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args =
         buildMetadataArgs(line, "procedure name pattern", strings);
@@ -325,7 +325,7 @@ public class Commands {
   }
 
   public void tables(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     args.add(null);
@@ -333,12 +333,12 @@ public class Commands {
   }
 
   public void typeinfo(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     metadata("getTypeInfo", Collections.emptyList(), callback);
   }
 
   public void nativesql(String sql, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     if (sql.startsWith(SqlLine.COMMAND_PREFIX)) {
       sql = sql.substring(1);
     }
@@ -353,7 +353,7 @@ public class Commands {
   }
 
   public void columns(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
     List<Object> args = buildMetadataArgs(line, "table name", strings);
     args.add("%");
@@ -423,7 +423,7 @@ public class Commands {
   }
 
   public void scan(String line, DispatchCallback callback)
-    throws IOException {
+      throws IOException {
     TreeSet<String> names = new TreeSet<String>();
 
     if (sqlLine.getDrivers() == null) {
@@ -467,7 +467,7 @@ public class Commands {
   }
 
   public void save(String line, DispatchCallback callback)
-    throws IOException {
+      throws IOException {
     sqlLine.info(
         sqlLine.loc("saving-options", sqlLine.getOpts().getPropertiesFile()));
     sqlLine.getOpts().save();
@@ -541,7 +541,7 @@ public class Commands {
   }
 
   public void commit(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -566,7 +566,7 @@ public class Commands {
   }
 
   public void rollback(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -590,7 +590,7 @@ public class Commands {
   }
 
   public void autocommit(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -646,7 +646,7 @@ public class Commands {
   }
 
   public void isolation(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -929,7 +929,7 @@ public class Commands {
    * @throws Exception on error
    */
   public void properties(String line, DispatchCallback callback)
-    throws Exception {
+      throws Exception {
     String example = "";
     example += "Usage: properties <properties file>" + SqlLine.getSeparator();
 
@@ -1016,7 +1016,7 @@ public class Commands {
   }
 
   public void connect(Properties props, DispatchCallback callback)
-    throws IOException {
+      throws IOException {
     String url = getProperty(props,
         "url",
         "javax.jdo.option.ConnectionURL",
@@ -1351,7 +1351,7 @@ public class Commands {
   }
 
   public void describe(String line, DispatchCallback callback)
-    throws SQLException {
+      throws SQLException {
     String[][] cmd = sqlLine.splitCompound(line);
     if (cmd.length != 2) {
       sqlLine.error("Usage: describe <table name>");
@@ -1401,7 +1401,7 @@ public class Commands {
   }
 
   public void manual(String line, DispatchCallback callback)
-    throws IOException {
+      throws IOException {
     InputStream in = SqlLine.class.getResourceAsStream("manual.txt");
     if (in == null) {
       callback.setToFailure();

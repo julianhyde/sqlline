@@ -10,12 +10,15 @@ incorporating changes made by the
 [LucidDB](https://github.com/LucidDB/luciddb) project,
 now modernized, mavenized and forkable in github.
 
-## License
+## License and distribution
 
 sqlline is distributed under the
 [3-clause BSD License](http://opensource.org/licenses/BSD-3-Clause),
 meaning that you are free to redistribute, modify, or sell it with
 almost no restrictions.
+
+It is distributed via the
+[Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Csqlline).
 
 ## Getting started
 
@@ -67,7 +70,7 @@ Use the following definition to use `sqlline` in your maven project:
 <dependency>
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
-  <version>1.1.6</version>
+  <version>1.1.9</version>
 </dependency>
 ```
 
@@ -75,8 +78,8 @@ Use the following definition to use `sqlline` in your maven project:
 
 Prerequisites:
 
-* Maven 2+
-* Java 5+
+* Maven 3.2.1 or higher
+* Java 1.5 or higher (1.8 preferred)
 
 Check out and build:
 
@@ -88,7 +91,7 @@ mvn package
 
 ## Authors
 
-* Marc Prud'hommeaux <marc@apocalypse.org>
+* Marc Prud'hommeaux (marc@apocalypse.org)
 * John V. Sichi (jsichi@gmail.com)
 * Stephan Zuercher (stephan@zuercher.us)
 * Sunny Choi
@@ -98,10 +101,15 @@ mvn package
 * [Julian Hyde](https://github.com/julianhyde)
 * [Joe Posner](https://github.com/joeposner)
 
-## Resources
+## More information
 
+* License: Modified BSD License
 * [Project site](http://www.hydromatic.net/sqlline)
 * [API](http://www.hydromatic.net/sqlline/apidocs)
-* Mailing list: sqlline-dev@googlegroups.com (<a href="http://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>, <a href="http://groups.google.com/group/sqlline-dev/topics">archive</a>)
+* [Source code](http://github.com/julianhyde/tpcds)
+* Developers list:
+  <a href="mailto:sqlline-dev@googlegroups.com">sqlline-dev at googlegroups.com</a>
+  (<a href="http://groups.google.com/group/sqlline-dev/topics">archive</a>,
+  <a href="http://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
+* [Issues](https://github.com/julianhyde/sqlline/issues)
 * <a href="HISTORY.md">Release notes and history</a>
-

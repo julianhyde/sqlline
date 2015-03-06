@@ -27,7 +27,7 @@ import jline.console.completer.StringsCompleter;
  */
 class SqlCompleter extends StringsCompleter {
   public SqlCompleter(SqlLine sqlLine, boolean skipMeta)
-    throws IOException, SQLException {
+      throws IOException, SQLException {
     super(new String[0]);
 
     Set<String> completions = new TreeSet<String>();

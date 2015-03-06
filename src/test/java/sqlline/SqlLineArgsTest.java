@@ -57,7 +57,7 @@ public class SqlLineArgsTest {
   }
 
   private static Pair runScript(File scriptFile, boolean flag)
-    throws Throwable {
+      throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
         "-d", CONNECTION_SPEC.driver,

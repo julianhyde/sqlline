@@ -130,7 +130,7 @@ class SqlLineOpts implements Completer {
   }
 
   Set<String> propertyNames()
-    throws IllegalAccessException, InvocationTargetException {
+      throws IllegalAccessException, InvocationTargetException {
     final TreeSet<String> set = new TreeSet<String>();
     for (String s : propertyNamesMixed()) {
       set.add(s.toLowerCase());
@@ -139,7 +139,7 @@ class SqlLineOpts implements Completer {
   }
 
   Set<String> propertyNamesMixed()
-    throws IllegalAccessException, InvocationTargetException {
+      throws IllegalAccessException, InvocationTargetException {
     TreeSet<String> names = new TreeSet<String>();
 
     // get all the values from getXXX methods
@@ -174,7 +174,7 @@ class SqlLineOpts implements Completer {
   }
 
   public Properties toProperties()
-    throws IllegalAccessException,
+      throws IllegalAccessException,
       InvocationTargetException,
       ClassNotFoundException {
     Properties props = new Properties();
