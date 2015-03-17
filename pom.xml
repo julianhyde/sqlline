@@ -174,8 +174,8 @@
     </dependency>
     <dependency>
       <groupId>net.hydromatic</groupId>
-      <artifactId>foodmart-data-hsqldb</artifactId>
-      <version>0.3</version>
+      <artifactId>scott-data-hsqldb</artifactId>
+      <version>0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -29,6 +29,8 @@ import org.hamcrest.Matcher;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -362,12 +364,12 @@ public class SqlLineArgsTest {
 
     public static final ConnectionSpec HSQLDB =
         new ConnectionSpec(
-            "jdbc:hsqldb:res:foodmart", "FOODMART", "FOODMART",
+            ScottHsqldb.URI, ScottHsqldb.USER, ScottHsqldb.PASSWORD,
             "org.hsqldb.jdbcDriver");
 
     public static final ConnectionSpec MYSQL =
         new ConnectionSpec(
-            "jdbc:mysql://localhost/foodmart", "foodmart", "foodmart",
+            "jdbc:mysql://localhost/scott", "scott", "tiger",
             "com.mysql.jdbc.Driver");
   }
 

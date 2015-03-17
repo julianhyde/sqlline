@@ -28,13 +28,15 @@ the same directory. (Or just put `sqlline` on your `PATH`.)
 
 ```bash
 $ sqlline -d com.mysql.jdbc.Driver
-sqlline> !connect jdbc:mysql://localhost:3306/foodmart user password
+sqlline> !connect jdbc:mysql://localhost:3306/scott user password
 sqlline> !tables
 +------------+--------------+-------------+---------------+----------+
 | TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  |  TABLE_TYPE   | REMARKS  |
 +------------+--------------+-------------+---------------+----------+
-| null       | SALES        | DEPTS       | TABLE         | null     |
-| null       | SALES        | EMPS        | TABLE         | null     |
+| null       | SCOTT        | BONUS       | TABLE         | null     |
+| null       | SCOTT        | DEPT        | TABLE         | null     |
+| null       | SCOTT        | EMP         | TABLE         | null     |
+| null       | SCOTT        | SALGRADE    | TABLE         | null     |
 | null       | metadata     | COLUMNS     | SYSTEM_TABLE  | null     |
 | null       | metadata     | TABLES      | SYSTEM_TABLE  | null     |
 +------------+--------------+-------------+---------------+----------+
