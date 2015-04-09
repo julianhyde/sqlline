@@ -70,7 +70,7 @@ class IncrementalRows extends Rows {
           endOfResult = true;
         }
       } catch (SQLException ex) {
-        throw new RuntimeException(ex.toString());
+        throw new WrappedSqlException(ex);
       }
     }
 
