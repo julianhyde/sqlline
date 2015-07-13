@@ -18,6 +18,8 @@ import java.io.FileReader;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,10 +64,10 @@ public class SqlLineArgsTest {
       throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
-        "-d", CONNECTION_SPEC.driver,
-        "-u", CONNECTION_SPEC.url,
-        "-n", CONNECTION_SPEC.username,
-        "-p", CONNECTION_SPEC.password);
+            "-d", CONNECTION_SPEC.driver,
+            "-u", CONNECTION_SPEC.url,
+            "-n", CONNECTION_SPEC.username,
+            "-p", CONNECTION_SPEC.password);
     if (flag) {
       args.add("-f");
       args.add(scriptFile.getAbsolutePath());
@@ -153,7 +155,7 @@ public class SqlLineArgsTest {
   @Test
   public void testClose() throws Throwable {
     checkScriptFile("!close 1\n", false, equalTo(SqlLine.Status.OK),
-        equalTo("xx"));
+            equalTo("xx"));
   }
 
   /**
@@ -179,7 +181,7 @@ public class SqlLineArgsTest {
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
         is(false));
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
-        is(true));
+            is(true));
 
     while (!help.isEmpty()) {
       int i = help.indexOf("\n", 1);
@@ -211,26 +213,26 @@ public class SqlLineArgsTest {
         false,
         equalTo(SqlLine.Status.OK),
         RegexMatcher.of("(?s)1/7          values 1;\n"
-            + "\\+-------------\\+\n"
-            + "\\|     C1      \\|\n"
-            + "\\+-------------\\+\n"
-            + "\\| 1           \\|\n"
-            + "\\+-------------\\+\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "2/7          !record .*.log\n"
-            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
-            + "'C1'\n"
-            + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "5/7          !record\n"
-            + "Recording stopped.\n"
-            + "6/7          !set outputformat csv\n"
-            + "7/7          values 3;\n"
-            + "'C1'\n"
-            + "'3'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+                + "\\+-------------\\+\n"
+                + "\\|     C1      \\|\n"
+                + "\\+-------------\\+\n"
+                + "\\| 1           \\|\n"
+                + "\\+-------------\\+\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "2/7          !record .*.log\n"
+                + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+                + "3/7          !set outputformat csv\n"
+                + "4/7          values 2;\n"
+                + "'C1'\n"
+                + "'2'\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "5/7          !record\n"
+                + "Recording stopped.\n"
+                + "6/7          !set outputformat csv\n"
+                + "7/7          values 3;\n"
+                + "'C1'\n"
+                + "'3'\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
 
     // Now check that the right stuff got into the file.
     final FileReader fileReader = new FileReader(file);
@@ -244,14 +246,14 @@ public class SqlLineArgsTest {
       stringWriter.write(chars, 0, c);
     }
     assertThat(stringWriter.toString(),
-        RegexMatcher.of(
-            "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
-            + "'C1'\n"
-            + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            RegexMatcher.of(
+                    "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+                            + "3/7          !set outputformat csv\n"
+                            + "4/7          values 2;\n"
+                            + "'C1'\n"
+                            + "'2'\n"
+                            + "1 row selected \\([0-9.]+ seconds\\)\n"
+                            + "5/7          !record\n"));
   }
 
   /**
@@ -261,12 +263,35 @@ public class SqlLineArgsTest {
   @Test
   public void testBreakOnErrorScriptFile() throws Throwable {
     checkScriptFile("select * from abcdefg01;\ncall 100 + 23;\n",
-        true,
-        equalTo(SqlLine.Status.OTHER),
-        not(containsString(" 123 ")));
+            true,
+            equalTo(SqlLine.Status.OTHER),
+            not(containsString(" 123 ")));
   }
 
-  /**
+    //"CREATE FUNCTION throwExcept(in INT) RETURNS INT \n" +
+    //"LANGUAGE JAVA DETERMINISTIC NO SQL \n" +
+    //"EXTERNAL NAME 'CLASSPATH:sqlline.SqlLineArgsTest.throwExcept'; \n" +
+  public static int throwExcept(int a) throws SQLException{
+    if ( a == 10 ) {
+      throw new SQLDataException("Obligatory Exception.");
+    }
+    return 0;
+  }
+
+  @Test
+  public void testExecutionException() throws Throwable {
+    checkScriptFile( "CREATE TABLE rsTest ( a int);\n" +
+                    "insert into rsTest values (1);\n" +
+                    "insert into rsTest values (0);\n" +
+                    "select 1/a from rsTest;\n" +
+                    "DROP TABLE rsTest;\n" +
+                    "",
+            true,
+            equalTo(SqlLine.Status.OTHER),
+            containsString("Error: data exception: division by zero"));
+  }
+
+    /**
    * Attempts to execute a missing script file with the -f option to SqlLine.
    */
   @Test

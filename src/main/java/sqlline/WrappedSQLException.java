@@ -24,33 +24,10 @@ import java.sql.SQLException;
  * would be handled.
  */
 
-public class WrappedSQLException extends RuntimeException {
+class WrappedSQLException extends RuntimeException {
 
   public WrappedSQLException(SQLException ex) {
     super(ex);
-  }
-
-  public WrappedSQLException() {
-    super();
-  }
-
-  public WrappedSQLException(String message) {
-    super(message);
-  }
-
-  public WrappedSQLException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public WrappedSQLException(Throwable cause) {
-    super(cause);
-  }
-
-  protected WrappedSQLException(String message,
-                                Throwable cause,
-                                boolean enableSuppression,
-                                boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
   }
 
   @Override
