@@ -28,8 +28,16 @@ import java.util.List;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+
+import org.hsqldb.jdbc.JDBCDatabaseMetaData;
+import org.hsqldb.jdbc.JDBCResultSet;
+
 import org.junit.Ignore;
 import org.junit.Test;
+
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
 
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 
@@ -56,6 +64,7 @@ public class SqlLineArgsTest {
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     SqlLine.Status status = beeLine.begin(args, null, false);
+
 
     return new Pair(status, os.toString("UTF8"));
   }
@@ -136,15 +145,15 @@ public class SqlLineArgsTest {
   @Test
   public void testNull() throws Throwable {
     checkScriptFile(
-        "values (1, cast(null as integer), cast(null as varchar(3));\n",
-        false,
-        equalTo(SqlLine.Status.OK),
-        containsString(
-            "+-------------+-------------+-----+\n"
-            + "|     C1      |     C2      | C3  |\n"
-            + "+-------------+-------------+-----+\n"
-            + "| 1           | null        |     |\n"
-            + "+-------------+-------------+-----+\n"));
+            "values (1, cast(null as integer), cast(null as varchar(3));\n",
+            false,
+            equalTo(SqlLine.Status.OK),
+            containsString(
+                    "+-------------+-------------+-----+\n"
+                            + "|     C1      |     C2      | C3  |\n"
+                            + "+-------------+-------------+-----+\n"
+                            + "| 1           | null        |     |\n"
+                            + "+-------------+-------------+-----+\n"));
   }
 
   /**
@@ -268,27 +277,48 @@ public class SqlLineArgsTest {
             not(containsString(" 123 ")));
   }
 
-    //"CREATE FUNCTION throwExcept(in INT) RETURNS INT \n" +
-    //"LANGUAGE JAVA DETERMINISTIC NO SQL \n" +
-    //"EXTERNAL NAME 'CLASSPATH:sqlline.SqlLineArgsTest.throwExcept'; \n" +
-  public static int throwExcept(int a) throws SQLException{
-    if ( a == 10 ) {
-      throw new SQLDataException("Obligatory Exception.");
-    }
-    return 0;
-  }
-
   @Test
-  public void testExecutionException() throws Throwable {
-    checkScriptFile( "CREATE TABLE rsTest ( a int);\n" +
-                    "insert into rsTest values (1);\n" +
-                    "insert into rsTest values (0);\n" +
-                    "select 1/a from rsTest;\n" +
-                    "DROP TABLE rsTest;\n" +
-                    "",
-            true,
-            equalTo(SqlLine.Status.OTHER),
-            containsString("Error: data exception: division by zero"));
+  public void testExecutionException(@Mocked final JDBCDatabaseMetaData meta,
+                 @Mocked final JDBCResultSet resultSet)  throws Throwable {
+    new Expectations() {
+      {
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductName(); result = "hsqldb";
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductVersion(); result = "1.0";
+        // Generate an exception on a call to resultSet.next
+        resultSet.next(); result = new SQLException("Generated Exception.");
+      }
+    };
+    SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+    String[] args = {
+      "-d",
+      "org.hsqldb.jdbcDriver",
+      "-u",
+      "jdbc:hsqldb:res:scott",
+      "-n",
+      "SCOTT",
+      "-p",
+      "TIGER"
+    };
+    DispatchCallback callback = new DispatchCallback();
+    sqlLine.initArgs(args, callback);
+    // If sqlline is not initialized, handleSQLException will print
+    // the entire stack trace.
+    // To prevent that, forcible set init to true.
+    Deencapsulation.setField(sqlLine, "initComplete", true);
+    sqlLine.getConnection();
+    sqlLine.runCommands(Arrays.asList("CREATE TABLE rsTest ( a int);",
+            "insert into rsTest values (1);",
+            "insert into rsTest values (2);",
+            "select a from rsTest; "
+    ), callback);
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("Generated Exception"));
   }
 
     /**
