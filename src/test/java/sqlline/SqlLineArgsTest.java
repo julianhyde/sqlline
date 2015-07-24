@@ -33,10 +33,12 @@ import org.hsqldb.jdbc.JDBCResultSet;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
+import mockit.integration.junit4.JMockit;
 
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 
@@ -46,6 +48,7 @@ import static org.junit.Assert.*;
 /**
  * Executes tests of the command-line arguments to SqlLine.
  */
+@RunWith(JMockit.class)
 public class SqlLineArgsTest {
   private static final ConnectionSpec CONNECTION_SPEC = ConnectionSpec.HSQLDB;
 
@@ -308,7 +311,7 @@ public class SqlLineArgsTest {
     sqlLine.initArgs(args, callback);
     // If sqlline is not initialized, handleSQLException will print
     // the entire stack trace.
-    // To prevent that, forcible set init to true.
+    // To prevent that, forcibly set init to true.
     Deencapsulation.setField(sqlLine, "initComplete", true);
     sqlLine.getConnection();
     sqlLine.runCommands(Arrays.asList("CREATE TABLE rsTest ( a int);",
