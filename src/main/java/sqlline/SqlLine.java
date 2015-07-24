@@ -1494,6 +1494,8 @@ public class SqlLine {
 
     if (e instanceof SQLException) {
       handleSQLException((SQLException) e);
+    } else if (e instanceof WrappedSQLException) {
+      handleSQLException((SQLException) e.getCause());
     } else if (!initComplete && !opts.getVerbose()) {
       // all init errors must be verbose
       if (e.getMessage() == null) {

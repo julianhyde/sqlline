@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,8 +27,18 @@ import java.util.List;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+
+import org.hsqldb.jdbc.JDBCDatabaseMetaData;
+import org.hsqldb.jdbc.JDBCResultSet;
+
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.integration.junit4.JMockit;
 
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 
@@ -37,6 +48,7 @@ import static org.junit.Assert.*;
 /**
  * Executes tests of the command-line arguments to SqlLine.
  */
+@RunWith(JMockit.class)
 public class SqlLineArgsTest {
   private static final ConnectionSpec CONNECTION_SPEC = ConnectionSpec.HSQLDB;
 
@@ -55,6 +67,7 @@ public class SqlLineArgsTest {
     beeLine.setErrorStream(beelineOutputStream);
     SqlLine.Status status = beeLine.begin(args, null, false);
 
+
     return new Pair(status, os.toString("UTF8"));
   }
 
@@ -62,10 +75,10 @@ public class SqlLineArgsTest {
       throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
-        "-d", CONNECTION_SPEC.driver,
-        "-u", CONNECTION_SPEC.url,
-        "-n", CONNECTION_SPEC.username,
-        "-p", CONNECTION_SPEC.password);
+            "-d", CONNECTION_SPEC.driver,
+            "-u", CONNECTION_SPEC.url,
+            "-n", CONNECTION_SPEC.username,
+            "-p", CONNECTION_SPEC.password);
     if (flag) {
       args.add("-f");
       args.add(scriptFile.getAbsolutePath());
@@ -134,15 +147,15 @@ public class SqlLineArgsTest {
   @Test
   public void testNull() throws Throwable {
     checkScriptFile(
-        "values (1, cast(null as integer), cast(null as varchar(3));\n",
-        false,
-        equalTo(SqlLine.Status.OK),
-        containsString(
-            "+-------------+-------------+-----+\n"
-            + "|     C1      |     C2      | C3  |\n"
-            + "+-------------+-------------+-----+\n"
-            + "| 1           | null        |     |\n"
-            + "+-------------+-------------+-----+\n"));
+            "values (1, cast(null as integer), cast(null as varchar(3));\n",
+            false,
+            equalTo(SqlLine.Status.OK),
+            containsString(
+                    "+-------------+-------------+-----+\n"
+                            + "|     C1      |     C2      | C3  |\n"
+                            + "+-------------+-------------+-----+\n"
+                            + "| 1           | null        |     |\n"
+                            + "+-------------+-------------+-----+\n"));
   }
 
   /**
@@ -153,7 +166,7 @@ public class SqlLineArgsTest {
   @Test
   public void testClose() throws Throwable {
     checkScriptFile("!close 1\n", false, equalTo(SqlLine.Status.OK),
-        equalTo("xx"));
+            equalTo("xx"));
   }
 
   /**
@@ -179,7 +192,7 @@ public class SqlLineArgsTest {
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
         is(false));
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
-        is(true));
+            is(true));
 
     while (!help.isEmpty()) {
       int i = help.indexOf("\n", 1);
@@ -211,26 +224,26 @@ public class SqlLineArgsTest {
         false,
         equalTo(SqlLine.Status.OK),
         RegexMatcher.of("(?s)1/7          values 1;\n"
-            + "\\+-------------\\+\n"
-            + "\\|     C1      \\|\n"
-            + "\\+-------------\\+\n"
-            + "\\| 1           \\|\n"
-            + "\\+-------------\\+\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "2/7          !record .*.log\n"
-            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
-            + "'C1'\n"
-            + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "5/7          !record\n"
-            + "Recording stopped.\n"
-            + "6/7          !set outputformat csv\n"
-            + "7/7          values 3;\n"
-            + "'C1'\n"
-            + "'3'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+                + "\\+-------------\\+\n"
+                + "\\|     C1      \\|\n"
+                + "\\+-------------\\+\n"
+                + "\\| 1           \\|\n"
+                + "\\+-------------\\+\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "2/7          !record .*.log\n"
+                + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+                + "3/7          !set outputformat csv\n"
+                + "4/7          values 2;\n"
+                + "'C1'\n"
+                + "'2'\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "5/7          !record\n"
+                + "Recording stopped.\n"
+                + "6/7          !set outputformat csv\n"
+                + "7/7          values 3;\n"
+                + "'C1'\n"
+                + "'3'\n"
+                + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
 
     // Now check that the right stuff got into the file.
     final FileReader fileReader = new FileReader(file);
@@ -244,14 +257,14 @@ public class SqlLineArgsTest {
       stringWriter.write(chars, 0, c);
     }
     assertThat(stringWriter.toString(),
-        RegexMatcher.of(
-            "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
-            + "'C1'\n"
-            + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            RegexMatcher.of(
+                    "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+                            + "3/7          !set outputformat csv\n"
+                            + "4/7          values 2;\n"
+                            + "'C1'\n"
+                            + "'2'\n"
+                            + "1 row selected \\([0-9.]+ seconds\\)\n"
+                            + "5/7          !record\n"));
   }
 
   /**
@@ -261,12 +274,56 @@ public class SqlLineArgsTest {
   @Test
   public void testBreakOnErrorScriptFile() throws Throwable {
     checkScriptFile("select * from abcdefg01;\ncall 100 + 23;\n",
-        true,
-        equalTo(SqlLine.Status.OTHER),
-        not(containsString(" 123 ")));
+            true,
+            equalTo(SqlLine.Status.OTHER),
+            not(containsString(" 123 ")));
   }
 
-  /**
+  @Test
+  public void testExecutionException(@Mocked final JDBCDatabaseMetaData meta,
+                 @Mocked final JDBCResultSet resultSet)  throws Throwable {
+    new Expectations() {
+      {
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductName(); result = "hsqldb";
+        // prevent calls to functions that also call resultSet.next
+        meta.getDatabaseProductVersion(); result = "1.0";
+        // Generate an exception on a call to resultSet.next
+        resultSet.next(); result = new SQLException("Generated Exception.");
+      }
+    };
+    SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+    String[] args = {
+      "-d",
+      "org.hsqldb.jdbcDriver",
+      "-u",
+      "jdbc:hsqldb:res:scott",
+      "-n",
+      "SCOTT",
+      "-p",
+      "TIGER"
+    };
+    DispatchCallback callback = new DispatchCallback();
+    sqlLine.initArgs(args, callback);
+    // If sqlline is not initialized, handleSQLException will print
+    // the entire stack trace.
+    // To prevent that, forcibly set init to true.
+    Deencapsulation.setField(sqlLine, "initComplete", true);
+    sqlLine.getConnection();
+    sqlLine.runCommands(Arrays.asList("CREATE TABLE rsTest ( a int);",
+            "insert into rsTest values (1);",
+            "insert into rsTest values (2);",
+            "select a from rsTest; "
+    ), callback);
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("Generated Exception"));
+  }
+
+    /**
    * Attempts to execute a missing script file with the -f option to SqlLine.
    */
   @Test
