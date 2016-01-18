@@ -1432,16 +1432,19 @@ public class SqlLine {
     char[] head = new char[start];
     Arrays.fill(head, ' ');
 
-    for (
-        StringTokenizer tok = new StringTokenizer(toWrap, " ");
+    for (StringTokenizer tok = new StringTokenizer(toWrap, " ");
         tok.hasMoreTokens();) {
       String next = tok.nextToken();
-      if (line.length() + next.length() > len) {
+      final int x = line.length();
+      line.append(line.length() == 0 ? "" : " ").append(next);
+      if (line.length() > len) {
+        // The line is now too long. Backtrack: remove the last word, start a
+        // new line containing just that word.
+        line.setLength(x);
         buff.append(line).append(SEPARATOR).append(head);
         line.setLength(0);
+        line.append(next);
       }
-
-      line.append(line.length() == 0 ? "" : " ").append(next);
     }
 
     buff.append(line);

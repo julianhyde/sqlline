@@ -175,10 +175,16 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testHelpSet() throws Throwable {
+    final String expected = "1/1          !help set\n"
+        + "!set                Set a sqlline variable\n"
+        + "\n"
+        + "Variable        Value      Description\n"
+        + "=============== ========== ================================\n"
+        + "autoCommit      true/false Enable/disable automatic\n"
+        + "                           transaction commit\n"
+        + "autoSave        true/false Automatically save preferences\n";
     checkScriptFile("!help set\n", false, equalTo(SqlLine.Status.OK),
-        containsString(
-            "1/1          !help set\n"
-                + "!set                Set a sqlline variable\n"));
+        containsString(expected));
 
     // Make sure that each variable (autoCommit, autoSave, color, etc.) has a
     // line in the output of '!help set'
@@ -204,6 +210,23 @@ public class SqlLineArgsTest {
       }
       help = help.substring(i);
     }
+  }
+
+  /**
+   * Test case for [SQLLINE-39], "'help set' shouldn't break long lines".
+   *
+   * <p>But it should break 'help all', which consists of a single long line.
+   */
+  @Test
+  public void testHelpAll() throws Throwable {
+    // Note that "connections" has been broken onto a new line.
+    final String expected = "1/1          !help all\n"
+        + "!all                Execute the specified SQL against all the current\n"
+        + "                    connections\n"
+        + "Closing: org.hsqldb.jdbc.JDBCConnection\n"
+        + "sqlline version ???\n";
+    checkScriptFile("!help all\n", false, equalTo(SqlLine.Status.OK),
+        is(expected));
   }
 
   /**

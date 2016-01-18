@@ -2,6 +2,17 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.10">1.1.10</a> (under development)
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/39">SQLLINE-39</a>]
+  `!help set` shouldn't break long lines
+* Add `WrappedSqlException` to allow `IncrementalRows` to throw a `SQLException`
+  (Parth Chandra)
+* Switch to "scott-data-hsqldb" as test data set; it is smaller than
+  "foodmart-data-hsqldb"
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.9">1.1.9</a> (2015-03-06)
 
 No bug fixes or other functional changes
