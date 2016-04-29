@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.BaseMatcher;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
@@ -51,6 +52,11 @@ import static org.junit.Assert.*;
 @RunWith(JMockit.class)
 public class SqlLineArgsTest {
   private static final ConnectionSpec CONNECTION_SPEC = ConnectionSpec.HSQLDB;
+  private ConnectionSpec connectionSpec;
+
+  public SqlLineArgsTest() {
+    connectionSpec = CONNECTION_SPEC;
+  }
 
   /**
    * Execute a script with "beeline -f".
@@ -71,14 +77,19 @@ public class SqlLineArgsTest {
     return new Pair(status, os.toString("UTF8"));
   }
 
-  private static Pair runScript(File scriptFile, boolean flag)
+  private Pair runScript(File scriptFile, boolean flag)
       throws Throwable {
+    return runScript(connectionSpec, scriptFile, flag);
+  }
+
+  private static Pair runScript(ConnectionSpec connectionSpec, File scriptFile,
+      boolean flag) throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
-            "-d", CONNECTION_SPEC.driver,
-            "-u", CONNECTION_SPEC.url,
-            "-n", CONNECTION_SPEC.username,
-            "-p", CONNECTION_SPEC.password);
+        "-d", connectionSpec.driver,
+        "-u", connectionSpec.url,
+        "-n", connectionSpec.username,
+        "-p", connectionSpec.password);
     if (flag) {
       args.add("-f");
       args.add(scriptFile.getAbsolutePath());
@@ -427,6 +438,46 @@ public class SqlLineArgsTest {
     assertThat(output, containsString("No current connection"));
   }
 
+  @Test
+  public void testTablesCsv() throws Throwable {
+    final String script = "!set outputformat csv\n"
+        + "!tables\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(
+            containsString("'TABLE_CAT','TABLE_SCHEM','TABLE_NAME',"),
+            containsString("'PUBLIC','SCOTT','SALGRADE','TABLE','',")));
+  }
+
+  @Test
+  public void testTables() throws Throwable {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!tables\n";
+    final String line0 =
+        "|                                                            TABLE_CAT         |";
+    final String line1 =
+        "| PUBLIC                                                                       |";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(
+            containsString(line0),
+            containsString(line1)));
+  }
+
+  @Test
+  public void testTablesH2() throws Throwable {
+    connectionSpec = ConnectionSpec.H2;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!tables\n";
+    final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
+    final String line1 =
+        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(
+            containsString(line0),
+            containsString(line1)));
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
@@ -442,6 +493,9 @@ public class SqlLineArgsTest {
       this.password = password;
       this.driver = driver;
     }
+
+    public static final ConnectionSpec H2 =
+        new ConnectionSpec("jdbc:h2:mem:", "sa", "", "org.h2.Driver");
 
     public static final ConnectionSpec HSQLDB =
         new ConnectionSpec(

@@ -93,6 +93,15 @@ public class SqlLineTest extends TestCase {
     assertEquals(new String[][] {{"ABC"}, {";DEF"}}, strings);
   }
 
+  public void testCenterString() {
+    assertEquals("abc", ColorBuffer.centerString("abc", -1));
+    assertEquals("abc", ColorBuffer.centerString("abc", 1));
+    assertEquals("abc ", ColorBuffer.centerString("abc", 4));
+    assertEquals(" abc ", ColorBuffer.centerString("abc", 5));
+    // centerString used to have cartesian performance
+    assertEquals(1234567, ColorBuffer.centerString("abc", 1234567).length());
+  }
+
   void assertEquals(String[][] expectedses, String[][] actualses) {
     assertEquals(expectedses.length, actualses.length);
     for (int i = 0; i < expectedses.length; ++i) {

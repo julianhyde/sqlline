@@ -40,8 +40,7 @@ final class ColorBuffer implements Comparable {
       this.style = style;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
       return style;
     }
   }
@@ -63,10 +62,8 @@ final class ColorBuffer implements Comparable {
   /**
    * Pad the specified String with spaces to the indicated length
    *
-   * @param str
-   *          the String to pad
-   * @param len
-   *          the length we want the return String to be
+   * @param str The String to pad
+   * @param len The length we want the return String to be
    * @return the passed in String with spaces appended until the
    *         length matches the specified length.
    */
@@ -81,15 +78,25 @@ final class ColorBuffer implements Comparable {
   }
 
   ColorBuffer center(String str, int len) {
-    StringBuilder buf = new StringBuilder(str);
-    while (buf.length() < len) {
-      buf.append(" ");
+    return append(centerString(str, len));
+  }
 
-      if (buf.length() < len) {
-        buf.insert(0, " ");
-      }
+  static String centerString(String str, int len) {
+    final int n = len - str.length();
+    if (n <= 0) {
+      return str;
     }
-    return append(buf.toString());
+    final StringBuilder buf = new StringBuilder();
+    final int left = n / 2;
+    final int right = n - left;
+    for (int i = 0; i < left; i++) {
+      buf.append(' ');
+    }
+    buf.append(str);
+    for (int i = 0; i < right; i++) {
+      buf.append(' ');
+    }
+    return buf.toString();
   }
 
   ColorBuffer pad(String str, int len) {

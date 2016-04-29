@@ -40,12 +40,15 @@ class IncrementalRows extends Rows {
     // pre-compute normalization so we don't have to deal
     // with SQLExceptions later
     for (int i = 0; i < maxRow.sizes.length; ++i) {
-      // normalized display width is based on maximum of display size
-      // and label size
-      maxRow.sizes[i] =
-          Math.max(
-              maxRow.sizes[i],
-              rsMeta.getColumnDisplaySize(i + 1));
+      // Normalized display width is based on maximum of display size
+      // and label size.
+      //
+      // H2 returns Integer.MAX_VALUE, so avoid that.
+      final int displaySize = rsMeta.getColumnDisplaySize(i + 1);
+      if (displaySize > maxRow.sizes[i]
+          && displaySize < Integer.MAX_VALUE) {
+        maxRow.sizes[i] = displaySize;
+      }
     }
 
     nextRow = labelRow;
