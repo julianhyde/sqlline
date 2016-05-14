@@ -759,10 +759,12 @@ public class SqlLine {
     }
 
     if (line.trim().length() == 0) {
+      callback.setStatus(DispatchCallback.Status.SUCCESS);
       return;
     }
 
     if (isComment(line)) {
+      callback.setStatus(DispatchCallback.Status.SUCCESS);
       return;
     }
 

@@ -153,6 +153,37 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Test case for [SQLLINE-42], "Script fails if first line is a comment".
+   */
+  @Test
+  public void testScriptFileStartsWithComment() throws Throwable {
+    final String scriptText = "-- a comment\n"
+        + "call 100 + 23;\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        containsString(" 123 "));
+  }
+
+  @Test
+  public void testScriptFileStartsWithEmptyLine() throws Throwable {
+    final String scriptText = "\n"
+        + "call 100 + 23;\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        containsString(" 123 "));
+  }
+
+  @Test
+  public void testScriptFileContainsComment() throws Throwable {
+    final String scriptText = "values 10 + 23;\n"
+        + "-- a comment\n"
+        + "values 100 + 23;\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  /**
    * Values that contain null.
    */
   @Test
