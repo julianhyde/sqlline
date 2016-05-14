@@ -621,11 +621,16 @@ public class SqlLine {
   }
 
   /**
-   * Start accepting input from stdin, and dispatch it to the appropriate
+   * Runs SqlLine, accepting input from the given input stream,
+   * dispatching it to the appropriate
    * {@link CommandHandler} until the global variable <code>exit</code> is
    * true.
+   *
+   * <p>Before you invoke this method, you can redirect output by
+   * calling {@link #setOutputStream(PrintStream)}
+   * and/or {@link #setErrorStream(PrintStream)}.
    */
-  Status begin(String[] args, InputStream inputStream,
+  public Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {
     try {
       opts.load();
