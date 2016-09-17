@@ -52,8 +52,7 @@ public class SqlLine {
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
-  private final SqlLineOpts opts =
-      new SqlLineOpts(this, System.getProperties());
+  private final SqlLineOpts opts = new SqlLineOpts(this);
   private String lastProgress = null;
   private final Map<SQLWarning, Date> seenWarnings =
       new HashMap<SQLWarning, Date>();
@@ -367,6 +366,7 @@ public class SqlLine {
 
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
     reflector = new Reflector(this);
+    opts.loadProperties(System.getProperties());
 
     // attempt to dynamically load signal handler
     try {
