@@ -55,8 +55,12 @@ class SqlLineOpts implements Completer {
       new File(saveDir(), "history").getAbsolutePath();
   private String runFile;
 
-  public SqlLineOpts(SqlLine sqlLine, Properties props) {
+  public SqlLineOpts(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+  }
+
+  public SqlLineOpts(SqlLine sqlLine, Properties props) {
+    this(sqlLine);
     loadProperties(props);
   }
 
