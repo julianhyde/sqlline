@@ -102,12 +102,12 @@ public class SqlLineTest extends TestCase {
     assertEquals(1234567, ColorBuffer.centerString("abc", 1234567).length());
   }
 
-  public void testLoadingSystemPropertiesOnCreate(){
+  public void testLoadingSystemPropertiesOnCreate() {
     System.setProperty("sqlline.Isolation", "TRANSACTION_NONE");
     SqlLine line = new SqlLine();
     try {
       assertEquals("TRANSACTION_NONE", line.getOpts().getIsolation());
-    }finally {
+    } finally {
       // set back to the default for tests running in the same JVM.
       System.setProperty("sqlline.Isolation", "TRANSACTION_REPEATABLE_READ");
     }
