@@ -74,6 +74,34 @@
   <build>
     <plugins>
       <plugin>
+        <!-- Generate manual.html from manual.xml. Then you must manually
+             generate manual.txt by copy-pasting from manual.html in a web
+             browser. -->
+        <groupId>com.agilejava.docbkx</groupId>
+        <artifactId>docbkx-maven-plugin</artifactId>
+        <version>2.0.17</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-html</goal>
+              <goal>generate-xhtml</goal>
+              <goal>generate-xhtml5</goal>
+              <goal>generate-manpages</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <entities>
+            <entity>
+              <name>VERSION</name>
+              <value>${project.version}</value>
+            </entity>
+          </entities>
+          <includes>manual.xml</includes>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <executions>

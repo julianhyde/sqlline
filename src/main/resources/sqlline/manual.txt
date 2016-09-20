@@ -1,0 +1,1994 @@
+SQLLine 1.0.9
+
+Copyright © 2002, 2003, 2004, 2005 Marc Prud'hommeaux
+
+SQLLine Manual
+Introduction
+License and Terms of Use
+Obtaining SQLLine
+Installation
+Required software
+Installing SQLLine
+Using SQLLine
+Running SQLLine
+Connecting to a database
+Issuing SQL commands
+Command Completion
+Command Reference
+all
+all — Execute SQL against all active connections
+autocommit
+autocommit — Enable or disable automatic transaction commit mode
+batch
+batch — Start or execute a batch of SQL statements
+brief
+brief — Enable terse output mode
+close
+close — Close the active connection
+columns
+columns — Display columns of a table
+commit
+commit — Commit the current transaction
+connect
+connect — Connect to a database
+dbinfo
+dbinfo — Provide information about the current database
+describe
+describe — Describe a table
+dropall
+dropall — Drop all tables in the database
+exportedkeys
+exportedkeys — List exported foreign keys for a database
+go
+go — Change to a different active connection
+help
+help — Display help information
+history
+history — Display the command history
+importedkeys
+importedkeys — List imported foreign keys for a database
+indexes
+indexes — Display indexes for a table
+isolation
+isolation — Set the transaction isolation mode for the active connection
+list
+list — Display all active connections
+metadata
+metadata — Invoke arbitrary metadata commands
+outputformat
+outputformat — Change the method for displaying SQL results
+primarykeys
+primarykeys — Display the primary key columns for a table
+procedures
+procedures — List stored procedures
+properties
+properties — Connect to the database defined in the specified properties file.
+quit
+quit — Exit SQLLine
+reconnect
+reconnect — Reconnect to the current database
+record
+record — Begin recording all output from SQL commands
+rehash
+rehash — Obtain a list of all tables and columns from the database
+rollback
+rollback — Roll back the current transaction
+run
+run — Execute a command script
+save
+save — Save the current preferences
+scan
+scan — Scan class path for JDBC drivers
+script
+script — Save executed commands to a file
+set
+set — Set a preference
+sql
+sql — Execute a SQL against a database
+tables
+tables — List all the tables in the database
+verbose
+verbose — Enable verbose output
+Parameter Reference
+autocommit
+autosave
+color
+fastconnect
+force
+headerinterval
+historyfile
+incremental
+isolation
+maxcolumnwidth
+maxwidth
+numberformat
+outputformat
+rowlimit
+showheader
+shownestederrs
+showtime
+showwarnings
+silent
+trimscripts
+verbose
+JDBC Driver Support
+Project Information
+SQLLine Manual
+
+Table of Contents
+
+Introduction
+License and Terms of Use
+Obtaining SQLLine
+Installation
+Required software
+Installing SQLLine
+Using SQLLine
+Running SQLLine
+Connecting to a database
+Issuing SQL commands
+Command Completion
+Command Reference
+all
+all — Execute SQL against all active connections
+autocommit
+autocommit — Enable or disable automatic transaction commit mode
+batch
+batch — Start or execute a batch of SQL statements
+brief
+brief — Enable terse output mode
+close
+close — Close the active connection
+columns
+columns — Display columns of a table
+commit
+commit — Commit the current transaction
+connect
+connect — Connect to a database
+dbinfo
+dbinfo — Provide information about the current database
+describe
+describe — Describe a table
+dropall
+dropall — Drop all tables in the database
+exportedkeys
+exportedkeys — List exported foreign keys for a database
+go
+go — Change to a different active connection
+help
+help — Display help information
+history
+history — Display the command history
+importedkeys
+importedkeys — List imported foreign keys for a database
+indexes
+indexes — Display indexes for a table
+isolation
+isolation — Set the transaction isolation mode for the active connection
+list
+list — Display all active connections
+metadata
+metadata — Invoke arbitrary metadata commands
+outputformat
+outputformat — Change the method for displaying SQL results
+primarykeys
+primarykeys — Display the primary key columns for a table
+procedures
+procedures — List stored procedures
+properties
+properties — Connect to the database defined in the specified properties file.
+quit
+quit — Exit SQLLine
+reconnect
+reconnect — Reconnect to the current database
+record
+record — Begin recording all output from SQL commands
+rehash
+rehash — Obtain a list of all tables and columns from the database
+rollback
+rollback — Roll back the current transaction
+run
+run — Execute a command script
+save
+save — Save the current preferences
+scan
+scan — Scan class path for JDBC drivers
+script
+script — Save executed commands to a file
+set
+set — Set a preference
+sql
+sql — Execute a SQL against a database
+tables
+tables — List all the tables in the database
+verbose
+verbose — Enable verbose output
+Parameter Reference
+autocommit
+autosave
+color
+fastconnect
+force
+headerinterval
+historyfile
+incremental
+isolation
+maxcolumnwidth
+maxwidth
+numberformat
+outputformat
+rowlimit
+showheader
+shownestederrs
+showtime
+showwarnings
+silent
+trimscripts
+verbose
+JDBC Driver Support
+Introduction
+
+SQLLine is a pure-Java console based utility for connecting to relational databases and executing SQL commands. It is similiar to other command-line database access utilities like sqlplus for Oracle, mysql for MySQL, and isql for Sybase/SQL Server. Since it is pure-Java, it is platform independant, and will run on any platform that can run Java 1.3 or higher.
+
+License and Terms of Use
+
+SQLLine is distributed under the BSD License, meaning that you are free to redistribute, modify, or sell the software with almost no restrictions. For the text of the license, see the license text.
+
+For information on obtaining the software under another license, contact the copyright holder: mwp1@cornell.edu.
+
+Obtaining SQLLine
+
+SQLLine is hosted on SourceForge, and is located at http://sqlline.sf.net. The latest release can be downloaded from http://sqlline.sf.net/download.html.
+
+Installation
+
+Required software
+Installing SQLLine
+Required software
+
+SQLLine depends on the following software:
+
+Java™ Virtual Machine - SQLLine is a pure java program, and requires Java version 1.3 or higher in order to run. The latest JVM can be downloaded from http://java.sun.com.
+
+JLine - SQLLine uses the JLine console reader for command line editing, tab-completion, and command history. It can be downloaded from http://jline.sf.net. Version 0.8.1 or higher is required.
+
+JDBC™ Driver(s) - Since SQLLine uses the Java Database Connectivity package to connect to your database, you need to obtain the correct JDBC driver libraries for your database. Any JDBC compliant driver can be used for this purpose. Drivers can be located by referring to the section on known JDBC drivers, or else by referring to your database vendor's web site.
+
+Installing SQLLine
+
+There are currently no set standards for installing Java software on different platforms. The simplest method for installing SQLLine in a platform independant way is as follows:
+
+Create a new directory/folder where you like. This will be referred to as sqllinedir.
+
+Download sqlline.jar into sqllinedir.
+
+Download the latest jline.jar from http://jline.sf.net into sqllinedir.
+
+Download your database's JDBC driver files into sqllinedir. Note that some JDBC drivers require some installation, such as uncompressing or unzipping.
+
+Using SQLLine
+
+Running SQLLine
+Connecting to a database
+Issuing SQL commands
+Command Completion
+Running SQLLine
+
+SQLLine can be run with the following command:
+
+java {-Djava.ext.dirs=sqllinedir} {sqllinedir/sqlline.jar} [options...] [properties files...]
+
+For example, if your sqllinedir is /usr/share/java/ (this is typical for Debian Linux), then you might run:
+
+java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
+
+Once you have started SQLLine, you will a prompt that reads "sqlline> ". From here, you can enter either SQLLine commands (beginning with a "!" character), or a SQL statement (if you are currently connected to a database). For example, entering "!help" will display a list of all the available commands.
+
+Connecting to a database
+
+SQLLine is only useful once you are connected to a database. In order to do so, you need to use the "!connect" command, with the JDBC URL of the database you are going to connect to, followed by the username and password (followed optionally by the driver class name). The JDBC URL is specific to the JDBC driver that you are using for your database, but will always start with "jdbc:", and usually has the machine name of the database and the name of the database itself as part of the string. Consult your driver's documentation for details on the URL to use.
+
+For example, to connect to an Oracle database, you might enter:
+
+
+sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
+
+Connected to: Oracle (version Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the Partitioning, OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production)
+Driver: Oracle JDBC driver (version 9.0.1.0.0)
+Autocommit status: true
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+Once you are connected, the prompt will change the reflect URL of the current connection.
+
+SQLLine can also accept command line options to connect to a database. If a file is specified on the command line, it will be treated as a properties file, and try to connect to the database specified therein. For details, see the properties command documentation.
+
+SQLLine allows you to have multiple connections to databases (either the same database, or a different database) open at the same time. Issuing the connect command multiple times will add the new connection to the list of open connections. The "current" connection (against which all SQL statements will be executed) can be switched with the go command. The currently open connections can be listed with the list command.
+
+Issuing SQL commands
+
+Once you are connected to a database, you can begin SQL statements against the current connection. For example:
+
+Example 1. Issuing SQL commands
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM MYTABLE;
+
++-----+
+| ID  |
++-----+
+| 1   |
+| 2   |
+| 3   |
+| 4   |
++-----+
+4 rows selected (0.012 seconds)
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+
+Command Completion
+
+On UNIX systems, SQLLine allows command-line completion using the tab key. This will be familiar for users of such popular shells as bash and tcsh. In general, hitting the TAB key when part of the way through typing a command will fill in the rest of the command, or else will display a selection of appropriate possibilities.
+
+Command Reference
+
+all
+all — Execute SQL against all active connections
+autocommit
+autocommit — Enable or disable automatic transaction commit mode
+batch
+batch — Start or execute a batch of SQL statements
+brief
+brief — Enable terse output mode
+close
+close — Close the active connection
+columns
+columns — Display columns of a table
+commit
+commit — Commit the current transaction
+connect
+connect — Connect to a database
+dbinfo
+dbinfo — Provide information about the current database
+describe
+describe — Describe a table
+dropall
+dropall — Drop all tables in the database
+exportedkeys
+exportedkeys — List exported foreign keys for a database
+go
+go — Change to a different active connection
+help
+help — Display help information
+history
+history — Display the command history
+importedkeys
+importedkeys — List imported foreign keys for a database
+indexes
+indexes — Display indexes for a table
+isolation
+isolation — Set the transaction isolation mode for the active connection
+list
+list — Display all active connections
+metadata
+metadata — Invoke arbitrary metadata commands
+outputformat
+outputformat — Change the method for displaying SQL results
+primarykeys
+primarykeys — Display the primary key columns for a table
+procedures
+procedures — List stored procedures
+properties
+properties — Connect to the database defined in the specified properties file.
+quit
+quit — Exit SQLLine
+reconnect
+reconnect — Reconnect to the current database
+record
+record — Begin recording all output from SQL commands
+rehash
+rehash — Obtain a list of all tables and columns from the database
+rollback
+rollback — Roll back the current transaction
+run
+run — Execute a command script
+save
+save — Save the current preferences
+scan
+scan — Scan class path for JDBC drivers
+script
+script — Save executed commands to a file
+set
+set — Set a preference
+sql
+sql — Execute a SQL against a database
+tables
+tables — List all the tables in the database
+verbose
+verbose — Enable verbose output
+all
+
+Name
+
+all — Execute SQL against all active connections
+
+Synopsis
+
+!all {SQL statement}
+
+Description
+
+Execute the specified SQL against all the current connections.
+
+Example of "all" command
+
+1: jdbc:mysql://localhost/mydb> !list
+
+2 active connections:
+ #0  open     jdbc:oracle:thin:@localhost:1521:mydb
+ #1  open     jdbc:mysql://localhost/mydb
+
+1: jdbc:mysql://localhost/mydb> !all DELETE FROM COMPANY;
+
+Executing SQL against: jdbc:oracle:thin:@localhost:1521:mydb
+4 rows affected (0.004 seconds)
+
+Executing SQL against: jdbc:mysql://localhost/mydb
+1 row affected (3.187 seconds)
+
+1: jdbc:mysql://localhost/mydb>
+
+autocommit
+
+Name
+
+autocommit — Enable or disable automatic transaction commit mode
+
+Synopsis
+
+!autocommit {on/off}
+
+Description
+
+Set autocommit mode on or off. When autocommit is on, every individual SQL statement will be committed after it is issued. Otherwise, the commit command will need to be issued in order to commit any changes to the database.
+
+Example of "autocommit" command
+
+1: jdbc:mysql://localhost/mydb> !autocommit off
+
+Autocommit status: false
+
+1: jdbc:mysql://localhost/mydb>
+
+batch
+
+Name
+
+batch — Start or execute a batch of SQL statements
+
+Synopsis
+
+!batch
+
+Description
+
+Start or execute a batch of SQL statements. The first time the statement is issued, subsequent SQL statements will be deferred until the batch command is issued again. Databases can frequently optimize multiple batched statements (e.g., for bulk data loading) in order to speed up execution.
+
+Example of "batch" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !batch
+
+Batching SQL statements. Run "batch" again to execute the batch.
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> INSERT INTO MYTABLE (ID) VALUES (1);
+0: jdbc:oracle:thin:@localhost:1521:mydb> INSERT INTO MYTABLE (ID) VALUES (2);
+0: jdbc:oracle:thin:@localhost:1521:mydb> INSERT INTO MYTABLE (ID) VALUES (3);
+0: jdbc:oracle:thin:@localhost:1521:mydb> INSERT INTO MYTABLE (ID) VALUES (4);
+0: jdbc:oracle:thin:@localhost:1521:mydb> !batch
+
+Running batched SQL statements...
+COUNT   STATEMENT
+1       INSERT INTO MYTABLE (ID) VALUES (1)
+1       INSERT INTO MYTABLE (ID) VALUES (2)
+1       INSERT INTO MYTABLE (ID) VALUES (3)
+1       INSERT INTO MYTABLE (ID) VALUES (4)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM MYTABLE;
+
++-----+
+| ID  |
++-----+
+| 1   |
+| 2   |
+| 3   |
+| 4   |
++-----+
+4 rows selected (0.012 seconds)
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+brief
+
+Name
+
+brief — Enable terse output mode
+
+Synopsis
+
+!brief
+
+Description
+
+Set verbose mode off. This will prevent printing of stack traces when errors occur.
+
+Example of "brief" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
+
+Error: ORA-00942: table or view does not exist (state=42000,code=942)
+java.sql.SQLException: ORA-00942: table or view does not exist
+
+        at oracle.jdbc.dbaccess.DBError.throwSqlException(DBError.java:180)
+        at oracle.jdbc.ttc7.TTIoer.processError(TTIoer.java:208)
+        at oracle.jdbc.ttc7.Oall7.receive(Oall7.java:543)
+        at oracle.jdbc.ttc7.TTC7Protocol.doOall7(TTC7Protocol.java:1451)
+        at oracle.jdbc.ttc7.TTC7Protocol.parseExecuteDescribe(TTC7Protocol.java:651)
+        at oracle.jdbc.driver.OracleStatement.doExecuteQuery(OracleStatement.java:2110)
+        at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:2324)
+        at oracle.jdbc.driver.OracleStatement.execute(OracleStatement.java:909)
+        at sqlline.SqlLine$Commands.sql(SqlLine.java:3183)
+        at sqlline.SqlLine.dispatch(SqlLine.java:771)
+        at sqlline.SqlLine.begin(SqlLine.java:634)
+        at sqlline.SqlLine.main(SqlLine.java:332)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !brief
+
+verbose: off
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
+
+Error: ORA-00942: table or view does not exist (state=42000,code=942)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+close
+
+Name
+
+close — Close the active connection
+
+Synopsis
+
+!close
+
+Description
+
+Close the current connection and remote it from the connection list.
+
+Example of "close" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !list
+
+1 active connection:
+ #0  open     jdbc:oracle:thin:@localhost:1521:mydb
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !close
+
+Closing: oracle.jdbc.driver.OracleConnection
+
+sqlline> !list
+
+No active connections
+
+sqlline>
+
+columns
+
+Name
+
+columns — Display columns of a table
+
+Synopsis
+
+!columns {table name}
+
+Description
+
+List the columns in the specified table.
+
+Example of "columns" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !columns EMPLOYEE
+
++-------------+--------------+------------+------------+
+| TABLE_NAME  | COLUMN_NAME  | DATA_TYPE  | TYPE_NAME  |
++-------------+--------------+------------+------------+
+| EMPLOYEE    | ID           | 3          | NUMBER     |
+| EMPLOYEE    | FIRST_NAME   | 12         | VARCHAR2   |
+| EMPLOYEE    | LAST_NAME    | 12         | VARCHAR2   |
++-------------+--------------+------------+------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+commit
+
+Name
+
+commit — Commit the current transaction
+
+Synopsis
+
+!commit
+
+Description
+
+Commit the current transaction, if autocommit is off.
+
+Example of "commit" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !autocommit off
+
+Autocommit status: false
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> INSERT INTO EMPLOYEE (ID, FIRST_NAME, LAST_NAME) VALUES (1, 'Bob', 'Smith');
+1 row affected (1.254 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !commit
+
+Commit complete (0.661 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM EMPLOYEE;
+
++--------------+-------------+------------+
+| ID           | FIRST_NAME  | LAST_NAME  |
++--------------+-------------+------------+
+| 1            | Bob         | Smith      |
++--------------+-------------+------------+
+1 row selected (0.309 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+connect
+
+Name
+
+connect — Connect to a database
+
+Synopsis
+
+!connect {url} {username} {password} [driver class]
+
+Description
+
+Connect to a database.
+
+Example of "commit" command
+
+sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
+
+Connected to: Oracle (version Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the Partitioning, OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production)
+Driver: Oracle JDBC driver (version 9.0.1.0.0)
+Autocommit status: true
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+dbinfo
+
+Name
+
+dbinfo — Provide information about the current database
+
+Synopsis
+
+!dbinfo
+
+Description
+
+List metadata information about the current connection.
+
+Example of "dbinfo" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !dbinfo
+
+allProceduresAreCallable                          false
+allTablesAreSelectable                            false
+dataDefinitionCausesTransactionCommit             true
+dataDefinitionIgnoredInTransactions               false
+doesMaxRowSizeIncludeBlobs                        true
+getCatalogSeparator
+getCatalogTerm
+getDatabaseProductName                            Oracle
+getDatabaseProductVersion                         Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the Partitioning, OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production
+getDefaultTransactionIsolation                    2
+getDriverMajorVersion                             9
+getDriverMinorVersion                             0
+getDriverName                                     Oracle JDBC driver
+getDriverVersion                                  9.0.1.0.0
+getExtraNameCharacters                            $#
+getIdentifierQuoteString                          "
+getMaxBinaryLiteralLength                         1000
+getMaxCatalogNameLength                           0
+getMaxCharLiteralLength                           2000
+getMaxColumnNameLength                            30
+getMaxColumnsInGroupBy                            0
+getMaxColumnsInIndex                              32
+getMaxColumnsInOrderBy                            0
+getMaxColumnsInSelect                             0
+getMaxColumnsInTable                              1000
+getMaxConnections                                 0
+getMaxCursorNameLength                            0
+getMaxIndexLength                                 0
+getMaxProcedureNameLength                         30
+getMaxRowSize                                     2000
+getMaxSchemaNameLength                            30
+getMaxStatementLength                             65535
+getMaxStatements                                  0
+getMaxTableNameLength                             30
+getMaxTablesInSelect                              0
+getMaxUserNameLength                              30
+getNumericFunctions                               ABS,CEIL,COS,COSH,EXP,FLOOR,
+                                                  LN,LOG,MOD,POWER,ROUND,SIGN,
+                                                  SIN,SINH,SQRT,TAN,TANH,TRUNC,
+                                                  AVG,COUNT,GLB,LUB,MAX,MIN,
+                                                  STDDEV,SUM,VARIANCE
+getProcedureTerm                                  procedure
+getSchemaTerm                                     schema
+getSearchStringEscape                             //
+getSQLKeywords                                    ACCESS, ADD, ALTER, AUDIT,
+                                                  CLUSTER, COLUMN, COMMENT,
+                                                  COMPRESS, CONNECT, DATE, DROP,
+                                                  EXCLUSIVE, FILE, IDENTIFIED,
+                                                  IMMEDIATE, INCREMENT, INDEX,
+                                                  INITIAL, INTERSECT,
+                                                  LEVEL, LOCK, LONG, MAXEXTENTS,
+                                                  MINUS, MODE, NOAUDIT,
+                                                  NOCOMPRESS, NOWAIT, NUMBER,
+                                                  OFFLINE, ONLINE, PCTFREE,
+                                                  PRIOR,
+                                                  all_PL_SQL_reserved_ words
+getStringFunctions                                CHR, INITCAP, LOWER, LPAD,
+                                                  LTRIM, NLS,_INITCAP,
+                                                  NLS,_LOWER, NLS,_UPPER,
+                                                  REPLACE, RPAD, RTRIM, SOUNDEX,
+                                                  SUBSTR, SUBSTRB, TRANSLATE,
+                                                  UPPER, ASCII, INSTR, INSTRB,
+                                                  LENGTH, LENGTHB, NLSSORT,
+                                                  CHARTOROWID, CONVERT,
+                                                  HEXTORAW, RAWTOHEX,
+                                                  ROWIDTOCHAR,
+                                                  TO_CHAR, TO_DATE, TO_LABEL,
+                                                  TO_MULTI_BYTE, TO_NUMBER,
+                                                  TO_SINGLE_BYTE
+getSystemFunctions                                DUMP, GREATEST, GREATEST_LB,
+                                                  LEAST, LEAST_UB, NVL, UID,
+                                                  USER, USERENV, VSIZE
+getTimeDateFunctions                              ADD_MONTHS, LAST_DAY,
+                                                  MONTHS_BETWEEN, NEW_TIME,
+                                                  NEXT_DAY, ROUND, SYSDATE,
+                                                  TRUNC
+getURL                                            jdbc:oracle:thin:@localhost:1521:mydb
+getUserName                                       MYDB
+isCatalogAtStart                                  false
+isReadOnly                                        false
+nullPlusNonNullIsNull                             true
+nullsAreSortedAtEnd                               false
+nullsAreSortedAtStart                             false
+nullsAreSortedHigh                                false
+nullsAreSortedLow                                 true
+storesLowerCaseIdentifiers                        false
+storesLowerCaseQuotedIdentifiers                  false
+storesMixedCaseIdentifiers                        false
+storesMixedCaseQuotedIdentifiers                  true
+storesUpperCaseIdentifiers                        true
+storesUpperCaseQuotedIdentifiers                  false
+supportsAlterTableWithAddColumn                   true
+supportsAlterTableWithDropColumn                  false
+supportsANSI92EntryLevelSQL                       true
+supportsANSI92FullSQL                             false
+supportsANSI92IntermediateSQL                     false
+supportsBatchUpdates                              true
+supportsCatalogsInDataManipulation                false
+supportsCatalogsInIndexDefinitions                false
+supportsCatalogsInPrivilegeDefinitions            false
+supportsCatalogsInProcedureCalls                  false
+supportsCatalogsInTableDefinitions                false
+supportsColumnAliasing                            true
+supportsConvert                                   true
+supportsCoreSQLGrammar                            true
+supportsCorrelatedSubqueries                      true
+supportsDataDefinitionAndDataManipulationTransactionstrue
+supportsDataManipulationTransactionsOnly          true
+supportsDifferentTableCorrelationNames            true
+supportsExpressionsInOrderBy                      true
+supportsExtendedSQLGrammar                        true
+supportsFullOuterJoins                            true
+supportsGroupBy                                   true
+supportsGroupByBeyondSelect                       true
+supportsGroupByUnrelated                          true
+supportsIntegrityEnhancementFacility              true
+supportsLikeEscapeClause                          true
+supportsLimitedOuterJoins                         true
+supportsMinimumSQLGrammar                         true
+supportsMixedCaseIdentifiers                      false
+supportsMixedCaseQuotedIdentifiers                true
+supportsMultipleResultSets                        false
+supportsMultipleTransactions                      true
+supportsNonNullableColumns                        true
+supportsOpenCursorsAcrossCommit                   false
+supportsOpenCursorsAcrossRollback                 false
+supportsOpenStatementsAcrossCommit                false
+supportsOpenStatementsAcrossRollback              false
+supportsOrderByUnrelated                          true
+supportsOuterJoins                                true
+supportsPositionedDelete                          true
+supportsPositionedUpdate                          true
+supportsSchemasInDataManipulation                 true
+supportsSchemasInIndexDefinitions                 true
+supportsSchemasInPrivilegeDefinitions             true
+supportsSchemasInProcedureCalls                   true
+supportsSchemasInTableDefinitions                 true
+supportsSelectForUpdate                           true
+supportsStoredProcedures                          true
+supportsSubqueriesInComparisons                   true
+supportsSubqueriesInExists                        true
+supportsSubqueriesInIns                           true
+supportsSubqueriesInQuantifieds                   true
+supportsTableCorrelationNames                     true
+supportsTransactions                              true
+supportsUnion                                     true
+supportsUnionAll                                  true
+usesLocalFilePerTable                             false
+usesLocalFiles                                    false
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+describe
+
+Name
+
+describe — Describe a table
+
+Synopsis
+
+!describe [table name]
+
+Description
+
+Synonym for columns (if an argument is specified) or tables (if no argument is specified).
+
+Example of "describe" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !describe EMPLOYEE
+
++--------------+------------+-------------+-----------+------------+
+| TABLE_SCHEM  | TABLE_NAME | COLUMN_NAME | DATA_TYPE | TYPE_NAME  |
++--------------+------------+-------------+-----------+------------+
+| MYDB         | EMPLOYEE   | ID          | 3         | NUMBER     |
+| MYDB         | EMPLOYEE   | FIRST_NAME  | 12        | VARCHAR2   |
+| MYDB         | EMPLOYEE   | LAST_NAME   | 12        | VARCHAR2   |
++--------------+------------+-------------+-----------+------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+dropall
+
+Name
+
+dropall — Drop all tables in the database
+
+Synopsis
+
+!dropall
+
+Description
+
+Drop every table in the database.
+
+Example of "dropall" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !dropall
+
+Really drop every table in the database? (y/n) y
+
+1/5         DROP TABLE COMPANY;
+2/5         DROP TABLE EMPLOYEE;
+3/5         DROP TABLE PROJECTS;
+4/5         DROP TABLE EMPLOYEE_PROJECTS;
+5/5         DROP TABLE COMPANYEMPLOYEES;
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+Warning on using "dropall"
+
+Warning
+
+This command will destroy all data in the database (subject to access restrictions). Use with extreme caution.
+
+exportedkeys
+
+Name
+
+exportedkeys — List exported foreign keys for a database
+
+Synopsis
+
+!exportedkeys {table name}
+
+Description
+
+List all the foreign keys that are exported by the specified table.
+
+Example of "exportedkeys" command
+
+0: jdbc:hsqldb:db-hypersonic> !exportedkeys COMPANY
+
++----------------+---------------+----------------+-------------+
+| PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++----------------+---------------+----------------+-------------+
+|                | COMPANY       | COMPANY_ID     |             |
++----------------+---------------+----------------+-------------+
+
+0: jdbc:hsqldb:db-hypersonic>
+
+go
+
+Name
+
+go — Change to a different active connection
+
+Synopsis
+
+!go {connection number}
+
+Description
+
+Switch to the specified connection.
+
+Example of "go" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !list
+
+2 active connections:
+ #0  open     jdbc:oracle:thin:@localhost:1521:mydb
+ #1  open     jdbc:mysql://localhost/mydb
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !go 1
+
+1: jdbc:mysql://localhost/mydb> !go 0
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+
+help
+
+Name
+
+help — Display help information
+
+Synopsis
+
+!help
+
+Description
+
+Display information about allowed commands.
+
+Example of "help" command
+
+sqlline> !help
+
+!all              Execute the specified SQL against all the current connections
+!autocommit       Set autocommit mode on or off
+!batch            Start or execute a batch of statements
+!brief            Set verbose mode off
+!close            Close the current connection to the database
+!columns          List all the columns for the specified table
+!commit           Commit the current transaction (if autocommit is off)
+!connect          Open a new connection to the database.
+!dbinfo           Give metadata information about the database
+!describe         Describe a table
+!dropall          Drop all tables in the current database
+!exportedkeys     List all the exported keys for the specified table
+!go               Select the current connection
+!help             Print a summary of command usage
+!history          Display the command history
+!importedkeys     List all the imported keys for the specified table
+!indexes          List all the indexes for the specified table
+!isolation        Set the transaction isolation for this connection
+!list             List the current connections
+!metadata         Obtain metadata information
+!outputformat     Set the output format for displaying results
+                  (table,vertical,csv,tsv,xmlattrs,xmlelements)
+!properties       Connect to the database specified in the properties file(s)
+!primarykeys      List all the primary keys for the specified table
+!procedures       List all the procedures
+!quit             Exits the program
+!reconnect        Reconnect to the database
+!record           Record all output to the specified file
+!rehash           Fetch table and column names for command completion
+!rollback         Roll back the current transaction (if autocommit is off)
+!run              Run a script from the specified file
+!save             Save the current variabes and aliases
+!scan             Scan for installed JDBC drivers
+!script           Start saving a script to a file
+!set              Set a sqlline variable
+!sql              Execute a SQL command
+!tables           List all the tables in the database
+!verbose          Set verbose mode on
+
+Comments, bug reports, and patches go to mwp1@cornell.edu
+
+sqlline>
+
+
+history
+
+Name
+
+history — Display the command history
+
+Synopsis
+
+!history
+
+Description
+
+Display the command history.
+
+Example of "history" command
+
+sqlline> !history
+
+1.  !outputformat xmlelements
+2.  SELECT * FROM PCPOINT;
+3.  !outputformat vertical
+4.  SELECT * FROM PCPOINT;
+5.  !tables
+
+sqlline>
+
+
+importedkeys
+
+Name
+
+importedkeys — List imported foreign keys for a database
+
+Synopsis
+
+!importedkeys {table name}
+
+Description
+
+List all the foreign keys that are imported by the specified table.
+
+Example of "importedkeys" command
+
+0: jdbc:hsqldb:db-hypersonic> !importedkeys EMPLOYEE
+
++----------------+---------------+----------------+-------------+
+| PKTABLE_SCHEM  | PKTABLE_NAME  | PKCOLUMN_NAME  | FKTABLE_CAT |
++----------------+---------------+----------------+-------------+
+|                | COMPANY       | COMPANY_ID     |             |
++----------------+---------------+----------------+-------------+
+
+0: jdbc:hsqldb:db-hypersonic>
+
+indexes
+
+Name
+
+indexes — Display indexes for a table
+
+Synopsis
+
+!indexes {table name}
+
+Description
+
+List all the indexes on the specified table name.
+
+Example of "indexes" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !indexes EMPLOYEE
+
++-------------+-------------+-----------------+-------+--------------+
+| TABLE_NAME  | NON_UNIQUE  |   INDEX_NAME    | TYPE  | COLUMN_NAME  |
++-------------+-------------+-----------------+-------+--------------+
+| EMPLOYEE    | 0           |                 | 0     |              |
+| EMPLOYEE    | 0           | SYS_C003115849  | 1     | ID           |
+| EMPLOYEE    | 1           | FIRST_NAME      | 1     | FIRST_NAME   |
+| EMPLOYEE    | 1           | LAST_NAME       | 1     | LAST_NAME    |
++-------------+-------------+-----------------+-------+--------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+isolation
+
+Name
+
+isolation — Set the transaction isolation mode for the active connection
+
+Synopsis
+
+!isolation {isolation level}
+
+Description
+
+Set the isolation level for the current transaction. For a description of the different isolation levels, see http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail.
+
+Example of "isolation" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !isolation TRANSACTION_READ_UNCOMMITTED
+
+Error: READ_COMMITTED and SERIALIZABLE are the only valid transaction levels (state=,code=17030)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !isolation TRANSACTION_SERIALIZABLE
+
+Transaction isolation: TRANSACTION_SERIALIZABLE
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+list
+
+Name
+
+list — Display all active connections
+
+Synopsis
+
+!list
+
+Description
+
+List all the current connections.
+
+Example of "list" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !list
+
+2 active connections:
+ #0  open     jdbc:oracle:thin:@localhost:1521:mydb
+ #1  open     jdbc:mysql://localhost/mydb
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+metadata
+
+Name
+
+metadata — Invoke arbitrary metadata commands
+
+Synopsis
+
+!metadata {methodname} {params...}
+
+Description
+
+Execute an arbitrary metadata method agains the current connection. refpurpose are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
+
+Example of "metadata" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !metadata supportsSelectForUpdate
+
+true
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !metadata getTypeInfo
+
++------------+------------+-------------+-----------------+-----------------+
+| TYPE_NAME  | DATA_TYPE  |  PRECISION  | LITERAL_PREFIX  | LITERAL_SUFFIX  |
++------------+------------+-------------+-----------------+-----------------+
+| NUMBER     | -7         | 1           |                 |                 |
+| NUMBER     | -6         | 3           |                 |                 |
+| NUMBER     | -5         | 38          |                 |                 |
+| LONG RAW   | -4         | 2147483647  | '               | '               |
+| RAW        | -3         | 2000        | '               | '               |
+| LONG       | -1         | 2147483647  | '               | '               |
+| CHAR       | 1          | 2000        | '               | '               |
+| NUMBER     | 2          | 38          |                 |                 |
+| NUMBER     | 4          | 10          |                 |                 |
+| NUMBER     | 5          | 5           |                 |                 |
+| FLOAT      | 6          | 63          |                 |                 |
+| REAL       | 7          | 63          |                 |                 |
+| VARCHAR2   | 12         | 4000        | '               | '               |
+| DATE       | 93         | 7           |                 |                 |
+| STRUCT     | 2002       | 0           | '               | '               |
+| ARRAY      | 2003       | 0           | '               | '               |
+| BLOB       | 2004       | 4294967295  |                 |                 |
+| CLOB       | 2005       | 4294967295  | '               | '               |
+| REF        | 2006       | 0           | '               | '               |
++------------+------------+-------------+-----------------+-----------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !meta getProcedureColumns null % %JAVA% %
+
++----------------+------------------+------------------------+--------------+
+| PROCEDURE_CAT  | PROCEDURE_SCHEM  |     PROCEDURE_NAME     | COLUMN_NAME  |
++----------------+------------------+------------------------+--------------+
+| DBMS_JAVA      | SYS              | DROPJAVA               | OPTIONS      |
+| XMLPARSER      | SYS              | GETJAVARELEASEVERSION  |              |
+| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |
+| DBMS_JAVA      | SYS              | LOADJAVA               | OPTIONS      |
+| DBMS_JAVA      | SYS              | LOADJAVA               | RESOLVER     |
++----------------+------------------+------------------------+--------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+outputformat
+
+Name
+
+outputformat — Change the method for displaying SQL results
+
+Synopsis
+
+!outputformat {format name}
+
+Description
+
+Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parseable format.
+
+Example of table output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat table
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 1           | Apple      |
+| 2           | Sun        |
+| 3           | IBM        |
+| 4           | Microsoft  |
++-------------+------------+
+4 rows selected (0.012 seconds)
+
+Example of vertical output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat vertical
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+COMPANY_ID  1
+NAME        Apple
+
+COMPANY_ID  2
+NAME        Sun
+
+COMPANY_ID  3
+NAME        IBM
+
+COMPANY_ID  4
+NAME        Microsoft
+
+4 rows selected (0.011 seconds)
+
+Example of CSV output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat csv
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+'COMPANY_ID','NAME'
+'1','Apple'
+'2','Sun'
+'3','IBM'
+'4','Microsoft'
+4 rows selected (0.012 seconds)
+
+Example of TSV output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat tsv
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+'COMPANY_ID'    'NAME'
+'1'     'Apple'
+'2'     'Sun'
+'3'     'IBM'
+'4'     'Microsoft'
+4 rows selected (0.013 seconds)
+
+Example of XML attribute output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlattr
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+<resultset>
+  <result COMPANY_ID="1" NAME="Apple"/>
+  <result COMPANY_ID="2" NAME="Sun"/>
+  <result COMPANY_ID="3" NAME="IBM"/>
+  <result COMPANY_ID="4" NAME="Microsoft"/>
+</resultset>
+4 rows selected (0.012 seconds)
+
+Example of XML element output formatting
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlelements
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY
+<resultset>
+  <result>
+    <COMPANY_ID>1</COMPANY_ID>
+    <NAME>Apple</NAME>
+  </result>
+  <result>
+    <COMPANY_ID>2</COMPANY_ID>
+    <NAME>Sun</NAME>
+  </result>
+  <result>
+    <COMPANY_ID>3</COMPANY_ID>
+    <NAME>IBM</NAME>
+  </result>
+  <result>
+    <COMPANY_ID>4</COMPANY_ID>
+    <NAME>Microsoft</NAME>
+  </result>
+</resultset>
+4 rows selected (0.02 seconds)
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+primarykeys
+
+Name
+
+primarykeys — Display the primary key columns for a table
+
+Synopsis
+
+!primarykeys {table name}
+
+Description
+
+List all the primary keys for the specified table.
+
+Example of "primarykeys" command
+
+0: jdbc:hsqldb:db-hypersonic> !primarykeys COMPANY
+
++--------------+-------------+--------------+----------+----------+
+| TABLE_SCHEM  | TABLE_NAME  | COLUMN_NAME  | KEY_SEQ  |     PK_N |
++--------------+-------------+--------------+----------+----------+
+|              | COMPANY     | COMPANY_ID   | 1        | SYS_PK_C |
++--------------+-------------+--------------+----------+----------+
+
+0: jdbc:hsqldb:db-hypersonic>
+
+procedures
+
+Name
+
+procedures — List stored procedures
+
+Synopsis
+
+!procedures [procedure name pattern]
+
+Description
+
+Display a list of all the stored procedures that are exposed by the current database.
+
+Example of "procedures" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !procedures %JDBC%
+
++----------------+------------------+------------------+
+| PROCEDURE_CAT  | PROCEDURE_SCHEM  |  PROCEDURE_NAME  |
++----------------+------------------+------------------+
+| WK_ADM         | WKSYS            | GET_JDBC_DRIVER  |
+| WK_ADM         | WKSYS            | SET_JDBC_DRIVER  |
++----------------+------------------+------------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+properties
+
+Name
+
+properties — Connect to the database defined in the specified properties file.
+
+Synopsis
+
+!properties {file}
+
+Description
+
+Connect to the database defined in the specified properties file. The properties file is expected to have the following values:
+
+url: the database URL to which to connect
+
+driver: the driver class that handles the URL. If unspecifed, SQLLine with automatically scan the CLASSPATH for an appropriate driver
+
+user: the username to use to connect to the database. If unspecified, SQLLine will prompt for it.
+
+password: the password to use to connect to the database. If unspecified, SQLLine will prompt for it.
+
+The key names in the properties file can also use JDO semantics for the properties. These properties are "javax.jdo.option.ConnectionURL", "javax.jdo.option.ConnectionDriverName", "javax.jdo.option.ConnectionUserName", and "javax.jdo.option.ConnectionPassword". Furthermore, any properties that end with "ConnectionURL", "ConnectionDriverName", "ConnectionUserName", and "ConnectionPassword" will be used for the connection.
+
+Example of "properties" command
+
+sqlline> !properties test.properties
+
+Connecting to jdbc:mysql://localhost/mydb
+
+Enter password for jdbc:mysql://localhost/mydb: *****
+
+Connected to: MySQL (version 3.23.52-log)
+Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2008/12/10 $, $Revision: #3 $ ))
+Autocommit status: true
+Transaction isolation: TRANSACTION_READ_COMMITTED
+
+0: jdbc:mysql://localhost/mydb>
+
+quit
+
+Name
+
+quit — Exit SQLLine
+
+Synopsis
+
+!quit
+
+Description
+
+Exit SQLLine.
+
+Example of "reconnect" command
+
+0: jdbc:hsqldb:db-hypersonic> !quit
+
+Closing: org.hsqldb.jdbcConnection
+
+reconnect
+
+Name
+
+reconnect — Reconnect to the current database
+
+Synopsis
+
+!reconnect
+
+Description
+
+Reconnect to the current database.
+
+Example of "reconnect" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !reconnect
+
+Reconnecting to "jdbc:oracle:thin:@localhost:1521:mydb"...
+
+Closing: oracle.jdbc.driver.OracleConnection@4428d3
+
+Connected to: Oracle (version Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the Partitioning, OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production)
+Driver: Oracle JDBC driver (version 9.0.1.0.0)
+Autocommit status: true
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+record
+
+Name
+
+record — Begin recording all output from SQL commands
+
+Synopsis
+
+!record {file name}
+
+Description
+
+Save all output from the session to the specified file.
+
+Example of "record" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !record /tmp/mysession.out
+
+Saving all output to "/tmp/mysession.out". Enter "record" with no arguments to stop it.
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 3           | IBM        |
+| 4           | Microsoft  |
+| 1           | Apple      |
+| 2           | Sun        |
++-------------+------------+
+4 rows selected (0.011 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !record
+
+Recording stopped.
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+rehash
+
+Name
+
+rehash — Obtain a list of all tables and columns from the database
+
+Synopsis
+
+!rehash
+
+Description
+
+Get a list of all tables and columns from the database in order to include them in the list for tab-completion of SQL statements. This is done automatically on connect when the fastconnect option is enabled.
+
+Example of "rehash" command
+
+0: jdbc:hsqldb:db-hypersonic> !rehash
+
+Building list of tables and columns for tab-completion (set fastconnect to true to skip)...
+7/7 (100%) Done
+Done
+
+0: jdbc:hsqldb:db-hypersonic>
+
+
+Warning on using "rehash"
+
+Caution
+
+This operation can be extremely slow for some databases.
+
+rollback
+
+Name
+
+rollback — Roll back the current transaction
+
+Synopsis
+
+!rollback
+
+Description
+
+Rollback the current transaction, if autocommit is off.
+
+Example of "rollback" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !autocommit off
+
+Autocommit status: false
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 3           | IBM        |
+| 4           | Microsoft  |
+| 1           | Apple      |
+| 2           | Sun        |
++-------------+------------+
+4 rows selected (0.011 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> DELETE FROM COMPANY;
+
+4 rows affected (0.004 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+
++-------------+-------+
+| COMPANY_ID  | NAME  |
++-------------+-------+
++-------------+-------+
+No rows selected (0.01 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !rollback
+
+Rollback complete (0.016 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
+
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 3           | IBM        |
+| 4           | Microsoft  |
+| 1           | Apple      |
+| 2           | Sun        |
++-------------+------------+
+4 rows selected (0.01 seconds)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+run
+
+Name
+
+run — Execute a command script
+
+Synopsis
+
+!run {file name}
+
+Description
+
+Run the individual commands specified in the file name. The file should consist of individual SQL statements or SQLLine commands. Lines beginning with "#" are interpreted as comments and ignored. If any errors occur while running the script, the script will be aborted, unless the force preference is set to true.
+
+Example of "run" command
+
+0: jdbc:hsqldb:db-hypersonic> !run example.sql
+1/11         CREATE TABLE COMPANY (COMPANY_ID INT, NAME VARCHAR(255));
+No rows affected (0.001 seconds)
+2/11         INSERT INTO COMPANY VALUES (1, 'Apple');
+1 row affected (0 seconds)
+3/11         INSERT INTO COMPANY VALUES (2, 'Sun');
+1 row affected (0 seconds)
+4/11         INSERT INTO COMPANY VALUES (3, 'IBM');
+1 row affected (0.001 seconds)
+5/11         INSERT INTO COMPANY VALUES (4, 'Microsoft');
+1 row affected (0.015 seconds)
+6/11         CREATE TABLE EMPLOYEE (ID INT, FIRST_NAME VARCHAR(255), LAST_NAME VARCHAR(255), COMPANY INT);
+No rows affected (0.004 seconds)
+7/11         CREATE INDEX FIRST_NAME ON EMPLOYEE(FIRST_NAME);
+No rows affected (0 seconds)
+8/11         CREATE INDEX LAST_NAME ON EMPLOYEE(LAST_NAME);
+No rows affected (0.001 seconds)
+9/11         ALTER TABLE EMPLOYEE ADD CONSTRAINT EMP_COMPANY FOREIGN KEY (COMPANY) REFERENCES COMPANY (COMPANY_ID);
+No rows affected (0 seconds)
+10/11        INSERT INTO EMPLOYEE (ID, FIRST_NAME, LAST_NAME, COMPANY) VALUES (234, 'William', 'Gates', 4);
+1 row affected (0.001 seconds)
+11/11        SELECT * FROM COMPANY,EMPLOYEE WHERE EMPLOYEE.COMPANY = COMPANY.COMPANY_ID;
++------------+-----------+--------------+-------------+------------+---------+
+| COMPANY_ID |    NAME   | ID           | FIRST_NAME  | LAST_NAME  | COMPANY |
++------------+-----------+--------------+-------------+------------+---------+
+| 4          | Microsoft | 234          | William     | Gates      | 4       |
++------------+-----------+--------------+-------------+------------+---------+
+1 row selected (0.001 seconds)
+0: jdbc:hsqldb:db-hypersonic>
+
+
+save
+
+Name
+
+save — Save the current preferences
+
+Synopsis
+
+!save
+
+Description
+
+Save the current preferences.
+
+Example of "save" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !save
+
+Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+scan
+
+Name
+
+scan — Scan class path for JDBC drivers
+
+Synopsis
+
+!scan
+
+Description
+
+Scans all the jar files in the CLASSPATH for any JDBC drivers, and prints the class names of the drivers.
+
+Example of "scan" command
+
+sqlline> !scan
+
+35 driver classes found
+Compliant Version Driver Class
+no        4.0     COM.cloudscape.core.JDBCDriver
+no        1.0     COM.cloudscape.core.RmiJdbcDriver
+yes       7.1     COM.ibm.db2.jdbc.net.DB2Driver
+yes       3.2     com.ddtek.jdbc.db2.DB2Driver
+yes       3.2     com.ddtek.jdbc.informix.InformixDriver
+yes       3.2     com.ddtek.jdbc.oracle.OracleDriver
+yes       3.2     com.ddtek.jdbc.sqlserver.SQLServerDriver
+yes       3.2     com.ddtek.jdbc.sybase.SybaseDriver
+yes       1.0     com.ibm.db2.jcc.DB2Driver
+yes       2.21    com.informix.jdbc.IfxDriver
+no        0.2     com.internetcds.jdbc.tds.Driver
+no        0.2     com.internetcds.jdbc.tds.SybaseDriver
+yes       2.2715  com.jnetdirect.jsql.JSQLDriver
+yes       3.2     com.merant.datadirect.jdbc.db2.DB2Driver
+yes       3.2     com.merant.datadirect.jdbc.informix.InformixDriver
+yes       3.2     com.merant.datadirect.jdbc.oracle.OracleDriver
+yes       3.2     com.merant.datadirect.jdbc.sqlserver.SQLServerDriver
+yes       3.2     com.merant.datadirect.jdbc.sybase.SybaseDriver
+yes       2.2     com.microsoft.jdbc.sqlserver.SQLServerDriver
+no        3.0     com.mysql.jdbc.Driver
+no        3.0     com.mysql.jdbc.NonRegisteringDriver
+yes       4.4     com.pointbase.jdbc.jdbcDriver
+yes       4.4     com.pointbase.jdbc.jdbcEmbeddedDriver
+yes       4.4     com.pointbase.jdbc.jdbcUniversalDriver
+no        5.5     com.sybase.jdbc2.jdbc.SybDriver
+yes       1.0     in.co.daffodil.db.jdbc.DaffodilDBDriver
+no        2.0     interbase.interclient.Driver
+no        0.5     net.sourceforge.jtds.jdbc.Driver
+yes       1.0     oracle.jdbc.OracleDriver
+yes       1.0     oracle.jdbc.driver.OracleDriver
+no        3.26    org.enhydra.instantdb.jdbc.idbDriver
+no        3.0     org.gjt.mm.mysql.Driver
+no        1.7     org.hsqldb.jdbcDriver
+no        7.3     org.postgresql.Driver
+yes       0.9     org.sourceforge.jxdbcon.JXDBConDriver
+
+sqlline>
+
+script
+
+Name
+
+script — Save executed commands to a file
+
+Synopsis
+
+!script {filename}
+
+Description
+
+Start saving all commands entered to the specified file. Once scripting on, it can be finished by entering the script command again with no arguments. Saved scripts can be re-run using the run command.
+
+Example of "script" command
+
+0: jdbc:hsqldb:db-hypersonic> !script /tmp/mysession.script
+
+Saving command script to "/tmp/mysession.script". Enter "script" with no arguments to stop it.
+
+0: jdbc:hsqldb:db-hypersonic> !autocommit off
+
+Autocommit status: false
+
+0: jdbc:hsqldb:db-hypersonic> SELECT * FROM COMPANY;
+
++-------------+------------+
+| COMPANY_ID  |    NAME    |
++-------------+------------+
+| 1           | Apple      |
+| 2           | Sun        |
+| 3           | IBM        |
+| 4           | Microsoft  |
++-------------+------------+
+4 rows selected (0.001 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> UPDATE COMPANY SET NAME='Apple, Inc.' WHERE NAME='Apple';
+
+1 row affected (0.005 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> !commit
+
+Commit complete (0 seconds)
+
+0: jdbc:hsqldb:db-hypersonic> !script
+
+Script closed. Enter "run /tmp/mysession.script" to replay it.
+
+0: jdbc:hsqldb:db-hypersonic>
+
+set
+
+Name
+
+set — Set a preference
+
+Synopsis
+
+!set {preference} {value}
+
+Description
+
+Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed setting can be saved for future SQLLine session eith the save command.
+
+Example of "set" command
+
+0: jdbc:hsqldb:db-hypersonic> !set color on
+
+sql
+
+Name
+
+sql — Execute a SQL against a database
+
+Synopsis
+
+!sql {statement}
+
+Description
+
+Issue the specified SQL statement. This is equivalent to entering the statement by itself from the command line.
+
+Example of "sql" command
+
+0: jdbc:hsqldb:db-hypersonic> !sql DELETE FROM COMPANY;
+
+4 rows affected (0.005 seconds)
+
+0: jdbc:hsqldb:db-hypersonic>
+
+tables
+
+Name
+
+tables — List all the tables in the database
+
+Synopsis
+
+!tables
+
+Description
+
+List all the tables in the database of the current connection.
+
+Example of "tables" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !tables
+
++------------+--------------+---------------------------------+-------------+
+| TABLE_CAT  | TABLE_SCHEM  |           TABLE_NAME            | TABLE_TYPE  |
++------------+--------------+---------------------------------+-------------+
+|            | MYDB         | COMPANY                         | TABLE       |
+|            | MYDB         | EMPLOYEE                        | TABLE       |
++------------+--------------+---------------------------------+-------------+
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+verbose
+
+Name
+
+verbose — Enable verbose output
+
+Synopsis
+
+!verbose
+
+Description
+
+Enable verbose mode, which causes stack traces to be printed when errors occur, and enabled outputting of debug information.
+
+Example of "verbose" command
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
+
+Error: ORA-00942: table or view does not exist (state=42000,code=942)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> !verbose
+
+verbose: on
+
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM BOGUS_TABLE;
+
+Error: ORA-00942: table or view does not exist (state=42000,code=942)
+java.sql.SQLException: ORA-00942: table or view does not exist
+
+        at oracle.jdbc.dbaccess.DBError.throwSqlException(DBError.java:180)
+        at oracle.jdbc.ttc7.TTIoer.processError(TTIoer.java:208)
+        at oracle.jdbc.ttc7.Oall7.receive(Oall7.java:543)
+        at oracle.jdbc.ttc7.TTC7Protocol.doOall7(TTC7Protocol.java:1451)
+        at oracle.jdbc.ttc7.TTC7Protocol.parseExecuteDescribe(TTC7Protocol.java:651)
+        at oracle.jdbc.driver.OracleStatement.doExecuteQuery(OracleStatement.java:2110)
+        at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:2324)
+        at oracle.jdbc.driver.OracleStatement.execute(OracleStatement.java:909)
+        at sqlline.SqlLine$Commands.sql(SqlLine.java:3183)
+        at sqlline.SqlLine.dispatch(SqlLine.java:771)
+        at sqlline.SqlLine.begin(SqlLine.java:634)
+        at sqlline.SqlLine.main(SqlLine.java:332)
+
+0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+Parameter Reference
+
+autocommit
+autosave
+color
+fastconnect
+force
+headerinterval
+historyfile
+incremental
+isolation
+maxcolumnwidth
+maxwidth
+numberformat
+outputformat
+rowlimit
+showheader
+shownestederrs
+showtime
+showwarnings
+silent
+trimscripts
+verbose
+autocommit
+
+If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
+
+autosave
+
+When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitely saved using the save command. Defaults to false.
+
+color
+
+If true, then output to the terminal will use color for a more pleasing visual experience. Requires that the terminal support ANSI control codes (most do). Defaults to false.
+
+fastconnect
+
+When false, any new connection will cause SQLLine to access information about the available tables and columns in order to provide them as candidates for tab-completion. This can be a very slow operation for some databases, do by default it is off. Table and column information can always be explicitely retrieved using the rehash command.
+
+force
+
+When set to false, any failures during the execution of the run or record commands will cause execution to abort, preventing the execution of subsequent commands. When set to true, errors will be displayed but otherwise ignored. Defaults to false.
+
+headerinterval
+
+The interval between which the column headers will be redisplayed when using the "table" outputformat. Defaults to 100.
+
+historyfile
+
+The file to which SQLLine will save a record of all the commands issued. Defaults to HOME/sqlline/history on Windows, and HOME/.sqlline/history on all other platforms.
+
+incremental
+
+When set to false, the entire result set is fetched and buffered before being displayed, yielding optimal display column sizing. When set to true, result rows are displayed immediately as they are fetched, yielding lower latency and memory usage at the price of extra display column padding. Defaults to false.
+
+isolation
+
+The default transaction isolation that will be used for new connections. To change the isolation level of the currently active connection, use the isolation command instead.
+
+maxcolumnwidth
+
+The maximum column width to display for each colummn before truncating data when using the "table" outputformat. Defaults to 15.
+
+maxwidth
+
+The maximum width to display before truncating data when using the "table" outputformat. Defaults to attempting to query the terminal for the current width, falls back to 80.
+
+numberformat
+
+The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits.
+
+outputformat
+
+The format for how results are displayed. For details, see the information on the outputformat command.
+
+rowlimit
+
+The maximum number of rows to fetch per query. Defaults to 0, which is interpreted as fetching all rows.
+
+showheader
+
+If true, display the names of the columns when displaying results. Defaults to true.
+
+shownestederrs
+
+If true, display any nested errors that are reported on the connection after issuing any database commands. Defaults to false, meaning only the topmost error is displayed.
+
+showtime
+
+If true, display execution time for database commands when in verbose mode. Defaults to true.
+
+showwarnings
+
+If true, display any warnings that are reported on the connection after issuing any database commands. Defaults to true.
+
+silent
+
+If true, then reduce the amount of informational messages displayed. Useful for redirecting a sqlline command to a file for later parsing. Defaults to false.
+
+trimscripts
+
+If true, then trim leading and trailing whitespace from lines as they are processed in scripts; otherwise, preserve whitespace. Defaults to true.
+
+verbose
+
+If true, then print out the entire java stack trace whenever an error occurs, as well as displaying debugging information. Defaults to false.
+
+JDBC Driver Support
+
+Project Information

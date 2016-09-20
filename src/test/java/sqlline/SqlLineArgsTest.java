@@ -11,10 +11,12 @@
 */
 package sqlline;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -71,8 +73,8 @@ public class SqlLineArgsTest {
     PrintStream beelineOutputStream = new PrintStream(os);
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
-    SqlLine.Status status = beeLine.begin(args, null, false);
-
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(args, is, false);
 
     return new Pair(status, os.toString("UTF8"));
   }
@@ -242,7 +244,7 @@ public class SqlLineArgsTest {
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
             is(true));
 
-    while (!help.isEmpty()) {
+    while (help.length() > 0) {
       int i = help.indexOf("\n", 1);
       if (i < 0) {
         break;
@@ -269,6 +271,19 @@ public class SqlLineArgsTest {
         + "sqlline version ???\n";
     checkScriptFile("!help all\n", false, equalTo(SqlLine.Status.OK),
         is(expected));
+  }
+
+  /**
+   * Test case for [SQLLINE-49], "!manual command fails".
+   */
+  @Test
+  public void testManual() throws Throwable {
+    final String expected = "Installing SQLLine\n"
+        + "Using SQLLine\n"
+        + "Running SQLLine\n"
+        + "Connecting to a database\n";
+    checkScriptFile("!manual\n", false, equalTo(SqlLine.Status.OK),
+        CoreMatchers.containsString(expected));
   }
 
   /**
