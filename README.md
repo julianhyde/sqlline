@@ -62,7 +62,7 @@ If you prefer, you can invoke Java directly, without using the
 $ java -jar sqlline-VERSION-jar-with-dependencies.jar --help
 ```
 
-Read [the manual](http://www.hydromatic.net/sqlline/manual.html).
+Read [the manual](http://julianhyde.github.io/sqlline/manual.html).
 
 ## Maven Usage
 
