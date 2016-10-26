@@ -10,7 +10,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-  <version>1.2.0</version>
+  <version>1.3-SNAPSHOT</version>
   <name>sqlline</name>
   <url>http://github.com/julianhyde/sqlline</url>
 
@@ -52,7 +52,7 @@
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
     <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
     <url>http://github.com/julianhyde/sqlline/tree/master</url>
-    <tag>sqlline-1.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <mailingLists>
