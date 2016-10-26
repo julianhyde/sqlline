@@ -2,7 +2,7 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
-## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.2">1.2</a> (2016-10-25)
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.2.0">1.2.0</a> (2016-10-26)
 
 Bugs and functional changes:
 

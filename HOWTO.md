@@ -31,13 +31,14 @@ mvn clean
 Prepare:
 
 ```bash
-mvn -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT release:prepare
+read -s GPG_PASSPHRASE
+mvn -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
 ```
 
 Perform:
 
 ```bash
-mvn -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT release:perform
+mvn -DskipTests -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:perform
 ```
 
 Publish:
@@ -45,7 +46,12 @@ Publish:
 * Under "Build Promotion", click on "Staging Repositories".
 * Select the line "sqlline-nnnn", and click "Close". You might need to
   click "Refresh" a couple of times before it closes.
-* If it closes without errors, click "Publish".
+* If it closes without errors, click "Release".
+
+Wait a couple of hours for the artifacts to appear on Maven central,
+and announce the release.
+
+Update the [github release list](https://github.com/julianhyde/sqlline/releases).
 
 ## Cleaning up after a failed release attempt (for committers)
 
