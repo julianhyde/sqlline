@@ -16,9 +16,9 @@ import java.sql.*;
 import sun.misc.*; // CHECKSTYLE: IGNORE 0
 
 /**
- * A signal handler for SqlLine which interprets Ctrl+C as a request to cancel
- * the currently executing query. Adapted from <a
- * href="http://www.smotricz.com/kabutz/Issue043.html">TJSN</a>.
+ * A signal handler for SQLLine which interprets Ctrl+C as a request to cancel
+ * the currently executing query. Adapted from
+ * <a href="http://www.smotricz.com/kabutz/Issue043.html">TJSN</a>.
  */
 class SunSignalHandler implements SqlLineSignalHandler, SignalHandler {
   private DispatchCallback dispatchCallback;

@@ -38,7 +38,7 @@
     </repository>
     <site>
       <id>sqlline.website</id>
-      <name>Sqlline Website</name>
+      <name>SQLLine Website</name>
       <url>file:/home/jhyde/web2/sqlline</url>
     </site>
   </distributionManagement>
@@ -118,6 +118,20 @@
             </configuration>
             <goals>
               <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
             </goals>
           </execution>
         </executions>

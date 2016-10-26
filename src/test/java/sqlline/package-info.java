@@ -11,7 +11,7 @@
 */
 
 /**
- * Unit tests for SqlLine, the JDBC shell.
+ * Unit tests for SQLLine, the JDBC shell.
  */
 package sqlline;
 

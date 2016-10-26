@@ -16,7 +16,7 @@ import java.util.List;
 import jline.console.completer.Completer;
 
 /**
- * Completer for SqlLine. It dispatches to sub-completers based on the
+ * Completer for SQLline. It dispatches to sub-completers based on the
  * current arguments.
  */
 class SqlLineCompleter

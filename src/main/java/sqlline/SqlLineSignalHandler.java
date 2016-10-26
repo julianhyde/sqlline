@@ -12,7 +12,7 @@
 package sqlline;
 
 /**
- * A signal handler interface for SqlLine. The interface is decoupled from the
+ * A signal handler interface for SQLLine. The interface is decoupled from the
  * implementation since signal handlers are not portable across JVMs, so we use
  * dynamic class-loading.
  */

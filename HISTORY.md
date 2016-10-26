@@ -1,15 +1,33 @@
-# Sqlline release history and change log
+# SQLLine release history and change log
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
-## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.1.10">1.1.10</a> (under development)
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.2">1.2</a> (2016-10-25)
 
 Bugs and functional changes:
 
+* [<a href="https://github.com/julianhyde/sqlline/issues/49">SQLLINE-49</a>]
+  `!manual` command fails
+* [<a href="https://github.com/julianhyde/sqlline/issues/48">SQLLINE-48</a>]
+  Lazily load system properties on startup
+* [<a href="https://github.com/julianhyde/sqlline/issues/35">SQLLINE-35</a>]
+  Make `SqlLine.begin` method public
+* [<a href="https://github.com/julianhyde/sqlline/issues/42">SQLLINE-42</a>]
+  Script fails if first line is a comment
+* [<a href="https://github.com/julianhyde/sqlline/issues/41">SQLLINE-41</a>]
+  `!tables` command hangs in h2
 * [<a href="https://github.com/julianhyde/sqlline/issues/39">SQLLINE-39</a>]
   `!help set` shouldn't break long lines
 * Add `WrappedSqlException` to allow `IncrementalRows` to throw a `SQLException`
   (Parth Chandra)
+
+Other:
+* Change capitalization of project name to "SQLLine"
+  (previously a mixture of "sqlline" and "SQLline")
+* [<a href="https://github.com/julianhyde/sqlline/issues/37">SQLLINE-37</a>]
+  Initial github-pages web site, including manual
+* Checkstyle should always look for unix line endings, even on windows
+* Fix Windows line endings
 * Switch to "scott-data-hsqldb" as test data set; it is smaller than
   "foodmart-data-hsqldb"
 
@@ -53,8 +71,8 @@ Bugs and functional changes:
 * Fix bug: SqlCompleter was skipping every other column.
 * Fix <a href="https://issues.apache.org/jira/browse/HIVE-4566">HIVE-4566</a>, "NullPointerException if typeinfo and nativesql commands are executed at beeline before a DB connection is established" (Xuefu Zhang via Ashutosh Chauhan and Julian Hyde)
 * Fix <a href="https://issues.apache.org/jira/browse/HIVE-4364">HIVE-4364</a>, "beeline always exits with 0 status, should exit with non-zero status on error" (Rob Weltman via Ashutosh Chauhan and Julian Hyde)
-* Fix <a href="https://issues.apache.org/jira/browse/HIVE-4268">HIVE-4268</a>, "Beeline should support the -f option" (Rob Weltman via cws and Julian Hyde). SqlLine options '-f file' and '--run=file' are now equivalent.
-* Add SqlLineArgsTest, copied from BeeLineArgsTest, but testing against hsqldb rather than Hive.
+* Fix <a href="https://issues.apache.org/jira/browse/HIVE-4268">HIVE-4268</a>, "Beeline should support the -f option" (Rob Weltman via cws and Julian Hyde). SQLLine options '-f file' and '--run=file' are now equivalent.
+* Add `SqlLineArgsTest`, copied from `BeeLineArgsTest`, but testing against hsqldb rather than Hive.
 
 Code re-organization:
 * Break out inner classes.

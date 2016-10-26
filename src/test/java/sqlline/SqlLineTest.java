@@ -14,7 +14,7 @@ package sqlline;
 import junit.framework.TestCase;
 
 /**
- * Test cases for SqlLine.
+ * Test cases for SQLLine.
  */
 public class SqlLineTest extends TestCase {
   /**
