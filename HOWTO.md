@@ -32,13 +32,13 @@ Prepare:
 
 ```bash
 read -s GPG_PASSPHRASE
-mvn -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
+mvn -Prelease -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
 ```
 
 Perform:
 
 ```bash
-mvn -DskipTests -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:perform
+mvn -Prelease -DskipTests -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:perform
 ```
 
 Publish:
