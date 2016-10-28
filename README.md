@@ -73,7 +73,7 @@ Use the following definition to use `sqlline` in your maven project:
 <dependency>
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
-  <version>1.2</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 

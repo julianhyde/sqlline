@@ -41,7 +41,7 @@ Perform:
 mvn -Prelease -DskipTests -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:perform
 ```
 
-Publish:
+Publish the release:
 * Go to http://oss.sonatype.org and log in.
 * Under "Build Promotion", click on "Staging Repositories".
 * Select the line "sqlline-nnnn", and click "Close". You might need to
@@ -52,6 +52,19 @@ Wait a couple of hours for the artifacts to appear on Maven central,
 and announce the release.
 
 Update the [github release list](https://github.com/julianhyde/sqlline/releases).
+
+Publish the site:
+```bash
+git checkout branch-version-x.y
+mvn package
+mv target/docbkx/html/manual.html docs
+git add docs/manual.html
+rm -rf docs/apidocs
+mv target/apidocs docs
+git add docs/apidocs
+git commit
+git push
+```
 
 ## Cleaning up after a failed release attempt (for committers)
 

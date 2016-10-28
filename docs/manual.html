@@ -1,156 +1,165 @@
-<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>SQLLine 1.0.7-eb</title><link href="styles.css" rel="stylesheet" type="text/css"><meta content="DocBook XSL Stylesheets V1.75.2" name="generator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" title="SQLLine 1.0.7-eb"><div class="titlepage"><div><div><h1 class="title"><a name="N10001"></a>
-			SQLLine 1.0.7-eb
-		</h1></div><div><p class="copyright">Copyright &copy; 2002, 2003, 2004, 2005 Marc Prud'hommeaux</p></div></div><hr></div><div class="toc"><dl><dt><span class="part"><a href="#manual">SQLLine Manual</a></span></dt><dd><dl><dt><span class="chapter"><a href="#introduction">Introduction</a></span></dt><dt><span class="chapter"><a href="#license">License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#N10041">Required software</a></span></dt><dt><span class="sect1"><a href="#N10063">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &mdash; 
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>SQLLine 1.2</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>
+			SQLLine 1.2
+		</h1></div><div><p class="copyright">Copyright &copy; 2002, 2003, 2004, 2005 Marc Prud'hommeaux</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="part"><a href="#manual">I. SQLLine Manual</a></span></dt><dd><dl><dt><span class="chapter"><a href="#introduction">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#license">2. License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">3. Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">4. Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d5e28">Required software</a></span></dt><dt><span class="sect1"><a href="#d5e43">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">5. Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">6. Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &#8212;
 					Execute SQL against all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &#8212;
 					Enable or disable automatic transaction commit mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &#8212;
 					Start or execute a batch of SQL statements
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &#8212;
 					Enable terse output mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &#8212;
 					Close the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &#8212;
 					Display columns of a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &#8212;
 					Commit the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &#8212;
 					Connect to a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &#8212;
 					Provide information about the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &#8212;
 					Describe a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &#8212;
 					Drop all tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &#8212;
 					List exported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &#8212;
 					Change to a different active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &#8212;
 					Display help information
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212;
 					Display the command history
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212;
 					List imported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212;
 					Display indexes for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &#8212;
 					Set the transaction isolation mode for the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &#8212;
 					Display all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &mdash; 
-					Invoke arbitrary metadata commands 
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &#8212;
+					Invoke arbitrary metadata commands
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &#8212;
 					Change the method for displaying SQL results
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &#8212;
 					Display the primary key columns for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &#8212;
 					List stored procedures
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &#8212;
 					Connect to the database defined in the
 					specified properties file.
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &#8212;
 					Exit SQLLine
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &#8212;
 					Reconnect to the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &#8212;
 					Begin recording all output from SQL commands
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &#8212;
 					Obtain a list of all tables and columns from the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &#8212;
 					Roll back the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &#8212;
 					Execute a command script
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &#8212;
 					Save the current preferences
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212;
 					Scan class path for JDBC drivers
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212;
 					Save executed commands to a file
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212;
 					Set a preference
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &#8212;
 					Execute a SQL against a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &#8212;
 					List all the tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &#8212;
 					Enable verbose output
-					</span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">JDBC Driver Support</a></span></dt></dl></dd><dt><span class="appendix"><a href="#project_info">Project Information</a></span></dt></dl></div><div class="part" title="SQLLine Manual"><div class="titlepage"><div><div><h1 class="title"><a name="manual"></a>SQLLine Manual</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#introduction">Introduction</a></span></dt><dt><span class="chapter"><a href="#license">License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#N10041">Required software</a></span></dt><dt><span class="sect1"><a href="#N10063">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">7. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">8. JDBC Driver Support</a></span></dt></dl></dd><dt><span class="appendix"><a href="#project_info">A. Project Information</a></span></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>5.1. <a href="#sql_example">Issuing SQL commands</a></dt></dl></div>
+
+	<div class="part"><div class="titlepage"><div><div><h1 class="title"><a name="manual"></a>Part&nbsp;I.&nbsp;SQLLine Manual</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="chapter"><a href="#introduction">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#license">2. License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">3. Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">4. Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d5e28">Required software</a></span></dt><dt><span class="sect1"><a href="#d5e43">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">5. Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">6. Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &#8212;
 					Execute SQL against all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &#8212;
 					Enable or disable automatic transaction commit mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &#8212;
 					Start or execute a batch of SQL statements
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &#8212;
 					Enable terse output mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &#8212;
 					Close the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &#8212;
 					Display columns of a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &#8212;
 					Commit the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &#8212;
 					Connect to a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &#8212;
 					Provide information about the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &#8212;
 					Describe a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &#8212;
 					Drop all tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &#8212;
 					List exported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &#8212;
 					Change to a different active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &#8212;
 					Display help information
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212;
 					Display the command history
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212;
 					List imported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212;
 					Display indexes for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &#8212;
 					Set the transaction isolation mode for the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &#8212;
 					Display all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &mdash; 
-					Invoke arbitrary metadata commands 
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &#8212;
+					Invoke arbitrary metadata commands
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &#8212;
 					Change the method for displaying SQL results
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &#8212;
 					Display the primary key columns for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &#8212;
 					List stored procedures
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &#8212;
 					Connect to the database defined in the
 					specified properties file.
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &#8212;
 					Exit SQLLine
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &#8212;
 					Reconnect to the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &#8212;
 					Begin recording all output from SQL commands
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &#8212;
 					Obtain a list of all tables and columns from the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &#8212;
 					Roll back the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &#8212;
 					Execute a command script
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &#8212;
 					Save the current preferences
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212;
 					Scan class path for JDBC drivers
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212;
 					Save executed commands to a file
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212;
 					Set a preference
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &#8212;
 					Execute a SQL against a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &#8212;
 					List all the tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &#8212;
 					Enable verbose output
-					</span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">JDBC Driver Support</a></span></dt></dl></div><div class="chapter" title="Introduction"><div class="titlepage"><div><div><h2 class="title"><a name="introduction"></a>Introduction</h2></div></div></div><p>
+					</span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">7. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">8. JDBC Driver Support</a></span></dt></dl></div>
+
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="introduction"></a>Chapter&nbsp;1.&nbsp;Introduction</h2></div></div></div>
+
+			<p>
 			SQLLine is a pure-Java console based utility for connecting
 			to relational databases and executing SQL commands. It is
 			similiar to other command-line database access utilities like
@@ -158,7 +167,12 @@
 			for MySQL, and <code class="filename">isql</code> for Sybase/SQL Server.
 			Since it is pure-Java, it is platform independant, and will
 			run on any platform that can run Java 1.3 or higher.
-			</p></div><div class="chapter" title="License and Terms of Use"><div class="titlepage"><div><div><h2 class="title"><a name="license"></a>License and Terms of Use</h2></div></div></div><p>
+			</p>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="license"></a>Chapter&nbsp;2.&nbsp;License and Terms of Use</h2></div></div></div>
+
+			<p>
 				SQLLine is distributed under the
 				BSD License, meaning that
 				you are free to redistribute, modify, or sell the software
@@ -166,19 +180,32 @@
 				see the
 				<a class="ulink" href="http://www.opensource.org/licenses/bsd-license.php" target="_top">
 				license text</a>.
-			</p><p>
+			</p>
+			<p>
 				For information on obtaining the software under another
 				license, contact the copyright holder:
 				<a class="ulink" href="mailto:mwp1@cornell.edu" target="_top">mwp1@cornell.edu</a>.
-			</p></div><div class="chapter" title="Obtaining SQLLine"><div class="titlepage"><div><div><h2 class="title"><a name="obtaining"></a>Obtaining SQLLine</h2></div></div></div><p>
+			</p>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="obtaining"></a>Chapter&nbsp;3.&nbsp;Obtaining SQLLine</h2></div></div></div>
+
+			<p>
 				SQLLine is hosted on SourceForge, and is located at
 				<a class="ulink" href="http://sqlline.sf.net" target="_top">http://sqlline.sf.net</a>.
-				The latest release can be downloaded from 
+				The latest release can be downloaded from
 				<a class="ulink" href="http://sqlline.sf.net/download.html" target="_top">http://sqlline.sf.net/download.html</a>.
-			</p></div><div class="chapter" title="Installation"><div class="titlepage"><div><div><h2 class="title"><a name="installation"></a>Installation</h2></div></div></div><div class="toc"><dl><dt><span class="sect1"><a href="#N10041">Required software</a></span></dt><dt><span class="sect1"><a href="#N10063">Installing SQLLine</a></span></dt></dl></div><div class="sect1" title="Required software"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N10041"></a>Required software</h2></div></div></div><p>
+			</p>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="installation"></a>Chapter&nbsp;4.&nbsp;Installation</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#d5e28">Required software</a></span></dt><dt><span class="sect1"><a href="#d5e43">Installing SQLLine</a></span></dt></dl></div>
+
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e28"></a>Required software</h2></div></div></div>
+
+				<p>
 					SQLLine depends on the following software:
-					</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
-						<span class="trademark">Java</span>&trade; Virtual Machine -
+					</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+						<span class="trademark">Java</span>&#8482; Virtual Machine -
 						SQLLine is a pure
 						java program, and requires Java version 1.3 or higher
 						in order to run. The latest JVM can be downloaded from
@@ -190,18 +217,22 @@
 						<a class="ulink" href="http://jline.sf.net" target="_top">http://jline.sf.net</a>. Version
 						0.8.1 or higher is required.
 						</p></li><li class="listitem"><p>
-						<span class="trademark">JDBC</span>&trade; Driver(s) - Since
+						<span class="trademark">JDBC</span>&#8482; Driver(s) - Since
 						SQLLine uses the Java Database
 						Connectivity package to connect to your database, you
 						need to obtain the correct JDBC driver libraries
 						for your database. Any JDBC compliant driver can be
 						used for this purpose. Drivers can be located by
-						referring to the section on 
-						<a class="link" href="#known_drivers" title="JDBC Driver Support">known JDBC drivers</a>,
+						referring to the section on
+						<a class="link" href="#known_drivers" title="Chapter&nbsp;8.&nbsp;JDBC Driver Support">known JDBC drivers</a>,
 						or else by referring to your database vendor's
 						web site.
 						</p></li></ul></div><p>
-				</p></div><div class="sect1" title="Installing SQLLine"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N10063"></a>Installing SQLLine</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d5e43"></a>Installing SQLLine</h2></div></div></div>
+
+				<p>
 				There are currently no set standards for installing Java
 				software on different platforms. The simplest method for
 				installing SQLLine in a platform independant way is as follows:
@@ -221,9 +252,23 @@
 					drivers require some installation, such as uncompressing
 					or unzipping.
 					</p></li></ol></div><p>
-				</p></div></div><div class="chapter" title="Using SQLLine"><div class="titlepage"><div><div><h2 class="title"><a name="usage"></a>Using SQLLine</h2></div></div></div><div class="toc"><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></div><div class="sect1" title="Running SQLLine"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage_running"></a>Running SQLLine</h2></div></div></div><p>
+				</p>
+			</div>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="usage"></a>Chapter&nbsp;5.&nbsp;Using SQLLine</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></div>
+
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage_running"></a>Running SQLLine</h2></div></div></div>
+
+				<p>
 				SQLLine can be run with the following command:
-					</p><div class="cmdsynopsis"><p><code class="command">java</code>  {-Djava.ext.dirs=<em class="replaceable"><code>sqllinedir</code></em>} {<em class="replaceable"><code>sqllinedir</code></em>/sqlline.jar} [<em class="replaceable"><code>options</code></em>...] [<em class="replaceable"><code>properties files</code></em>...]</p></div><p>
+					</p><div class="cmdsynopsis"><p>
+					<code class="command">java</code>
+					 {-Djava.ext.dirs=<em class="replaceable"><code>sqllinedir</code></em>}
+					 {<em class="replaceable"><code>sqllinedir</code></em>/sqlline.jar}
+					 [<em class="replaceable"><code>options</code></em>...]
+					 [<em class="replaceable"><code>properties files</code></em>...]
+					</p></div><p>
 
 				For example, if your <code class="filename">sqllinedir</code> is
 				<code class="filename">/usr/share/java/</code> (this is typical for
@@ -231,14 +276,20 @@
 				</p><pre class="screen">
 java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
 				</pre><p>
-				</p><p>
+				</p>
+
+				<p>
 				Once you have started SQLLine, you will a prompt that
 				reads "sqlline&gt; ". From here, you can enter either SQLLine
 				commands (beginning with a "!" character), or a SQL statement
 				(if you are currently connected to a database). For example,
 				entering "!help" will display a list of all the available
 				commands.
-				</p></div><div class="sect1" title="Connecting to a database"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connecting"></a>Connecting to a database</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="connecting"></a>Connecting to a database</h2></div></div></div>
+
+				<p>
 				SQLLine is only useful once you are connected to a database.
 				In order to do so, you need to use the "!connect" command,
 				with the JDBC URL of the database you are going to
@@ -250,7 +301,8 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
 				name of the database itself as part of the string.
 				Consult your driver's documentation for details on the
 				URL to use.
-				</p><p>
+				</p>
+				<p>
 				For example, to connect to an Oracle database, you might enter:
 				</p><pre class="screen">
 
@@ -267,14 +319,17 @@ Autocommit status: true
 
 				Once you are connected, the prompt will change the
 				reflect URL of the current connection.
-				</p><p>
+				</p>
+				<p>
 				SQLLine can also accept command line options to connect
 				to a database. If a file is specified on the command
 				line, it will be treated as a properties file, and
 				try to connect to the database specified therein.
 				For details, see the
 				<a class="link" href="#sect_command_properties" title="properties">properties command</a> documentation.
-				</p><p>
+				</p>
+
+				<p>
 				SQLLine allows you to have multiple connections to databases
 				(either the same database, or a different database) open
 				at the same time. Issuing the
@@ -285,11 +340,17 @@ Autocommit status: true
 				the <a class="link" href="#command_go" title="go">go</a> command. The currently
 				open connections can be listed with the
 				<a class="link" href="#command_list" title="list">list</a> command.
-				</p></div><div class="sect1" title="Issuing SQL commands"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="issuing_sql"></a>Issuing SQL commands</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="issuing_sql"></a>Issuing SQL commands</h2></div></div></div>
+
+				<p>
 					Once you are connected to a database, you
 					can begin SQL statements against the current connection.
 					For example:
-				</p><div class="example"><a name="sql_example"></a><p class="title"><b>Example&nbsp;1.&nbsp;Issuing SQL commands</b></p><div class="example-contents"><pre class="screen">
+				</p><div class="example"><a name="sql_example"></a><p class="title"><b>Example&nbsp;5.1.&nbsp;Issuing SQL commands</b></p><div class="example-contents">
+
+				<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM MYTABLE;
 
 +-----+
@@ -302,95 +363,127 @@ Autocommit status: true
 +-----+
 4 rows selected (0.012 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-				</pre></div></div><p><br class="example-break">
-				</p></div><div class="sect1" title="Command Completion"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="completion"></a>Command Completion</h2></div></div></div><p>
+				</pre>
+				</div></div><p><br class="example-break">
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="completion"></a>Command Completion</h2></div></div></div>
+
+				<p>
 				On UNIX systems, SQLLine allows command-line completion
 				using the tab key. This will be familiar for users of such
 				popular shells as bash and tcsh. In general, hitting
 				the TAB key when part of the way through typing a command
 				will fill in the rest of the command, or else will display
 				a selection of appropriate possibilities.
-				</p></div></div><div class="chapter" title="Command Reference"><div class="titlepage"><div><div><h2 class="title"><a name="commands"></a>Command Reference</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &mdash; 
+				</p>
+			</div>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="commands"></a>Chapter&nbsp;6.&nbsp;Command Reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &#8212;
 					Execute SQL against all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &#8212;
 					Enable or disable automatic transaction commit mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_batch">batch</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_batch">batch</a></span><span class="refpurpose"> &#8212;
 					Start or execute a batch of SQL statements
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_brief">brief</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_brief">brief</a></span><span class="refpurpose"> &#8212;
 					Enable terse output mode
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_close">close</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_close">close</a></span><span class="refpurpose"> &#8212;
 					Close the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_columns">columns</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_columns">columns</a></span><span class="refpurpose"> &#8212;
 					Display columns of a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_commit">commit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_commit">commit</a></span><span class="refpurpose"> &#8212;
 					Commit the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_connect">connect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_connect">connect</a></span><span class="refpurpose"> &#8212;
 					Connect to a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dbinfo">dbinfo</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dbinfo">dbinfo</a></span><span class="refpurpose"> &#8212;
 					Provide information about the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_describe">describe</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_describe">describe</a></span><span class="refpurpose"> &#8212;
 					Describe a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_dropall">dropall</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_dropall">dropall</a></span><span class="refpurpose"> &#8212;
 					Drop all tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_exportedkeys">exportedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_exportedkeys">exportedkeys</a></span><span class="refpurpose"> &#8212;
 					List exported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_go">go</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_go">go</a></span><span class="refpurpose"> &#8212;
 					Change to a different active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_help">help</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_help">help</a></span><span class="refpurpose"> &#8212;
 					Display help information
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212;
 					Display the command history
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212;
 					List imported foreign keys for a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212;
 					Display indexes for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_isolation">isolation</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_isolation">isolation</a></span><span class="refpurpose"> &#8212;
 					Set the transaction isolation mode for the active connection
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_list">list</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_list">list</a></span><span class="refpurpose"> &#8212;
 					Display all active connections
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &mdash; 
-					Invoke arbitrary metadata commands 
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_metadata">metadata</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_metadata">metadata</a></span><span class="refpurpose"> &#8212;
+					Invoke arbitrary metadata commands
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_outputformat">outputformat</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_outputformat">outputformat</a></span><span class="refpurpose"> &#8212;
 					Change the method for displaying SQL results
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_primarykeys">primarykeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_primarykeys">primarykeys</a></span><span class="refpurpose"> &#8212;
 					Display the primary key columns for a table
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_procedures">procedures</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_procedures">procedures</a></span><span class="refpurpose"> &#8212;
 					List stored procedures
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_properties">properties</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_properties">properties</a></span><span class="refpurpose"> &#8212;
 					Connect to the database defined in the
 					specified properties file.
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_quit">quit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_quit">quit</a></span><span class="refpurpose"> &#8212;
 					Exit SQLLine
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_reconnect">reconnect</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_reconnect">reconnect</a></span><span class="refpurpose"> &#8212;
 					Reconnect to the current database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_record">record</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_record">record</a></span><span class="refpurpose"> &#8212;
 					Begin recording all output from SQL commands
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rehash">rehash</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rehash">rehash</a></span><span class="refpurpose"> &#8212;
 					Obtain a list of all tables and columns from the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_rollback">rollback</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_rollback">rollback</a></span><span class="refpurpose"> &#8212;
 					Roll back the current transaction
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_run">run</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_run">run</a></span><span class="refpurpose"> &#8212;
 					Execute a command script
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_save">save</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_save">save</a></span><span class="refpurpose"> &#8212;
 					Save the current preferences
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212;
 					Scan class path for JDBC drivers
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212;
 					Save executed commands to a file
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212;
 					Set a preference
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_sql">sql</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_sql">sql</a></span><span class="refpurpose"> &#8212;
 					Execute a SQL against a database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_tables">tables</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_tables">tables</a></span><span class="refpurpose"> &#8212;
 					List all the tables in the database
-					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &mdash; 
+					</span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &#8212;
 					Enable verbose output
-					</span></dt></dl></dd></dl></div><div class="section" title="all"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_all"></a>all</h2></div></div></div><div class="refentry" title="all"><a name="command_all"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>all &mdash; 
+					</span></dt></dl></dd></dl></div>
+
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_all"></a>all</h2></div></div></div>
+
+			<div class="refentry"><a name="command_all"></a><div class="titlepage"></div>
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					all
+					 &#8212;
 					Execute SQL against all active connections
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!all</code>  {<em class="replaceable"><code>SQL statement</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1011A"></a><h2>Description</h2><p>
+
+				</p></div>
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!all</code>
+					 {<em class="replaceable"><code>SQL statement</code></em>}
+					</p></div>
+				</div>
+				<div class="refsect1"><a name="d5e117"></a><h2>Description</h2>
+
+					<p>
 					Execute the specified SQL against all the
 					current connections.
-					</p></div><div class="refsect1" title="Example of &quot;all&quot; command"><a name="N1011F"></a><h2>Example of "all" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e120"></a><h2>Example of "all" command</h2>
+
+					<pre class="screen">
 1: jdbc:mysql://localhost/mydb&gt; !list
 
 2 active connections:
@@ -406,31 +499,86 @@ Executing SQL against: jdbc:mysql://localhost/mydb
 1 row affected (3.187 seconds)
 
 1: jdbc:mysql://localhost/mydb&gt;
-					</pre></div></div></div><div class="section" title="autocommit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_autocommit"></a>autocommit</h2></div></div></div><div class="refentry" title="autocommit"><a name="command_autocommit"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>autocommit &mdash; 
+					</pre>
+				</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_autocommit"></a>autocommit</h2></div></div></div>
+
+			<div class="refentry"><a name="command_autocommit"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					autocommit
+					 &#8212;
 					Enable or disable automatic transaction commit mode
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!autocommit</code>  {<em class="replaceable"><code>on/off</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N10140"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!autocommit</code>
+					 {<em class="replaceable"><code>on/off</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e137"></a><h2>Description</h2>
+
+					<p>
 					Set autocommit mode on or off. When autocommit is
 					on, every individual SQL statement will be committed
 					after it is issued. Otherwise, the
 					<a class="link" href="#command_commit" title="commit">commit</a>
 					command will need to be issued in order to commit any
 					changes to the database.
-					</p></div><div class="refsect1" title="Example of &quot;autocommit&quot; command"><a name="N10149"></a><h2>Example of "autocommit" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e141"></a><h2>Example of "autocommit" command</h2>
+
+					<pre class="screen">
 1: jdbc:mysql://localhost/mydb&gt; !autocommit off
 
 Autocommit status: false
 
 1: jdbc:mysql://localhost/mydb&gt;
-					</pre></div></div></div><div class="section" title="batch"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_batch"></a>batch</h2></div></div></div><div class="refentry" title="batch"><a name="command_batch"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>batch &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_batch"></a>batch</h2></div></div></div>
+
+			<div class="refentry"><a name="command_batch"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					batch
+					 &#8212;
 					Start or execute a batch of SQL statements
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!batch</code> </p></div></div><div class="refsect1" title="Description"><a name="N10165"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!batch</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e156"></a><h2>Description</h2>
+
+					<p>
 					Start or execute a batch of SQL statements. The first time
 					the statement is issued, subsequent SQL statements will
 					be deferred until the batch command is issued again.
 					Databases can frequently optimize multiple batched
 					statements (e.g., for bulk data loading) in order to
 					speed up execution.
-					</p></div><div class="refsect1" title="Example of &quot;batch&quot; command"><a name="N1016A"></a><h2>Example of "batch" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e159"></a><h2>Example of "batch" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !batch
 
 Batching SQL statements. Run "batch" again to execute the batch.
@@ -460,12 +608,39 @@ COUNT   STATEMENT
 +-----+
 4 rows selected (0.012 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="brief"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_brief"></a>brief</h2></div></div></div><div class="refentry" title="brief"><a name="command_brief"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>brief &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_brief"></a>brief</h2></div></div></div>
+
+			<div class="refentry"><a name="command_brief"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					brief
+					 &#8212;
 					Enable terse output mode
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!brief</code> </p></div></div><div class="refsect1" title="Description"><a name="N10186"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!brief</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e174"></a><h2>Description</h2>
+
+					<p>
 					Set verbose mode off. This will prevent printing
 					of stack traces when errors occur.
-					</p></div><div class="refsect1" title="Example of &quot;brief&quot; command"><a name="N1018B"></a><h2>Example of "brief" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e177"></a><h2>Example of "brief" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM BOGUS_TABLE;
 
 Error: ORA-00942: table or view does not exist (state=42000,code=942)
@@ -493,12 +668,39 @@ verbose: off
 Error: ORA-00942: table or view does not exist (state=42000,code=942)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="close"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_close"></a>close</h2></div></div></div><div class="refentry" title="close"><a name="command_close"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>close &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_close"></a>close</h2></div></div></div>
+
+			<div class="refentry"><a name="command_close"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					close
+					 &#8212;
 					Close the active connection
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!close</code> </p></div></div><div class="refsect1" title="Description"><a name="N101A7"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!close</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e192"></a><h2>Description</h2>
+
+					<p>
 					Close the current connection and remote it from the
 					connection list.
-					</p></div><div class="refsect1" title="Example of &quot;close&quot; command"><a name="N101AC"></a><h2>Example of "close" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e195"></a><h2>Example of "close" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !list
 
 1 active connection:
@@ -513,11 +715,39 @@ sqlline&gt; !list
 No active connections
 
 sqlline&gt;
-					</pre></div></div></div><div class="section" title="columns"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_columns"></a>columns</h2></div></div></div><div class="refentry" title="columns"><a name="command_columns"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>columns &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_columns"></a>columns</h2></div></div></div>
+
+			<div class="refentry"><a name="command_columns"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					columns
+					 &#8212;
 					Display columns of a table
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!columns</code>  {<em class="replaceable"><code>table name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N101CD"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!columns</code>
+					 {<em class="replaceable"><code>table name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e212"></a><h2>Description</h2>
+
+					<p>
 					List the columns in the specified table.
-					</p></div><div class="refsect1" title="Example of &quot;columns&quot; command"><a name="N101D2"></a><h2>Example of "columns" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e215"></a><h2>Example of "columns" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !columns EMPLOYEE
 
 +-------------+--------------+------------+------------+
@@ -529,11 +759,38 @@ sqlline&gt;
 +-------------+--------------+------------+------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="commit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_commit"></a>commit</h2></div></div></div><div class="refentry" title="commit"><a name="command_commit"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>commit &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_commit"></a>commit</h2></div></div></div>
+
+			<div class="refentry"><a name="command_commit"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					commit
+					 &#8212;
 					Commit the current transaction
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!commit</code> </p></div></div><div class="refsect1" title="Description"><a name="N101EE"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!commit</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e230"></a><h2>Description</h2>
+
+					<p>
 					Commit the current transaction, if autocommit is off.
-					</p></div><div class="refsect1" title="Example of &quot;commit&quot; command"><a name="N101F3"></a><h2>Example of "commit" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e233"></a><h2>Example of "commit" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !autocommit off
 
 Autocommit status: false
@@ -555,11 +812,42 @@ Commit complete (0.661 seconds)
 1 row selected (0.309 seconds)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="connect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_connect"></a>connect</h2></div></div></div><div class="refentry" title="connect"><a name="command_connect"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>connect &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_connect"></a>connect</h2></div></div></div>
+
+			<div class="refentry"><a name="command_connect"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					connect
+					 &#8212;
 					Connect to a database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!connect</code>  {<em class="replaceable"><code>url</code></em>} {<em class="replaceable"><code>username</code></em>} {<em class="replaceable"><code>password</code></em>} [<em class="replaceable"><code>driver class</code></em>]</p></div></div><div class="refsect1" title="Description"><a name="N10223"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!connect</code>
+					 {<em class="replaceable"><code>url</code></em>}
+					 {<em class="replaceable"><code>username</code></em>}
+					 {<em class="replaceable"><code>password</code></em>}
+					 [<em class="replaceable"><code>driver class</code></em>]
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e256"></a><h2>Description</h2>
+
+					<p>
 					Connect to a database.
-					</p></div><div class="refsect1" title="Example of &quot;commit&quot; command"><a name="N10228"></a><h2>Example of "commit" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e259"></a><h2>Example of "commit" command</h2>
+
+					<pre class="screen">
 sqlline&gt; !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
 
 Connected to: Oracle (version Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
@@ -569,11 +857,38 @@ Driver: Oracle JDBC driver (version 9.0.1.0.0)
 Autocommit status: true
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="dbinfo"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_dbinfo"></a>dbinfo</h2></div></div></div><div class="refentry" title="dbinfo"><a name="command_dbinfo"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>dbinfo &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_dbinfo"></a>dbinfo</h2></div></div></div>
+
+			<div class="refentry"><a name="command_dbinfo"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					dbinfo
+					 &#8212;
 					Provide information about the current database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!dbinfo</code> </p></div></div><div class="refsect1" title="Description"><a name="N10244"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!dbinfo</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e274"></a><h2>Description</h2>
+
+					<p>
 					List metadata information about the current connection.
-					</p></div><div class="refsect1" title="Example of &quot;dbinfo&quot; command"><a name="N10249"></a><h2>Example of "dbinfo" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e277"></a><h2>Example of "dbinfo" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !dbinfo
 
 allProceduresAreCallable                          false
@@ -729,15 +1044,43 @@ usesLocalFilePerTable                             false
 usesLocalFiles                                    false
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="describe"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_describe"></a>describe</h2></div></div></div><div class="refentry" title="describe"><a name="command_describe"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>describe &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_describe"></a>describe</h2></div></div></div>
+
+			<div class="refentry"><a name="command_describe"></a><div class="titlepage"></div>
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					describe
+					 &#8212;
 					Describe a table
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!describe</code>  [<em class="replaceable"><code>table name</code></em>]</p></div></div><div class="refsect1" title="Description"><a name="N1026A"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!describe</code>
+					 [<em class="replaceable"><code>table name</code></em>]
+					</p></div>
+				</div>
+
+					<div class="refsect1"><a name="d5e294"></a><h2>Description</h2>
+
+					<p>
 					Synonym for
 					<a class="link" href="#command_columns" title="columns">columns</a> (if
 					an argument is specified)
 					or <a class="link" href="#command_tables" title="tables">tables</a>
 					 (if no argument is specified).
-					</p></div><div class="refsect1" title="Example of &quot;describe&quot; command"><a name="N10277"></a><h2>Example of "describe" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e299"></a><h2>Example of "describe" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !describe EMPLOYEE
 
 +--------------+------------+-------------+-----------+------------+
@@ -749,11 +1092,39 @@ usesLocalFiles                                    false
 +--------------+------------+-------------+-----------+------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="dropall"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_dropall"></a>dropall</h2></div></div></div><div class="refentry" title="dropall"><a name="command_dropall"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>dropall &mdash; 
+					</pre>
+					</div>
+
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_dropall"></a>dropall</h2></div></div></div>
+
+			<div class="refentry"><a name="command_dropall"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					dropall
+					 &#8212;
 					Drop all tables in the database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!dropall</code> </p></div></div><div class="refsect1" title="Description"><a name="N10293"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!dropall</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e314"></a><h2>Description</h2>
+
+					<p>
 					Drop every table in the database.
-					</p></div><div class="refsect1" title="Example of &quot;dropall&quot; command"><a name="N10298"></a><h2>Example of "dropall" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e317"></a><h2>Example of "dropall" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !dropall
 
 Really drop every table in the database? (y/n) y
@@ -765,16 +1136,48 @@ Really drop every table in the database? (y/n) y
 5/5         DROP TABLE COMPANYEMPLOYEES;
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div><div class="refsect1" title="Warning on using &quot;dropall&quot;"><a name="N1029E"></a><h2>Warning on using "dropall"</h2><div class="warning" title="Warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
+					</pre>
+					</div>
+					<div class="refsect1"><a name="d5e320"></a><h2>Warning on using "dropall"</h2>
+
+				<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>
 					This command will destroy all data in the
 					database (subject to access restrictions). Use
 					with extreme caution.
-				</p></div></div></div></div><div class="section" title="exportedkeys"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_exportedkeys"></a>exportedkeys</h2></div></div></div><div class="refentry" title="exportedkeys"><a name="command_exportedkeys"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>exportedkeys &mdash; 
+				</p></div>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_exportedkeys"></a>exportedkeys</h2></div></div></div>
+
+			<div class="refentry"><a name="command_exportedkeys"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					exportedkeys
+					 &#8212;
 					List exported foreign keys for a database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!exportedkeys</code>  {<em class="replaceable"><code>table name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N102BF"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!exportedkeys</code>
+					 {<em class="replaceable"><code>table name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e338"></a><h2>Description</h2>
+
+					<p>
 					List all the foreign keys that are exported by the
 					specified table.
-					</p></div><div class="refsect1" title="Example of &quot;exportedkeys&quot; command"><a name="N102C4"></a><h2>Example of "exportedkeys" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e341"></a><h2>Example of "exportedkeys" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !exportedkeys COMPANY
 
 +----------------+---------------+----------------+-------------+
@@ -784,11 +1187,39 @@ Really drop every table in the database? (y/n) y
 +----------------+---------------+----------------+-------------+
 
 0: jdbc:hsqldb:db-hypersonic&gt;
-					</pre></div></div></div><div class="section" title="go"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_go"></a>go</h2></div></div></div><div class="refentry" title="go"><a name="command_go"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>go &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_go"></a>go</h2></div></div></div>
+
+			<div class="refentry"><a name="command_go"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					go
+					 &#8212;
 					Change to a different active connection
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!go</code>  {<em class="replaceable"><code>connection number</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N102E5"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!go</code>
+					 {<em class="replaceable"><code>connection number</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e358"></a><h2>Description</h2>
+
+					<p>
 					Switch to the specified connection.
-					</p></div><div class="refsect1" title="Example of &quot;go&quot; command"><a name="N102EA"></a><h2>Example of "go" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e361"></a><h2>Example of "go" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !list
 
 2 active connections:
@@ -801,11 +1232,38 @@ Really drop every table in the database? (y/n) y
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
 
-					</pre></div></div></div><div class="section" title="help"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_help"></a>help</h2></div></div></div><div class="refentry" title="help"><a name="command_help"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>help &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_help"></a>help</h2></div></div></div>
+
+			<div class="refentry"><a name="command_help"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					help
+					 &#8212;
 					Display help information
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!help</code> </p></div></div><div class="refsect1" title="Description"><a name="N10306"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!help</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e376"></a><h2>Description</h2>
+
+					<p>
 					Display information about allowed commands.
-					</p></div><div class="refsect1" title="Example of &quot;help&quot; command"><a name="N1030B"></a><h2>Example of "help" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e379"></a><h2>Example of "help" command</h2>
+
+					<pre class="screen">
 sqlline&gt; !help
 
 !all              Execute the specified SQL against all the current connections
@@ -849,29 +1307,85 @@ sqlline&gt; !help
 
 Comments, bug reports, and patches go to mwp1@cornell.edu
 
-sqlline&gt; 
+sqlline&gt;
 
-					</pre></div></div></div><div class="section" title="history"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_history"></a>history</h2></div></div></div><div class="refentry" title="history"><a name="command_history"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>history &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_history"></a>history</h2></div></div></div>
+
+			<div class="refentry"><a name="command_history"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					history
+					 &#8212;
 					Display the command history
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!history</code> </p></div></div><div class="refsect1" title="Description"><a name="N10327"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!history</code>
+					</p></div>
+				</div>
+
+					<div class="refsect1"><a name="d5e394"></a><h2>Description</h2>
+
+					<p>
 					Display the command history.
-					</p></div><div class="refsect1" title="Example of &quot;history&quot; command"><a name="N1032C"></a><h2>Example of "history" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e397"></a><h2>Example of "history" command</h2>
+
+					<pre class="screen">
 sqlline&gt; !history
 
-1.  !outputformat xmlelements 
+1.  !outputformat xmlelements
 2.  SELECT * FROM PCPOINT;
-3.  !outputformat vertical 
+3.  !outputformat vertical
 4.  SELECT * FROM PCPOINT;
-5.  !tables 
+5.  !tables
 
-sqlline&gt; 
+sqlline&gt;
 
-					</pre></div></div></div><div class="section" title="importedkeys"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_importedkeys"></a>importedkeys</h2></div></div></div><div class="refentry" title="importedkeys"><a name="command_importedkeys"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>importedkeys &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_importedkeys"></a>importedkeys</h2></div></div></div>
+
+			<div class="refentry"><a name="command_importedkeys"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					importedkeys
+					 &#8212;
 					List imported foreign keys for a database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!importedkeys</code>  {<em class="replaceable"><code>table name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1034D"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!importedkeys</code>
+					 {<em class="replaceable"><code>table name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e414"></a><h2>Description</h2>
+
+					<p>
 					List all the foreign keys that are imported by
 					the specified table.
-					</p></div><div class="refsect1" title="Example of &quot;importedkeys&quot; command"><a name="N10352"></a><h2>Example of "importedkeys" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e417"></a><h2>Example of "importedkeys" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !importedkeys EMPLOYEE
 
 +----------------+---------------+----------------+-------------+
@@ -881,11 +1395,39 @@ sqlline&gt;
 +----------------+---------------+----------------+-------------+
 
 0: jdbc:hsqldb:db-hypersonic&gt;
-					</pre></div></div></div><div class="section" title="indexes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_indexes"></a>indexes</h2></div></div></div><div class="refentry" title="indexes"><a name="command_indexes"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>indexes &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_indexes"></a>indexes</h2></div></div></div>
+
+			<div class="refentry"><a name="command_indexes"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					indexes
+					 &#8212;
 					Display indexes for a table
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!indexes</code>  {<em class="replaceable"><code>table name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N10373"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!indexes</code>
+					 {<em class="replaceable"><code>table name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e434"></a><h2>Description</h2>
+
+					<p>
 					List all the indexes on the specified table name.
-					</p></div><div class="refsect1" title="Example of &quot;indexes&quot; command"><a name="N10378"></a><h2>Example of "indexes" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e437"></a><h2>Example of "indexes" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !indexes EMPLOYEE
 
 +-------------+-------------+-----------------+-------+--------------+
@@ -898,13 +1440,41 @@ sqlline&gt;
 +-------------+-------------+-----------------+-------+--------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="isolation"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_isolation"></a>isolation</h2></div></div></div><div class="refentry" title="isolation"><a name="command_isolation"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>isolation &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_isolation"></a>isolation</h2></div></div></div>
+
+			<div class="refentry"><a name="command_isolation"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					isolation
+					 &#8212;
 					Set the transaction isolation mode for the active connection
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!isolation</code>  {<em class="replaceable"><code>isolation level</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N10399"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!isolation</code>
+					 {<em class="replaceable"><code>isolation level</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e454"></a><h2>Description</h2>
+
+					<p>
 					Set the isolation level for the current transaction. For
 					a description of the different isolation levels, see
 					<a class="ulink" href="http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail" target="_top">http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail</a>.
-					</p></div><div class="refsect1" title="Example of &quot;isolation&quot; command"><a name="N103A2"></a><h2>Example of "isolation" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e458"></a><h2>Example of "isolation" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !isolation TRANSACTION_READ_UNCOMMITTED
 
 Error: READ_COMMITTED and SERIALIZABLE are the only valid transaction levels (state=,code=17030)
@@ -914,11 +1484,38 @@ Error: READ_COMMITTED and SERIALIZABLE are the only valid transaction levels (st
 Transaction isolation: TRANSACTION_SERIALIZABLE
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="list"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_list"></a>list</h2></div></div></div><div class="refentry" title="list"><a name="command_list"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>list &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_list"></a>list</h2></div></div></div>
+
+			<div class="refentry"><a name="command_list"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					list
+					 &#8212;
 					Display all active connections
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!list</code> </p></div></div><div class="refsect1" title="Description"><a name="N103BE"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!list</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e473"></a><h2>Description</h2>
+
+					<p>
 					List all the current connections.
-					</p></div><div class="refsect1" title="Example of &quot;list&quot; command"><a name="N103C3"></a><h2>Example of "list" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e476"></a><h2>Example of "list" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !list
 
 2 active connections:
@@ -926,16 +1523,44 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
  #1  open     jdbc:mysql://localhost/mydb
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="metadata"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_metadata"></a>metadata</h2></div></div></div><div class="refentry" title="metadata"><a name="command_metadata"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>metadata &mdash; 
-					Invoke arbitrary metadata commands 
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!metadata</code>  {<em class="replaceable"><code>methodname</code></em>} {<em class="replaceable"><code>params</code></em>...}</p></div></div><div class="refsect1" title="Description"><a name="N103E9"></a><h2>Description</h2><p>
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_metadata"></a>metadata</h2></div></div></div>
+
+			<div class="refentry"><a name="command_metadata"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					metadata
+					 &#8212;
+					Invoke arbitrary metadata commands
+
+				</p></div>
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!metadata</code>
+					 {<em class="replaceable"><code>methodname</code></em>}
+					 {<em class="replaceable"><code>params</code></em>...}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e495"></a><h2>Description</h2>
+
+					<p>
 					Execute an arbitrary metadata method agains the current
 						connection. refpurpose are separated by spaces.
 
 					Use "" for a blank String, and null for a null parameter.
 					For information on available metadata methods, see
 					<a class="ulink" href="http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html" target="_top">http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html</a>.
-					</p></div><div class="refsect1" title="Example of &quot;metadata&quot; command"><a name="N103F2"></a><h2>Example of "metadata" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e499"></a><h2>Example of "metadata" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !metadata supportsSelectForUpdate
 
 true
@@ -979,14 +1604,43 @@ true
 +----------------+------------------+------------------------+--------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="outputformat"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_outputformat"></a>outputformat</h2></div></div></div><div class="refentry" title="outputformat"><a name="command_outputformat"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>outputformat &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_outputformat"></a>outputformat</h2></div></div></div>
+
+			<div class="refentry"><a name="command_outputformat"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					outputformat
+					 &#8212;
 					Change the method for displaying SQL results
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!outputformat</code>  {<em class="replaceable"><code>format name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N10413"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!outputformat</code>
+					 {<em class="replaceable"><code>format name</code></em>}
+					</p></div>
+				</div>
+
+					<div class="refsect1"><a name="d5e516"></a><h2>Description</h2>
+
+					<p>
 					Set the mode for displaying results from statements.
 					This is useful for saving output from SQL statements to
 					either a visually pleasing format or an easily
 					parseable format.
-					</p></div><div class="refsect1" title="Example of table output formatting"><a name="N10418"></a><h2>Example of table output formatting</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e519"></a><h2>Example of table output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat table
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY;
 +-------------+------------+
@@ -998,7 +1652,11 @@ true
 | 4           | Microsoft  |
 +-------------+------------+
 4 rows selected (0.012 seconds)
-					</pre></div><div class="refsect1" title="Example of vertical output formatting"><a name="N1041E"></a><h2>Example of vertical output formatting</h2><pre class="screen">
+					</pre>
+					</div>
+				<div class="refsect1"><a name="d5e522"></a><h2>Example of vertical output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat vertical
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY;
 COMPANY_ID  1
@@ -1014,7 +1672,11 @@ COMPANY_ID  4
 NAME        Microsoft
 
 4 rows selected (0.011 seconds)
-					</pre></div><div class="refsect1" title="Example of CSV output formatting"><a name="N10424"></a><h2>Example of CSV output formatting</h2><pre class="screen">
+					</pre>
+				</div>
+				<div class="refsect1"><a name="d5e525"></a><h2>Example of CSV output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat csv
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY;
 'COMPANY_ID','NAME'
@@ -1023,7 +1685,11 @@ NAME        Microsoft
 '3','IBM'
 '4','Microsoft'
 4 rows selected (0.012 seconds)
-					</pre></div><div class="refsect1" title="Example of TSV output formatting"><a name="N1042A"></a><h2>Example of TSV output formatting</h2><pre class="screen">
+					</pre>
+				</div>
+				<div class="refsect1"><a name="d5e528"></a><h2>Example of TSV output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat tsv
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY;
 'COMPANY_ID'    'NAME'
@@ -1032,7 +1698,11 @@ NAME        Microsoft
 '3'     'IBM'
 '4'     'Microsoft'
 4 rows selected (0.013 seconds)
-					</pre></div><div class="refsect1" title="Example of XML attribute output formatting"><a name="N10430"></a><h2>Example of XML attribute output formatting</h2><pre class="screen">
+					</pre>
+				</div>
+				<div class="refsect1"><a name="d5e531"></a><h2>Example of XML attribute output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat xmlattr
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY;
 &lt;resultset&gt;
@@ -1042,7 +1712,11 @@ NAME        Microsoft
   &lt;result COMPANY_ID="4" NAME="Microsoft"/&gt;
 &lt;/resultset&gt;
 4 rows selected (0.012 seconds)
-					</pre></div><div class="refsect1" title="Example of XML element output formatting"><a name="N10436"></a><h2>Example of XML element output formatting</h2><pre class="screen">
+					</pre>
+				</div>
+				<div class="refsect1"><a name="d5e534"></a><h2>Example of XML element output formatting</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !outputformat xmlelements
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM COMPANY
 &lt;resultset&gt;
@@ -1065,11 +1739,39 @@ NAME        Microsoft
 &lt;/resultset&gt;
 4 rows selected (0.02 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="primarykeys"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_primarykeys"></a>primarykeys</h2></div></div></div><div class="refentry" title="primarykeys"><a name="command_primarykeys"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>primarykeys &mdash; 
+					</pre>
+				</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_primarykeys"></a>primarykeys</h2></div></div></div>
+
+			<div class="refentry"><a name="command_primarykeys"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					primarykeys
+					 &#8212;
 					Display the primary key columns for a table
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!primarykeys</code>  {<em class="replaceable"><code>table name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N10457"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!primarykeys</code>
+					 {<em class="replaceable"><code>table name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e551"></a><h2>Description</h2>
+
+					<p>
 					List all the primary keys for the specified table.
-					</p></div><div class="refsect1" title="Example of &quot;primarykeys&quot; command"><a name="N1045C"></a><h2>Example of "primarykeys" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e554"></a><h2>Example of "primarykeys" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !primarykeys COMPANY
 
 +--------------+-------------+--------------+----------+----------+
@@ -1079,12 +1781,40 @@ NAME        Microsoft
 +--------------+-------------+--------------+----------+----------+
 
 0: jdbc:hsqldb:db-hypersonic&gt;
-					</pre></div></div></div><div class="section" title="procedures"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_procedures"></a>procedures</h2></div></div></div><div class="refentry" title="procedures"><a name="command_procedures"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>procedures &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_procedures"></a>procedures</h2></div></div></div>
+
+			<div class="refentry"><a name="command_procedures"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					procedures
+					 &#8212;
 					List stored procedures
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!procedures</code>  [<em class="replaceable"><code>procedure name pattern</code></em>]</p></div></div><div class="refsect1" title="Description"><a name="N1047D"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!procedures</code>
+					 [<em class="replaceable"><code>procedure name pattern</code></em>]
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e571"></a><h2>Description</h2>
+
+					<p>
 					Display a list of all the stored procedures that are
 					exposed by the current database.
-					</p></div><div class="refsect1" title="Example of &quot;procedures&quot; command"><a name="N10482"></a><h2>Example of "procedures" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e574"></a><h2>Example of "procedures" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !procedures %JDBC%
 
 +----------------+------------------+------------------+
@@ -1095,14 +1825,39 @@ NAME        Microsoft
 +----------------+------------------+------------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="properties"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_properties"></a>properties</h2></div></div></div><div class="refentry" title="properties"><a name="command_properties"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>properties &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_properties"></a>properties</h2></div></div></div>
+
+			<div class="refentry"><a name="command_properties"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					properties
+					 &#8212;
 					Connect to the database defined in the
 					specified properties file.
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!properties</code>  {<em class="replaceable"><code>file</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N104A3"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!properties</code>
+					 {<em class="replaceable"><code>file</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e591"></a><h2>Description</h2>
+
+					<p>
 					Connect to the database defined in the
 					specified properties file. The properties file is
 					expected to have the following values:
-					</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
+					</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
 							url: the database URL to which to connect
 						</p></li><li class="listitem"><p>
 							driver: the driver class that handles the URL. If
@@ -1110,17 +1865,18 @@ NAME        Microsoft
 								scan the CLASSPATH for an appropriate driver
 						</p></li><li class="listitem"><p>
 							user: the username to use to connect to the
-								database. If unspecified, SQLLine will 
+								database. If unspecified, SQLLine will
 								prompt for it.
 						</p></li><li class="listitem"><p>
 							password: the password to use to connect to the
-								database. If unspecified, SQLLine will 
+								database. If unspecified, SQLLine will
 								prompt for it.
 						</p></li></ul></div><p>
-					</p><p>
+					</p>
+					<p>
 						The key names in the properties file can also
 						use JDO semantics for the properties. These
-						properties are 
+						properties are
 						"javax.jdo.option.ConnectionURL",
 						"javax.jdo.option.ConnectionDriverName",
 						"javax.jdo.option.ConnectionUserName",
@@ -1130,8 +1886,12 @@ NAME        Microsoft
 						"ConnectionURL", "ConnectionDriverName",
 						"ConnectionUserName", and "ConnectionPassword" will
 						be used for the connection.
-					</p></div><div class="refsect1" title="Example of &quot;properties&quot; command"><a name="N104B8"></a><h2>Example of "properties" command</h2><pre class="screen">
-sqlline&gt; !properties test.properties 
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e604"></a><h2>Example of "properties" command</h2>
+
+					<pre class="screen">
+sqlline&gt; !properties test.properties
 
 Connecting to jdbc:mysql://localhost/mydb
 
@@ -1142,20 +1902,76 @@ Driver: MySQL-AB JDBC Driver (version 3.0.8-stable ( $Date: 2008/12/10 $, $Revis
 Autocommit status: true
 Transaction isolation: TRANSACTION_READ_COMMITTED
 
-0: jdbc:mysql://localhost/mydb&gt; 
-					</pre></div></div></div><div class="section" title="quit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_quit"></a>quit</h2></div></div></div><div class="refentry" title="quit"><a name="command_quit"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>quit &mdash; 
+0: jdbc:mysql://localhost/mydb&gt;
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_quit"></a>quit</h2></div></div></div>
+
+			<div class="refentry"><a name="command_quit"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					quit
+					 &#8212;
 					Exit SQLLine
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!quit</code> </p></div></div><div class="refsect1" title="Description"><a name="N104D4"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!quit</code>
+					</p></div>
+				</div>
+
+					<div class="refsect1"><a name="d5e619"></a><h2>Description</h2>
+
+					<p>
 					Exit SQLLine.
-					</p></div><div class="refsect1" title="Example of &quot;reconnect&quot; command"><a name="N104D9"></a><h2>Example of "reconnect" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e622"></a><h2>Example of "reconnect" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !quit
 
 Closing: org.hsqldb.jdbcConnection
-					</pre></div></div></div><div class="section" title="reconnect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_reconnect"></a>reconnect</h2></div></div></div><div class="refentry" title="reconnect"><a name="command_reconnect"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>reconnect &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_reconnect"></a>reconnect</h2></div></div></div>
+
+			<div class="refentry"><a name="command_reconnect"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					reconnect
+					 &#8212;
 					Reconnect to the current database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!reconnect</code> </p></div></div><div class="refsect1" title="Description"><a name="N104F5"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!reconnect</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e637"></a><h2>Description</h2>
+
+					<p>
 					Reconnect to the current database.
-					</p></div><div class="refsect1" title="Example of &quot;reconnect&quot; command"><a name="N104FA"></a><h2>Example of "reconnect" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e640"></a><h2>Example of "reconnect" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !reconnect
 
 Reconnecting to "jdbc:oracle:thin:@localhost:1521:mydb"...
@@ -1169,11 +1985,39 @@ Driver: Oracle JDBC driver (version 9.0.1.0.0)
 Autocommit status: true
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="record"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_record"></a>record</h2></div></div></div><div class="refentry" title="record"><a name="command_record"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>record &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_record"></a>record</h2></div></div></div>
+
+			<div class="refentry"><a name="command_record"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					record
+					 &#8212;
 					Begin recording all output from SQL commands
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!record</code>  {<em class="replaceable"><code>file name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1051B"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!record</code>
+					 {<em class="replaceable"><code>file name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e657"></a><h2>Description</h2>
+
+					<p>
 					Save all output from the session to the specified file.
-					</p></div><div class="refsect1" title="Example of &quot;record&quot; command"><a name="N10520"></a><h2>Example of "record" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e660"></a><h2>Example of "record" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !record /tmp/mysession.out
 
 Saving all output to "/tmp/mysession.out". Enter "record" with no arguments to stop it.
@@ -1194,16 +2038,44 @@ Saving all output to "/tmp/mysession.out". Enter "record" with no arguments to s
 Recording stopped.
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="rehash"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_rehash"></a>rehash</h2></div></div></div><div class="refentry" title="rehash"><a name="command_rehash"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>rehash &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_rehash"></a>rehash</h2></div></div></div>
+
+			<div class="refentry"><a name="command_rehash"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					rehash
+					 &#8212;
 					Obtain a list of all tables and columns from the database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!rehash</code> </p></div></div><div class="refsect1" title="Description"><a name="N1053C"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!rehash</code>
+					</p></div>
+				</div>
+
+					<div class="refsect1"><a name="d5e675"></a><h2>Description</h2>
+
+					<p>
 					Get a list of all tables and columns from the database
 					in order to include them in the list for tab-completion
 					of SQL statements. This is done automatically on connect
 					when the
 					<a class="link" href="#setting_fastconnect" title="fastconnect">fastconnect</a>
 					option is enabled.
-					</p></div><div class="refsect1" title="Example of &quot;rehash&quot; command"><a name="N10545"></a><h2>Example of "rehash" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e679"></a><h2>Example of "rehash" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !rehash
 
 Building list of tables and columns for tab-completion (set fastconnect to true to skip)...
@@ -1212,13 +2084,46 @@ Done
 
 0: jdbc:hsqldb:db-hypersonic&gt;
 
-					</pre></div><div class="refsect1" title="Warning on using &quot;rehash&quot;"><a name="N1054B"></a><h2>Warning on using "rehash"</h2><div class="caution" title="Caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3><p>
+					</pre>
+					</div>
+					<div class="refsect1"><a name="d5e682"></a><h2>Warning on using "rehash"</h2>
+
+				<div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3>
+					<p>
 						This operation can be extremely slow for some databases.
-					</p></div></div></div></div><div class="section" title="rollback"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_rollback"></a>rollback</h2></div></div></div><div class="refentry" title="rollback"><a name="command_rollback"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>rollback &mdash; 
+					</p>
+				</div>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_rollback"></a>rollback</h2></div></div></div>
+
+			<div class="refentry"><a name="command_rollback"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					rollback
+					 &#8212;
 					Roll back the current transaction
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!rollback</code> </p></div></div><div class="refsect1" title="Description"><a name="N10567"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!rollback</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e698"></a><h2>Description</h2>
+
+					<p>
 					Rollback the current transaction, if autocommit is off.
-					</p></div><div class="refsect1" title="Example of &quot;rollback&quot; command"><a name="N1056C"></a><h2>Example of "rollback" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e701"></a><h2>Example of "rollback" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !autocommit off
 
 Autocommit status: false
@@ -1264,9 +2169,32 @@ Rollback complete (0.016 seconds)
 4 rows selected (0.01 seconds)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="run"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_run"></a>run</h2></div></div></div><div class="refentry" title="run"><a name="command_run"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>run &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_run"></a>run</h2></div></div></div>
+
+			<div class="refentry"><a name="command_run"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					run
+					 &#8212;
 					Execute a command script
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!run</code>  {<em class="replaceable"><code>file name</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1058D"></a><h2>Description</h2><p>
+
+				</p></div>
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!run</code>
+					 {<em class="replaceable"><code>file name</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e718"></a><h2>Description</h2>
+
+					<p>
 					Run the individual commands specified in the file name.
 					The file should consist of individual SQL
 					statements or SQLLine commands. Lines beginning with
@@ -1275,7 +2203,11 @@ Rollback complete (0.016 seconds)
 					be aborted, unless the
 					<a class="link" href="#setting_force" title="force">force</a> preference is
 					set to <code class="literal">true</code>.
-					</p></div><div class="refsect1" title="Example of &quot;run&quot; command"><a name="N1059A"></a><h2>Example of "run" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e723"></a><h2>Example of "run" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !run example.sql
 1/11         CREATE TABLE COMPANY (COMPANY_ID INT, NAME VARCHAR(255));
 No rows affected (0.001 seconds)
@@ -1306,22 +2238,76 @@ No rows affected (0 seconds)
 1 row selected (0.001 seconds)
 0: jdbc:hsqldb:db-hypersonic&gt;
 
-					</pre></div></div></div><div class="section" title="save"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_save"></a>save</h2></div></div></div><div class="refentry" title="save"><a name="command_save"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>save &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_save"></a>save</h2></div></div></div>
+
+			<div class="refentry"><a name="command_save"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					save
+					 &#8212;
 					Save the current preferences
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!save</code> </p></div></div><div class="refsect1" title="Description"><a name="N105B6"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!save</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e738"></a><h2>Description</h2>
+
+					<p>
 					Save the current preferences.
-					</p></div><div class="refsect1" title="Example of &quot;save&quot; command"><a name="N105BB"></a><h2>Example of "save" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e741"></a><h2>Example of "save" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !save
 
 Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="scan"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_scan"></a>scan</h2></div></div></div><div class="refentry" title="scan"><a name="command_scan"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>scan &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_scan"></a>scan</h2></div></div></div>
+
+			<div class="refentry"><a name="command_scan"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					scan
+					 &#8212;
 					Scan class path for JDBC drivers
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!scan</code> </p></div></div><div class="refsect1" title="Description"><a name="N105D7"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!scan</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e756"></a><h2>Description</h2>
+
+					<p>
 					Scans all the jar files in the CLASSPATH for any
 					JDBC drivers, and prints the class names of the drivers.
-					</p></div><div class="refsect1" title="Example of &quot;scan&quot; command"><a name="N105DC"></a><h2>Example of "scan" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e759"></a><h2>Example of "scan" command</h2>
+
+					<pre class="screen">
 sqlline&gt; !scan
 
 35 driver classes found
@@ -1363,15 +2349,43 @@ no        7.3     org.postgresql.Driver
 yes       0.9     org.sourceforge.jxdbcon.JXDBConDriver
 
 sqlline&gt;
-					</pre></div></div></div><div class="section" title="script"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_script"></a>script</h2></div></div></div><div class="refentry" title="script"><a name="command_script"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>script &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_script"></a>script</h2></div></div></div>
+
+			<div class="refentry"><a name="command_script"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					script
+					 &#8212;
 					Save executed commands to a file
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!script</code>  {<em class="replaceable"><code>filename</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N105FD"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!script</code>
+					 {<em class="replaceable"><code>filename</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e776"></a><h2>Description</h2>
+
+					<p>
 					Start saving all commands entered to the specified
 					file. Once scripting on, it can be finished
 					by entering the script command again with no arguments.
 					Saved scripts can be re-run using the
 					<a class="link" href="#command_run" title="run">run</a> command.
-					</p></div><div class="refsect1" title="Example of &quot;script&quot; command"><a name="N10606"></a><h2>Example of "script" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e780"></a><h2>Example of "script" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !script /tmp/mysession.script
 
 Saving command script to "/tmp/mysession.script". Enter "script" with no arguments to stop it.
@@ -1405,34 +2419,118 @@ Commit complete (0 seconds)
 Script closed. Enter "run /tmp/mysession.script" to replay it.
 
 0: jdbc:hsqldb:db-hypersonic&gt;
-					</pre></div></div></div><div class="section" title="set"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_set"></a>set</h2></div></div></div><div class="refentry" title="set"><a name="command_set"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>set &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_set"></a>set</h2></div></div></div>
+
+			<div class="refentry"><a name="command_set"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					set
+					 &#8212;
 					Set a preference
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!set</code>  {<em class="replaceable"><code>preference</code></em>} {<em class="replaceable"><code>value</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1062C"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!set</code>
+					 {<em class="replaceable"><code>preference</code></em>}
+					 {<em class="replaceable"><code>value</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e799"></a><h2>Description</h2>
+
+					<p>
 					Set the specified preference to the specified value. If
 					<a class="link" href="#setting_autosave" title="autosave">autosave</a> is
 					on, then this will cause preferences to be
 					immediately saved. Otherwise, changed setting can be
 					saved for future SQLLine session eith the
 					<a class="link" href="#command_save" title="save">save</a> command.
-					</p></div><div class="refsect1" title="Example of &quot;set&quot; command"><a name="N10639"></a><h2>Example of "set" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e804"></a><h2>Example of "set" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !set color on
-					</pre></div></div></div><div class="section" title="sql"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_sql"></a>sql</h2></div></div></div><div class="refentry" title="sql"><a name="command_sql"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>sql &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_sql"></a>sql</h2></div></div></div>
+
+			<div class="refentry"><a name="command_sql"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					sql
+					 &#8212;
 					Execute a SQL against a database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!sql</code>  {<em class="replaceable"><code>statement</code></em>}</p></div></div><div class="refsect1" title="Description"><a name="N1065A"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!sql</code>
+					 {<em class="replaceable"><code>statement</code></em>}
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e821"></a><h2>Description</h2>
+
+					<p>
 					Issue the specified SQL statement. This is equivalent to
 					entering the statement by itself from the command line.
-					</p></div><div class="refsect1" title="Example of &quot;sql&quot; command"><a name="N1065F"></a><h2>Example of "sql" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e824"></a><h2>Example of "sql" command</h2>
+
+					<pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !sql DELETE FROM COMPANY;
 
 4 rows affected (0.005 seconds)
 
 0: jdbc:hsqldb:db-hypersonic&gt;
-					</pre></div></div></div><div class="section" title="tables"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_tables"></a>tables</h2></div></div></div><div class="refentry" title="tables"><a name="command_tables"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>tables &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_tables"></a>tables</h2></div></div></div>
+
+			<div class="refentry"><a name="command_tables"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					tables
+					 &#8212;
 					List all the tables in the database
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!tables</code> </p></div></div><div class="refsect1" title="Description"><a name="N1067B"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!tables</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e839"></a><h2>Description</h2>
+
+					<p>
 					List all the tables in the database of the
 					current connection.
-					</p></div><div class="refsect1" title="Example of &quot;tables&quot; command"><a name="N10680"></a><h2>Example of "tables" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e842"></a><h2>Example of "tables" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !tables
 
 +------------+--------------+---------------------------------+-------------+
@@ -1443,13 +2541,40 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
 +------------+--------------+---------------------------------+-------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div><div class="section" title="verbose"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_verbose"></a>verbose</h2></div></div></div><div class="refentry" title="verbose"><a name="command_verbose"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>verbose &mdash; 
+					</pre>
+					</div>
+			</div>
+			</div>
+
+			<div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_verbose"></a>verbose</h2></div></div></div>
+
+			<div class="refentry"><a name="command_verbose"></a><div class="titlepage"></div>
+
+
+
+				<div class="refnamediv"><h2>Name</h2><p>
+					verbose
+					 &#8212;
 					Enable verbose output
-					</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">!verbose</code> </p></div></div><div class="refsect1" title="Description"><a name="N1069C"></a><h2>Description</h2><p>
+
+				</p></div>
+
+				<div class="refsynopsisdiv"><h2>Synopsis</h2>
+					<div class="cmdsynopsis"><p>
+					<code class="command">!verbose</code>
+					</p></div>
+				</div>
+					<div class="refsect1"><a name="d5e857"></a><h2>Description</h2>
+
+					<p>
 					Enable verbose mode, which causes stack traces
 					to be printed when errors occur, and enabled outputting
 					of debug information.
-					</p></div><div class="refsect1" title="Example of &quot;verbose&quot; command"><a name="N106A1"></a><h2>Example of "verbose" command</h2><pre class="screen">
+					</p>
+				</div>
+				<div class="refsect1"><a name="d5e860"></a><h2>Example of "verbose" command</h2>
+
+					<pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM BOGUS_TABLE;
 
 Error: ORA-00942: table or view does not exist (state=42000,code=942)
@@ -1477,7 +2602,19 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         at sqlline.SqlLine.main(SqlLine.java:332)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt;
-					</pre></div></div></div></div><div class="chapter" title="Parameter Reference"><div class="titlepage"><div><div><h2 class="title"><a name="settings"></a>Parameter Reference</h2></div></div></div><div class="toc"><dl><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></div><div class="sect1" title="autocommit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_autocommit"></a>autocommit</h2></div></div></div><p>
+					</pre>
+					</div>
+			</div>
+			</div>
+
+
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="settings"></a>Chapter&nbsp;7.&nbsp;Parameter Reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt></dl></div>
+
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_autocommit"></a>autocommit</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, then new connections will have autocommit
 					set, otherwise, transactions will need to be explicitely
 					<a class="link" href="#command_commit" title="commit">committed</a> or
@@ -1486,8 +2623,12 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					To change the autocommit status for
 					a connection that is already open and active, use the
 					<a class="link" href="#command_autocommit" title="autocommit">autocommit</a>
-					command instead. 
-				</p></div><div class="sect1" title="autosave"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_autosave"></a>autosave</h2></div></div></div><p>
+					command instead.
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_autosave"></a>autosave</h2></div></div></div>
+
+				<p>
 					When set to <code class="literal">true</code>, any changes
 					to preferences using the
 					<a class="link" href="#command_set" title="set">set</a> command will cause
@@ -1495,13 +2636,21 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					need to be explicitely saved using the
 					<a class="link" href="#command_save" title="save">save</a> command.
 					Defaults to <code class="literal">false</code>.
-				</p></div><div class="sect1" title="color"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_color"></a>color</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_color"></a>color</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, then output to
 					the terminal will use color for
 					a more pleasing visual experience. Requires that the
 					terminal support ANSI control codes (most do).
 					Defaults to <code class="literal">false</code>.
-				</p></div><div class="sect1" title="fastconnect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_fastconnect"></a>fastconnect</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_fastconnect"></a>fastconnect</h2></div></div></div>
+
+				<p>
 					When <code class="literal">false</code>, any new connection
 					will cause SQLLine to
 					access information about the available tables and columns
@@ -1510,7 +2659,11 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					by default it is off. Table and column information can
 					always be explicitely retrieved using the
 					<a class="link" href="#command_rehash" title="rehash">rehash</a> command.
-				</p></div><div class="sect1" title="force"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_force"></a>force</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_force"></a>force</h2></div></div></div>
+
+				<p>
 					When set to <code class="literal">false</code>,
 					any failures during the
 					execution of the <a class="link" href="#command_run" title="run">run</a>
@@ -1520,16 +2673,28 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					<code class="literal">true</code>, errors
 					will be displayed but otherwise ignored.
 					Defaults to <code class="literal">false</code>.
-				</p></div><div class="sect1" title="headerinterval"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_headerinterval"></a>headerinterval</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_headerinterval"></a>headerinterval</h2></div></div></div>
+
+				<p>
 					The interval between which the column headers will be
 					redisplayed when using the "table"
 					<a class="link" href="#setting_outputformat" title="outputformat">outputformat</a>.
 					Defaults to 100.
-				</p></div><div class="sect1" title="historyfile"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_historyfile"></a>historyfile</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_historyfile"></a>historyfile</h2></div></div></div>
+
+				<p>
 					The file to which SQLLine will save a record of all the
 					commands issued. Defaults to HOME/sqlline/history on
 					Windows, and HOME/.sqlline/history on all other platforms.
-				</p></div><div class="sect1" title="incremental"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_incremental"></a>incremental</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_incremental"></a>incremental</h2></div></div></div>
+
+				<p>
 					When set to <code class="literal">false</code>,
 					the entire result set is fetched and buffered
 					before being displayed, yielding optimal display
@@ -1538,24 +2703,40 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					fetched, yielding lower latency and memory usage
 					at the price of extra display column padding.
 					Defaults to <code class="literal">false</code>.
-				</p></div><div class="sect1" title="isolation"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_isolation"></a>isolation</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_isolation"></a>isolation</h2></div></div></div>
+
+				<p>
 					The default transaction isolation that will be
 					used for new connections. To change the isolation
 					level of the currently active connection, use the
 					<a class="link" href="#command_isolation" title="isolation">isolation</a>
 					command instead.
-				</p></div><div class="sect1" title="maxcolumnwidth"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_maxcolumnwidth"></a>maxcolumnwidth</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_maxcolumnwidth"></a>maxcolumnwidth</h2></div></div></div>
+
+				<p>
 					The maximum column width to display for each colummn
 					before truncating data when using the "table"
 					<a class="link" href="#setting_outputformat" title="outputformat">outputformat</a>.
 					Defaults to 15.
-				</p></div><div class="sect1" title="maxwidth"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_maxwidth"></a>maxwidth</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_maxwidth"></a>maxwidth</h2></div></div></div>
+
+				<p>
 					The maximum width to display before truncating data
 					when using the "table"
 					<a class="link" href="#setting_outputformat" title="outputformat">outputformat</a>.
 					Defaults to attempting to query the terminal for the
 					current width, falls back to 80.
-				</p></div><div class="sect1" title="numberformat"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_numberformat"></a>numberformat</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_numberformat"></a>numberformat</h2></div></div></div>
+
+				<p>
 					The format for how numeric values are displayed. Setting
 					to <code class="literal">default</code> causes numeric
 					values to be fetched and rendered via ResultSet.getString.
@@ -1564,50 +2745,102 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 					java.text.DecimalFormat</a>.  For example,
 					the setting "0.###E0" yields scientific notation
 					with up to three fractional digits.
-				</p></div><div class="sect1" title="outputformat"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_outputformat"></a>outputformat</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_outputformat"></a>outputformat</h2></div></div></div>
+
+				<p>
 					The format for how results are displayed. For details,
 					see the information on the
 					<a class="link" href="#command_outputformat" title="outputformat">outputformat
 					command</a>.
-				</p></div><div class="sect1" title="rowlimit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_rowlimit"></a>rowlimit</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_rowlimit"></a>rowlimit</h2></div></div></div>
+
+				<p>
 					The maximum number of rows to fetch per query.
 					Defaults to 0, which is interpreted as fetching all rows.
-				</p></div><div class="sect1" title="showheader"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showheader"></a>showheader</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showheader"></a>showheader</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, display the names of the
 					columns when displaying results. Defaults to
 					<code class="literal">true</code>.
-				</p></div><div class="sect1" title="shownestederrs"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_shownestederrs"></a>shownestederrs</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_shownestederrs"></a>shownestederrs</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, display any nested errors
 					that are reported on the connection after issuing
 					any database commands. Defaults to
 					<code class="literal">false</code>, meaning only the topmost
 					error is displayed.
-				</p></div><div class="sect1" title="showtime"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showtime"></a>showtime</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showtime"></a>showtime</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>,
 					display execution time for
 					database commands when in
 					verbose mode.  Defaults to
 					<code class="literal">true</code>.
-				</p></div><div class="sect1" title="showwarnings"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showwarnings"></a>showwarnings</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showwarnings"></a>showwarnings</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, display any warnings
 					that are reported on the connection after issuing
 					any database commands. Defaults to
 					<code class="literal">true</code>.
-				</p></div><div class="sect1" title="silent"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_silent"></a>silent</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_silent"></a>silent</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, then reduce the amount
 					of informational messages displayed. Useful for redirecting
 					a sqlline command to a file for later parsing. Defaults to
 					<code class="literal">false</code>.
-				</p></div><div class="sect1" title="trimscripts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_trimscripts"></a>trimscripts</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_trimscripts"></a>trimscripts</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, then trim leading and
 					trailing whitespace from lines as they are processed
 					in scripts; otherwise, preserve whitespace.  Defaults to
 					<code class="literal">true</code>.
-				</p></div><div class="sect1" title="verbose"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_verbose"></a>verbose</h2></div></div></div><p>
+				</p>
+			</div>
+			<div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_verbose"></a>verbose</h2></div></div></div>
+
+				<p>
 					If <code class="literal">true</code>, then print out the
 					entire java stack trace whenever an error occurs,
 					as well as displaying debugging information.
 					Defaults to <code class="literal">false</code>.
-				</p></div></div><div class="chapter" title="JDBC Driver Support"><div class="titlepage"><div><div><h2 class="title"><a name="known_drivers"></a>JDBC Driver Support</h2></div></div></div><p>
-			</p></div></div><div class="appendix" title="Project Information"><div class="titlepage"><div><div><h2 class="title"><a name="project_info"></a>Project Information</h2></div></div></div><p>
-	</p></div></div></body></html>
+				</p>
+			</div>
+		</div>
+
+		<div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="known_drivers"></a>Chapter&nbsp;8.&nbsp;JDBC Driver Support</h2></div></div></div>
+
+			<p>
+			</p>
+		</div>
+
+	</div>
+
+
+<div class="appendix"><div class="titlepage"><div><div><h1 class="title"><a name="project_info"></a>Appendix&nbsp;A.&nbsp;Project Information</h1></div></div></div>
+
+	<p>
+	</p>
+</div>
+</div></body></html>

@@ -1,0 +1,317 @@
+BODY
+{
+	font-family: verdana;
+}
+
+DIV.ABSTRACT
+{
+	border: solid 2px;
+	padding-left: 10pt;
+	padding-right: 10pt;
+}
+PRE.SCREEN
+{
+	font-family:monospace;
+	white-space: pre;
+	width: 100%;
+        background-color: #ffffcc;
+        border:solid;
+	color: #000000;
+        border-color: #009999;
+        border-left: solid #009999 2px;
+        border-right: solid #009999 2px;
+        border-top: solid #009999 2px;
+        border-bottom: solid #009999 2px;
+
+        padding-left: 15pt;
+}
+
+PRE.PROGRAMLISTING
+{
+        font-family:monospace;
+        white-space: pre;
+	width: 100%;
+        background-color: #ffffcc;
+        border:solid;
+	color: #000000;
+        border-color: #009999;
+        border-left: solid #009999 2px;
+        border-right: solid #009999 2px;
+        border-top: solid #009999 2px;
+        border-bottom: solid #009999 2px;
+
+        padding-left: 15pt;
+}
+
+H1
+{
+	color: #ffffff;
+	border: solid 3px #a0a0d0;
+	background-color: #606090;
+	font-variant: small-caps;
+	width: 100%;
+}
+
+H1.TITLE
+{
+	color: #ffffff;
+	border: solid 3px #a0a0d0;
+	background-color: #606090;
+	font-variant: small-caps;
+	width: 100%;
+}
+
+.TITLE a {
+        color: #ffffff; 
+        text-decoration: none;
+}
+
+.TITLE a:active {
+        color: #ffffff; 
+        text-decoration: none;
+}
+
+.TITLE a:visited {
+        color: #ffffff; 
+        text-decoration: none;
+}
+
+H2
+{	
+        COLOR: #ffffff ;
+        font-style: italic;
+        BACKGROUND-color: #a0a0d0;
+        BORDER: solid 3px #606090;
+        PADDING: 1px
+}
+
+TABLE.IMPORTANT
+{
+	font-style:italic;
+	border: solid 2px #ff0000;
+	width: 70%;
+	margin-left: 15%;	
+}
+TABLE.CAUTION
+{
+	font-style:italic;
+	border: ridge 2px #ffff00;
+	width: 70%;
+	margin-left: 15%;	
+}
+
+TABLE.NOTE
+{
+	font-style:italic;
+	border: solid 1px #000000;
+	width: 70%;
+	margin-left: 15%;	
+}
+TABLE.TIP
+{
+	font-style:italic;
+	border: solid 1px #000000;
+	width: 70%;
+	margin-left: 15%;	
+}
+
+TABLE.WARNING
+{
+	font-style:italic;
+        font-weight: bold;
+	border: ridge 4px #ff0000;
+	
+	width: 70%;
+	margin-left: 15%;	
+}
+
+DIV.VARIABLELIST {
+        font-family: sans-serif;
+        font-style: normal;
+        font-weight: normal;
+        padding-left: 20px;
+}
+
+.VARLISTENTRY {
+        font-weight: bold;
+        margin-top: 10px;
+        COLOR: #ffffff ;
+        BACKGROUND-color: #a0a0d0;
+        BORDER: solid 1px #606090;
+        PADDING: 1px
+}
+
+/*
+ * See http://diveintoaccessibility.org/day_26_using_relative_font_sizes.html
+ * for an explanation of the following few commands.
+ * They are really too complicated to explain here in all depth. ;-)
+*/
+
+P {
+	font-size: 12px;
+}
+
+/*/*/A{}
+BODY P {
+	font-size: x-small;
+	voice-family: "\"}\"";
+	voice-family: inherit;
+	font-size: small;
+}
+
+HTML>BODY P {
+	font-size: small;
+}
+/* */
+
+A     {
+        text-decoration : none;
+      }
+A:link,A:active,A:visited {
+        color : #006699;
+}
+A:hover {
+        text-decoration: underline; color : #DD6900;
+}
+
+/* Add an external-link icon to absolute links */
+a[href^="http:"] {
+        background: url(images/remote.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+a[href^="http:"]:hover {
+        background: url(images/remote_a.gif) right center no-repeat;
+}
+
+/* Add a note icon to footnote links */
+a[href^="#FTN"] {
+        background: url(images/qbullet-note.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+a[href^="#FTN"]:hover {
+        background: url(images/qbullet-note_a.gif) right center no-repeat;
+}
+
+/* ...and a back icon to the backlinks in the footnotes themselves */
+a[name^="FTN"] {
+        background: url(images/scrollup.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+a[name^="FTN"]:hover {
+        background: url(images/scrollup_a.gif) right center no-repeat;
+}
+
+/* Add a download icon to .gz links */
+a[href$=".gz"],a[href$=".tar"],a[href$=".zip"],a[href$=".tgz"] {
+        background: url(images/disk.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+
+/* Add an Acrobat Reader icon to PDF links */
+a[href$=".pdf"] {
+        background: url(images/acrobat.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+a[href$=".pdf"]:hover {
+        background: url(images/acrobat_a.gif) right center no-repeat;
+}
+
+/* Add a Word icon to RTF links */
+a[href$=".rtf"] {
+        background: url(images/word.gif) right center no-repeat;
+        padding-right: 12px;
+}
+
+
+/* ...but not to absolute links in this domain... */
+a[href^="http://www.karakas-online.de"] {
+        background: transparent;
+        padding-right: 0px;
+}
+
+a[href^="http://www.karakas-online.de"]:hover {
+        background: transparent;
+}
+
+/* ...or to the translation links on each page */
+DIV.translatelink > a[href^="http:"] {
+        background: transparent;
+        padding-right: 0px;
+}
+
+DIV.translatelink > a[href^="http:"]:hover {
+        background: transparent;
+}
+
+/* ...or to any images  */
+DIV.imagelink  a[href^="http:"] {
+        background: transparent;
+        padding-right: 0px;
+}
+
+DIV.imagelink  a[href^="http:"]:hover {
+        background: transparent;
+}
+
+
+P.C2 {
+        COLOR: #ffffff ;
+        BACKGROUND-color: #a0a0d0;
+        BORDER: solid 1px #606090;
+        PADDING: 1px
+}
+
+
+DIV.NAVFOOTER {
+	color: #000000;
+        background-color: #EFEFF8;
+        padding: 5px;
+        margin-top: 10px;
+	width: 100%;
+	border: thin solid #a0a0d0;
+}
+
+DIV.NUKEFOOTER {
+	color: #000000;
+        background-color: #B0E0E6;
+        padding: 5px;
+        margin-top: 10px;
+	width: 100%;
+	border: thin solid #a0a0d0;
+}
+
+DIV.NAVHEADER {
+	color: #000000;
+        background-color: #EFEFF8;
+        padding: 5px;
+        margin-bottom: 10px;
+        width: 100%;
+        border: thin solid #a0a0d0;
+}
+
+DIV.SECT1,DIV.SECT2,DIV.SECT3 {
+        margin-left: 20px;
+}
+
+DIV.EXAMPLE,DIV.TOC {
+        border: thin dotted #70AAE5;
+        padding-left: 10px;
+        padding-right: 10px;
+	color: #000000;
+        background-color: #EFF8F8;
+}
+
+DIV.TOC {
+        margin-left: 20px;
+        margin-right: 20px;
+	width: 95%;
+}
+
+UL  {
+	list-style: url("images/tux-bullet.png") disc;
+    }
