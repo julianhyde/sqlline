@@ -17,6 +17,17 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <top.dir>${project.basedir}</top.dir>
+
+    <!-- The following list is sorted. -->
+    <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
+    <h2.version>1.4.191</h2.version>
+    <hsqldb.version>2.3.1</hsqldb.version>
+    <jline.version>2.10</jline.version>
+    <jmockit.version>1.18</jmockit.version>
+    <junit.version>4.11</junit.version>
+    <maven-dependency-plugin.version>2.5.1</maven-dependency-plugin.version>
+    <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+    <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
 
   <licenses>
@@ -79,7 +90,7 @@
              browser. -->
         <groupId>com.agilejava.docbkx</groupId>
         <artifactId>docbkx-maven-plugin</artifactId>
-        <version>2.0.17</version>
+        <version>${docbkx-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -141,7 +152,7 @@
       <plugin>
         <!--  To allow JMockit to be loaded first in surefire -->
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>${maven-dependency-plugin.version}</version>
         <executions>
           <execution>
             <id>getClasspathFilenames</id>
@@ -205,37 +216,37 @@
     <dependency>
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
-      <version>2.10</version>
+      <version>${jline.version}</version>
     </dependency>
     <dependency>
       <!-- JMockit needs to be on class path before JUnit. -->
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>
-      <version>1.18</version>
+      <version>${jmockit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>net.hydromatic</groupId>
       <artifactId>scott-data-hsqldb</artifactId>
-      <version>0.1</version>
+      <version>${scott-data-hsqldb.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <version>2.3.1</version>
+      <version>${hsqldb.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.191</version>
+      <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -248,7 +259,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>${maven-gpg-plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
