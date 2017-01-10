@@ -82,7 +82,7 @@ Use the following definition to use `sqlline` in your maven project:
 Prerequisites:
 
 * Maven 3.2.1 or higher
-* Java 1.5 or higher (1.8 preferred)
+* Java 1.6 or higher (9 preferred)
 
 Check out and build:
 

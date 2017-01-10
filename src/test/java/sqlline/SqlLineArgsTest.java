@@ -489,7 +489,7 @@ public class SqlLineArgsTest {
     final String script = "!set outputformat csv\n"
         + "!tables\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(
+        allOf(
             containsString("'TABLE_CAT','TABLE_SCHEM','TABLE_NAME',"),
             containsString("'PUBLIC','SCOTT','SALGRADE','TABLE','',")));
   }
@@ -504,7 +504,7 @@ public class SqlLineArgsTest {
     final String line1 =
         "| PUBLIC                                                                       |";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(
+        allOf(
             containsString(line0),
             containsString(line1)));
   }
@@ -519,9 +519,15 @@ public class SqlLineArgsTest {
     final String line1 =
         "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(
+        allOf(
             containsString(line0),
             containsString(line1)));
+  }
+
+  // Work around compile error in JDK 1.6
+  private static Matcher<String> allOf(Matcher<String> m1,
+      Matcher<String> m2) {
+    return CoreMatchers.<String>allOf(m1, m2);
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run
