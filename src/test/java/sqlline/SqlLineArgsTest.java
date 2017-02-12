@@ -264,6 +264,31 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Table output without header.
+   */
+  @Test
+  public void testTableOutputNullWithoutHeader() throws Throwable {
+    final String script = "!set showHeader false\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+        containsString("| 1           | null        |     |\n"));
+  }
+
+  /**
+   * Csv output without header.
+   */
+  @Test
+  public void testCsvNullWithoutHeader() throws Throwable {
+    final String script = "!set showHeader false\n"
+        + "!set outputformat csv\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+        containsString("'1','null',''\n"));
+  }
+
+  /**
    * Tests the "close" command,
    * [HIVE-5768] Beeline connection cannot be closed with '!close' command.
    */

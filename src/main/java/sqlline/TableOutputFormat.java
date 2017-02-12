@@ -50,13 +50,14 @@ class TableOutputFormat implements OutputFormat {
                 headerCols.getVisibleLength());
       }
 
-      if ((index == 0)
-          || (sqlLine.getOpts().getHeaderInterval() > 0
-          && (index % sqlLine.getOpts().getHeaderInterval() == 0)
-          && sqlLine.getOpts().getShowHeader())) {
-        printRow(header, true);
-        printRow(headerCols, false);
-        printRow(header, true);
+      if (sqlLine.getOpts().getShowHeader()) {
+        if (index == 0
+            || sqlLine.getOpts().getHeaderInterval() > 0
+                && index % sqlLine.getOpts().getHeaderInterval() == 0) {
+          printRow(header, true);
+          printRow(headerCols, false);
+          printRow(header, true);
+        }
       }
 
       if (index != 0) { // don't output the header twice
