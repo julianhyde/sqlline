@@ -31,6 +31,8 @@ class SeparatedValuesOutputFormat implements OutputFormat {
     while (rows.hasNext()) {
       if (count > 0 || (count == 0 && sqlLine.getOpts().getShowHeader())) {
         printRow(rows, rows.next());
+      } else {
+        rows.next();
       }
       count++;
     }

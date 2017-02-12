@@ -28,7 +28,11 @@ abstract class AbstractOutputFormat implements OutputFormat {
     printHeader(header);
 
     while (rows.hasNext()) {
-      printRow(rows, header, rows.next());
+      if (count > 0 || (count == 0 && sqlLine.getOpts().getShowHeader())) {
+        printRow(rows, header, rows.next());
+      } else {
+        rows.next();
+      }
       count++;
     }
 
