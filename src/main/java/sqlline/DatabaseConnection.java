@@ -30,6 +30,7 @@ class DatabaseConnection {
   private final String url;
   private final String username;
   private final String password;
+  private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
 
@@ -248,6 +249,14 @@ class DatabaseConnection {
 
   String getUrl() {
     return url;
+  }
+
+  String getNickname() {
+    return nickname;
+  }
+
+  void setNickname(String nickname) {
+    this.nickname = nickname;
   }
 
   Completer getSqlCompleter() {

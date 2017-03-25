@@ -55,6 +55,8 @@ list
 list — Display all active connections
 metadata
 metadata — Invoke arbitrary metadata commands
+nickname
+nickname - Create a friendly name for the connection (updates command prompt)
 outputformat
 outputformat — Change the method for displaying SQL results
 primarykeys
