@@ -33,7 +33,6 @@ import jline.console.history.FileHistory;
  *
  * <p>TODO:
  * <ul>
- * <li>User-friendly connection prompts</li>
  * <li>Page results</li>
  * <li>Handle binary data (blob fields)</li>
  * <li>Implement command aliases</li>
@@ -319,6 +318,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getConnectionURLExamples()),
             "connect", "open"),
+        new ReflectiveCommandHandler(this, empty, "nickname"),
         new ReflectiveCommandHandler(this, tableCompleter, "describe"),
         new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
         new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
@@ -533,6 +533,7 @@ public class SqlLine {
     String user = null;
     String pass = null;
     String url = null;
+    String nickname = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -572,6 +573,8 @@ public class SqlLine {
         commands.add(args[++i]);
       } else if (args[i].equals("-f")) {
         getOpts().setRun(args[++i]);
+      } else if (args[i].equals("-nn")) {
+        nickname = args[++i];
       } else {
         files.add(args[i]);
       }
@@ -586,6 +589,10 @@ public class SqlLine {
               + (driver == null ? "" : driver);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
+    }
+
+    if (nickname != null) {
+      dispatch(COMMAND_PREFIX + "nickname " + nickname, new DispatchCallback());
     }
 
     // now load properties files
@@ -1046,6 +1053,9 @@ public class SqlLine {
     DatabaseConnection dbc = getDatabaseConnection();
     if (dbc == null || dbc.getUrl() == null) {
       return "sqlline> ";
+    } else if (dbc.getNickname() != null) {
+      return getPrompt(connections.getIndex() + ": "
+        + dbc.getNickname()) + "> ";
     } else {
       return getPrompt(connections.getIndex() + ": " + dbc.getUrl()) + "> ";
     }

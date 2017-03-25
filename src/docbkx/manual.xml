@@ -1125,6 +1125,7 @@ sqlline> !help
 !isolation        Set the transaction isolation for this connection
 !list             List the current connections
 !metadata         Obtain metadata information
+!nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
                   (table,vertical,csv,tsv,xmlattrs,xmlelements)
 !properties       Connect to the database specified in the properties file(s)
@@ -1464,6 +1465,43 @@ true
 					</screen>
 					</refsect1>
 			</refentry>
+			</section>
+
+			<section id="sect_command_nickname">
+				<title>nickname</title>
+				<refentry id="command_nickname">
+					<refmeta>
+						<refentrytitle>nickname</refentrytitle>
+						<manvolnum>1</manvolnum>
+					</refmeta>
+
+
+					<refnamediv>
+						<refname>nickname</refname>
+						<refpurpose>
+							Create a friendly name for the connection (updates command prompt)
+						</refpurpose>
+					</refnamediv>
+					<refsynopsisdiv>
+						<cmdsynopsis>
+							<command>!nickname</command>
+							<arg choice="req"><replaceable>nickname</replaceable></arg>
+						</cmdsynopsis>
+					</refsynopsisdiv>
+					<refsect1>
+						<title>Description</title>
+						<para>
+							Create a friendly name for the connection (updates command prompt).
+						</para>
+					</refsect1>
+					<refsect1>
+						<title>Example of "nickname" command</title>
+						<screen>
+							0: jdbc:oracle:thin:@localhost:1521:mydb> !nickname devdb
+							0: devdb>
+						</screen>
+					</refsect1>
+				</refentry>
 			</section>
 
 			<section id="sect_command_outputformat">
