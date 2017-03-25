@@ -348,6 +348,29 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Test case for [SQLLINE-61], "Add !nickname command"
+   */
+  @Test
+  public void testNickname() throws Throwable {
+    final String script = "!set outputformat csv\n"
+        + "values 1;\n"
+        + "!nickname foo\n"
+        + "values 2;\n";
+    final String expected = "(?s)1/4          !set outputformat csv\n"
+        + "2/4          values 1;\n"
+        + "'C1'\n"
+        + "'1'\n"
+        + "1 row selected \\([0-9.]+ seconds\\)\n"
+        + "3/4          !nickname foo\n"
+        + "4/4          values 2;\n"
+        + "'C1'\n"
+        + "'2'\n"
+        + "1 row selected \\([0-9.]+ seconds\\)\n.*";
+    checkScriptFile(script, false, equalTo(SqlLine.Status.OK),
+        RegexMatcher.of(expected));
+  }
+
+  /**
    * Attempts to execute a simple script file with the -f option to SqlLine.
    * The first command should fail and the second command should not execute.
    */

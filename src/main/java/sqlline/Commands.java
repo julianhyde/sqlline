@@ -948,6 +948,10 @@ public class Commands {
       connect(props, callback);
       if (callback.isSuccess()) {
         successes++;
+        String nickname = getProperty(props, "nickname", "ConnectionNickname");
+        if (nickname != null) {
+          sqlLine.getDatabaseConnection().setNickname(nickname);
+        }
       }
     }
 
@@ -994,6 +998,32 @@ public class Commands {
     }
 
     connect(props, callback);
+  }
+
+  public void nickname(String line, DispatchCallback callback)
+      throws Exception {
+    String example = "Usage: nickname <nickname for current connection>"
+        + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    String nickname = parts.length < 2 ? null : parts[1];
+    if (nickname != null) {
+      DatabaseConnection current = sqlLine.getDatabaseConnection();
+      if (current != null) {
+        current.setNickname(nickname);
+        callback.setToSuccess();
+      } else {
+        sqlLine.error("nickname command requires active connection");
+      }
+    } else {
+      sqlLine.error(example);
+    }
   }
 
   private String getProperty(Properties props, String... keys) {
@@ -1112,7 +1142,8 @@ public class Commands {
           sqlLine.getColorBuffer()
               .pad(" #" + index++ + "", 5)
               .pad(closed ? sqlLine.loc("closed") : sqlLine.loc("open"), 9)
-              .append(databaseConnection.getUrl()));
+              .pad(databaseConnection.getNickname(), 20)
+              .append(" " + databaseConnection.getUrl()));
     }
 
     callback.setToSuccess();
