@@ -476,8 +476,9 @@ public class Commands {
 
   public void load(String line, DispatchCallback callback) throws IOException {
     sqlLine.getOpts().load();
-    sqlLine.info(sqlLine.loc("loaded-options",
-        sqlLine.getOpts().getPropertiesFile()));
+    sqlLine.info(
+        sqlLine.loc("loaded-options",
+            sqlLine.getOpts().getPropertiesFile()));
     callback.setToSuccess();
   }
 

@@ -28,8 +28,7 @@ public class OutputFile {
     out = new PrintWriter(new FileWriter(file), true);
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return file.getAbsolutePath();
   }
 

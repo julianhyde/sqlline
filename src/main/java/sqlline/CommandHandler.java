@@ -42,8 +42,7 @@ interface CommandHandler {
    * Checks to see if the specified string can be dispatched to this
    * command.
    *
-   * @param line
-   *          the command line to check.
+   * @param line The command line to check
    * @return the command string that matches, or null if it no match
    */
   String matches(String line);
@@ -51,8 +50,7 @@ interface CommandHandler {
   /**
    * Executes the specified command.
    *
-   * @param line
-   *          the full command line to execute.
+   * @param line The full command line to execute
    * @param dispatchCallback the callback to check or interrupt the action
    */
   void execute(String line, DispatchCallback dispatchCallback);

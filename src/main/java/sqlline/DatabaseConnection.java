@@ -43,8 +43,7 @@ class DatabaseConnection {
     this.password = password;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return getUrl() + "";
   }
 
@@ -88,8 +87,7 @@ class DatabaseConnection {
           // non-letter-or-number characters, except
           // underscore and characters that are specified
           // by the database to be valid name identifiers.
-          @Override
-          public boolean isDelimiterChar(
+          @Override public boolean isDelimiterChar(
               final CharSequence buffer, int pos) {
             char c = buffer.charAt(pos);
             if (Character.isWhitespace(c)) {
@@ -159,17 +157,19 @@ class DatabaseConnection {
     meta = connection.getMetaData();
 
     try {
-      sqlLine.debug(sqlLine.loc("connected",
-          meta.getDatabaseProductName(),
-          meta.getDatabaseProductVersion()));
+      sqlLine.debug(
+          sqlLine.loc("connected",
+              meta.getDatabaseProductName(),
+              meta.getDatabaseProductVersion()));
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
 
     try {
-      sqlLine.debug(sqlLine.loc("driver",
-          meta.getDriverName(),
-          meta.getDriverVersion()));
+      sqlLine.debug(
+          sqlLine.loc("driver",
+              meta.getDriverName(),
+              meta.getDriverVersion()));
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
