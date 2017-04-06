@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -326,6 +327,56 @@ public class SqlLineArgsTest {
                 + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
 
     // Now check that the right stuff got into the file.
+    assertFileContains(file,
+        RegexMatcher.of("Saving all output to \".*.log\". "
+            + "Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"));
+  }
+
+  /** Test case for [SQLLINE-62], "Expand ~ to user's home directory". */
+  @Test
+  public void testRecordHome() throws Throwable {
+    File home = new File(System.getProperty("user.home"));
+    File file;
+    for (int i = 0;; i++) {
+      file = new File(home, "sqlline" + i + ".log");
+      if (!file.exists()) {
+        break;
+      }
+    }
+    file.deleteOnExit();
+    final String s = "Saving all output to \".*.log\". "
+        + "Enter \"record\" with no arguments to stop it.\n"
+        + "2/4          !set outputformat csv\n"
+        + "3/4          values 2;\n"
+        + "'C1'\n"
+        + "'2'\n"
+        + "1 row selected \\([0-9.]+ seconds\\)\n"
+        + "4/4          !record\n";
+    checkScriptFile("!record " + file.getAbsolutePath() + "\n"
+            + "!set outputformat csv\n"
+            + "values 2;\n"
+            + "!record\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        RegexMatcher.of("(?s)1/4          !record .*.log\n"
+            + s
+            + "Recording stopped.\n"
+            + ".*"));
+
+    // Now check that the right stuff got into the file.
+    assertFileContains(file, RegexMatcher.of(s));
+    final boolean delete = file.delete();
+    assertThat(delete, is(true));
+  }
+
+  private void assertFileContains(File file, RegexMatcher matcher)
+      throws IOException {
     final FileReader fileReader = new FileReader(file);
     final StringWriter stringWriter = new StringWriter();
     final char[] chars = new char[1024];
@@ -336,15 +387,7 @@ public class SqlLineArgsTest {
       }
       stringWriter.write(chars, 0, c);
     }
-    assertThat(stringWriter.toString(),
-            RegexMatcher.of(
-                    "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-                            + "3/7          !set outputformat csv\n"
-                            + "4/7          values 2;\n"
-                            + "'C1'\n"
-                            + "'2'\n"
-                            + "1 row selected \\([0-9.]+ seconds\\)\n"
-                            + "5/7          !record\n"));
+    assertThat(stringWriter.toString(), matcher);
   }
 
   /**
