@@ -1409,7 +1409,7 @@ public class Commands {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
         String help = commandHandler.getHelpText();
-        if (!help.contains("\n ")) {
+        if (!help.contains("\n")) {
           // Do not wrap if text appears to be pre-formatted (e.g. '!help set')
           help = sqlLine.wrap(help, 60, 20);
         }
