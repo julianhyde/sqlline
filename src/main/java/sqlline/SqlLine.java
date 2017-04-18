@@ -173,7 +173,8 @@ public class SqlLine {
           "com.internetcds.jdbc.tds.Driver",
           "weblogic.jdbc.pool.Driver",
           "com.sqlstream.jdbc.Driver",
-          "org.luciddb.jdbc.LucidDbClientDriver"));
+          "org.luciddb.jdbc.LucidDbClientDriver",
+          "com.amazonaws.athena.jdbc.AthenaDriver"));
 
   static {
     String testClass = "jline.console.ConsoleReader";
