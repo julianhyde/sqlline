@@ -90,6 +90,7 @@ public class SqlLine {
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
       Arrays.asList(
           "centura.java.sqlbase.SqlbaseDriver",
+          "com.amazonaws.athena.jdbc.AthenaDriver",
           "COM.cloudscape.core.JDBCDriver",
           "com.ddtek.jdbc.db2.DB2Driver",
           "com.ddtek.jdbc.informix.InformixDriver",
