@@ -2,6 +2,29 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.3.0">1.3.0</a> (2017-06-09)
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/63">SQLLINE-63</a>]
+  Add Athena JDBC driver (Ben Poweski)
+* [<a href="https://github.com/julianhyde/sqlline/issues/62">SQLLINE-62</a>]
+  In `!record` and `!run` commands, expand '~' to user's home directory (Mike
+  Mattozzi)
+* [<a href="https://github.com/julianhyde/sqlline/issues/61">SQLLINE-61</a>]
+  Add `!nickname` command, to set a friendly name for a connection (Mike Mattozzi)
+* [<a href="https://github.com/julianhyde/sqlline/issues/54">SQLLINE-54</a>]
+  Add JDK 9 support; drop JDK 1.5 support
+
+Other:
+
+* Fix tests on Windows
+* Sort list of JDBC drivers
+* Publish manual and API for release 1.2.0
+* Create a property for the version number of each maven dependency
+* Add "release" profile, and only sign if it is enabled
+* Edit release instructions
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.2.0">1.2.0</a> (2016-10-26)
 
 Bugs and functional changes:
@@ -22,6 +45,7 @@ Bugs and functional changes:
   (Parth Chandra)
 
 Other:
+
 * Change capitalization of project name to "SQLLine"
   (previously a mixture of "sqlline" and "SQLline")
 * [<a href="https://github.com/julianhyde/sqlline/issues/37">SQLLINE-37</a>]
