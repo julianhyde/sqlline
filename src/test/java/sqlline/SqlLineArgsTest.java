@@ -125,10 +125,16 @@ public class SqlLineArgsTest {
     Pair pair = runScript(scriptFile, flag);
 
     // Check output before status. It gives a better clue what went wrong.
-    assertThat(pair.output, outputMatcher);
+    assertThat(toLinux(pair.output), outputMatcher);
     assertThat(pair.status, statusMatcher);
     final boolean delete = scriptFile.delete();
     assertThat(delete, is(true));
+  }
+
+  /** Windows line separators in a string into Linux line separators;
+   * a Linux string is unchanged. */
+  private static String toLinux(String s) {
+    return s.replaceAll("\r\n", "\n");
   }
 
   /**
@@ -372,7 +378,11 @@ public class SqlLineArgsTest {
     // Now check that the right stuff got into the file.
     assertFileContains(file, RegexMatcher.of(s));
     final boolean delete = file.delete();
-    assertThat(delete, is(true));
+    if (File.separatorChar == '/') {
+      // For unknown reasons, File.delete returns false on Windows, so only
+      // check on Linux and macOS.
+      assertThat(delete, is(true));
+    }
   }
 
   private void assertFileContains(File file, RegexMatcher matcher)
@@ -387,7 +397,7 @@ public class SqlLineArgsTest {
       }
       stringWriter.write(chars, 0, c);
     }
-    assertThat(stringWriter.toString(), matcher);
+    assertThat(toLinux(stringWriter.toString()), matcher);
   }
 
   /**
@@ -470,7 +480,7 @@ public class SqlLineArgsTest {
     assertThat(output, containsString("Generated Exception"));
   }
 
-    /**
+  /**
    * Attempts to execute a missing script file with the -f option to SqlLine.
    */
   @Test
