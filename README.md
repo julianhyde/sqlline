@@ -4,7 +4,7 @@ Command-line shell for issuing SQL to relational databases via JDBC.
 
 ## History
 
-A fork of the [Marc Prud'hommeaux](http://mprudhom.users.sourceforge.net/)'s
+A fork of the [Marc Prud'hommeaux](https://github.com/mprudhom)'s
 [sqlline](http://sourceforge.net/projects/sqlline/) project, also
 incorporating changes made by the
 [LucidDB](https://github.com/LucidDB/luciddb) project,
@@ -20,6 +20,23 @@ almost no restrictions.
 
 It is distributed via the
 [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Csqlline).
+
+## Quick start
+
+If you have [Coursier](https://github.com/coursier/coursier) installed, you
+can quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb) with:
+
+```
+$ coursier launch sqlline:sqlline:1.3.0 org.hsqldb:hsqldb:2.4.0 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+0: jdbc:hsqldb:res:foodmart> select avg("shelf_height" * "shelf_width" * "shelf_depth") as "avg_volume" from "product";
++-------------------------+
+|       avg_volume        |
++-------------------------+
+| 2147.3845245442353      |
++-------------------------+
+1 row selected (0.01 seconds)
+0: jdbc:hsqldb:res:foodmart> 
+```
 
 ## Getting started
 
@@ -94,7 +111,7 @@ mvn package
 
 ## Authors
 
-* Marc Prud'hommeaux (marc@apocalypse.org)
+* Marc Prud'hommeaux (mwp1@cornell.edu)
 * John V. Sichi (jsichi@gmail.com)
 * Stephan Zuercher (stephan@zuercher.us)
 * Sunny Choi
