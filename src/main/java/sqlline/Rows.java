@@ -165,6 +165,8 @@ abstract class Rows implements Iterator<Rows.Row> {
           break;
         case Types.BIT:
         case Types.CLOB:
+          values[i] = rs.getString(i + 1);
+          break;
         case Types.BLOB:
         case Types.REF:
         case Types.JAVA_OBJECT:
