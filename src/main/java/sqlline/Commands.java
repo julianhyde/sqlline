@@ -1231,7 +1231,7 @@ public class Commands {
       return;
     }
 
-    String filename = line.substring("script".length() + 1);
+    String filename = sqlLine.dequote(line.substring("script".length() + 1));
     if (filename == null) {
       callback.setToFailure();
       return;
@@ -1255,12 +1255,11 @@ public class Commands {
    * @param callback Callback for command status
    */
   public void run(String line, DispatchCallback callback) {
-    String filename = line.substring("run".length() + 1);
+    String filename = sqlLine.dequote(line.substring("run".length() + 1));
     if (filename.length() == 0) {
       callback.setToFailure();
       return;
     }
-
     List<String> cmds = new LinkedList<String>();
 
     try {
@@ -1365,7 +1364,7 @@ public class Commands {
       return;
     }
 
-    String filename = line.substring("record".length() + 1);
+    String filename = sqlLine.dequote(line.substring("record".length() + 1));
     if (filename == null) {
       callback.setToFailure();
       return;
