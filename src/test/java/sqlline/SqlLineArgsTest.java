@@ -192,6 +192,24 @@ public class SqlLineArgsTest {
         allOf(containsString(" 33 "), containsString(" 123 ")));
   }
 
+  @Test
+  public void testScriptFilenameWithSpace() throws Throwable {
+    final String scriptText = "values 10 + 23;\n"
+        + "-- a comment\n"
+        + "values 100 + 23;\n";
+
+    File scriptFile = File.createTempFile("Script with Spaces", ".sql");
+    scriptFile.deleteOnExit();
+    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    os.print(scriptText);
+    os.close();
+
+    Pair pair = runScript(scriptFile, true);
+    assertThat(pair.status, equalTo(SqlLine.Status.OK));
+    assertThat(pair.output, allOf(containsString(" 33 "),
+        containsString(" 123 ")));
+  }
+
   /**
    * Values that contain null.
    */
@@ -383,6 +401,57 @@ public class SqlLineArgsTest {
       // check on Linux and macOS.
       assertThat(delete, is(true));
     }
+  }
+
+  /**
+   * Test case for [SQLLINE-26], "Flush output for each command when using
+   * !record command."
+   */
+  @Test
+  public void testRecordFilenameWithSpace() throws Throwable {
+    File file = File.createTempFile("sqlline file with spaces", ".log");
+    checkScriptFile(
+        "values 1;\n"
+            + "!record " + file.getAbsolutePath() + "\n"
+            + "!set outputformat csv\n"
+            + "values 2;\n"
+            + "!record\n"
+            + "!set outputformat csv\n"
+            + "values 3;\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        RegexMatcher.of("(?s)1/7          values 1;\n"
+            + "\\+-------------\\+\n"
+            + "\\|     C1      \\|\n"
+            + "\\+-------------\\+\n"
+            + "\\| 1           \\|\n"
+            + "\\+-------------\\+\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "2/7          !record .*.log\n"
+            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"
+            + "Recording stopped.\n"
+            + "6/7          !set outputformat csv\n"
+            + "7/7          values 3;\n"
+            + "'C1'\n"
+            + "'3'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+
+    // Now check that the right stuff got into the file.
+    assertFileContains(file,
+        RegexMatcher.of("Saving all output to \".*.log\". "
+            + "Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"));
   }
 
   private void assertFileContains(File file, RegexMatcher matcher)
