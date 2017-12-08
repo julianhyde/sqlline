@@ -162,7 +162,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-42], "Script fails if first line is a comment".
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/42">[SQLLINE-42],
+   * Script fails if first line is a comment</a>.
    */
   @Test
   public void testScriptFileStartsWithComment() throws Throwable {
@@ -190,6 +192,28 @@ public class SqlLineArgsTest {
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  /** Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/72">[SQLLINE-72]
+   * Allow quoted file names (including spaces) in <tt>!record</tt>,
+   * <tt>!run</tt> and <tt>!script</tt> commands</a>. */
+  @Test
+  public void testScriptFilenameWithSpace() throws Throwable {
+    final String scriptText = "values 10 + 23;\n"
+        + "-- a comment\n"
+        + "values 100 + 23;\n";
+
+    File scriptFile = File.createTempFile("Script with Spaces", ".sql");
+    scriptFile.deleteOnExit();
+    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    os.print(scriptText);
+    os.close();
+
+    Pair pair = runScript(scriptFile, true);
+    assertThat(pair.status, equalTo(SqlLine.Status.OK));
+    assertThat(pair.output, allOf(containsString(" 33 "),
+        containsString(" 123 ")));
   }
 
   /**
@@ -221,8 +245,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-32], "!help set' should print documentation for all
-   * variables".
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/32">[SQLLINE-32]
+   * !help set' should print documentation for all variables</a>.
    */
   @Test
   public void testHelpSet() throws Throwable {
@@ -264,7 +289,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-39], "'help set' shouldn't break long lines".
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/39">[SQLLINE-39]
+   * 'help set' should not break long lines</a>.
    *
    * <p>But it should break 'help all', which consists of a single long line.
    */
@@ -281,7 +308,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-49], "!manual command fails".
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/49">[SQLLINE-49]
+   * !manual command fails</a>.
    */
   @Test
   public void testManual() throws Throwable {
@@ -294,8 +323,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-26], "Flush output for each command when using
-   * !record command."
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/26">[SQLLINE-26]
+   * Flush output for each command when using !record command</a>.
    */
   @Test
   public void testRecord() throws Throwable {
@@ -344,7 +374,9 @@ public class SqlLineArgsTest {
             + "5/7          !record\n"));
   }
 
-  /** Test case for [SQLLINE-62], "Expand ~ to user's home directory". */
+  /** Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/62">[SQLLINE-62]
+   * Expand ~ to user's home directory</a>. */
   @Test
   public void testRecordHome() throws Throwable {
     File home = new File(System.getProperty("user.home"));
@@ -385,6 +417,57 @@ public class SqlLineArgsTest {
     }
   }
 
+  /**
+   * As {@link #testRecord()}, but file name is double-quoted and contains a
+   * space.
+   */
+  @Test
+  public void testRecordFilenameWithSpace() throws Throwable {
+    File file = File.createTempFile("sqlline file with spaces", ".log");
+    checkScriptFile(
+        "values 1;\n"
+            + "!record " + file.getAbsolutePath() + "\n"
+            + "!set outputformat csv\n"
+            + "values 2;\n"
+            + "!record\n"
+            + "!set outputformat csv\n"
+            + "values 3;\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        RegexMatcher.of("(?s)1/7          values 1;\n"
+            + "\\+-------------\\+\n"
+            + "\\|     C1      \\|\n"
+            + "\\+-------------\\+\n"
+            + "\\| 1           \\|\n"
+            + "\\+-------------\\+\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "2/7          !record .*.log\n"
+            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"
+            + "Recording stopped.\n"
+            + "6/7          !set outputformat csv\n"
+            + "7/7          values 3;\n"
+            + "'C1'\n"
+            + "'3'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+
+    // Now check that the right stuff got into the file.
+    assertFileContains(file,
+        RegexMatcher.of("Saving all output to \".*.log\". "
+            + "Enter \"record\" with no arguments to stop it.\n"
+            + "3/7          !set outputformat csv\n"
+            + "4/7          values 2;\n"
+            + "'C1'\n"
+            + "'2'\n"
+            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "5/7          !record\n"));
+  }
+
   private void assertFileContains(File file, RegexMatcher matcher)
       throws IOException {
     final FileReader fileReader = new FileReader(file);
@@ -401,7 +484,9 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test case for [SQLLINE-61], "Add !nickname command"
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/61">[SQLLINE-61]
+   * Add !nickname command</a>.
    */
   @Test
   public void testNickname() throws Throwable {

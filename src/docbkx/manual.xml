@@ -1127,7 +1127,7 @@ sqlline> !help
 !metadata         Obtain metadata information
 !nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
-                  (table,vertical,csv,tsv,xmlattrs,xmlelements)
+                  (table, vertical, csv, tsv, xmlattrs, xmlelements)
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
 !procedures       List all the procedures
@@ -1137,7 +1137,7 @@ sqlline> !help
 !rehash           Fetch table and column names for command completion
 !rollback         Roll back the current transaction (if autocommit is off)
 !run              Run a script from the specified file
-!save             Save the current variabes and aliases
+!save             Save the current variables and aliases
 !scan             Scan for installed JDBC drivers
 !script           Start saving a script to a file
 !set              Set a sqlline variable
@@ -1935,6 +1935,11 @@ Autocommit status: true
           <para>
           Save all output from the session to the specified file.
           </para>
+
+          <para>
+          If the file name contains spaces, you may enclose it in
+          double-quotes.
+          </para>
         </refsect1>
         <refsect1>
           <title>Example of "record" command</title>
@@ -2134,6 +2139,11 @@ Rollback complete (0.016 seconds)
           <link linkend="setting_force">force</link> preference is
           set to <literal>true</literal>.
           </para>
+
+          <para>
+          If the file name contains spaces, you may enclose it in
+          double-quotes.
+          </para>
         </refsect1>
         <refsect1>
           <title>Example of "run" command</title>
@@ -2320,6 +2330,11 @@ sqlline>
           by entering the script command again with no arguments.
           Saved scripts can be re-run using the
           <link linkend="command_run">run</link> command.
+          </para>
+
+          <para>
+          If the file name contains spaces, you may enclose it in
+          double-quotes.
           </para>
         </refsect1>
         <refsect1>
