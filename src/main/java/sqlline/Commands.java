@@ -1231,14 +1231,14 @@ public class Commands {
       return;
     }
 
-    String[] parts = sqlLine.split(line, 2, "Usage: script <filename>");
-    if (parts == null) {
+    String filename = sqlLine.dequote(line.substring("script".length() + 1));
+    if (filename == null) {
       callback.setToFailure();
       return;
     }
 
     try {
-      outFile = new OutputFile(parts[1]);
+      outFile = new OutputFile(filename);
       sqlLine.setScriptOutputFile(outFile);
       sqlLine.output(sqlLine.loc("script-started", outFile));
       callback.setToSuccess();
@@ -1255,17 +1255,16 @@ public class Commands {
    * @param callback Callback for command status
    */
   public void run(String line, DispatchCallback callback) {
-    String[] parts = sqlLine.split(line, 2, "Usage: run <scriptfile>");
-    if (parts == null) {
+    String filename = sqlLine.dequote(line.substring("run".length() + 1));
+    if (filename.length() == 0) {
       callback.setToFailure();
       return;
     }
-
     List<String> cmds = new LinkedList<String>();
 
     try {
       BufferedReader reader =
-          new BufferedReader(new FileReader(parts[1]));
+          new BufferedReader(new FileReader(filename));
       try {
         // ### NOTE: fix for sf.net bug 879427
         StringBuilder cmd = null;
@@ -1365,14 +1364,14 @@ public class Commands {
       return;
     }
 
-    String[] parts = sqlLine.split(line, 2, "Usage: record <filename>");
-    if (parts == null) {
+    String filename = sqlLine.dequote(line.substring("record".length() + 1));
+    if (filename == null) {
       callback.setToFailure();
       return;
     }
 
     try {
-      outputFile = new OutputFile(parts[1]);
+      outputFile = new OutputFile(filename);
       sqlLine.setRecordOutputFile(outputFile);
       sqlLine.output(sqlLine.loc("record-started", outputFile));
       callback.setToSuccess();

@@ -592,7 +592,7 @@ public class SqlLine {
 
     // if a script file was specified, run the file and quit
     if (opts.getRun() != null) {
-      dispatch(COMMAND_PREFIX + "run " + opts.getRun(), callback);
+      dispatch(COMMAND_PREFIX + "run \"" + opts.getRun() + "\"", callback);
       if (callback.isFailure()) {
         status = Status.OTHER;
       }
