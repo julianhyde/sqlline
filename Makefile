@@ -17,7 +17,7 @@ build:
 	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
 	cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
 	# Update for install dir
-	sed "s|$(CURDIR)|@install_dir@|g" $(CURDIR)/bin/sqlline
+	sed "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
 
 install: build
 	ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
