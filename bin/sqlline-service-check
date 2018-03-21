@@ -1,0 +1,19 @@
+#!/bin/bash
+# Launch script for sqlline-service-check.py
+
+# Needed for pipenv not to use root user's .cache directory
+export HOME="/home/icinga"
+
+cd /opt/sqlline
+
+# Debug output
+if [[ $(echo "$@" | grep "\-\-debug") != "" ]]; then
+	echo "Running script as: $(whoami)"
+	echo "HOME env: $HOME"
+fi
+
+# Reset venv if you run into issues
+# rm -rf /home/icinga/{.cache,.virtualenvs} /home/icinga/.local/share/virtualenvs
+
+# Run script
+pipenv run python bin/sqlline-service-check.py "$@"

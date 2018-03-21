@@ -19,7 +19,6 @@
     <top.dir>${project.basedir}</top.dir>
 
     <!-- The following list is sorted. -->
-    <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
     <h2.version>1.4.191</h2.version>
     <hsqldb.version>2.3.4</hsqldb.version>
     <jline.version>2.14.3</jline.version>
@@ -84,34 +83,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <!-- Generate manual.html from manual.xml. Then you must manually
-             generate manual.txt by copy-pasting from manual.html in a web
-             browser. -->
-        <groupId>com.agilejava.docbkx</groupId>
-        <artifactId>docbkx-maven-plugin</artifactId>
-        <version>${docbkx-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate-html</goal>
-              <goal>generate-xhtml</goal>
-              <goal>generate-xhtml5</goal>
-              <goal>generate-manpages</goal>
-            </goals>
-            <phase>validate</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <entities>
-            <entity>
-              <name>VERSION</name>
-              <value>${project.version}</value>
-            </entity>
-          </entities>
-          <includes>manual.xml</includes>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
