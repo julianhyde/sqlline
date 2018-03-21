@@ -14,7 +14,7 @@ build:
 	rm -fv /usr/lib64/nagios/plugins/sqlline
 	# sqlline build
 	mvn package
-	rm -rf $(CURDIR)/hivejars && mkdir $(GIT_DIR)/hivejars
+	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
 	cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
 
 install: build
