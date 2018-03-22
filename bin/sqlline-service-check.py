@@ -214,9 +214,9 @@ def main():
 	if mode == "kerberos":
 		# Check for required args that support kerberos
 		if not args.adserver:
-			sys.exit("--adserver is required (e.g. hostname.domain.com)")
+			sys.exit("--adserver is required for kerberos usage (e.g. hostname.domain.com)")
 		if not args.realm:
-			sys.exit("--realm is required (e.g. DOMAIN.COM)")
+			sys.exit("--realm is required for kerberos usage (e.g. DOMAIN.COM)")
 		proc_status = subprocess.call(['kinit', '-kt', \
 			args.keytab, username + '@GEISINGER.EDU'], stdout=open('/dev/null', 'w'))
 		if proc_status is not 0:
