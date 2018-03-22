@@ -21,7 +21,7 @@ import time
 
 class Load(nagiosplugin.Resource):
 	""" Construct the class for Icinga """
-	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, prinicpal, query, queryfile, realm, username):
+	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, username):
 		logging.debug("Initializing")
 		self.adserver = adserver
 		self.database = database
@@ -29,7 +29,6 @@ class Load(nagiosplugin.Resource):
 		self.mode = mode
 		self.PASSWORD = PASSWORD
 		self.port = port
-		self.prinicpal = prinicpal
 		self.query = query
 		self.queryfile = queryfile
 		self.realm = realm
@@ -229,7 +228,7 @@ def main():
 	# Get metrics
 	try:
 		check = nagiosplugin.Check(
-			Load(database, adserver, hostname, mode, PASSWORD,port, prinicpal, \
+			Load(database, adserver, hostname, mode, PASSWORD,port, \
 			query, queryfile, realm, username), \
 			nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
 	except:
