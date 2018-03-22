@@ -193,7 +193,7 @@ def main():
 	initialize_logger(debug, log_filename, log_filename_debug)
 
 	# Authentication
-	# Setup creds for non-kerboers (if required)
+	# Setup creds for non-kerberos (if required)
 	if args.creds and mode != "kerberos":
 		# use supplied credentials file
 		credentials_file = open(args.creds)
@@ -212,6 +212,11 @@ def main():
 		PASSWORD = ""
 
 	if mode == "kerberos":
+		# Check for required args that support kerberos
+		if not args.adserver:
+			sys.exit("--adserver is required (e.g. hostname.domain.com)")
+		if not args.realm:
+			sys.exit("--realm is required (e.g. DOMAIN.COM)")
 		proc_status = subprocess.call(['kinit', '-kt', \
 			args.keytab, username + '@GEISINGER.EDU'], stdout=open('/dev/null', 'w'))
 		if proc_status is not 0:
