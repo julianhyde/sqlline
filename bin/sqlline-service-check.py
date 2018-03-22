@@ -21,12 +21,12 @@ import time
 
 class Load(nagiosplugin.Resource):
 	""" Construct the class for Icinga """
-	def __init__(self, database, adserver, auth, host, mode, PASSWORD, port, prinicpal, query, queryfile, realm, username):
+	def __init__(self, database, adserver, auth, hostname, mode, PASSWORD, port, prinicpal, query, queryfile, realm, username):
 		logging.debug("Initializing")
 		self.adserver = adserver
 		self.database = database
 		self.auth = auth
-		self.host = host
+		self.hostname = hostname
 		self.mode = mode
 		self.PASSWORD = PASSWORD
 		self.port = port
@@ -40,11 +40,11 @@ class Load(nagiosplugin.Resource):
 		"""Executes the query of file"""
 
 		if self.mode == "kerberos":
-			jdbc = '"jdbc:hive2://' + self.host + ':' + self.port \
+			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port \
 				+ '/;AuthMech=1;KrbHostFQDN=' + adserver + ';KrbServiceName=hive;KrbHostFQDN=' \
-				+ self.host + ';KrbRealm=' + realm + '"'
+				+ self.hostname + ';KrbRealm=' + realm + '"'
 		elif self.mode == "ssl":
-			jdbc = '"jdbc:hive2://' + self.host + ':' + self.port + '/;ssl=1;AuthMech=3"'
+			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port + '/;ssl=1;AuthMech=3"'
 
 		# sqlline does not support the beeline "-e" parameter. Build a file instead
 		if execute_type == "file":
@@ -152,11 +152,11 @@ def main():
 	aparser.add_argument('-f', '--filename', required=False, default=None, help= \
 		"Process a .hql file. Separate querie sets with \
 		blank lines, and continous lines qith a '\'")
-	aparser.add_argument('-hs', '--host', required=False, help="Hive server")
+	aparser.add_argument('-hs', '--hostname', required=False, help="Hive server")
 	aparser.add_argument('-kt', '--keytab', help="Supply a custom keytab file")
 	aparser.add_argument('-ln', '--log-name', action='store', default="sqlline-service-check", help="log filename")
 	aparser.add_argument('-m', '--mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
-	aparser.add_argument('-p', '--port', required=False, help="Hive host port")
+	aparser.add_argument('-p', '--port', required=False, help="Hive hostname port")
 	aparser.add_argument('-q', '--query', required=False, default=None, action='store', help="Query supplied")
 	aparser.add_argument('-w', '--warning', metavar='RANGE', default='',
 		help='return warning if load is outside RANGE')
@@ -172,7 +172,7 @@ def main():
 	adserver = args.adserver
 	database = args.database
 	debug = args.debug
-	host = args.host
+	hostname = args.hostname
 	mode = args.mode
 	query_cmds = []
 	realm = args.realm
@@ -230,7 +230,7 @@ def main():
 	# Get metrics
 	try:
 		check = nagiosplugin.Check(
-			Load(database, adserver, auth, host, mode, PASSWORD,port, prinicpal, \
+			Load(database, adserver, auth, hostname, mode, PASSWORD,port, prinicpal, \
 			query, queryfile, realm, username), \
 			nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
 	except:
