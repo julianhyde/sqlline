@@ -44,6 +44,8 @@ class Load(nagiosplugin.Resource):
 		elif self.mode == "ssl":
 			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port + '/;ssl=1;AuthMech=3"'
 
+		logging.debug("JDBC used: " + str(jdbc))
+
 		# sqlline does not support the beeline "-e" parameter. Build a file instead
 		if execute_type == "file":
 			queryfile = self.queryfile
