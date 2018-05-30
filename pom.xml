@@ -22,7 +22,7 @@
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
     <h2.version>1.4.191</h2.version>
     <hsqldb.version>2.3.4</hsqldb.version>
-    <jline.version>2.14.3</jline.version>
+    <jline.version>2.14.4</jline.version>
     <jmockit.version>1.30</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
