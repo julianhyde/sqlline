@@ -2,6 +2,30 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.4.0">1.4.0</a> (2018-05-31)
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/75">SQLLINE-75</a>]
+  jline gives `NumberFormatException` during startup
+  * Caused by [<a href="https://github.com/jline/jline2/issues/281">JLINE2-281</a>],
+    and fixed by upgrading jline to 2.14.4
+* [<a href="https://github.com/julianhyde/sqlline/issues/72">SQLLINE-72</a>]
+  Allow quoted file names (including spaces) in `!record`, `!run` and `!script`
+  commands (Jason Prodonovich)
+
+Other:
+
+* Upgrade `maven-javadoc-plugin` to 3.0.1 due to
+  [<a href="https://issues.apache.org/jira/browse/MJAVADOC-485">MJAVADOC-517</a>]
+* [<a href="https://github.com/julianhyde/sqlline/issues/76">SQLLINE-76</a>]
+  During build, manual fails to validate against docbook DTD
+* Travis CI: remove JDK 6 and 7 (no longer supported by Travis)
+* Upgrade `maven-javadoc-plugin` to 3.0.0 due to
+  [<a href="https://issues.apache.org/jira/browse/MJAVADOC-485">MJAVADOC-485</a>]
+* Add hyperlinks to previous test-cases (Julian Hyde)
+* Add coursier usage example, and update contact info (Marc Prud'hommeaux)
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.3.0">1.3.0</a> (2017-06-09)
 
 Bugs and functional changes:
