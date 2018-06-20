@@ -155,6 +155,7 @@ def main():
 	aparser.add_argument('-hs', '--hostname', required=False, help="Hive server")
 	aparser.add_argument('-kt', '--keytab', help="Supply a custom keytab file")
 	aparser.add_argument('-ln', '--log-name', action='store', default="sqlline-service-check", help="log filename")
+	aparser.add_argument('-lf', '--log-folder', action='store', default="/home/"+ getpass.getuser() +"/sqlline-service-check/", help="log folder name")
 	aparser.add_argument('-m', '--mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
 	aparser.add_argument('-p', '--port', required=False, help="Hive hostname port")
 	aparser.add_argument('-q', '--query', required=False, default=None, action='store', help="Query supplied")
@@ -187,7 +188,7 @@ def main():
 		query = None
 		queryfile = args.filename
 
-	log_folder = '/home/icinga/plugin-logs/sqlline-service-check/'
+	log_folder = args.log_folder
 	if not os.path.isdir(log_folder):
 		os.makedirs(log_folder)
 	log_filename = log_folder + args.log_name + ".log"
