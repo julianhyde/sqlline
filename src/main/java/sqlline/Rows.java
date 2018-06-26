@@ -31,8 +31,8 @@ abstract class Rows implements Iterator<Rows.Row> {
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
-  final Map<TableKey, Set<String>> tablePrimaryKeysCache
-      = new HashMap<TableKey, Set<String>>();
+  final Map<TableKey, Set<String>> tablePrimaryKeysCache =
+      new HashMap<TableKey, Set<String>>();
   final NumberFormat numberFormat;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
@@ -95,8 +95,8 @@ abstract class Rows implements Iterator<Rows.Row> {
 
       // Get the (possibly cached) set of primary key columns
       // for the table containing this column.
-      Set<String> tablePrimaryKeys
-          = getTablePrimaryKeys(catalog, schema, table);
+      Set<String> tablePrimaryKeys =
+          getTablePrimaryKeys(catalog, schema, table);
 
       // Determine if this column is a primary key and cache the result.
       return primaryKeys[col] = tablePrimaryKeys != null
