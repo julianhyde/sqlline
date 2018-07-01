@@ -1,5 +1,6 @@
 #!/bin/bash
 # Launch script for sqlline-service-check.py
+# This is for Icinga ONLY
 
 # Needed for pipenv not to use root user's .cache directory
 export HOME="/home/icinga"

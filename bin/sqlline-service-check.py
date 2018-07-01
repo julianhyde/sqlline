@@ -1,6 +1,6 @@
 #!/bin/python
 # Description: Nagios/Icinga plugin for Hiveserver2 checks
-#	       Uses sqlline
+#	       Uses sqlline. Intended for Icinga ONLY
 # Metrics:
 #	Returns query completion time in seconds	
 

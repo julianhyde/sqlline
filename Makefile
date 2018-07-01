@@ -6,7 +6,10 @@
 # https://hortonworks.com/downloads/
 SIMBA_DRIVERS = 'https://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/hive-jdbc4/1.0.42.1054/Simba_HiveJDBC41_1.0.42.1054.zip'
 
-all: build install
+all: clean build install
+
+clean:
+	mvn clean
 
 build:
 	rm -fv /usr/local/bin/sqlline-service-check
@@ -21,7 +24,8 @@ build:
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
 
 install: build
-	ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
+	#ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
+	echo "TODO - install RPM here"
 
 install-icinga: build
 	# Build pipenv environment for python wrapper
