@@ -6,19 +6,13 @@
 # https://hortonworks.com/downloads/
 SIMBA_DRIVERS = 'https://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/hive-jdbc4/1.0.42.1054/Simba_HiveJDBC41_1.0.42.1054.zip'
 
-all: build install
+all: build
 
 build:
-	rm -fv /usr/local/bin/sqlline-service-check
-	rm -fv /usr/local/bin/sqlline
-	rm -fv /usr/lib64/nagios/plugins/sqlline
 	# sqlline build
 	mvn package
-	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
-	cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
-	# Update for install dir
-	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
-	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
+	#rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
+	#cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
 
 install: build
 	ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
@@ -34,7 +28,8 @@ install-icinga: build
 	ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
 
 uninstall:
-	rm -fv /usr/local/bin/sqlline
-	rm -fv /usr/local/bin/sqlline-service-check
-	rm -fv /usr/lib64/nagios/plugins/sqlline-service-check
+	# code to unintall RPM
 
+clean:
+	mvn clean
+	rm -rf usr/

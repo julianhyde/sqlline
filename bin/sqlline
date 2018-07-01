@@ -1,0 +1,21 @@
+#!/bin/bash
+# sqlline - Script to launch SQL shell on Unix, Linux or Mac OS
+#
+# Related for the RSA/SSL error before the ext dir was linked below:
+# https://github.com/julianhyde/sqlline/issues/46
+# JIRA: HO-1713 (initial implementation)
+# JIRA: HO-1807 (kerberos)
+
+# debug only
+# -Dsun.security.krb5.debug=true
+
+BINPATH=$(dirname $0)
+#export BINPATH=/usr/lib/jvm/jre/lib/ext:@install_dir@/target:sqlline-1.4.0-SNAPSHOT.jar:@install_dir@/hivejars:$BINPATH
+export BINPATH=/usr/lib/jvm/jre/lib/ext:sqlline-1.4.0-SNAPSHOT.jar:$BINPATH
+exec java \
+        -Djava.ext.dirs=$BINPATH \
+        -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts \
+        -Djavax.net.ssl.trustStorePassword=changeit sqlline.SqlLine \
+        "$@"
+
+# End sqlline
