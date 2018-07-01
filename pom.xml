@@ -80,7 +80,7 @@
   </prerequisites>
 
   <repositories>
-		<!-- Begin Hortonworks repositories -->
+    <!-- Begin Hortonworks repositories -->
     <repository>
       <releases>
         <enabled>true</enabled>
@@ -103,7 +103,7 @@
        <name>Hortonworks Other Dependencies</name>
        <url>http://repo.hortonworks.com/content/groups/public</url>
     </repository>
-		<!-- End Hortonworks repositories -->
+    <!-- End Hortonworks repositories -->
   </repositories>
 
   <build>
@@ -206,7 +206,7 @@
           </execution>
         </executions>
       </plugin>
-	  <plugin>
+    <plugin>
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>rpm-maven-plugin</artifactId>
       <version>2.2.0</version>
@@ -231,7 +231,7 @@
             <groupname>root</groupname>
             <sources>
               <source>
-						    <location>bin/sqlline</location>
+                <location>bin/sqlline</location>
               </source>
             </sources>
           </mapping>
@@ -277,26 +277,26 @@
       <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>
-		<!-- Dependency on Hortonworks drivers -->
-		<!-- https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc -->
-		<dependency>
+    <!-- Dependency on Hortonworks drivers -->
+    <!-- https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc -->
+    <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-jdbc</artifactId>
       <version>1.2.1000.2.6.5.10-2</version>
-		</dependency>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.thrift/libfb303 -->
-		<dependency>
-			<groupId>org.apache.thrift</groupId>
-			<artifactId>libfb303</artifactId>
-			<version>0.9.0</version>
-			<type>pom</type>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libfb303</artifactId>
+      <version>0.9.0</version>
+      <type>pom</type>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1.3</version>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.1.3</version>
+    </dependency>
   </dependencies>
 
   <profiles>
