@@ -235,6 +235,17 @@
               </source>
             </sources>
           </mapping>
+          <mapping>
+            <directoryIncluded>false</directoryIncluded>
+            <directory>/usr/lib/sqlline</directory>
+            <username>root</username>
+            <groupname>root</groupname>
+            <sources>
+              <source>
+                <location>target/sqlline-1.4.0-SNAPSHOT-jar-with-dependencies.jar</location>
+              </source>
+            </sources>
+          </mapping>
         </mappings>
       </configuration>
     </plugin>
