@@ -10,7 +10,8 @@
 # -Dsun.security.krb5.debug=true
 
 BINPATH=$(dirname $0)
-export BINPATH=/usr/lib/jvm/jre/lib/ext:/usr/lib/sqlline/:$BINPATH
+# Include drivers in BINPATH (e.g. Simba hive driver)
+export BINPATH=/usr/lib/simba-hive-driver:/usr/lib/sqlline/:$BINPATH
 exec java \
         -Djava.ext.dirs=$BINPATH \
         -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts \
