@@ -14,8 +14,9 @@ build: clean
 	mvn package
 
 install: build
-	# Specifying sqlline for groupID should place the hivejars folder under .m2/repository/sqlline/hivejars
 	# For version on the hive jars, this should be replaced by a var with the Simba download URL... TODO
+	# The mvn insall needs remove and the JAR installed into a proper location
+	# When this is done, adjust bin/sqlline to match
 	@echo "Install Maven project to user .m2 directory"
 	mvn install
 	@echo "Installing RPM"
