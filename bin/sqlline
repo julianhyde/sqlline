@@ -11,7 +11,7 @@
 
 BINPATH=$(dirname $0)
 # Include drivers in BINPATH (e.g. Simba hive driver)
-export BINPATH=/usr/lib/simba-hive-driver:/usr/lib/sqlline/:$BINPATH
+export BINPATH=/usr/lib/simba-hive-jdbc:/usr/lib/sqlline/:$BINPATH
 exec java \
         -Djava.ext.dirs=$BINPATH \
         -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts \
