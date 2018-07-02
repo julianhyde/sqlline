@@ -10,7 +10,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-  <version>1.4.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <name>sqlline</name>
   <url>http://github.com/julianhyde/sqlline</url>
 
@@ -21,7 +21,7 @@
     <!-- The following list is sorted. -->
     <h2.version>1.4.191</h2.version>
     <hsqldb.version>2.3.4</hsqldb.version>
-    <jline.version>2.14.3</jline.version>
+    <jline.version>2.14.4</jline.version>
     <jmockit.version>1.30</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
@@ -132,7 +132,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
         <configuration>
           <stylesheetfile>${basedir}/doc/styles.css</stylesheetfile>
           <show>public</show>
