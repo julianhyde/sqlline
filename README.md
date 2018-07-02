@@ -27,7 +27,7 @@ If you have [Coursier](https://github.com/coursier/coursier) installed, you
 can quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb) with:
 
 ```
-$ coursier launch sqlline:sqlline:1.3.0 org.hsqldb:hsqldb:2.4.0 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+$ coursier launch sqlline:sqlline:1.4.0 org.hsqldb:hsqldb:2.4.1 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
 0: jdbc:hsqldb:res:foodmart> select avg("shelf_height" * "shelf_width" * "shelf_depth") as "avg_volume" from "product";
 +-------------------------+
 |       avg_volume        |
@@ -90,7 +90,7 @@ Use the following definition to use `sqlline` in your maven project:
 <dependency>
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
-  <version>1.3.0</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 

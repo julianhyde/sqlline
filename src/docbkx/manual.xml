@@ -1,10 +1,10 @@
 <!DOCTYPE book
   PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-  "http://www.docbook.org/xml/4.2/docbookx.dtd"
+  "https://docbook.org/xml/4.2/docbookx.dtd"
 [
     <!-- "http://www.docbook.org/xml/4.2/docbookx.dtd" -->
     <!-- "file:/sw/share/xml/dtd/docbookx/4.2.0/docbookx.dtd" -->
-    <!ENTITY VERSION "1.3">
+    <!ENTITY VERSION "1.4">
 ]>
 <book>
   <bookinfo>
@@ -70,7 +70,7 @@
             <listitem><para>
             <trademark>Java</trademark> Virtual Machine -
             SQLLine is a pure
-            java program, and requires Java version 1.3 or higher
+            java program, and requires Java version 1.6 or higher
             in order to run. The latest JVM can be downloaded from
             <ulink url="http://java.sun.com"/>.
             </para></listitem>
@@ -1321,7 +1321,7 @@ sqlline>
           <para>
           Set the isolation level for the current transaction. For
           a description of the different isolation levels, see
-          <ulink url="http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail">http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail</ulink>.
+          <ulink url="https://docs.oracle.com/javase/9/docs/api/java/sql/Connection.html#field_detail">java.sql.Connection#field_detail</ulink>.
           </para>
         </refsect1>
         <refsect1>
@@ -1413,7 +1413,7 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
 
           Use "" for a blank String, and null for a null parameter.
           For information on available metadata methods, see
-          <ulink url="http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html">http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html</ulink>.
+          <ulink url="https://docs.oracle.com/javase/9/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetaData</ulink>.
           </para>
         </refsect1>
         <refsect1>
@@ -2707,7 +2707,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           to <literal>default</literal> causes numeric
           values to be fetched and rendered via ResultSet.getString.
           Any other setting results in fetch via ResultSet.getObject
-          and rendering via <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/DecimalFormat.html">
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/DecimalFormat.html">
           java.text.DecimalFormat</ulink>.  For example,
           the setting "0.###E0" yields scientific notation
           with up to three fractional digits.
