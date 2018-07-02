@@ -242,7 +242,7 @@
             <groupname>root</groupname>
             <sources>
               <source>
-                <location>target/sqlline-1.4.0-SNAPSHOT-jar-with-dependencies.jar</location>
+                <location>target/sqlline-1.5.0-SNAPSHOT-jar-with-dependencies.jar</location>
               </source>
             </sources>
           </mapping>
