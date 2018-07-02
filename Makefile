@@ -2,16 +2,15 @@
 # Author: Michael DeGuzis <mtdeguzis@geisinger.edu>
 # https://udajira:8443/browse/HO-1713
 # https://udajira:8443/browse/HO-1806
+#
+# NOTE: For Hive functionality, you will need the Simba Hive JDBC drivers
+# This can be installed/built from the rpm GitHub repo -> simba-hive-jdbc
 
-# https://hortonworks.com/downloads/
-SIMBA_DRIVERS = 'https://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/hive-jdbc4/1.0.42.1054/Simba_HiveJDBC41_1.0.42.1054.zip'
 CURRENT_USER = $(shell echo $whoami)
 
 all: build
 
 build: clean
-	#rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
-	#cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
 	mvn package
 
 install: build
@@ -42,5 +41,3 @@ clean:
 	# If RPM was inspected/unpacked for testing
 	rm -rf usr/
 
-test:
-	java -jar target/sqlline-1.4.0-SNAPSHOT-jar-with-dependencies.jar
