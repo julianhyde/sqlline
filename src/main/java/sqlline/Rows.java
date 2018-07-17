@@ -11,13 +11,18 @@
 */
 package sqlline;
 
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Abstract base class representing a set of rows to be displayed.
@@ -26,6 +31,8 @@ abstract class Rows implements Iterator<Rows.Row> {
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
+  final Map<TableKey, Set<String>> tablePrimaryKeysCache =
+      new HashMap<TableKey, Set<String>>();
   final NumberFormat numberFormat;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
@@ -63,37 +70,41 @@ abstract class Rows implements Iterator<Rows.Row> {
     }
 
     try {
+      // Convert column index into JDBC column number.
+      int colNum = col + 1;
+
+      // If the table name can't be determined exit quickly.
       // this doesn't always work, since some JDBC drivers (e.g.,
       // Oracle's) return a blank string from getTableName.
-      String table = rsMeta.getTableName(col + 1);
-      String column = rsMeta.getColumnName(col + 1);
-
-      if (table == null
-          || table.length() == 0
-          || column == null
-          || column.length() == 0) {
+      String table = rsMeta.getTableName(colNum);
+      if (table == null || table.length() == 0) {
         return primaryKeys[col] = false;
       }
 
-      ResultSet pks =
-          sqlLine.getDatabaseConnection().meta.getPrimaryKeys(
-              sqlLine.getDatabaseConnection().meta.getConnection().getCatalog(),
-              null,
-              table);
-
-      try {
-        while (pks.next()) {
-          if (column.equalsIgnoreCase(
-              pks.getString("COLUMN_NAME"))) {
-            return primaryKeys[col] = true;
-          }
-        }
-      } finally {
-        pks.close();
+      // If the column name can't be determined exit quickly.
+      String column = rsMeta.getColumnName(colNum);
+      if (column == null || column.length() == 0) {
+        return primaryKeys[col] = false;
       }
 
-      return primaryKeys[col] = false;
-    } catch (SQLException sqle) {
+      // Retrieve the catalog and schema name for this connection.
+      // Either or both may be null.
+      DatabaseMetaData dbMeta = sqlLine.getDatabaseConnection().meta;
+      String catalog = dbMeta.getConnection().getCatalog();
+      String schema = rsMeta.getSchemaName(colNum);
+
+      // Get the (possibly cached) set of primary key columns
+      // for the table containing this column.
+      Set<String> tablePrimaryKeys =
+          getTablePrimaryKeys(catalog, schema, table);
+
+      // Determine if this column is a primary key and cache the result.
+      return primaryKeys[col] = tablePrimaryKeys != null
+          && tablePrimaryKeys.contains(column);
+
+    } catch (SQLException e) {
+      // Ignore the exception and assume that this column
+      // isn't a primary key for display purposes.
       return primaryKeys[col] = false;
     }
   }
@@ -187,6 +198,97 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
     }
   }
+
+  /**
+   * Load and cache a set of primary key column names given a table key
+   * (i.e. catalog, schema and table name).  The result cannot be considered
+   * authoritative as since it depends on whether the JDBC driver property
+   * implements {@link java.sql.ResultSetMetaData#getTableName} and many
+   * drivers/databases do not.
+   *
+   * @param tableKey A key (containing catalog, schema and table names) into
+   *                 the table primary key cache.  Must not be null.
+   * @return A set of primary key column names.  May be empty but will
+   *         never be null.
+   */
+  private Set<String> loadAndCachePrimaryKeysForTable(TableKey tableKey) {
+    Set<String> primaryKeys = new HashSet<String>();
+    try {
+      ResultSet pks = sqlLine.getDatabaseConnection().meta.getPrimaryKeys(
+          tableKey.catalog, tableKey.schema, tableKey.table);
+      try {
+        while (pks.next()) {
+          primaryKeys.add(pks.getString("COLUMN_NAME"));
+        }
+      } finally {
+        pks.close();
+      }
+    } catch (SQLException e) {
+      // Ignore exception and proceed with the current state (possibly empty)
+      // of the primaryKey set.
+    }
+    tablePrimaryKeysCache.put(tableKey, primaryKeys);
+    return primaryKeys;
+  }
+
+  /**
+   * Gets a set of primary key column names given a table key (i.e. catalog,
+   * schema and table name).  The returned set may be cached as a result of
+   * previous requests for the same table key.
+   *
+   * The result cannot be considered authoritative as since it depends on
+   * whether the JDBC driver property implements
+   * {@link java.sql.ResultSetMetaData#getTableName} and many drivers/databases
+   * do not.
+   *
+   * @param catalog The catalog for the table.  May be null.
+   * @param schema The schema for the table.  May be null.
+   * @param table The name of table.  May not be null.
+   * @return A set of primary key column names.  May be empty but
+   *         will never be null.
+   */
+  private Set<String> getTablePrimaryKeys(
+      String catalog, String schema, String table) {
+    TableKey tableKey = new TableKey(catalog, schema, table);
+    Set<String> primaryKeys = tablePrimaryKeysCache.get(tableKey);
+    if (primaryKeys == null) {
+      primaryKeys = loadAndCachePrimaryKeysForTable(tableKey);
+    }
+    return primaryKeys;
+  }
+
+  /**
+   * The table coordinates used as key into table primary key cache.
+   */
+  private static class TableKey {
+    private final String catalog;
+    private final String schema;
+    private final String table;
+
+    private TableKey(String catalog, String schema, String table) {
+      this.catalog = catalog;
+      this.schema = schema;
+      this.table = table;
+    }
+
+    public int hashCode() {
+      return catalog == null ? 13 : catalog.hashCode()
+          + schema == null ? 17 : schema.hashCode()
+          + table == null ? 19 : table.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+      TableKey that = obj instanceof TableKey ? (TableKey) obj : null;
+      return that != null && this.toString().equals(that.toString());
+    }
+
+    public String toString() {
+      return catalog == null ? "" : catalog + ":"
+          + schema == null ? "" : schema + ":"
+          + table == null ? "" : table;
+    }
+  }
+
 }
 
 // End Rows.java
