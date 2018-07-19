@@ -40,7 +40,7 @@ clean:
 	mvn clean
 	mvn build-helper:remove-project-artifact
 	@echo "Clearing symlinks"
-	@rm -f /usr/local/bin/sqlline-service-check
+	@rm -f /usr/local/bin/sqlline-service-check /usr/local/bin/sqlline /usr/lib64/nagios/plugins/sqlline-service-check
 	@-sudo rpm -e sqlline
 	# If RPM was inspected/unpacked for testing
 	rm -rf usr/
