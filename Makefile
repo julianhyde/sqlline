@@ -7,6 +7,7 @@
 # This can be installed/built from the rpm GitHub repo -> simba-hive-jdbc
 
 CURRENT_USER = $(shell echo $whoami)
+SIMBA_DRIVERS = 'https://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/hive-jdbc4/1.0.42.1054/Simba_HiveJDBC41_1.0.42.1054.zip'
 
 build: clean
 	mvn package
@@ -14,17 +15,21 @@ build: clean
 install: build
 	@echo "Installing RPM"
 	find $(CURDIR) -name "*.rpm" -exec sudo rpm -i {} \;
+	echo "TODO - install RPM here"
 
-install-icinga: install
-	# Perform regular install + pipenv wrapper for nagiosplugin dependency
+install-icinga: build
+	# Until repo is up, we need to make sure the drivers are pushed manually
+	mkdir -p /usr/lib/simba-hive-jdbc
+	cd /usr/lib/simba-hive-jdbc  && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip	
 	# Build pipenv environment for python wrapper
+	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
 	pipenv install
 	# Install symlinks
 	rm -f /usr/lib64/nagios/plugins/sqlline-service-check
-	rm -f /usr/local/bin/sqlline-service-check
 	ln -s $(CURDIR)/bin/sqlline-service-check /usr/local/bin/sqlline-service-check
 	ln -s $(CURDIR)/bin/sqlline-service-check /usr/lib64/nagios/plugins/sqlline-service-check
+	ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
 
 clean:
 	# If needed, for local .m2 repo
