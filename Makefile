@@ -19,8 +19,10 @@ install: build
 
 install-icinga: build
 	# Until repo is up, we need to make sure the drivers are pushed manually
-	mkdir -p /usr/lib/simba-hive-jdbc
+	rm -rf /usr/lib/simba-hive-jdbc && mkdir -p /usr/lib/simba-hive-jdbc
 	cd /usr/lib/simba-hive-jdbc  && curl -O $(SIMBA_DRIVERS) && unzip -o Simba_HiveJDBC*.zip	
+	rm -rf /usr/lib/sqlline && mkdir -p /usr/lib/sqlline
+	cp $(CURDIR)/target/sqlline-1.5.0-SNAPSHOT-jar-with-dependencies.jar /usr/lib/sqlline
 	# Build pipenv environment for python wrapper
 	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
