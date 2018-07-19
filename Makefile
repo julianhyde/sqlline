@@ -22,7 +22,7 @@ install-icinga: build
 	mkdir -p /usr/lib/simba-hive-jdbc
 	cd /usr/lib/simba-hive-jdbc  && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip	
 	# Build pipenv environment for python wrapper
-  # TODO,this needs to be adjusted or removed entirely for icing
+	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
 	pipenv install
 	# Install symlinks
