@@ -15,7 +15,6 @@ build: clean
 install: build
 	@echo "Installing RPM"
 	find $(CURDIR) -name "*.rpm" -exec sudo rpm -i {} \;
-	echo "TODO - install RPM here"
 
 install-icinga: build
 	# Build pipenv environment for python wrapper
