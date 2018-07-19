@@ -18,9 +18,6 @@ install: build
 	echo "TODO - install RPM here"
 
 install-icinga: build
-	# Until repo is up, we need to make sure the drivers are pushed manually
-	mkdir -p /usr/lib/simba-hive-jdbc
-	cd /usr/lib/simba-hive-jdbc  && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip	
 	# Build pipenv environment for python wrapper
 	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
