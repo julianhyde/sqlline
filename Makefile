@@ -37,6 +37,8 @@ clean:
 	@echo "Cleaning and purging project files and local repository artifacts..."
 	mvn clean
 	mvn build-helper:remove-project-artifact
+	@echo "Clearing symlinks"
+	@rm -f /usr/local/bin/sqlline-service-check
 	@-sudo rpm -e sqlline
 	# If RPM was inspected/unpacked for testing
 	rm -rf usr/
