@@ -2,7 +2,7 @@
 properties([
 	parameters([
 		string(
-			defaultValue: "gdchdpmn04drlx.geisinger.edu",
+			defaultValue: "gdchdpmn07prlx.geisinger.edu",
 			description: "Hostname to build on",
 			name: 'hostname'
 		)
