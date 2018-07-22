@@ -86,3 +86,49 @@ mvn release:clean
 git status
 git reset --hard HEAD
 ```
+
+
+## How to run sqlline in IntelliJ IDEA (Windows)
+This is a guide may be helpful for Issue#80.
+In Windows 10, the Sqlline (actually the Jline) may ignore user input in Run/Debug Console of IDEA.
+When you type the command then hint <Enter>, the sqlline doesn't response.
+
+The problem is caused by the compatiblity between Jline2 and IntelliJ Idea.
+
+The Idea Console is not a standard console which is not support well by Jline.
+
+The Jline program inside uses JNI call to get the Console or Terminal information.
+
+If you're interested about it, you can try Jline3. God it takes me too much time.
+
+Well, the Jline3 latest still not works well in IDEA, I have tried. 
+
+For Jline2 the Sqlline now use, you can launch it like this:
+```
+public class LaunchSqlline {
+    public static void main(String[] args) {
+        try {
+            List<String> stringList = new LinkedList<>();
+            stringList.add("-d org.apache.phoenix.queryserver.client.Driver");
+            stringList.add("-u 'jdbc:phoenix:thin:url=http://localhost:8765'");
+            stringList.add("-n none");
+            stringList.add("-p none");
+            stringList.add("--incremental=false");
+            stringList.add("--isolation=TRANSACTION_READ_COMMITTED");
+//            stringList.add("--maxWidth=160"); //If you read the issue#80, you will understand why.
+//            stringList.add("--maxHeight=2000");
+//            stringList.add("--color=true");
+            
+            //Add this line, the Console should response you command.
+            jline.TerminalFactory.registerFlavor(jline.TerminalFactory.Flavor.WINDOWS, UnsupportedTerminal.class);
+
+            String join = StringUtils.join(stringList, " ");
+            String[] argsGiven = join.split(" ");
+
+            SqlLine.main(argsGiven);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+```
+I should works fine. ^_^
