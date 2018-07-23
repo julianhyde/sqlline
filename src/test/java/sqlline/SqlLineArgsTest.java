@@ -656,6 +656,76 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testTimeFormat() throws Throwable {
+    SqlLine sqlLine = new SqlLine();
+    final ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
+    //Use System.err as it is used in sqlline.SqlLineOpts#set
+    final PrintStream originalErr = System.err;
+    System.setErr(new PrintStream(errBaos));
+
+    //successful patterns
+    final String okTimeFormat = "!set timeFormat HH:mm:ss\n";
+    final String defaultTimeFormat = "!set timeFormat default\n";
+    final String okDateFormat = "!set dateFormat YYYY-MM-dd\n";
+    final String defaultDateFormat = "!set dateFormat default\n";
+    final String okTimestampFormat = "!set timestampFormat default\n";
+    final String defaultTimestampFormat = "!set timestampFormat default\n";
+
+    //successful cases
+    sqlLine.runCommands(Arrays.asList(okTimeFormat), new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+    sqlLine.
+        runCommands(Arrays.asList(defaultTimeFormat), new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+    sqlLine.runCommands(Arrays.asList(okDateFormat), new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+    sqlLine.runCommands(Arrays.asList(defaultDateFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+    sqlLine.runCommands(Arrays.asList(okTimestampFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+    sqlLine.runCommands(Arrays.asList(defaultTimestampFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        not(anyOf(containsString("Error setting configuration"),
+            containsString("Exception"))));
+
+    //failed patterns
+    final String wrongTimeFormat = "!set timeFormat qwerty\n";
+    final String wrongDateFormat = "!set dateFormat ASD\n";
+    final String wrongTimestampFormat =
+        "!set timestampFormat 'YYYY-MM-ddTHH:MI:ss'\n";
+
+    //failed cases
+    sqlLine.runCommands(Arrays.asList(wrongTimeFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        containsString("Illegal pattern character 'q'"));
+    sqlLine.runCommands(Arrays.asList(wrongDateFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        containsString("Illegal pattern character 'A'"));
+    sqlLine.runCommands(Arrays.asList(wrongTimestampFormat),
+        new DispatchCallback());
+    assertThat(errBaos.toString("UTF8"),
+        containsString("Illegal pattern character 'T'"));
+
+    //Set error stream back
+    System.setErr(originalErr);
+  }
+
+  @Test
   public void testTables() throws Throwable {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
