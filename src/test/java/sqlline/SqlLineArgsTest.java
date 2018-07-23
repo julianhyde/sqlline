@@ -212,8 +212,8 @@ public class SqlLineArgsTest {
 
     Pair pair = runScript(scriptFile, true);
     assertThat(pair.status, equalTo(SqlLine.Status.OK));
-    assertThat(pair.output, allOf(containsString(" 33 "),
-        containsString(" 123 ")));
+    assertThat(pair.output,
+        allOf(containsString(" 33 "), containsString(" 123 ")));
   }
 
   /**
@@ -623,7 +623,7 @@ public class SqlLineArgsTest {
    * HIVE-4566, "NullPointerException if typeinfo and nativesql commands are
    * executed at beeline before a DB connection is established".
    *
-   * @throws UnsupportedEncodingException
+   * @throws UnsupportedEncodingException on unsupported encoding
    */
   @Test
   public void testNPE() throws UnsupportedEncodingException {
@@ -653,6 +653,84 @@ public class SqlLineArgsTest {
         allOf(
             containsString("'TABLE_CAT','TABLE_SCHEM','TABLE_NAME',"),
             containsString("'PUBLIC','SCOTT','SALGRADE','TABLE','',")));
+  }
+
+  @Test
+  public void testTimeFormat() throws Throwable {
+    // Use System.err as it is used in sqlline.SqlLineOpts#set
+    final PrintStream originalErr = System.err;
+    try {
+      final ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
+      System.setErr(new PrintStream(errBaos));
+
+      // successful patterns
+      final String okTimeFormat = "!set timeFormat HH:mm:ss\n";
+      final String defaultTimeFormat = "!set timeFormat default\n";
+      final String okDateFormat = "!set dateFormat YYYY-MM-dd\n";
+      final String defaultDateFormat = "!set dateFormat default\n";
+      final String okTimestampFormat = "!set timestampFormat default\n";
+      final String defaultTimestampFormat = "!set timestampFormat default\n";
+
+      // successful cases
+      final SqlLine sqlLine = new SqlLine();
+      sqlLine.runCommands(Arrays.asList(okTimeFormat), new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      sqlLine.runCommands(
+          Arrays.asList(defaultTimeFormat), new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      sqlLine.runCommands(Arrays.asList(okDateFormat), new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      sqlLine.runCommands(Arrays.asList(defaultDateFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      sqlLine.runCommands(Arrays.asList(okTimestampFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      sqlLine.runCommands(Arrays.asList(defaultTimestampFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+
+      // failed patterns
+      final String wrongTimeFormat = "!set timeFormat qwerty\n";
+      final String wrongDateFormat = "!set dateFormat ASD\n";
+      final String wrongTimestampFormat =
+          "!set timestampFormat 'YYYY-MM-ddTHH:MI:ss'\n";
+
+      // failed cases
+      sqlLine.runCommands(Arrays.asList(wrongTimeFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          containsString("Illegal pattern character 'q'"));
+      sqlLine.runCommands(Arrays.asList(wrongDateFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          containsString("Illegal pattern character 'A'"));
+      sqlLine.runCommands(Arrays.asList(wrongTimestampFormat),
+          new DispatchCallback());
+      assertThat(errBaos.toString("UTF8"),
+          containsString("Illegal pattern character 'T'"));
+    } finally {
+      // Set error stream back
+      System.setErr(originalErr);
+    }
   }
 
   @Test

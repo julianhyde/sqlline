@@ -16,8 +16,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,16 +37,35 @@ abstract class Rows implements Iterator<Rows.Row> {
   final Map<TableKey, Set<String>> tablePrimaryKeysCache =
       new HashMap<TableKey, Set<String>>();
   final NumberFormat numberFormat;
+  final DateFormat dateFormat;
+  final DateFormat timeFormat;
+  final DateFormat timestampFormat;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     this.sqlLine = sqlLine;
     rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
-    if (sqlLine.getOpts().getNumberFormat().equals("default")) {
+    if (sqlLine.getOpts().getNumberFormat().equals(SqlLineOpts.DEFAULT)) {
       numberFormat = null;
     } else {
       numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat());
+    }
+    if (sqlLine.getOpts().getDateFormat().equals(SqlLineOpts.DEFAULT)) {
+      dateFormat = null;
+    } else {
+      dateFormat = new SimpleDateFormat(sqlLine.getOpts().getDateFormat());
+    }
+    if (sqlLine.getOpts().getTimeFormat().equals(SqlLineOpts.DEFAULT)) {
+      timeFormat = null;
+    } else {
+      timeFormat = new SimpleDateFormat(sqlLine.getOpts().getTimeFormat());
+    }
+    if (sqlLine.getOpts().getTimestampFormat().equals(SqlLineOpts.DEFAULT)) {
+      timestampFormat = null;
+    } else {
+      timestampFormat =
+          new SimpleDateFormat(sqlLine.getOpts().getTimestampFormat());
     }
   }
 
@@ -165,14 +187,7 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.DOUBLE:
         case Types.DECIMAL:
         case Types.NUMERIC:
-          o = rs.getObject(i + 1);
-          if (o == null) {
-            values[i] = "null";
-          } else if (numberFormat != null) {
-            values[i] = numberFormat.format(o);
-          } else {
-            values[i] = o.toString();
-          }
+          setFormat(rs.getObject(i + 1), numberFormat, i);
           break;
         case Types.BIT:
         case Types.CLOB:
@@ -183,18 +198,32 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.ROWID:
         case Types.NCLOB:
         case Types.SQLXML:
-          o = rs.getObject(i + 1);
-          if (o == null) {
-            values[i] = "null";
-          } else {
-            values[i] = o.toString();
-          }
+          setFormat(rs.getObject(i + 1), null, i);
+          break;
+        case Types.TIME:
+          setFormat(rs.getObject(i + 1), timeFormat, i);
+          break;
+        case Types.DATE:
+          setFormat(rs.getObject(i + 1), dateFormat, i);
+          break;
+        case Types.TIMESTAMP:
+          setFormat(rs.getObject(i + 1), timestampFormat, i);
           break;
         default:
           values[i] = rs.getString(i + 1);
           break;
         }
         sizes[i] = values[i] == null ? 1 : values[i].length();
+      }
+    }
+
+    private void setFormat(Object o, Format format, int i) {
+      if (o == null) {
+        values[i] = "null";
+      } else if (format != null) {
+        values[i] = format.format(o);
+      } else {
+        values[i] = o.toString();
       }
     }
   }
@@ -236,7 +265,7 @@ abstract class Rows implements Iterator<Rows.Row> {
    * schema and table name).  The returned set may be cached as a result of
    * previous requests for the same table key.
    *
-   * The result cannot be considered authoritative as since it depends on
+   * <p>The result cannot be considered authoritative as since it depends on
    * whether the JDBC driver property implements
    * {@link java.sql.ResultSetMetaData#getTableName} and many drivers/databases
    * do not.

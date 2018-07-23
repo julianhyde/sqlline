@@ -2614,6 +2614,18 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Defaults to <literal>false</literal>.
         </para>
       </sect1>
+      <sect1 id="setting_dateformat">
+        <title>dateformat</title>
+        <para>
+          The format for how date values are displayed. Setting
+          to <literal>default</literal> causes date values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting "YYYY_MM_dd" yields values like "1970_01_01".
+        </para>
+      </sect1>
       <sect1 id="setting_fastconnect">
         <title>fastconnect</title>
         <para>
@@ -2710,7 +2722,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/DecimalFormat.html">
           java.text.DecimalFormat</ulink>.  For example,
           the setting "0.###E0" yields scientific notation
-          with up to three fractional digits.
+          with up to three fractional digits, such as "6.022E23".
         </para>
       </sect1>
       <sect1 id="setting_outputformat">
@@ -2773,6 +2785,30 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           of informational messages displayed. Useful for redirecting
           a sqlline command to a file for later parsing. Defaults to
           <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_timeformat">
+        <title>timeformat</title>
+        <para>
+          The format for how time values are displayed. Setting
+          to <literal>default</literal> causes time values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting "HH:mm:ss" yields values like "14:12:11".
+          </para>
+      </sect1>
+      <sect1 id="setting_timestampformat">
+        <title>timestampformat</title>
+        <para>
+          The format for how date values are displayed. Setting
+          to <literal>default</literal> causes date values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
         </para>
       </sect1>
       <sect1 id="setting_trimscripts">

@@ -95,6 +95,7 @@ Parameter Reference
 autocommit
 autosave
 color
+dateformat
 fastconnect
 force
 headerinterval
@@ -111,6 +112,8 @@ shownestederrs
 showtime
 showwarnings
 silent
+timeformat
+timestampformat
 trimscripts
 verbose
 JDBC Driver Support
@@ -209,6 +212,7 @@ Parameter Reference
 autocommit
 autosave
 color
+dateformat
 fastconnect
 force
 headerinterval
@@ -225,6 +229,8 @@ shownestederrs
 showtime
 showwarnings
 silent
+timeformat
+timestampformat
 trimscripts
 verbose
 JDBC Driver Support
@@ -1889,6 +1895,7 @@ Parameter Reference
 autocommit
 autosave
 color
+dateformat
 fastconnect
 force
 headerinterval
@@ -1905,6 +1912,8 @@ shownestederrs
 showtime
 showwarnings
 silent
+timeformat
+timestampformat
 trimscripts
 verbose
 autocommit
@@ -1919,9 +1928,13 @@ color
 
 If true, then output to the terminal will use color for a more pleasing visual experience. Requires that the terminal support ANSI control codes (most do). Defaults to false.
 
+dateformat
+
+The format for how date values are displayed. Setting to default causes date values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "YYYY_MM_dd" yields values like "1970_01_01".
+
 fastconnect
 
-When false, any new connection will cause SQLLine to access information about the available tables and columns in order to provide them as candidates for tab-completion. This can be a very slow operation for some databases, do by default it is off. Table and column information can always be explicitely retrieved using the rehash command.
+When false, any new connection will cause SQLLine to access information about the available tables and columns in order to provide them as candidates for tab-completion. This can be a very slow operation for some databases, do by default it is off. Table and column information can always be explicitly retrieved using the rehash command.
 
 force
 
@@ -1953,7 +1966,7 @@ The maximum width to display before truncating data when using the "table" outpu
 
 numberformat
 
-The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits.
+The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits, values like "6.022E23".
 
 outputformat
 
@@ -1982,6 +1995,14 @@ If true, display any warnings that are reported on the connection after issuing 
 silent
 
 If true, then reduce the amount of informational messages displayed. Useful for redirecting a sqlline command to a file for later parsing. Defaults to false.
+
+timeformat
+
+The format for how time values are displayed. Setting to default causes time values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "HH:mm:ss" yields values like "14:12:11".
+
+timestampformat
+
+The format for how timestamp values are displayed. Setting to default causes timestamp values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
 
 trimscripts
 
