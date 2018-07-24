@@ -14,6 +14,7 @@ package sqlline;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import jline.TerminalFactory;
@@ -27,6 +28,8 @@ class SqlLineOpts implements Completer {
   public static final String PROPERTY_PREFIX = "sqlline.";
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
+  public static final String DEFAULT = "default";
+  public static final Date TEST_DATE = new Date();
   private SqlLine sqlLine;
   private boolean autoSave = false;
   private boolean silent = false;
@@ -41,7 +44,10 @@ class SqlLineOpts implements Completer {
   private boolean showElapsedTime = true;
   private boolean showWarnings = true;
   private boolean showNestedErrs = false;
-  private String numberFormat = "default";
+  private String numberFormat = DEFAULT;
+  private String dateFormat = DEFAULT;
+  private String timeFormat = DEFAULT;
+  private String timestampFormat = DEFAULT;
   private int maxWidth = TerminalFactory.get().getWidth();
   private int maxHeight = TerminalFactory.get().getHeight();
   private int maxColumnWidth = 15;
@@ -233,7 +239,11 @@ class SqlLineOpts implements Completer {
         // that sqlline's error() output chokes because it depends
         // on properties like text coloring that can get set in
         // arbitrary order.
-        System.err.println(sqlLine.loc("error-setting", key, e));
+        System.err.println(
+            sqlLine.loc(
+                "error-setting",
+                key,
+                e.getCause() == null ? e : e.getCause()));
       }
       return false;
     }
@@ -293,6 +303,30 @@ class SqlLineOpts implements Completer {
 
   public String getNumberFormat() {
     return this.numberFormat;
+  }
+
+  public String getDateFormat() {
+    return this.dateFormat;
+  }
+
+  public void setDateFormat(String dateFormat) {
+    this.dateFormat = getValidDateTimePatternOrThrow(dateFormat);
+  }
+
+  public String getTimeFormat() {
+    return this.timeFormat;
+  }
+
+  public void setTimeFormat(String timeFormat) {
+    this.timeFormat = getValidDateTimePatternOrThrow(timeFormat);
+  }
+
+  public String getTimestampFormat() {
+    return this.timestampFormat;
+  }
+
+  public void setTimestampFormat(String timestampFormat) {
+    this.timestampFormat = getValidDateTimePatternOrThrow(timestampFormat);
   }
 
   public void setMaxWidth(int maxWidth) {
@@ -445,6 +479,19 @@ class SqlLineOpts implements Completer {
 
   public String getRun() {
     return this.runFile;
+  }
+
+  private String getValidDateTimePatternOrThrow(String dateTimePattern) {
+    if (DEFAULT.equals(dateTimePattern)) {
+      return dateTimePattern;
+    }
+    try {
+      SimpleDateFormat sdf = new SimpleDateFormat(dateTimePattern);
+      sdf.format(TEST_DATE);
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e.getMessage());
+    }
+    return dateTimePattern;
   }
 }
 
