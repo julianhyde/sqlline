@@ -656,6 +656,31 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testTablesJson() throws Throwable {
+    final String script = "!set outputformat json\n"
+        + "!tables\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("{\"resultset\":["),
+            containsString("{\"TABLE_CAT\":\"PUBLIC\","
+                 + "\"TABLE_SCHEM\":\"SYSTEM_LOBS\",\"TABLE_NAME\":\"BLOCKS\","
+                 + "\"TABLE_TYPE\":\"SYSTEM TABLE\",\"REMARKS\":null,"
+                 + "\"TYPE_CAT\":null,")));
+  }
+
+  @Test
+  public void testSelectJson() throws Throwable {
+    final String script = "!set outputformat json\n"
+        + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ' 1''2\"3\t4');\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("{\"resultset\":["),
+            containsString("{\"C1\":1,\"C2\":-1.5,\"C3\":true,"
+                + "\"C4\":\"1969-07-20\",\"C5\":null,"
+                + "\"C6\":\" 1'2\\\"3\\t4\"}")));
+  }
+
+  @Test
   public void testTimeFormat() throws Throwable {
     // Use System.err as it is used in sqlline.SqlLineOpts#set
     final PrintStream originalErr = System.err;
