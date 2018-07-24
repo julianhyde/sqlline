@@ -1010,7 +1010,7 @@ sqlline> !help
 !list             List the current connections
 !metadata         Obtain metadata information
 !outputformat     Set the output format for displaying results
-                  (table,vertical,csv,tsv,xmlattrs,xmlelements)
+                  (table,vertical,csv,tsv,xmlattrs,xmlelements,json)
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
 !procedures       List all the procedures
@@ -1308,7 +1308,7 @@ Example of XML attribute output formatting
 Example of XML element output formatting
 
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlelements
-0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
 <resultset>
   <result>
     <COMPANY_ID>1</COMPANY_ID>
@@ -1329,6 +1329,19 @@ Example of XML element output formatting
 </resultset>
 4 rows selected (0.02 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+Example of JSON output formatting
+
+0: jdbc:calcite:model=target/test-classes/mod> !outputformat json
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+{"resultset":[
+{"COMPANY_ID":1,"NAME":"Apple"},
+{"COMPANY_ID":2,"NAME":"Sun"},
+{"COMPANY_ID":3,"NAME":"IBM"},
+{"COMPANY_ID":4,"NAME":"Microsoft"}
+]}
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod>
 
 primarykeys
 

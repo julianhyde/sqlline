@@ -83,7 +83,8 @@ public class SqlLine {
       "csv", new SeparatedValuesOutputFormat(this, ','),
       "tsv", new SeparatedValuesOutputFormat(this, '\t'),
       "xmlattr", new XmlAttributeOutputFormat(this),
-      "xmlelements", new XmlElementOutputFormat(this));
+      "xmlelements", new XmlElementOutputFormat(this),
+      "json", new JsonOutputFormat(this));
 
   final List<CommandHandler> commandHandlers;
 
