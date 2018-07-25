@@ -16,11 +16,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import org.hsqldb.jdbc.JDBCResultSet;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import mockit.Deencapsulation;
@@ -320,6 +323,38 @@ public class SqlLineArgsTest {
         + "Connecting to a database\n";
     checkScriptFile("!manual\n", false, equalTo(SqlLine.Status.OK),
         CoreMatchers.containsString(expected));
+  }
+
+  /** Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/38">[SQLLINE-38]
+   * Expand ~ to user's home directory</a>. */
+  @Test
+  public void testRunFromHome() throws Throwable {
+    File home = new File(System.getProperty("user.home"));
+    TemporaryFolder tmpFolder = new TemporaryFolder(home);
+    tmpFolder.create();
+    try {
+      File tmpFile = tmpFolder.newFile("test.sql");
+      Writer fw = new FileWriter(tmpFile);
+      try {
+        fw.write("!set outputformat csv\n");
+        fw.write("values (1, 2, 3, 4, 5);");
+        fw.flush();
+      } finally {
+        fw.close();
+      }
+      checkScriptFile("!run ~" + File.separatorChar
+              + tmpFolder.getRoot().getName()
+              + File.separatorChar + tmpFile.getName(),
+          false,
+          equalTo(SqlLine.Status.OK),
+          allOf(containsString("!set outputformat csv"),
+              containsString("values (1, 2, 3, 4, 5);")));
+
+    } finally {
+      // will remove tmpFile as well
+      tmpFolder.delete();
+    }
   }
 
   /**

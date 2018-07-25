@@ -1238,7 +1238,7 @@ public class Commands {
     }
 
     try {
-      outFile = new OutputFile(filename);
+      outFile = new OutputFile(expand(filename));
       sqlLine.setScriptOutputFile(outFile);
       sqlLine.output(sqlLine.loc("script-started", outFile));
       callback.setToSuccess();
@@ -1264,7 +1264,7 @@ public class Commands {
 
     try {
       BufferedReader reader =
-          new BufferedReader(new FileReader(filename));
+          new BufferedReader(new FileReader(expand(filename)));
       try {
         // ### NOTE: fix for sf.net bug 879427
         StringBuilder cmd = null;
@@ -1324,6 +1324,21 @@ public class Commands {
     }
   }
 
+  /** Expands "~" to the home directory. */
+  private static String expand(String filename) {
+    if (filename.startsWith("~" + File.separator)) {
+      try {
+        String home = System.getProperty("user.home");
+        if (home != null) {
+          return home + filename.substring(1);
+        }
+      } catch (SecurityException e) {
+        // ignore
+      }
+    }
+    return filename;
+  }
+
   /**
    * Starts or stops saving all output to a file.
    *
@@ -1371,7 +1386,7 @@ public class Commands {
     }
 
     try {
-      outputFile = new OutputFile(filename);
+      outputFile = new OutputFile(expand(filename));
       sqlLine.setRecordOutputFile(outputFile);
       sqlLine.output(sqlLine.loc("record-started", outputFile));
       callback.setToSuccess();
