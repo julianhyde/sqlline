@@ -656,6 +656,19 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testTablesJson() throws Throwable {
+    final String script = "!set outputformat json\n"
+        + "!tables\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("{\"resultset\":["),
+            containsString("{\"TABLE_CAT\":\"PUBLIC\","
+                 + "\"TABLE_SCHEM\":\"SYSTEM_LOBS\",\"TABLE_NAME\":\"BLOCKS\","
+                 + "\"TABLE_TYPE\":\"SYSTEM TABLE\",\"REMARKS\":null,"
+                 + "\"TYPE_CAT\":null,")));
+  }
+
+  @Test
   public void testTimeFormat() throws Throwable {
     // Use System.err as it is used in sqlline.SqlLineOpts#set
     final PrintStream originalErr = System.err;
