@@ -113,6 +113,47 @@ public class SqlLineTest extends TestCase {
     }
   }
 
+  public void testDequote() {
+    SqlLine line = new SqlLine();
+    assertEquals("'", line.dequote("\"'\""));
+    assertEquals("\"", line.dequote("'\"'"));
+    assertEquals("!", line.dequote("'!'"));
+    assertEquals("", line.dequote("''"));
+    assertEquals("", line.dequote("\"\""));
+    assertEquals("a", line.dequote("\"a\""));
+    assertEquals("a", line.dequote("'a'"));
+    try {
+      line.dequote("'");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.dequote("\"");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.dequote("\"'");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.dequote("\"a");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.dequote("q'");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+  }
+
   void assertEquals(String[][] expectedses, String[][] actualses) {
     assertEquals(expectedses.length, actualses.length);
     for (int i = 0; i < expectedses.length; ++i) {

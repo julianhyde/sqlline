@@ -95,6 +95,8 @@ Parameter Reference
 autocommit
 autosave
 color
+csvDelimiter
+csvQuoteCharacter
 dateformat
 fastconnect
 force
@@ -212,6 +214,8 @@ Parameter Reference
 autocommit
 autosave
 color
+csvDelimiter
+csvQuoteCharacter
 dateformat
 fastconnect
 force
@@ -1908,6 +1912,8 @@ Parameter Reference
 autocommit
 autosave
 color
+csvDelimiter
+csvQuoteCharacter
 dateformat
 fastconnect
 force
@@ -1940,6 +1946,14 @@ When set to true, any changes to preferences using the set command will cause th
 color
 
 If true, then output to the terminal will use color for a more pleasing visual experience. Requires that the terminal support ANSI control codes (most do). Defaults to false.
+
+csvDelimiter
+
+Sets the delimiter in csv outputFormat. Setting to default causes usage of "," as a delimiter.
+
+csvQuoteCharacter
+
+Sets the quote character in csv outputFormat. Setting to default causes usage of '\'' as a delimiter.
 
 dateformat
 

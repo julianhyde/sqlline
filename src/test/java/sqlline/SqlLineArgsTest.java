@@ -691,6 +691,18 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testCsvDelimiterAndQuoteCharacter() throws Throwable {
+    final String script = "!set outputformat csv\n"
+        + "!set csvDelimiter ##\n"
+        + "!set csvQuoteCharacter @\n"
+        + "values ('#', '@#@', 1, date '1969-07-20', null, ' 1''2\"3\t4');\n";
+    final String line1 = "@C1@##@C2@##@C3@##@C4@##@C5@##@C6@";
+    final String line2 = "@#@##@@@#@@@##@1@##@1969-07-20@##@@##@ 1'2\"3\t4@";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line1), containsString(line2)));
+  }
+
+  @Test
   public void testTablesJson() throws Throwable {
     final String script = "!set outputformat json\n"
         + "!tables\n";

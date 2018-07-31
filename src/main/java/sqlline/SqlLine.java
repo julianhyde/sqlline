@@ -80,8 +80,8 @@ public class SqlLine {
   private final Map<String, OutputFormat> formats = map(
       "vertical", (OutputFormat) new VerticalOutputFormat(this),
       "table", new TableOutputFormat(this),
-      "csv", new SeparatedValuesOutputFormat(this, ','),
-      "tsv", new SeparatedValuesOutputFormat(this, '\t'),
+      "csv", new SeparatedValuesOutputFormat(this, ","),
+      "tsv", new SeparatedValuesOutputFormat(this, "\t"),
       "xmlattr", new XmlAttributeOutputFormat(this),
       "xmlelements", new XmlElementOutputFormat(this),
       "json", new JsonOutputFormat(this));
@@ -1144,15 +1144,27 @@ public class SqlLine {
     }
   }
 
-
   /**
-   * Split the line into an array by tokenizing on space characters
+   * Splits the line into an array, tokenizing on space characters.
    *
    * @param line the line to break up
    * @return an array of individual words
    */
   String[] split(String line) {
-    return split(line, " ");
+    return split(line, 0);
+  }
+
+  /**
+   * Splits the line into an array, tokenizing on space characters,
+   * limiting the number of words to read.
+   *
+   * @param line the line to break up
+   * @param limit the limit for number of tokens
+   *        to be processed (0 means no limit)
+   * @return an array of individual words
+   */
+  String[] split(String line, int limit) {
+    return split(line, " ", limit);
   }
 
   /**
@@ -1318,19 +1330,47 @@ public class SqlLine {
       return null;
     }
 
-    while (str.startsWith("'") && str.endsWith("'")
-        || str.startsWith("\"") && str.endsWith("\"")) {
-      str = str.substring(1, str.length() - 1);
+    if ((str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"'))
+      || ((str.charAt(0) == '"' || str.charAt(0) == '\''
+            || str.charAt(str.length() - 1) == '"'
+            || str.charAt(str.length() - 1) == '\'')
+            && str.charAt(0) != str.charAt(str.length() - 1))) {
+      throw new IllegalArgumentException("A quote should be closed");
+    }
+    char prevQuote = 0;
+    int index = 0;
+    while ((str.charAt(index) == str.charAt(str.length() - index - 1))
+        && (str.charAt(index) == '"' || str.charAt(index) == '\'')) {
+      // if start and end point to the same element
+      if (index == str.length() - index - 1) {
+        if (prevQuote == str.charAt(index)) {
+          throw new IllegalArgumentException(
+              "A non-paired quote may not occur between the same quotes");
+        } else {
+          break;
+        }
+      // else if start and end point to neighbour elements
+      } else if (index == str.length() - index - 2) {
+        index++;
+        break;
+      }
+      prevQuote = str.charAt(index);
+      index++;
     }
 
-    return str;
+    return index == 0 ? str : str.substring(index, str.length() - index);
   }
 
   String[] split(String line, String delim) {
+    return split(line, delim, 0);
+  }
+
+  String[] split(String line, String delim, int limit) {
     StringTokenizer tok = new StringTokenizer(line, delim);
-    String[] ret = new String[tok.countTokens()];
+    final int count = tok.countTokens();
+    String[] ret = new String[limit > 0 && count > limit ? limit : count];
     int index = 0;
-    while (tok.hasMoreTokens()) {
+    while (tok.hasMoreTokens() && index < ret.length) {
       String t = tok.nextToken();
 
       t = dequote(t);
@@ -1342,14 +1382,13 @@ public class SqlLine {
   }
 
   static <K, V> Map<K, V> map(K key, V value, Object... obs) {
-    Map<K, V> m = new HashMap<K, V>();
+    final Map<K, V> m = new HashMap<K, V>();
     m.put(key, value);
     for (int i = 0; i < obs.length - 1; i += 2) {
       //noinspection unchecked
       m.put((K) obs[i], (V) obs[i + 1]);
     }
-
-    return Collections.unmodifiableMap(m);
+    return m;
   }
 
   static boolean getMoreResults(Statement stmnt) {
@@ -1633,6 +1672,16 @@ public class SqlLine {
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
     String format = opts.getOutputFormat();
     OutputFormat f = formats.get(format);
+    if ("csv".equals(format)) {
+      final SeparatedValuesOutputFormat csvOutput
+        = (SeparatedValuesOutputFormat) f;
+      if (!csvOutput.separator.equals(opts.getCsvDelimiter())
+          || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter()) {
+        f = new SeparatedValuesOutputFormat(this,
+            opts.getCsvDelimiter(), opts.getCsvQuoteCharacter());
+        formats.put("csv", f);
+      }
+    }
 
     if (f == null) {
       error(loc("unknown-format", format, formats.keySet()));

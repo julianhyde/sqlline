@@ -1586,6 +1586,21 @@ NAME        Microsoft
           </screen>
         </refsect1>
         <refsect1>
+          <title>Example of CSV output formatting with different csv delimiter and quote character</title>
+          <screen>
+0: jdbc:calcite:model=target/test-classes/mod> !set csvDelimiter ###
+0: jdbc:calcite:model=target/test-classes/mod> !set csvQuoteCharacter @
+0: jdbc:calcite:model=target/test-classes/mod> !set outputFormat csv
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+@COMPANY_ID@###@NAME@
+@1@###@Apple@
+@2@###@Sun@
+@3@###@IBM@
+@4@###@Microsoft@
+4 rows selected (0.014 seconds)
+          </screen>
+        </refsect1>
+        <refsect1>
           <title>Example of TSV output formatting</title>
           <screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat tsv

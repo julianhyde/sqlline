@@ -62,7 +62,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
       return null;
     }
 
-    String[] parts = sqlLine.split(line);
+    String[] parts = sqlLine.split(line, 1);
     if (parts == null || parts.length == 0) {
       return null;
     }

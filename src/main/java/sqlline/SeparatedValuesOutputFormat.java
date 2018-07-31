@@ -13,17 +13,22 @@ package sqlline;
 
 /**
  * OutputFormat for values separated by a delimiter.
- *
- * <p><strong>TODO</strong>:
- * Handle character escaping
  */
 class SeparatedValuesOutputFormat implements OutputFormat {
+  private static final char DEFAULT_QUOTE_CHARACTER = '"';
   private final SqlLine sqlLine;
-  private char separator;
+  final String separator;
+  final char quoteCharacter;
 
-  public SeparatedValuesOutputFormat(SqlLine sqlLine, char separator) {
+  public SeparatedValuesOutputFormat(SqlLine sqlLine,
+      String separator, char quoteCharacter) {
     this.sqlLine = sqlLine;
-    setSeparator(separator);
+    this.separator = separator;
+    this.quoteCharacter = quoteCharacter;
+  }
+
+  public SeparatedValuesOutputFormat(SqlLine sqlLine, String separator) {
+    this(sqlLine, separator, DEFAULT_QUOTE_CHARACTER);
   }
 
   public int print(Rows rows) {
@@ -40,20 +45,19 @@ class SeparatedValuesOutputFormat implements OutputFormat {
     String[] vals = row.values;
     StringBuilder buf = new StringBuilder();
     for (String val : vals) {
-      buf.append(buf.length() == 0 ? "" : "" + getSeparator())
-          .append('\'')
-          .append(val == null ? "" : val)
-          .append('\'');
+      buf.append(buf.length() == 0 ? "" : "" + separator)
+          .append(quoteCharacter);
+      if (val != null) {
+        for (char c : val.toCharArray()) {
+          if (c == quoteCharacter) {
+            buf.append(c);
+          }
+          buf.append(c);
+        }
+      }
+      buf.append(quoteCharacter);
     }
     sqlLine.output(buf.toString());
-  }
-
-  public void setSeparator(char separator) {
-    this.separator = separator;
-  }
-
-  public char getSeparator() {
-    return this.separator;
   }
 }
 

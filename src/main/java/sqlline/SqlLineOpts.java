@@ -34,6 +34,8 @@ class SqlLineOpts implements Completer {
   private boolean autoSave = false;
   private boolean silent = false;
   private boolean color = false;
+  private String csvDelimiter = ",";
+  private char csvQuoteCharacter = '\'';
   private boolean showHeader = true;
   private int headerInterval = 100;
   private boolean fastConnect = true;
@@ -383,6 +385,36 @@ class SqlLineOpts implements Completer {
 
   public boolean getColor() {
     return this.color;
+  }
+
+  public void setCsvDelimiter(String csvDelimiter) {
+    this.csvDelimiter = csvDelimiter;
+  }
+
+  public String getCsvDelimiter() {
+    return this.csvDelimiter;
+  }
+
+  public void setCsvQuoteCharacter(String csvQuoteCharacter) {
+    if (DEFAULT.equals(csvQuoteCharacter)) {
+      this.csvQuoteCharacter = '\'';
+      return;
+    } else if (csvQuoteCharacter != null) {
+      if (csvQuoteCharacter.length() == 1) {
+        this.csvQuoteCharacter = csvQuoteCharacter.charAt(0);
+        return;
+      } else if (csvQuoteCharacter.length() == 2
+          && csvQuoteCharacter.charAt(0) == '\\') {
+        this.csvQuoteCharacter = csvQuoteCharacter.charAt(1);
+        return;
+      }
+    }
+    throw new IllegalArgumentException("CsvQuoteCharacter is '"
+        + csvQuoteCharacter + "'; it must be a character of default");
+  }
+
+  public char getCsvQuoteCharacter() {
+    return this.csvQuoteCharacter;
   }
 
   public void setShowHeader(boolean showHeader) {
