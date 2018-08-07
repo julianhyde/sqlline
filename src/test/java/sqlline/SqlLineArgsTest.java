@@ -843,6 +843,39 @@ public class SqlLineArgsTest {
             containsString(line1)));
   }
 
+  @Test
+  public void testEmptyMetadata() throws Throwable {
+    final String script = "!metadata\n";
+    final String line = "Usage: metadata <methodname> <params...>";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString(line), not(containsString("Exception"))));
+  }
+
+  @Test
+  public void testEmptyRecord() throws Throwable {
+    final String line = "Usage: record <file name>";
+    checkScriptFile(
+        "!record", true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString(line), not(containsString("Exception"))));
+  }
+
+  @Test
+  public void testEmptyRun() throws Throwable {
+    final String line = "Usage: run <file name>";
+    checkScriptFile(
+        "!run", true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString(line), not(containsString("Exception"))));
+  }
+
+  @Test
+  public void testEmptyScript() throws Throwable {
+    final String line = "Usage: script <file name>";
+    checkScriptFile(
+        "!script", true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString(line), not(containsString("Exception"))));
+  }
+
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {

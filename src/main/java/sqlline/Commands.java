@@ -158,6 +158,12 @@ public class Commands {
       return;
     }
 
+    if (parts.length == 1) {
+      sqlLine.error("Usage: metadata <methodname> <params...>");
+      callback.setToFailure();
+      return;
+    }
+
     List<Object> params = new LinkedList<Object>(Arrays.asList(parts));
     params.remove(0);
     params.remove(0);
@@ -1231,8 +1237,11 @@ public class Commands {
       return;
     }
 
-    String filename = sqlLine.dequote(line.substring("script".length() + 1));
-    if (filename == null) {
+    String filename;
+    if (line.length() == "script".length()
+        || (filename =
+            sqlLine.dequote(line.substring("script".length() + 1))) == null) {
+      sqlLine.error("Usage: script <file name>");
       callback.setToFailure();
       return;
     }
@@ -1255,8 +1264,11 @@ public class Commands {
    * @param callback Callback for command status
    */
   public void run(String line, DispatchCallback callback) {
-    String filename = sqlLine.dequote(line.substring("run".length() + 1));
-    if (filename.length() == 0) {
+    String filename;
+    if (line.length() == "run".length()
+        || (filename =
+            sqlLine.dequote(line.substring("run".length() + 1))) == null) {
+      sqlLine.error("Usage: run <file name>");
       callback.setToFailure();
       return;
     }
@@ -1379,8 +1391,11 @@ public class Commands {
       return;
     }
 
-    String filename = sqlLine.dequote(line.substring("record".length() + 1));
-    if (filename == null) {
+    String filename;
+    if (line.length() == "record".length()
+        || (filename =
+            sqlLine.dequote(line.substring("record".length() + 1))) == null) {
+      sqlLine.error("Usage: record <file name>");
       callback.setToFailure();
       return;
     }
