@@ -193,7 +193,7 @@ class SqlLineOpts implements Completer {
 
     for (String name : propertyNames()) {
       props.setProperty(PROPERTY_PREFIX + name,
-          sqlLine.getReflector().invoke(this, "get" + name).toString());
+          String.valueOf(sqlLine.getReflector().invoke(this, "get" + name)));
     }
 
     sqlLine.debug("properties: " + props.toString());

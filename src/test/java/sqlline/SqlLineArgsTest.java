@@ -703,6 +703,14 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testSetForNulls() throws Throwable {
+    final String script = "!set numberFormat null\n"
+        + "!set\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("numberformat        null"));
+  }
+
+  @Test
   public void testTablesJson() throws Throwable {
     final String script = "!set outputformat json\n"
         + "!tables\n";
