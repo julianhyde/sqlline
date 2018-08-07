@@ -1408,7 +1408,7 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
           <refsect1>
           <title>Description</title>
           <para>
-          Execute an arbitrary metadata method agains the current
+          Execute an arbitrary metadata method against the current
             connection. refpurpose are separated by spaces.
 
           Use "" for a blank String, and null for a null parameter.
