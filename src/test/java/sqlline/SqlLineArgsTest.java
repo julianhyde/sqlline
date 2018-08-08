@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -79,17 +80,16 @@ public class SqlLineArgsTest {
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     SqlLine.Status status = beeLine.begin(args, is, false);
-
     return new Pair(status, os.toString("UTF8"));
   }
 
-  private Pair runScript(File scriptFile, boolean flag)
+  private Pair runScript(File scriptFile, boolean flag, String outputFileName)
       throws Throwable {
-    return runScript(connectionSpec, scriptFile, flag);
+    return runScript(connectionSpec, scriptFile, flag, outputFileName);
   }
 
   private static Pair runScript(ConnectionSpec connectionSpec, File scriptFile,
-      boolean flag) throws Throwable {
+      boolean flag, String outputFileName) throws Throwable {
     List<String> args = new ArrayList<String>();
     Collections.addAll(args,
         "-d", connectionSpec.driver,
@@ -101,6 +101,10 @@ public class SqlLineArgsTest {
       args.add(scriptFile.getAbsolutePath());
     } else {
       args.add("--run=" + scriptFile.getAbsolutePath());
+    }
+    if (outputFileName != null) {
+      args.add("-log");
+      args.add(outputFileName);
     }
     return run(args.toArray(new String[args.size()]));
   }
@@ -125,7 +129,7 @@ public class SqlLineArgsTest {
     os.print(scriptText);
     os.close();
 
-    Pair pair = runScript(scriptFile, flag);
+    Pair pair = runScript(scriptFile, flag, null);
 
     // Check output before status. It gives a better clue what went wrong.
     assertThat(toLinux(pair.output), outputMatcher);
@@ -213,10 +217,33 @@ public class SqlLineArgsTest {
     os.print(scriptText);
     os.close();
 
-    Pair pair = runScript(scriptFile, true);
+    Pair pair = runScript(scriptFile, true, null);
     assertThat(pair.status, equalTo(SqlLine.Status.OK));
     assertThat(pair.output,
         allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  @Test
+  public void testScriptWithOutput() throws Throwable {
+    final String scriptText = "values 100 + 123;\n"
+            + "-- a comment\n"
+            + "values 100 + 253;\n";
+
+    File scriptFile = File.createTempFile("Script file name", ".sql");
+    scriptFile.deleteOnExit();
+    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    os.print(scriptText);
+    os.close();
+
+    File outputFile = new File("testScriptWithOutput.out");
+    System.out.println("outputFile " + outputFile.getAbsoluteFile());
+    outputFile.deleteOnExit();
+    runScript(scriptFile, true, outputFile.getAbsolutePath());
+    assertFileContains(outputFile,
+            allOf(containsString("| 223                  |"),
+                    containsString("| 353                  |")));
+    final boolean delete = outputFile.delete();
+    assertThat(delete, is(true));
   }
 
   /**
@@ -445,11 +472,7 @@ public class SqlLineArgsTest {
     // Now check that the right stuff got into the file.
     assertFileContains(file, RegexMatcher.of(s));
     final boolean delete = file.delete();
-    if (File.separatorChar == '/') {
-      // For unknown reasons, File.delete returns false on Windows, so only
-      // check on Linux and macOS.
-      assertThat(delete, is(true));
-    }
+    assertThat(delete, is(true));
   }
 
   /**
@@ -503,18 +526,16 @@ public class SqlLineArgsTest {
             + "5/7          !record\n"));
   }
 
-  private void assertFileContains(File file, RegexMatcher matcher)
+  private void assertFileContains(File file, Matcher matcher)
       throws IOException {
-    final FileReader fileReader = new FileReader(file);
+    final BufferedReader br = new BufferedReader(new FileReader(file));
+    String line;
     final StringWriter stringWriter = new StringWriter();
-    final char[] chars = new char[1024];
-    for (;;) {
-      int c = fileReader.read(chars);
-      if (c < 0) {
-        break;
-      }
-      stringWriter.write(chars, 0, c);
+    while ((line = br.readLine()) != null) {
+      stringWriter.write(line);
+      stringWriter.write("\n");
     }
+    br.close();
     assertThat(toLinux(stringWriter.toString()), matcher);
   }
 
@@ -610,7 +631,7 @@ public class SqlLineArgsTest {
     final boolean delete = scriptFile.delete();
     assertThat(delete, is(true));
 
-    Pair pair = runScript(scriptFile, true);
+    Pair pair = runScript(scriptFile, true, null);
     assertThat(pair.status, equalTo(SqlLine.Status.OTHER));
     assertThat(pair.output, not(containsString(" 123 ")));
   }
