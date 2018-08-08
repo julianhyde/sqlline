@@ -510,7 +510,7 @@ public class SqlLine {
     String pass = null;
     String url = null;
     String nickname = null;
-    String logfile = null;
+    String logFile = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -555,7 +555,7 @@ public class SqlLine {
         } else if (args[i].equals("-f")) {
           getOpts().setRun(args[++i]);
         } else if (args[i].equals("-log")) {
-          logfile = args[++i];
+          logFile = args[++i];
         } else if (args[i].equals("-nn")) {
           nickname = args[++i];
         } else {
@@ -581,8 +581,8 @@ public class SqlLine {
       dispatch(COMMAND_PREFIX + "nickname " + nickname, new DispatchCallback());
     }
 
-    if (logfile != null) {
-      dispatch(COMMAND_PREFIX + "record " + logfile, new DispatchCallback());
+    if (logFile != null) {
+      dispatch(COMMAND_PREFIX + "record " + logFile, new DispatchCallback());
     }
 
     // now load properties files

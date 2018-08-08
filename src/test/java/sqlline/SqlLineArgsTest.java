@@ -226,8 +226,8 @@ public class SqlLineArgsTest {
   @Test
   public void testScriptWithOutput() throws Throwable {
     final String scriptText = "values 100 + 123;\n"
-            + "-- a comment\n"
-            + "values 100 + 253;\n";
+        + "-- a comment\n"
+        + "values 100 + 253;\n";
 
     File scriptFile = File.createTempFile("Script file name", ".sql");
     scriptFile.deleteOnExit();
@@ -240,8 +240,8 @@ public class SqlLineArgsTest {
     outputFile.deleteOnExit();
     runScript(scriptFile, true, outputFile.getAbsolutePath());
     assertFileContains(outputFile,
-            allOf(containsString("| 223                  |"),
-                    containsString("| 353                  |")));
+        allOf(containsString("| 223                  |"),
+            containsString("| 353                  |")));
     final boolean delete = outputFile.delete();
     assertThat(delete, is(true));
   }
@@ -529,9 +529,12 @@ public class SqlLineArgsTest {
   private void assertFileContains(File file, Matcher matcher)
       throws IOException {
     final BufferedReader br = new BufferedReader(new FileReader(file));
-    String line;
     final StringWriter stringWriter = new StringWriter();
-    while ((line = br.readLine()) != null) {
+    for (;;) {
+      final String line = br.readLine();
+      if (line == null) {
+        break;
+      }
       stringWriter.write(line);
       stringWriter.write("\n");
     }
