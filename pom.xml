@@ -26,6 +26,8 @@
     <jmockit.version>1.30</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
+    <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
@@ -75,10 +77,6 @@
       <post>http://groups.google.com/group/sqlline-dev/post</post>
     </mailingList>
   </mailingLists>
-
-  <prerequisites>
-    <maven>3.2.1</maven><!-- prerequisite of some plugins -->
-  </prerequisites>
 
   <repositories />
 
@@ -135,8 +133,31 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[1.6,)</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>[3.2.1,)</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>${maven-javadoc-plugin.version}</version>
         <configuration>
           <stylesheetfile>${basedir}/doc/styles.css</stylesheetfile>
           <show>public</show>
