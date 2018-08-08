@@ -30,6 +30,10 @@ class SqlLineOpts implements Completer {
       PROPERTY_PREFIX + "system.exit";
   public static final String DEFAULT = "default";
   public static final Date TEST_DATE = new Date();
+  private static final int DEFAULT_MAX_WIDTH =
+      TerminalFactory.get().getWidth();
+  private static final int DEFAULT_MAX_HEIGHT =
+      TerminalFactory.get().getHeight();
   private SqlLine sqlLine;
   private boolean autoSave = false;
   private boolean silent = false;
@@ -50,8 +54,8 @@ class SqlLineOpts implements Completer {
   private String dateFormat = DEFAULT;
   private String timeFormat = DEFAULT;
   private String timestampFormat = DEFAULT;
-  private int maxWidth = TerminalFactory.get().getWidth();
-  private int maxHeight = TerminalFactory.get().getHeight();
+  private int maxWidth = DEFAULT_MAX_WIDTH;
+  private int maxHeight = DEFAULT_MAX_HEIGHT;
   private int maxColumnWidth = 15;
   int rowLimit = 0;
   int timeout = -1;
