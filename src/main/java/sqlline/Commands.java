@@ -898,11 +898,18 @@ public class Commands {
 
   /**
    * Closes the current connection.
+   * Closes the current file writer.
    *
    * @param line Command line
    * @param callback Callback for command status
    */
   public void close(String line, DispatchCallback callback) {
+    // close file writer
+    if (sqlLine.getRecordOutputFile() != null) {
+      // instead of line could be any string
+      stopRecording(line, callback);
+    }
+
     DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
     if (databaseConnection == null) {
       callback.setToFailure();

@@ -510,6 +510,7 @@ public class SqlLine {
     String pass = null;
     String url = null;
     String nickname = null;
+    String logFile = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -537,20 +538,29 @@ public class SqlLine {
         continue;
       }
 
-      if (args[i].equals("-d")) {
-        driver = args[++i];
-      } else if (args[i].equals("-n")) {
-        user = args[++i];
-      } else if (args[i].equals("-p")) {
-        pass = args[++i];
-      } else if (args[i].equals("-u")) {
-        url = args[++i];
-      } else if (args[i].equals("-e")) {
-        commands.add(args[++i]);
-      } else if (args[i].equals("-f")) {
-        getOpts().setRun(args[++i]);
-      } else if (args[i].equals("-nn")) {
-        nickname = args[++i];
+      if (args[i].charAt(0) == '-') {
+        if (i == args.length - 1) {
+          return Status.ARGS;
+        }
+        if (args[i].equals("-d")) {
+          driver = args[++i];
+        } else if (args[i].equals("-n")) {
+          user = args[++i];
+        } else if (args[i].equals("-p")) {
+          pass = args[++i];
+        } else if (args[i].equals("-u")) {
+          url = args[++i];
+        } else if (args[i].equals("-e")) {
+          commands.add(args[++i]);
+        } else if (args[i].equals("-f")) {
+          getOpts().setRun(args[++i]);
+        } else if (args[i].equals("-log")) {
+          logFile = args[++i];
+        } else if (args[i].equals("-nn")) {
+          nickname = args[++i];
+        } else {
+          return Status.ARGS;
+        }
       } else {
         files.add(args[i]);
       }
@@ -569,6 +579,10 @@ public class SqlLine {
 
     if (nickname != null) {
       dispatch(COMMAND_PREFIX + "nickname " + nickname, new DispatchCallback());
+    }
+
+    if (logFile != null) {
+      dispatch(COMMAND_PREFIX + "record " + logFile, new DispatchCallback());
     }
 
     // now load properties files
