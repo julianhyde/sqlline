@@ -38,10 +38,6 @@
   </licenses>
 
   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
     <repository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
@@ -51,6 +47,11 @@
       <name>SQLLine Website</name>
       <url>file:/home/jhyde/web2/sqlline</url>
     </site>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>libs-snapshots</name>
+      <url>http://localhost:6464/artifactory/libs-snapshot</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <issueManagement>
