@@ -2,6 +2,6 @@
 # sqlline - Script to launch SQL shell on Unix, Linux or Mac OS
 
 BINPATH=$(dirname $0)
-exec java -Djava.ext.dirs=$BINPATH sqlline.SqlLine "$@"
+exec java -cp "$BINPATH/../target/*" sqlline.SqlLine "$@"
 
 # End sqlline
