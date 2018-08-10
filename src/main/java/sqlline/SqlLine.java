@@ -548,10 +548,12 @@ public class SqlLine {
 
   public LineReader getConsoleReader(InputStream inputStream,
       History fileHistory) throws IOException {
+    if (getLineReader() != null) {
+      return getLineReader();
+    }
     TerminalBuilder terminalBuilder = TerminalBuilder.builder();
     final Terminal terminal;
     if (inputStream != null) {
-      // ### NOTE:  fix for sf.net bug 879425.
       terminalBuilder =
           terminalBuilder.streams(inputStream, System.out);
       terminal = terminalBuilder.build();
@@ -562,7 +564,7 @@ public class SqlLine {
       getOpts().setMaxHeight(terminal.getHeight());
     }
 
-    lineReader = LineReaderBuilder.builder()
+    final LineReader lineReader = LineReaderBuilder.builder()
         .terminal(terminal)
         .completer(new SqlLineCompleter(this))
         .appName("sqlline")
@@ -573,6 +575,7 @@ public class SqlLine {
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
         .build();
     fileHistory.attach(lineReader);
+    setLineReader(lineReader);
     return lineReader;
   }
 

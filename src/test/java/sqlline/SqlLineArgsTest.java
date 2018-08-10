@@ -11,19 +11,9 @@
 */
 package sqlline;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,12 +29,22 @@ import org.hamcrest.Matcher;
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 
+import org.jline.builtins.Commands;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Size;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.impl.AbstractTerminal;
+import org.jline.utils.NonBlocking;
+import org.jline.utils.NonBlockingInputStream;
+import org.jline.utils.NonBlockingReader;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import mockit.Deencapsulation;
 import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 
@@ -431,14 +431,36 @@ public class SqlLineArgsTest {
    * <a href="https://github.com/julianhyde/sqlline/issues/49">[SQLLINE-49]
    * !manual command fails</a>.
    */
- // @Test
+  @Test
   public void testManual() throws Throwable {
-    final String expected = "Installing SQLLine\n"
-        + "Using SQLLine\n"
-        + "Running SQLLine\n"
-        + "Connecting to a database\n";
-    checkScriptFile("!manual\n", false, equalTo(SqlLine.Status.OK),
-        CoreMatchers.containsString(expected));
+    final String expectedLine = "sqlline version";
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    new MockUp<Commands>() {
+      @Mock
+      void less(Terminal terminal, InputStream in, PrintStream out,
+          PrintStream err,
+          Path currentDir,
+          String[] argv) {
+        return;
+      }
+    };
+
+    SqlLine beeLine = new SqlLine();
+    PrintStream baoswriter = new PrintStream(baos);
+    beeLine.setOutputStream(baoswriter);
+    beeLine.setErrorStream(baoswriter);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status =
+        beeLine.begin(new String[]{}, is, false);
+    // Here it is the status is SqlLine.Status.OTHER
+    // because of EOF as the result of InputStream which
+    // is not used in the current test so it is ok
+    // assertThat(status, equalTo(SqlLine.Status.OK));
+    beeLine.runCommands(Collections.singletonList("!manual"),
+        new DispatchCallback());
+    String output = baos.toString("UTF8");
+
+    assertThat(output, containsString(expectedLine));
   }
 
   /** Test case for
@@ -1484,6 +1506,118 @@ public class SqlLineArgsTest {
     }
   }
 
+  /**
+   * tets.
+   */
+  private class DumbTerminal extends AbstractTerminal {
+
+    private final NonBlockingInputStream input;
+    private final OutputStream output;
+    private final NonBlockingReader reader;
+    private final PrintWriter writer;
+    private final Attributes attributes;
+    private final Size size;
+
+    public DumbTerminal(InputStream in, OutputStream out) throws IOException {
+      this(TYPE_DUMB, TYPE_DUMB, in, out, null);
+    }
+
+    public DumbTerminal(String name, String type, InputStream in,
+        OutputStream out, Charset encoding) throws IOException {
+      this(name, type, in, out, encoding, SignalHandler.SIG_DFL);
+    }
+
+    public DumbTerminal(String name, String type, InputStream in,
+        OutputStream out, Charset encoding, SignalHandler signalHandler)
+        throws IOException {
+      super(name, type, encoding, signalHandler);
+      NonBlockingInputStream nbis = NonBlocking.nonBlocking(getName(), in);
+      this.input = new NonBlockingInputStream() {
+        @Override
+        public int read(long timeout, boolean isPeek) throws IOException {
+          for (;;) {
+            int c = nbis.read(timeout, isPeek);
+            if (attributes.getLocalFlag(Attributes.LocalFlag.ISIG)) {
+              if (c == attributes
+                  .getControlChar(Attributes.ControlChar.VINTR)) {
+                raise(Signal.INT);
+                continue;
+              } else if (c == attributes
+                  .getControlChar(Attributes.ControlChar.VQUIT)) {
+                raise(Signal.QUIT);
+                continue;
+              } else if (c == attributes
+                  .getControlChar(Attributes.ControlChar.VSUSP)) {
+                raise(Signal.TSTP);
+                continue;
+              } else if (c == attributes
+                  .getControlChar(Attributes.ControlChar.VSTATUS)) {
+                raise(Signal.INFO);
+                continue;
+              }
+            }
+            if (c == '\r') {
+              if (attributes.getInputFlag(Attributes.InputFlag.IGNCR)) {
+                continue;
+              }
+              if (attributes.getInputFlag(Attributes.InputFlag.ICRNL)) {
+                c = '\n';
+              }
+            } else if (c == '\n'
+                && attributes.getInputFlag(Attributes.InputFlag.INLCR)) {
+              c = '\r';
+            }
+            return c;
+          }
+        }
+      };
+      this.output = out;
+      this.reader = NonBlocking.nonBlocking(getName(), input, encoding());
+      this.writer = new PrintWriter(new OutputStreamWriter(output, encoding()));
+      this.attributes = new Attributes();
+      this.size = new Size(80, 80);
+      parseInfoCmp();
+    }
+
+    public NonBlockingReader reader() {
+      return reader;
+    }
+
+    public PrintWriter writer() {
+      return writer;
+    }
+
+    @Override
+    public InputStream input() {
+      return input;
+    }
+
+    @Override
+    public OutputStream output() {
+      return output;
+    }
+
+    public Attributes getAttributes() {
+      Attributes attr = new Attributes();
+      attr.copy(attributes);
+      return attr;
+    }
+
+    public void setAttributes(Attributes attr) {
+      attributes.copy(attr);
+    }
+
+    public Size getSize() {
+      Size sz = new Size();
+      sz.copy(size);
+      return sz;
+    }
+
+    public void setSize(Size sz) {
+      size.copy(sz);
+    }
+
+  }
 }
 
 // End SqlLineArgsTest.java

@@ -25,8 +25,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.jline.builtins.Completers.FileNameCompleter;
 import org.jline.reader.Completer;
-import org.jline.reader.impl.completer.FileNameCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
@@ -110,8 +110,7 @@ public class Application {
   };
 
   private static final SortedSet<String> DEFAULT_DRIVERS =
-      Collections.unmodifiableSortedSet(
-          new TreeSet<String>(Arrays.asList(DRIVERS)));
+      Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(DRIVERS)));
 
   private static final String[] CONNECTION_URLS = {
     "jdbc:JSQLConnect://<hostname>/database=<database>",
@@ -215,8 +214,7 @@ public class Application {
    * @return Map of output formats by name
    */
   public Map<String, OutputFormat> getOutputFormats(SqlLine sqlLine) {
-    final Map<String, OutputFormat> outputFormats =
-        new HashMap<String, OutputFormat>();
+    final Map<String, OutputFormat> outputFormats = new HashMap<>();
     outputFormats.put("vertical", new VerticalOutputFormat(sqlLine));
     outputFormats.put("table", new TableOutputFormat(sqlLine));
     outputFormats.put("csv", new SeparatedValuesOutputFormat(sqlLine, ","));
@@ -334,7 +332,7 @@ public class Application {
 
   private Set<String> getMetadataMethodNames() {
     try {
-      TreeSet<String> methodNames = new TreeSet<String>();
+      TreeSet<String> methodNames = new TreeSet<>();
       for (Method method : DatabaseMetaData.class.getDeclaredMethods()) {
         methodNames.add(method.getName());
       }

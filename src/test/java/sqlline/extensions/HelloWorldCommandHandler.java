@@ -15,6 +15,7 @@ import java.util.Collections;
 
 import sqlline.AbstractCommandHandler;
 import sqlline.DispatchCallback;
+
 import sqlline.SqlLine;
 
 /**

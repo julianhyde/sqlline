@@ -11,11 +11,7 @@ Capitalization is tricky:
 ## How to make a release (for committers)
 
 Make sure `mvn clean install` and `mvn site` pass under JDK 8, 9,
-<<<<<<< HEAD
 10 and 11.
-=======
-and 10.
->>>>>>> aa56567... Migration to Jline3
 
 Write release notes. Run the
 [relNotes](https://github.com/julianhyde/share/blob/master/tools/relNotes)
@@ -24,11 +20,7 @@ script and append the output to [HISTORY.md](HISTORY.md).
 Update version numbers in README, README.md, src/docbkx/manual.xml,
 and the copyright date in NOTICE.
 
-<<<<<<< HEAD
 Switch to JDK 10.
-=======
-Switch to JDK 8.
->>>>>>> aa56567... Migration to Jline3
 
 Check that the sandbox is clean:
 

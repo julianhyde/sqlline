@@ -1184,7 +1184,6 @@ public class Commands {
   public void all(String line, DispatchCallback callback) {
     int index = sqlLine.getDatabaseConnections().getIndex();
     boolean success = true;
-
     for (int i = 0; i < sqlLine.getDatabaseConnections().size(); i++) {
       sqlLine.getDatabaseConnections().setIndex(i);
       sqlLine.output(
