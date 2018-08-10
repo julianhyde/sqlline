@@ -13,7 +13,10 @@ package sqlline;
 
 import java.util.List;
 
-import jline.console.completer.Completer;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 
 /**
  * Completer for SQLLine. It dispatches to sub-completers based on the
@@ -27,20 +30,17 @@ class SqlLineCompleter
     this.sqlLine = sqlLine;
   }
 
-  public int complete(String buf, int pos, List<CharSequence> candidates) {
-    if (buf != null
-        && buf.startsWith(SqlLine.COMMAND_PREFIX)
-        && !buf.startsWith(SqlLine.COMMAND_PREFIX + "all")
-        && !buf.startsWith(SqlLine.COMMAND_PREFIX + "sql")) {
-      return sqlLine.getCommandCompleter().complete(buf, pos, candidates);
-    } else {
-      if (sqlLine.getDatabaseConnection() != null
-          && sqlLine.getDatabaseConnection().getSqlCompleter() != null) {
-        return sqlLine.getDatabaseConnection().getSqlCompleter()
-            .complete(buf, pos, candidates);
-      } else {
-        return -1;
-      }
+  @Override public void complete(LineReader reader, ParsedLine line,
+      List<Candidate> candidates) {
+    String bufferStr = reader.getBuffer().substring(0);
+    if (bufferStr.startsWith(SqlLine.COMMAND_PREFIX)
+        && !bufferStr.startsWith(SqlLine.COMMAND_PREFIX + "all")
+        && !bufferStr.startsWith(SqlLine.COMMAND_PREFIX + "sql")) {
+      sqlLine.getCommandCompleter().complete(reader, line, candidates);
+    } else if (sqlLine.getDatabaseConnection() != null
+        && sqlLine.getDatabaseConnection().getSqlCompleter() != null) {
+      sqlLine.getDatabaseConnection().getSqlCompleter()
+          .complete(reader, line, candidates);
     }
   }
 }

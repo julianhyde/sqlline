@@ -13,7 +13,6 @@ package sqlline.extensions;
 
 import java.util.Collections;
 
-import jline.console.completer.Completer;
 import sqlline.AbstractCommandHandler;
 import sqlline.DispatchCallback;
 import sqlline.SqlLine;
@@ -27,7 +26,7 @@ public class HelloWorldCommandHandler extends AbstractCommandHandler {
 
   public HelloWorldCommandHandler(SqlLine sqlLine) {
     super(sqlLine, new String[]{"hello", "test"}, "help for hello test",
-        Collections.<Completer>emptyList());
+        Collections.emptyList());
   }
 
   @Override public void execute(String line,

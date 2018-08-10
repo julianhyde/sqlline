@@ -14,7 +14,7 @@ package sqlline;
 import java.util.Collections;
 import java.util.List;
 
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
 
 /**
  * A {@link CommandHandler} implementation that
@@ -28,7 +28,7 @@ public class ReflectiveCommandHandler extends AbstractCommandHandler {
 
   public ReflectiveCommandHandler(SqlLine sqlLine, Completer completer,
       String... cmds) {
-    this(sqlLine, Collections.<Completer>singletonList(completer), cmds);
+    this(sqlLine, Collections.singletonList(completer), cmds);
   }
 
   public void execute(String line, DispatchCallback callback) {

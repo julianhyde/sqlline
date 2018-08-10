@@ -19,8 +19,7 @@ import java.util.List;
  * List of all database connections in the current sqlline session.
  */
 class DatabaseConnections implements Iterable<DatabaseConnection> {
-  private final List<DatabaseConnection> connections =
-      new ArrayList<DatabaseConnection>();
+  private final List<DatabaseConnection> connections = new ArrayList<>();
   private int index = -1;
 
   public DatabaseConnection current() {
