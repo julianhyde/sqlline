@@ -5,14 +5,9 @@ jdk:
   - oraclejdk10
   - oraclejdk9
   - oraclejdk8
-  - openjdk7
 branches:
   only:
     - master
-# Revert the following 3 lines after oraclejdk9 is production in Travis
-sudo: required
-dist: trusty
-before_install: export MAVEN_SKIP_RC="true"
 cache:
   directories:
     - $HOME/.m2

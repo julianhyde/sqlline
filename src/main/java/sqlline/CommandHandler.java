@@ -13,7 +13,7 @@ package sqlline;
 
 import java.util.List;
 
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
 
 /**
  * A generic command to be executed. Execution of the command should be

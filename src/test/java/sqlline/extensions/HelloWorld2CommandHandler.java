@@ -15,7 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
+
 import sqlline.CommandHandler;
 import sqlline.DispatchCallback;
 import sqlline.SqlLine;

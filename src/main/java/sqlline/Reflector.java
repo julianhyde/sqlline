@@ -44,7 +44,7 @@ class Reflector {
       throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     Class c = defClass != null ? defClass : on.getClass();
-    List<Method> candidateMethods = new LinkedList<Method>();
+    List<Method> candidateMethods = new LinkedList<>();
 
     for (Method method : c.getMethods()) {
       if (method.getName().equalsIgnoreCase(methodName)) {

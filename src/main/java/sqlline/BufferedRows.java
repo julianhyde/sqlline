@@ -28,7 +28,7 @@ class BufferedRows extends Rows {
   BufferedRows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     super(sqlLine, rs);
 
-    list = new LinkedList<Row>();
+    list = new LinkedList<>();
 
     int count = rsMeta.getColumnCount();
 

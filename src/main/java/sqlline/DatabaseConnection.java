@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-import jline.console.completer.ArgumentCompleter;
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.ArgumentCompleter;
 
 /**
  * Holds a database connection, credentials, and other associated state.
@@ -74,33 +74,9 @@ class DatabaseConnection {
           new Quoting(startQuote.charAt(0), startQuote.charAt(0), upper);
     }
 
-    final String extraNameCharacters =
-        meta == null
-            || meta.getExtraNameCharacters() == null
-            ? ""
-            : meta.getExtraNameCharacters();
-
     // setup the completer for the database
     sqlCompleter = new ArgumentCompleter(
-        new ArgumentCompleter.WhitespaceArgumentDelimiter() {
-          // delimiters for SQL statements are any
-          // non-letter-or-number characters, except
-          // underscore and characters that are specified
-          // by the database to be valid name identifiers.
-          @Override public boolean isDelimiterChar(
-              final CharSequence buffer, int pos) {
-            char c = buffer.charAt(pos);
-            if (Character.isWhitespace(c)) {
-              return true;
-            }
-
-            return !Character.isLetterOrDigit(c)
-                && c != '_'
-                && extraNameCharacters.indexOf(c) == -1;
-          }
-        },
         new SqlCompleter(sqlLine, skipmeta));
-
     // not all argument elements need to hold true
     ((ArgumentCompleter) sqlCompleter).setStrict(false);
   }
@@ -227,7 +203,7 @@ class DatabaseConnection {
   }
 
   public Collection<String> getTableNames(boolean force) {
-    Set<String> names = new TreeSet<String>();
+    Set<String> names = new TreeSet<>();
     for (Schema.Table table : getSchema().getTables()) {
       names.add(table.getName());
     }
@@ -271,7 +247,7 @@ class DatabaseConnection {
         return tables;
       }
 
-      tables = new LinkedList<Table>();
+      tables = new LinkedList<>();
 
       try {
         ResultSet rs =
