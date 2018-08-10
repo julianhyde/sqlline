@@ -2743,6 +2743,15 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         </para>
       </sect1>
       <sect1 id="setting_numberformat">
+        <title>nullvalue</title>
+        <para>
+          The value which will be used instead of null values. Setting
+          to default causes 'null' for numbers/dates/times
+          and empty strings for others. For example,
+          the setting *** yields null values like '***'.
+        </para>
+      </sect1>
+      <sect1 id="setting_numberformat">
         <title>numberformat</title>
         <para>
           The format for how numeric values are displayed. Setting

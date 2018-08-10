@@ -760,6 +760,21 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testNullValue() throws Throwable {
+    final String script = "!set nullValue %%%\n"
+        + "!set outputformat csv\n"
+        + "values (NULL, -1.5, null, date '1969-07-20', null, 'null');\n"
+        + "!set nullValue \"'\"\n"
+        + "values (NULL, -1.5, null, date '1969-07-20', null, 'null');\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(
+            containsString("'C1','C2','C3','C4','C5','C6'"),
+            containsString("'%%%','-1.5','%%%','1969-07-20','%%%','null'"),
+            containsString("'C1','C2','C3','C4','C5','C6'"),
+            containsString("'''','-1.5','''','1969-07-20','''','null'")));
+  }
+
+  @Test
   public void testTimeFormat() throws Throwable {
     // Use System.err as it is used in sqlline.SqlLineOpts#set
     final PrintStream originalErr = System.err;
