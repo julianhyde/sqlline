@@ -40,32 +40,38 @@ abstract class Rows implements Iterator<Rows.Row> {
   final DateFormat dateFormat;
   final DateFormat timeFormat;
   final DateFormat timestampFormat;
+  final String nullValue;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     this.sqlLine = sqlLine;
     rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
-    if (sqlLine.getOpts().getNumberFormat().equals(SqlLineOpts.DEFAULT)) {
+    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNumberFormat())) {
       numberFormat = null;
     } else {
       numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat());
     }
-    if (sqlLine.getOpts().getDateFormat().equals(SqlLineOpts.DEFAULT)) {
+    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getDateFormat())) {
       dateFormat = null;
     } else {
       dateFormat = new SimpleDateFormat(sqlLine.getOpts().getDateFormat());
     }
-    if (sqlLine.getOpts().getTimeFormat().equals(SqlLineOpts.DEFAULT)) {
+    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimeFormat())) {
       timeFormat = null;
     } else {
       timeFormat = new SimpleDateFormat(sqlLine.getOpts().getTimeFormat());
     }
-    if (sqlLine.getOpts().getTimestampFormat().equals(SqlLineOpts.DEFAULT)) {
+    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimestampFormat())) {
       timestampFormat = null;
     } else {
       timestampFormat =
           new SimpleDateFormat(sqlLine.getOpts().getTimestampFormat());
+    }
+    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNullValue())) {
+      nullValue = null;
+    } else {
+      nullValue = String.valueOf(sqlLine.getOpts().getNullValue());
     }
   }
 
@@ -213,13 +219,14 @@ abstract class Rows implements Iterator<Rows.Row> {
           values[i] = rs.getString(i + 1);
           break;
         }
+        values[i] = values[i] == null ? nullValue : values[i];
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
     }
 
     private void setFormat(Object o, Format format, int i) {
       if (o == null) {
-        values[i] = "null";
+        values[i] = String.valueOf(nullValue);
       } else if (format != null) {
         values[i] = format.format(o);
       } else {

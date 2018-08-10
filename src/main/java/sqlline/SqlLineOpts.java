@@ -53,6 +53,7 @@ class SqlLineOpts implements Completer {
   private String numberFormat = DEFAULT;
   private String dateFormat = DEFAULT;
   private String timeFormat = DEFAULT;
+  private String nullValue = DEFAULT;
   private String timestampFormat = DEFAULT;
   private int maxWidth = DEFAULT_MAX_WIDTH;
   private int maxHeight = DEFAULT_MAX_HEIGHT;
@@ -325,6 +326,14 @@ class SqlLineOpts implements Completer {
 
   public void setTimeFormat(String timeFormat) {
     this.timeFormat = getValidDateTimePatternOrThrow(timeFormat);
+  }
+
+  public String getNullValue() {
+    return this.nullValue;
+  }
+
+  public void setNullValue(String nullValue) {
+    this.nullValue = nullValue;
   }
 
   public String getTimestampFormat() {
