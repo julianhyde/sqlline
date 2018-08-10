@@ -34,8 +34,7 @@ abstract class Rows implements Iterator<Rows.Row> {
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
-  final Map<TableKey, Set<String>> tablePrimaryKeysCache =
-      new HashMap<TableKey, Set<String>>();
+  final Map<TableKey, Set<String>> tablePrimaryKeysCache = new HashMap<>();
   final NumberFormat numberFormat;
   final DateFormat dateFormat;
   final DateFormat timeFormat;
@@ -248,7 +247,7 @@ abstract class Rows implements Iterator<Rows.Row> {
    *         never be null.
    */
   private Set<String> loadAndCachePrimaryKeysForTable(TableKey tableKey) {
-    Set<String> primaryKeys = new HashSet<String>();
+    Set<String> primaryKeys = new HashSet<>();
     try {
       ResultSet pks = sqlLine.getDatabaseConnection().meta.getPrimaryKeys(
           tableKey.catalog, tableKey.schema, tableKey.table);

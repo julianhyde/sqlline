@@ -17,9 +17,11 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import jline.TerminalFactory;
-import jline.console.completer.Completer;
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Session options.
@@ -29,11 +31,9 @@ public class SqlLineOpts implements Completer {
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
   public static final String DEFAULT = "default";
+  private static final int DEFAULT_MAX_WIDTH = 80;
+  private static final int DEFAULT_MAX_HEIGHT = 80;
   public static final Date TEST_DATE = new Date();
-  private static final int DEFAULT_MAX_WIDTH =
-      TerminalFactory.get().getWidth();
-  private static final int DEFAULT_MAX_HEIGHT =
-      TerminalFactory.get().getHeight();
   public static final String DEFAULT_TRANSACTION_ISOLATION =
       "TRANSACTION_REPEATABLE_READ";
   private SqlLine sqlLine;
@@ -121,12 +121,14 @@ public class SqlLineOpts implements Completer {
     return f;
   }
 
-  public int complete(String buf, int pos, List<CharSequence> candidates) {
+  @Override
+  public void complete(
+      LineReader lineReader, ParsedLine parsedLine, List<Candidate> list) {
     try {
-      return new StringsCompleter(propertyNames())
-          .complete(buf, pos, candidates);
+      new StringsCompleter(propertyNames())
+          .complete(lineReader, parsedLine, list);
     } catch (Throwable t) {
-      return -1;
+      return;
     }
   }
 
@@ -152,7 +154,7 @@ public class SqlLineOpts implements Completer {
 
   Set<String> propertyNames()
       throws IllegalAccessException, InvocationTargetException {
-    final TreeSet<String> set = new TreeSet<String>();
+    final TreeSet<String> set = new TreeSet<>();
     for (String s : propertyNamesMixed()) {
       set.add(s.toLowerCase());
     }
@@ -161,7 +163,7 @@ public class SqlLineOpts implements Completer {
 
   Set<String> propertyNamesMixed()
       throws IllegalAccessException, InvocationTargetException {
-    TreeSet<String> names = new TreeSet<String>();
+    TreeSet<String> names = new TreeSet<>();
 
     // get all the values from getXXX methods
     for (Method method : getClass().getDeclaredMethods()) {
@@ -554,6 +556,7 @@ public class SqlLineOpts implements Completer {
     }
     return dateTimePattern;
   }
+
 }
 
 // End SqlLineOpts.java

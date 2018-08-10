@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import jline.console.completer.Completer;
-import jline.console.completer.NullCompleter;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.NullCompleter;
 
 /**
  * An abstract implementation of CommandHandler.
@@ -37,9 +37,9 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     this.helpText = helpText;
     if (completers == null || completers.size() == 0) {
       this.parameterCompleters =
-          Collections.singletonList((Completer) new NullCompleter());
+          Collections.singletonList(new NullCompleter());
     } else {
-      List<Completer> c = new ArrayList<Completer>(completers);
+      List<Completer> c = new ArrayList<>(completers);
       c.add(new NullCompleter());
       this.parameterCompleters = c;
     }

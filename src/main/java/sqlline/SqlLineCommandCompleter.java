@@ -14,18 +14,23 @@ package sqlline;
 import java.util.LinkedList;
 import java.util.List;
 
-import jline.console.completer.*;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.AggregateCompleter;
+import org.jline.reader.impl.completer.ArgumentCompleter;
+import org.jline.reader.impl.completer.NullCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Suggests completions for a command.
  */
 class SqlLineCommandCompleter extends AggregateCompleter {
   public SqlLineCommandCompleter(SqlLine sqlLine) {
-    List<ArgumentCompleter> completers = new LinkedList<ArgumentCompleter>();
+    super(new LinkedList<>());
+    List<ArgumentCompleter> completers = new LinkedList<>();
 
     for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       for (String cmd : commandHandler.getNames()) {
-        List<Completer> compl = new LinkedList<Completer>();
+        List<Completer> compl = new LinkedList<>();
         compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
         compl.addAll(commandHandler.getParameterCompleters());
         compl.add(new NullCompleter()); // last param no complete

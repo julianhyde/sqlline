@@ -17,8 +17,7 @@ import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.*;
 
-import jline.console.UserInterruptException;
-import jline.console.history.History;
+import org.jline.reader.UserInterruptException;
 
 /**
  * Collection of available commands.
@@ -166,7 +165,7 @@ public class Commands {
       return;
     }
 
-    List<Object> params = new LinkedList<Object>(Arrays.asList(parts));
+    List<Object> params = new LinkedList<>(Arrays.asList(parts));
     params.remove(0);
     params.remove(0);
     sqlLine.debug(params.toString());
@@ -182,8 +181,8 @@ public class Commands {
 
     try {
       Method[] methods = sqlLine.getDatabaseMetaData().getClass().getMethods();
-      Set<String> methodNames = new TreeSet<String>();
-      Set<String> methodNamesUpper = new TreeSet<String>();
+      Set<String> methodNames = new TreeSet<>();
+      Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
         methodNames.add(method.getName());
         methodNamesUpper.add(method.getName().toUpperCase());
@@ -219,12 +218,17 @@ public class Commands {
   }
 
   public void history(String line, DispatchCallback callback) {
-    int index = 1;
-    for (History.Entry entry : sqlLine.getConsoleReader().getHistory()) {
-      index++;
-      sqlLine.output(
-          sqlLine.getColorBuffer().pad(index + ".", 6)
-              .append(entry.toString()));
+    try {
+      String argsLine = line.substring("history".length());
+      org.jline.builtins.Commands.history(
+          sqlLine.getLineReader(),
+          sqlLine.getOutputStream(),
+          sqlLine.getErrorStream(),
+          argsLine.isEmpty()
+              ? new String[]{"-d"}
+              : sqlLine.split(argsLine, " "));
+    } catch (IOException e) {
+      callback.setToFailure();
     }
     callback.setToSuccess();
   }
@@ -270,7 +274,7 @@ public class Commands {
       String line,
       String paramName,
       String[] defaultValues) {
-    final List<Object> list = new ArrayList<Object>();
+    final List<Object> list = new ArrayList<>();
     final String[][] ret = sqlLine.splitCompound(line);
     String[] compound;
     if (ret == null || ret.length != 2) {
@@ -377,13 +381,13 @@ public class Commands {
     }
     try {
       String question = sqlLine.loc("really-drop-all");
-      if (!sqlLine.getConsoleReader().readLine(question).equals("y")) {
+      if (!sqlLine.getLineReader().readLine(question).equals("y")) {
         sqlLine.error("abort-drop-all");
         callback.setToFailure();
         return;
       }
 
-      List<String> cmds = new LinkedList<String>();
+      List<String> cmds = new LinkedList<>();
       ResultSet rs = sqlLine.getTables();
       try {
         while (rs.next()) {
@@ -432,7 +436,7 @@ public class Commands {
 
   public void scan(String line, DispatchCallback callback)
       throws IOException {
-    TreeSet<String> names = new TreeSet<String>();
+    TreeSet<String> names = new TreeSet<>();
 
     if (sqlLine.getDrivers() == null) {
       sqlLine.setDrivers(sqlLine.scanDrivers(line));
@@ -497,7 +501,7 @@ public class Commands {
   public void config(String line, DispatchCallback callback) {
     try {
       Properties props = sqlLine.getOpts().toProperties();
-      Set<String> keys = new TreeSet<String>(asMap(props).keySet());
+      Set<String> keys = new TreeSet<>(asMap(props).keySet());
       for (String key : keys) {
         sqlLine.output(sqlLine.getColorBuffer()
             .green(sqlLine.getColorBuffer()
@@ -733,7 +737,7 @@ public class Commands {
     }
 
     if (sqlLine.getBatch() == null) {
-      sqlLine.setBatch(new LinkedList<String>());
+      sqlLine.setBatch(new LinkedList<>());
       sqlLine.info(sqlLine.loc("batch-start"));
       callback.setToSuccess();
     } else {
@@ -761,10 +765,6 @@ public class Commands {
   private void execute(String line, boolean call, DispatchCallback callback) {
     if (line == null || line.length() == 0) {
       callback.setStatus(DispatchCallback.Status.FAILURE);
-      return;
-    }
-    line = getMultilineInput(line, callback);
-    if (line == null) {
       return;
     }
 
@@ -855,46 +855,6 @@ public class Commands {
 
     sqlLine.showWarnings();
     callback.setToSuccess();
-  }
-
-  private String getMultilineInput(String line, DispatchCallback callback) {
-    // ### FIXME:  doing the multi-line handling down here means
-    // higher-level logic never sees the extra lines.  So,
-    // for example, if a script is being saved, it won't include
-    // the continuation lines!  This is logged as sf.net
-    // bug 879518.
-
-    // use multiple lines for statements not terminated by ";"
-    try {
-      StringBuilder lineBuilder = new StringBuilder(line);
-      while (!(lineBuilder.toString().trim().endsWith(";"))) {
-        StringBuilder prompt = new StringBuilder(sqlLine.getPrompt());
-        for (int i = 0; i < prompt.length() - 1; i++) {
-          if (prompt.charAt(i) != '>') {
-            prompt.setCharAt(i, i % 2 == 0 ? '.' : ' ');
-          }
-        }
-
-        String extra = sqlLine.getConsoleReader().readLine(prompt.toString());
-        if (null == extra) {
-          break; // reader is at the end of data
-        }
-        if (!sqlLine.isComment(extra)) {
-          lineBuilder.append(SqlLine.getSeparator()).append(extra);
-        }
-      }
-      line = lineBuilder.toString();
-    } catch (UserInterruptException uie) {
-      // CTRL-C'd out of the command. Note it, but don't call it an
-      // error.
-      callback.setStatus(DispatchCallback.Status.CANCELED);
-      sqlLine.output(sqlLine.loc("command-canceled"));
-      return null;
-    } catch (Exception e) {
-      sqlLine.handleException(e);
-    }
-
-    return line;
   }
 
   public void quit(String line, DispatchCallback callback) {
@@ -1149,11 +1109,11 @@ public class Commands {
     sqlLine.debug("Connecting to " + url);
 
     if (username == null) {
-      username = sqlLine.getConsoleReader()
+      username = sqlLine.getLineReader()
           .readLine("Enter username for " + url + ": ");
     }
     if (password == null) {
-      password = sqlLine.getConsoleReader()
+      password = sqlLine.getLineReader()
           .readLine("Enter password for " + url + ": ", '*');
     }
 
@@ -1224,7 +1184,7 @@ public class Commands {
   public void all(String line, DispatchCallback callback) {
     int index = sqlLine.getDatabaseConnections().getIndex();
     boolean success = true;
-    line = getMultilineInput(line, callback);
+
     for (int i = 0; i < sqlLine.getDatabaseConnections().size(); i++) {
       sqlLine.getDatabaseConnections().setIndex(i);
       sqlLine.output(
@@ -1337,7 +1297,7 @@ public class Commands {
       callback.setToFailure();
       return;
     }
-    List<String> cmds = new LinkedList<String>();
+    List<String> cmds = new LinkedList<>();
 
     try {
       BufferedReader reader =
@@ -1554,7 +1514,7 @@ public class Commands {
   public void help(String line, DispatchCallback callback) {
     String[] parts = sqlLine.split(line);
     String cmd = parts.length > 1 ? parts[1] : "";
-    TreeSet<ColorBuffer> clist = new TreeSet<ColorBuffer>();
+    TreeSet<ColorBuffer> clist = new TreeSet<>();
 
     for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       if (cmd.length() == 0
@@ -1593,6 +1553,26 @@ public class Commands {
       return;
     }
 
+    // Workaround for windows because of
+    // https://github.com/jline/jline3/issues/304
+    if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+      sillyLess(in);
+    } else {
+      try {
+        org.jline.builtins.Commands.less(sqlLine.getLineReader().getTerminal(),
+            in, sqlLine.getOutputStream(), sqlLine.getErrorStream(),
+            null, new String[]{});
+      } catch (InterruptedException e) {
+        callback.setToFailure();
+        sqlLine.error(e);
+        return;
+      }
+    }
+
+    callback.setToSuccess();
+  }
+
+  private void sillyLess(InputStream in) throws IOException {
     BufferedReader breader =
         new BufferedReader(new InputStreamReader(in));
     String man;
@@ -1604,16 +1584,19 @@ public class Commands {
       // silly little pager
       if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
         String prompt = sqlLine.loc("enter-for-more");
-        String ret = sqlLine.getConsoleReader().readLine(prompt);
-        if (ret != null && ret.startsWith("q")) {
+        sqlLine.getLineReader().getTerminal().writer().write(prompt);
+        int c;
+        do {
+          c = sqlLine.getLineReader().getTerminal().reader().read(100);
+        } while (c != -1 && c != 13 && c != 'q');
+        if (c == -1 || c == 'q') {
+          sqlLine.getLineReader().getTerminal().writer().write('\n');
           break;
         }
       }
     }
 
     breader.close();
-
-    callback.setToSuccess();
   }
 
   public void appconfig(String line, DispatchCallback callback) {

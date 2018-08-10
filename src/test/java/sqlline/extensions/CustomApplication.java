@@ -19,7 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
+
 import sqlline.Application;
 import sqlline.CommandHandler;
 import sqlline.OutputFormat;

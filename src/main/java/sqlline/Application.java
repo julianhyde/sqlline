@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jline.console.completer.Completer;
-import jline.console.completer.FileNameCompleter;
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.FileNameCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Defines the configuration of a SQLLine application.
@@ -190,11 +190,11 @@ public class Application {
    *
    * <p>Override this method to modify set of supported known drivers.
    *
-   * @return Collection of known drivers
+   * @return set of known drivers
    *
    * @see #DEFAULT_DRIVERS
    */
-  public Collection<String> initDrivers() {
+  public Set<String> initDrivers() {
     return DEFAULT_DRIVERS;
   }
 
