@@ -263,6 +263,15 @@ public class SqlLineArgsTest {
                             + "+-------------+-------------+-----+\n"));
   }
 
+  @Test
+  public void testScan() throws Throwable {
+    final String expected = "Compliant Version Driver Class\n"
+        + "yes       2.3     org.hsqldb.jdbcDriver";
+    checkScriptFile("!scan\n", false,
+        equalTo(SqlLine.Status.OK),
+        containsString(expected));
+  }
+
   /**
    * Table output without header.
    */
@@ -943,27 +952,23 @@ public class SqlLineArgsTest {
   @Test
   public void testEmptyRecord() throws Throwable {
     final String line = "Usage: record <file name>";
-    checkScriptFile(
-        "!record", true, equalTo(SqlLine.Status.OTHER),
+    checkScriptFile("!record", true, equalTo(SqlLine.Status.OTHER),
         allOf(containsString(line), not(containsString("Exception"))));
   }
 
   @Test
   public void testEmptyRun() throws Throwable {
     final String line = "Usage: run <file name>";
-    checkScriptFile(
-        "!run", true, equalTo(SqlLine.Status.OTHER),
+    checkScriptFile("!run", true, equalTo(SqlLine.Status.OTHER),
         allOf(containsString(line), not(containsString("Exception"))));
   }
 
   @Test
   public void testEmptyScript() throws Throwable {
     final String line = "Usage: script <file name>";
-    checkScriptFile(
-        "!script", true, equalTo(SqlLine.Status.OTHER),
+    checkScriptFile("!script", true, equalTo(SqlLine.Status.OTHER),
         allOf(containsString(line), not(containsString("Exception"))));
   }
-
 
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,

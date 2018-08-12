@@ -444,28 +444,32 @@ public class Commands {
       names.add(driver.getClass().getName());
     }
 
-    final ColorBuffer colorBuffer = sqlLine.getColorBuffer();
-    sqlLine.output(colorBuffer
-        .bold(colorBuffer.pad(sqlLine.loc("compliant"), 10).getMono())
-        .bold(colorBuffer.pad(sqlLine.loc("jdbc-version"), 8).getMono())
-        .bold(sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono()));
+    String compliant =
+        sqlLine.getColorBuffer().pad(sqlLine.loc("compliant"), 10).getMono();
+    String jdbcVersion =
+        sqlLine.getColorBuffer().pad(sqlLine.loc("jdbc-version"), 8).getMono();
+    String driverClass =
+        sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono();
+    sqlLine.output(sqlLine.getColorBuffer()
+        .bold(compliant)
+        .bold(jdbcVersion)
+        .bold(driverClass));
 
     for (String name : names) {
       try {
         Driver driver = (Driver) Class.forName(name).newInstance();
-        ColorBuffer msg =
-            colorBuffer
-                .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
-                .pad(driver.getMajorVersion() + "."
-                    + driver.getMinorVersion(), 8)
-                .append(name);
+        ColorBuffer msg = sqlLine.getColorBuffer()
+            .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
+            .pad(driver.getMajorVersion() + "."
+                + driver.getMinorVersion(), 8)
+            .append(name);
         if (driver.jdbcCompliant()) {
           sqlLine.output(msg);
         } else {
-          sqlLine.output(colorBuffer.red(msg.getMono()));
+          sqlLine.output(sqlLine.getColorBuffer().red(msg.getMono()));
         }
       } catch (Throwable t) {
-        sqlLine.output(colorBuffer.red(name)); // error with driver
+        sqlLine.output(sqlLine.getColorBuffer().red(name)); // error with driver
       }
     }
 
