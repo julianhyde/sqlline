@@ -63,11 +63,12 @@ class Load(nagiosplugin.Resource):
 		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-		logging.debug("Analzying output")
+		logging.debug("Analyzing output")
 		# Parse stdout and stderr for metrics
 		# Right now, stats are trapper in stderr
 		perfstat = 0
 		if sqlline_cmd_stream.stdout:
+			logging.debug("...checking stdout")
 			# Iterate for debugging
 			for line in sqlline_cmd_stream.stdout:
 				line = line.strip()
@@ -80,6 +81,7 @@ class Load(nagiosplugin.Resource):
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
 		if sqlline_cmd_stream.stderr:
+			logging.debug("...checking stderr")
 			for line in sqlline_cmd_stream.stderr:
 				line = line.strip()
 				logging.debug(line)
