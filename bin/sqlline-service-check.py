@@ -63,15 +63,21 @@ class Load(nagiosplugin.Resource):
 		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		# Communicate stdout/stderr
+		try:
+			stdout,stderr = sqlline_cmd_stream.communicate()
+		except TimeoutExpired:
+			sqlline_cmd_stream.kill()
+			stdout,stderr = sqlline_cmd_stream.communicate()
+
 		logging.debug("Analyzing output")
 		# Parse stdout and stderr for metrics
 		# Right now, stats are trapper in stderr
 		perfstat = 0
-		if sqlline_cmd_stream.stdout:
+		if stdout:
 			logging.debug("...checking stdout")
 			# Iterate for debugging
-			for line in sqlline_cmd_stream.stdout:
-				line = line.strip()
+			for line in stdout.split('\n'):
 				logging.debug(line)
 				norows_match = re.search('.*No rows affected.*',line)
 				rowselect_match = re.search('.*rows selected.*',line)
@@ -80,10 +86,9 @@ class Load(nagiosplugin.Resource):
 				elif rowselect_match:
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
-		if sqlline_cmd_stream.stderr:
+		if stderr:
 			logging.debug("...checking stderr")
-			for line in sqlline_cmd_stream.stderr:
-				line = line.strip()
+			for line in stderr.split('\n'):
 				logging.debug(line)
 				norows_match = re.search('.*No rows affected.*',line)
 				rowselect_match = re.search('.*rows selected.*',line)
