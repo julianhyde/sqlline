@@ -22,8 +22,6 @@ install: build
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
-	# Link bin file
-	sudo ln -s $(CURDIR)/bin/sqlline /usr/local/bin/sqlline
 	# Needed due to Tidal checks using old Icinga script that requires nagiosplugin library
 	pipenv install
 
