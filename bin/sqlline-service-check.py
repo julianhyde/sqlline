@@ -60,8 +60,11 @@ class Load(nagiosplugin.Resource):
 
 		# Execute sqlline
 		logging.debug("Execute sqlline")
-		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
-			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		try:
+			sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
+				queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		except:
+			raise
 
 		# Poll for status on the process to check if it's running
 		logging.debug("Checking proc status")
