@@ -936,6 +936,46 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Tests the {@code !connect} command passing in the password in as a hash,
+   * and using h2's {@code PASSWORD_HASH} and {@code ALLOW_LITERALS} properties
+   * outside of the URL:
+   *
+   * <blockquote>
+   * !connect -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE
+   * jdbc:h2:mem sa 6e6f6e456d707479506173737764
+   * </blockquote>
+   */
+  @Test
+  public void testConnectWithDbPropertyAsParameter2() throws Throwable {
+    SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream beelineOutputStream = new PrintStream(os);
+    beeLine.setOutputStream(beelineOutputStream);
+    beeLine.setErrorStream(beelineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    assertThat(status, equalTo(SqlLine.Status.OK));
+    DispatchCallback dc = new DispatchCallback();
+    beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+    String fakeNonEmptyPassword = "nonEmptyPasswd";
+    beeLine.runCommands(
+        Collections.singletonList("!connect "
+            + " -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE "
+            + ConnectionSpec.H2.url + " "
+            + ConnectionSpec.H2.username + " "
+            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())),
+        dc);
+    beeLine.runCommands(Collections.singletonList("select 1;"), dc);
+    String output = os.toString("UTF8");
+    final String expected =
+        "Error: Literals of this kind are not allowed; SQL statement:";
+    assertThat(output, containsString(expected));
+    beeLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(beeLine.isExit());
+  }
+
+  /**
    * Tests the {@code !connect} command passing the password in as a hash:
    *
    * <blockquote>
@@ -970,6 +1010,26 @@ public class SqlLineArgsTest {
         + "[90004-191] (state=90004,code=90004)";
     assertThat(output, containsString(expected0));
     os.reset();
+
+    // success attempt
+    beeLine.runCommands(
+        Collections.singletonList("!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE;ALLOW_LITERALS=NONE\" "
+            + ConnectionSpec.H2.username + " \""
+            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())
+            + "\""), dc);
+    beeLine.runCommands(Collections.singletonList("!tables"), dc);
+    output = os.toString("UTF8");
+    final String expected1 = "| TABLE_CAT | TABLE_SCHEM | "
+        + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
+    assertThat(output, containsString(expected1));
+
+    beeLine.runCommands(Collections.singletonList("select 5;"), dc);
+    output = os.toString("UTF8");
+    final String expected2 =
+        "Error: Literals of this kind are not allowed; SQL statement:";
+    assertThat(output, containsString(expected2));
 
     beeLine.runCommands(
         Collections.singletonList("!quit"), new DispatchCallback());
