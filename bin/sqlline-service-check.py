@@ -21,7 +21,7 @@ import time
 
 class Load(nagiosplugin.Resource):
 	""" Construct the class for Icinga """
-	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, username):
+	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, sqlline_bin, username):
 		logging.debug("Initializing")
 		self.adserver = adserver
 		self.database = database
@@ -33,6 +33,7 @@ class Load(nagiosplugin.Resource):
 		self.queryfile = queryfile
 		self.realm = realm
 		self.username = username
+		self.sqlline_bin = sqlline_bin
 
 	def execute_sqlline(self, execute_type):
 		"""Executes the query of file"""
@@ -58,7 +59,8 @@ class Load(nagiosplugin.Resource):
 			sys.exit("Invalid execution type specified")	
 
 		# Execute sqlline
-		sqlline_cmd_stream = subprocess.Popen(["/usr/local/bin/sqlline", "-u", jdbc, "-f", \
+		logging.debug("Execute sqlline")
+		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Parse stdout and stderr for metrics
@@ -177,6 +179,8 @@ def main():
 	mode = args.mode
 	query_cmds = []
 	realm = args.realm
+	scriptdir = os.path.dirname(os.path.abspath(__file__))
+	sqlline_bin = scriptdir + '/sqlline'
 
 	if args.query and args.filename:
 		sys.exit("Cannot specify both a query and a file")
@@ -237,7 +241,7 @@ def main():
 	try:
 		check = nagiosplugin.Check(
 			Load(database, adserver, hostname, mode, PASSWORD,port, \
-			query, queryfile, realm, username), \
+			query, queryfile, realm, sqlline_bin, username), \
 			nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
 	except:
 		raise

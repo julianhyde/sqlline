@@ -5,3 +5,4 @@ target
 *.ipr
 .idea/
 *.jar
+bin/sqlline

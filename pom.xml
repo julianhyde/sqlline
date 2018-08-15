@@ -206,50 +206,7 @@
           </execution>
         </executions>
       </plugin>
-    <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>rpm-maven-plugin</artifactId>
-      <version>2.2.0</version>
-      <extensions>true</extensions>
-      <executions>
-        <execution>
-          <id>generate-rpm</id>
-          <goals>
-            <goal>rpm</goal>
-          </goals>
-        </execution>
-      </executions>
-      <configuration>
-        <copyright>2018 - Geisinger Health System</copyright>
-        <group>none</group>
-        <release>1.0</release>
-        <mappings>
-          <mapping>
-            <directoryIncluded>false</directoryIncluded>
-            <directory>/usr/local/bin</directory>
-            <username>root</username>
-            <groupname>root</groupname>
-            <sources>
-              <source>
-                <location>bin/sqlline</location>
-              </source>
-            </sources>
-          </mapping>
-          <mapping>
-            <directoryIncluded>false</directoryIncluded>
-            <directory>/usr/lib/sqlline</directory>
-            <username>root</username>
-            <groupname>root</groupname>
-            <sources>
-              <source>
-                <location>target/sqlline-1.5.0-SNAPSHOT-jar-with-dependencies.jar</location>
-              </source>
-            </sources>
-          </mapping>
-        </mappings>
-      </configuration>
-    </plugin>
-  </plugins>
+    </plugins>
   </build>
   <dependencies>
     <dependency>
