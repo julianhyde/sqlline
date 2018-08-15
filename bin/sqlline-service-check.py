@@ -16,10 +16,6 @@ import subprocess
 import sys
 import time
 
-# For Tidal, set term type or execution may hange
-# We saw this with beeline as well
-os.environ["HADOOP_CLIENT_OPTS"] = "-Djline.terminal=jline.UnsupportedTerminal"
-
 # Notes
 # probe seems to be a special function, required
 
@@ -212,6 +208,12 @@ def main():
 	log_filename = log_folder + args.log_name + "-" + args.hostname + ".log"
 	log_filename_debug = log_folder + args.log_name + "-" + args.hostname + "-debug.log"
 	initialize_logger(debug, log_filename, log_filename_debug)
+
+	# For Tidal, set term type or execution may hange
+	# We saw this with beeline as well
+	logging.debug("Setting HADOOP_CLIENT_OPTS for Tidal")
+	os.environ["HADOOP_CLIENT_OPTS"] = "-Djline.terminal=jline.UnsupportedTerminal"
+	logging.debug("HADOOP_CLIENT_OPTS value: " + os.environ["HADOOP_CLIENT_OPTS"])
 
 	# Authentication
 	# Setup creds for non-kerberos (if required)
