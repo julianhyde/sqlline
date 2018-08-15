@@ -63,6 +63,7 @@ class Load(nagiosplugin.Resource):
 		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		logging.debug("Analzying output")
 		# Parse stdout and stderr for metrics
 		# Right now, stats are trapper in stderr
 		perfstat = 0
@@ -90,6 +91,7 @@ class Load(nagiosplugin.Resource):
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
 		logging.debug("Total runtime: " + str(perfstat))
+		logging.debug("Query execution complete.")
 
 		# Check if perfstat was not updated at all
 		if perfstat == 0:
@@ -105,6 +107,7 @@ class Load(nagiosplugin.Resource):
 			elif self.query:
 				perfstat = self.execute_sqlline("query")
 
+			logging.debug("Returning metrics to nagiosplugin")
 			# Check the time metric with defaults for min/max set
 			return nagiosplugin.Metric('query_time', perfstat, min=0,
 				 max=60, context='query_time')
@@ -120,8 +123,8 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	if debug:
 		handler.setLevel(logging.DEBUG)
 	else:
-		handler.setLevel(logging.WARNING)
-	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+		handler.setLevel(logging.INFO)
+	formatter = logging.Formatter("%(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
@@ -246,10 +249,11 @@ def main():
 	except:
 		raise
 		sys.exit("Failed to run metrics check")
+
 	# Run check
+	logging.debug("Running check")
 	try:
 		check.main(verbose=args.verbose)
-		print "OK"
 	except:
 		raise
 
