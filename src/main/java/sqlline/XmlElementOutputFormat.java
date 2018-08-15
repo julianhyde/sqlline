@@ -16,6 +16,7 @@ package sqlline;
  * elements, and each of their columns as a nested XML element.
  */
 class XmlElementOutputFormat extends AbstractOutputFormat {
+  private static final String ALLOWED_NOT_ENCODE_SYMBOLS = "'\">";
   public XmlElementOutputFormat(SqlLine sqlLine) {
     super(sqlLine);
   }
@@ -36,7 +37,7 @@ class XmlElementOutputFormat extends AbstractOutputFormat {
     for (int i = 0; (i < head.length) && (i < vals.length); i++) {
       sqlLine.output(
           "    <" + head[i] + ">"
-              + (SqlLine.xmlattrencode(vals[i]))
+              + (SqlLine.xmlEncode(vals[i], ALLOWED_NOT_ENCODE_SYMBOLS))
               + "</" + head[i] + ">");
     }
 

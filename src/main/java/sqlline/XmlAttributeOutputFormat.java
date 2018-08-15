@@ -16,6 +16,9 @@ package sqlline;
  * elements, and each of their columns as an XML attribute.
  */
 class XmlAttributeOutputFormat extends AbstractOutputFormat {
+  // '> in case double quotes for attribute value
+  // "> in case single quotes for attribute value
+  private static final String ALLOWED_NOT_ENCODE_SYMBOLS = "'>";
   public XmlAttributeOutputFormat(SqlLine sqlLine) {
     super(sqlLine);
   }
@@ -36,7 +39,7 @@ class XmlAttributeOutputFormat extends AbstractOutputFormat {
 
     for (int i = 0; (i < head.length) && (i < vals.length); i++) {
       result.append(' ').append(head[i]).append("=\"").append(
-          SqlLine.xmlattrencode(vals[i])).append('"');
+          SqlLine.xmlEncode(vals[i], ALLOWED_NOT_ENCODE_SYMBOLS)).append('"');
     }
 
     result.append("/>");

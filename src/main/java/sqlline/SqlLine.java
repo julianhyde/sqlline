@@ -1456,33 +1456,53 @@ public class SqlLine {
     }
   }
 
-  static String xmlattrencode(String str) {
-    str = replace(str, "\"", "&quot;");
-    str = replace(str, "<", "&lt;");
-    return str;
-  }
-
-  static String replace(String source, String from, String to) {
-    if (source == null) {
-      return null;
+  static String xmlEncode(String str, String charsCouldBeNotEncoded) {
+    if (str == null) {
+      return str;
     }
-
-    if (from.equals(to)) {
-      return source;
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
+      switch (ch) {
+      case '"' :
+        // could be skipped for xml attribute in case of single quotes
+        // could be skipped for element text
+        if (charsCouldBeNotEncoded.indexOf(ch) == -1) {
+          sb.append("&quot;");
+        } else {
+          sb.append(ch);
+        }
+        break;
+      case '<' :
+        sb.append("&lt;");
+        break;
+      case '&' :
+        sb.append("&amp;");
+        break;
+      case '>' :
+        // could be skipped for xml attribute and there is no sequence ]]>
+        // could be skipped for element text and there is no sequence ]]>
+        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 1) == ']')
+            || charsCouldBeNotEncoded.indexOf(ch) == -1) {
+          sb.append("&gt;");
+        } else {
+          sb.append(ch);
+        }
+        break;
+      case '\'' :
+        // could be skipped for xml attribute in case of double quotes
+        // could be skipped for element text
+        if (charsCouldBeNotEncoded.indexOf(ch) == -1) {
+          sb.append("&apos;");
+        } else {
+          sb.append(ch);
+        }
+        break;
+      default:
+        sb.append(ch);
+      }
     }
-
-    StringBuilder replaced = new StringBuilder();
-
-    int index;
-    while ((index = source.indexOf(from)) != -1) {
-      replaced.append(source.substring(0, index));
-      replaced.append(to);
-      source = source.substring(index + from.length());
-    }
-
-    replaced.append(source);
-
-    return replaced.toString();
+    return sb.toString();
   }
 
   /**
