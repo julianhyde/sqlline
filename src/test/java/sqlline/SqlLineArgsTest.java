@@ -735,6 +735,36 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testSelectXmlAttributes() throws Throwable {
+    final String script = "!set outputformat xmlattr\n"
+        + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ']]> 1''2\"3\t<>&4');\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("<resultset>"),
+            containsString("<result C1=\"1\" C2=\"-1.5\" C3=\"TRUE\" "
+                + "C4=\"1969-07-20\" C5=\"null\" "
+                + "C6=\"]]&gt; 1'2&quot;3\t&lt;>&amp;4\"/>")));
+  }
+
+  @Test
+  public void testSelectXmlElements() throws Throwable {
+    final String script = "!set outputformat xmlelements\n"
+        + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ' ]]>1''2\"3\t<>&4');\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(
+            containsString("<resultset>"),
+            containsString("<result>"),
+            containsString("<C1>1</C1>"),
+            containsString("<C2>-1.5</C2>"),
+            containsString("<C3>TRUE</C3>"),
+            containsString("<C4>1969-07-20</C4>"),
+            containsString("<C5>null</C5>"),
+            containsString("<C6> ]]&gt;1'2\"3\t&lt;>&amp;4</C6>"),
+            containsString("</result>"),
+            containsString("</resultset>")));
+  }
+
+  @Test
   public void testTablesJson() throws Throwable {
     final String script = "!set outputformat json\n"
         + "!tables\n";
