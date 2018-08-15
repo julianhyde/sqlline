@@ -300,7 +300,7 @@ Once you have started SQLLine, you will a prompt that reads "sqlline> ". From he
 
 Connecting to a database
 
-SQLLine is only useful once you are connected to a database. In order to do so, you need to use the "!connect" command, with the JDBC URL of the database you are going to connect to, followed by the username and password (followed optionally by the driver class name). The JDBC URL is specific to the JDBC driver that you are using for your database, but will always start with "jdbc:", and usually has the machine name of the database and the name of the database itself as part of the string. Consult your driver's documentation for details on the URL to use.
+SQLLine is only useful once you are connected to a database. In order to do so, you need to use the "!connect" command, with the JDBC URL of the database you are going to connect to, followed by the username and password (followed optionally by the driver class name). The JDBC URL is specific to the JDBC driver that you are using for your database, but will always start with "jdbc:", and usually has the machine name of the database and the name of the database itself as part of the string. Quotes (both single and double) could be used in case of url, username, password contain spaces. Consult your driver's documentation for details on the URL to use.
 
 For example, to connect to an Oracle database, you might enter:
 
@@ -676,7 +676,7 @@ Description
 
 Connect to a database.
 
-Example of "commit" command
+Example of "connect" command
 
 sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
 

@@ -170,6 +170,8 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
         your database, but will always start with "jdbc:", and
         usually has the machine name of the database and the
         name of the database itself as part of the string.
+        Quotes (both single and double) could be used in
+        case of url, username, password contain spaces.
         Consult your driver's documentation for details on the
         URL to use.
         </para>

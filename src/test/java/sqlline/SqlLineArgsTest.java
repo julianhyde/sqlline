@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
@@ -671,6 +672,54 @@ public class SqlLineArgsTest {
     Pair pair = runScript(scriptFile, true, null);
     assertThat(pair.status, equalTo(SqlLine.Status.OTHER));
     assertThat(pair.output, not(containsString(" 123 ")));
+  }
+
+  /**
+   * Test the connect line
+   * !connect "jdbc:h2:mem; PASSWORD_HASH=TRUE" sa 6e6f6e456d707479506173737764
+   * */
+  @Test
+  public void testConnectWithDbProperty() throws Throwable {
+    SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream beelineOutputStream = new PrintStream(os);
+    beeLine.setOutputStream(beelineOutputStream);
+    beeLine.setErrorStream(beelineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    assertThat(status, equalTo(SqlLine.Status.OK));
+    DispatchCallback dc = new DispatchCallback();
+    beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+    //fail attempt
+    String fakeNonEmptyPassword = "nonEmptyPasswd";
+    beeLine.runCommands(
+        Collections.singletonList("!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE\" "
+            + ConnectionSpec.H2.username
+            + " \"" + fakeNonEmptyPassword + "\""), dc);
+    String output = os.toString("UTF8");
+    assertThat(output,
+        containsString("Error: Hexadecimal string contains "
+            + "non-hex character: \"" + fakeNonEmptyPassword + "\" "
+            + "[90004-191] (state=90004,code=90004)"));
+    os.reset();
+
+    //success attempt
+    beeLine.runCommands(
+        Collections.singletonList("!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE\" "
+            + ConnectionSpec.H2.username + " \""
+            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())
+            + "\""), dc);
+    beeLine.runCommands(Collections.singletonList("!tables"), dc);
+    output = os.toString("UTF8");
+    assertThat(output, containsString("| TABLE_CAT | TABLE_SCHEM | "
+        + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |"));
+    beeLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(beeLine.isExit());
   }
 
   /** Displays usage. */
