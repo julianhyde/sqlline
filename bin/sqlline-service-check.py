@@ -60,26 +60,24 @@ class Load(nagiosplugin.Resource):
 
 		# Execute sqlline
 		logging.debug("Execute sqlline")
-		try:
-			sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
-				queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		except:
-			raise
+		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
+			queryfile, "-n", self.username, "-p", self.PASSWORD], \
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Poll for status on the process to check if it's running
 		logging.debug("Checking proc status")
-		poll = sqlline_cmd_stream.poll()
-		while poll == None:
-			logging.debug("Subprocess is still active, sleeping for 1")
-			time.sleep(1)
-			poll = sqlline_cmd_stream.poll()
-
-		# Communicate stdout/stderr
-		try:
-			stdout,stderr = sqlline_cmd_stream.communicate()
-		except TimeoutExpired:
-			sqlline_cmd_stream.kill()
-			stdout,stderr = sqlline_cmd_stream.communicate()
+		try:	
+			logging.debug("Getting stdout/stderr")
+			stdout, stderr = sqlline_cmd_stream.communicate()
+			logging.debug("Retrieved stdout/stderr")
+		except:
+			logging.error('Process was killed by timeout.')
+			raise
+		finally:
+			if sqlline_cmd_stream.poll() is None:
+				logging.debug("Poll is none, ending process")
+				sqlline_cmd_stream.kill()
+				stdout, stderr = sqlline_cmd_stream.communicate()
 
 		logging.debug("Analyzing output")
 		# Parse stdout and stderr for metrics
@@ -161,6 +159,9 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)			
 
+def signal_handler(signum, frame):
+	raise Exception("Process must have timeout out...")
+
 def main():
 	""" Main function """
 
@@ -223,6 +224,7 @@ def main():
 
 	# For Tidal, set term type or execution may hange
 	# We saw this with beeline as well
+	logging.debug("===== Starting Logger =====")
 	logging.debug("Setting HADOOP_CLIENT_OPTS for Tidal")
 	os.environ["HADOOP_CLIENT_OPTS"] = "-Djline.terminal=jline.UnsupportedTerminal"
 	logging.debug("HADOOP_CLIENT_OPTS value: " + os.environ["HADOOP_CLIENT_OPTS"])
