@@ -63,6 +63,14 @@ class Load(nagiosplugin.Resource):
 		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		# Poll for status on the process to check if it's running
+		logging.debug("Checking proc status")
+		poll = sqlline_cmd_stream.poll()
+		while poll == None:
+			logging.debug("Subprocess is still active, sleeping for 1")
+			time.sleep(1)
+			poll = sqlline_cmd_stream.poll()
+
 		# Communicate stdout/stderr
 		try:
 			stdout,stderr = sqlline_cmd_stream.communicate()
@@ -129,9 +137,10 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	handler = logging.StreamHandler()
 	if debug:
 		handler.setLevel(logging.DEBUG)
+		formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	else:
 		handler.setLevel(logging.INFO)
-	formatter = logging.Formatter("%(message)s")
+		formatter = logging.Formatter("%(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
