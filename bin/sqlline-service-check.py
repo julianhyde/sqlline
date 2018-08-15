@@ -16,6 +16,10 @@ import subprocess
 import sys
 import time
 
+# For Tidal, set term type or execution may hange
+# We saw this with beeline as well
+os.environ["HADOOP_CLIENT_OPTS"] = "-Djline.terminal=jline.UnsupportedTerminal"
+
 # Notes
 # probe seems to be a special function, required
 
