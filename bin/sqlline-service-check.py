@@ -124,14 +124,14 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	logger.addHandler(handler)
 
 	# create inof file handler and set level to info
-	handler = logging.FileHandler(log_filename,"w", encoding=None, delay="true")
+	handler = logging.FileHandler(log_filename,"a", encoding=None, delay="true")
 	handler.setLevel(logging.INFO)
 	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
 	# create debug file handler and set level to debug
-	handler = logging.FileHandler(log_filename_debug,"w")
+	handler = logging.FileHandler(log_filename_debug,"a")
 	handler.setLevel(logging.DEBUG)
 	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	handler.setFormatter(formatter)
@@ -191,8 +191,8 @@ def main():
 	log_folder = args.log_folder
 	if not os.path.isdir(log_folder):
 		os.makedirs(log_folder)
-	log_filename = log_folder + args.log_name + ".log"
-	log_filename_debug = log_folder + args.log_name + "-debug.log"
+	log_filename = log_folder + args.log_name + "-" + args.hostname + ".log"
+	log_filename_debug = log_folder + args.log_name + "-" + args.hostname + "-debug.log"
 	initialize_logger(debug, log_filename, log_filename_debug)
 
 	# Authentication
