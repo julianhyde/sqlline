@@ -62,8 +62,15 @@ class Load(nagiosplugin.Resource):
 		sqlline_cmd_stream = subprocess.Popen(["/usr/local/bin/sqlline", "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		# Poll for status to ensure things are running
+		logging.debug("Checking for process status")
+		while sqlline_cmd_stream.poll() is None:
+			logging.debug("Process not yet complete, sleeping for 2 seconds")
+			time.sleep(2)
+			logging.debug("Polling for status")
+			continue
+
 		# Poll for status on the process to check if it's running
-		logging.debug("Checking proc status")
 		try:	
 			logging.debug("Getting stdout/stderr")
 			stdout, stderr = sqlline_cmd_stream.communicate()
