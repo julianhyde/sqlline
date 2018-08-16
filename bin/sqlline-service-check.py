@@ -101,10 +101,10 @@ class Load(nagiosplugin.Resource):
 				# Check for some common traps for better stderr handling
 				# Authentication:
 				if "javax.naming.AuthenticationException" in line:
-					logging.error(str(line))
+					logging.error(str(re.sub('.*FAILED', '', line)))
 					sys.exit(2)
 				if "com.simba.hiveserver2.support.exceptions.GeneralException" in line:
-					logging.error(str(line))
+					logging.error(str(re.sub('.*FAILED', '', line)))
 					sys.exit(2)
 				norows_match = re.search('.*No rows affected.*',line)
 				rowselect_match = re.search('.*rows selected.*',line)
