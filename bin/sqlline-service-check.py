@@ -58,16 +58,33 @@ class Load(nagiosplugin.Resource):
 			sys.exit("Invalid execution type specified")	
 
 		# Execute sqlline
+		logging.debug("Execute sqlline")
 		sqlline_cmd_stream = subprocess.Popen(["/usr/local/bin/sqlline", "-u", jdbc, "-f", \
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		# Poll for status on the process to check if it's running
+		logging.debug("Checking proc status")
+		try:	
+			logging.debug("Getting stdout/stderr")
+			stdout, stderr = sqlline_cmd_stream.communicate()
+			logging.debug("Retrieved stdout/stderr")
+		except:
+			logging.error('Process was killed by timeout.')
+			raise
+		finally:
+			if sqlline_cmd_stream.poll() is None:
+				logging.debug("Poll is none, ending process")
+				sqlline_cmd_stream.kill()
+				stdout, stderr = sqlline_cmd_stream.communicate()
+
+		logging.debug("Analyzing output")
 		# Parse stdout and stderr for metrics
 		# Right now, stats are trapper in stderr
 		perfstat = 0
-		if sqlline_cmd_stream.stdout:
+		if stdout:
+			logging.debug("...checking stdout")
 			# Iterate for debugging
-			for line in sqlline_cmd_stream.stdout:
-				line = line.strip()
+			for line in stdout.split('\n'):
 				logging.debug(line)
 				norows_match = re.search('.*No rows affected.*',line)
 				rowselect_match = re.search('.*rows selected.*',line)
@@ -76,10 +93,18 @@ class Load(nagiosplugin.Resource):
 				elif rowselect_match:
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
-		if sqlline_cmd_stream.stderr:
-			for line in sqlline_cmd_stream.stderr:
-				line = line.strip()
+		if stderr:
+			logging.debug("...checking stderr")
+			for line in stderr.split('\n'):
 				logging.debug(line)
+				# Check for some common traps for better stderr handling
+				# Authentication:
+				if "javax.naming.AuthenticationException" in line:
+					logging.error(str(line))
+					sys.exit(2)
+				if "com.simba.hiveserver2.support.exceptions.GeneralException" in line:
+					logging.error(str(line))
+					sys.exit(2)
 				norows_match = re.search('.*No rows affected.*',line)
 				rowselect_match = re.search('.*rows selected.*',line)
 				if norows_match:
@@ -88,6 +113,7 @@ class Load(nagiosplugin.Resource):
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
 		logging.debug("Total runtime: " + str(perfstat))
+		logging.debug("Query execution complete.")
 
 		# Check if perfstat was not updated at all
 		if perfstat == 0:
@@ -104,6 +130,7 @@ class Load(nagiosplugin.Resource):
 				perfstat = self.execute_sqlline("query")
 
 			# Check the time metric with defaults for min/max set
+			logging.debug("Returning metrics to nagiosplugin")
 			return nagiosplugin.Metric('query_time', perfstat, min=0,
 				 max=60, context='query_time')
 		except:
@@ -117,9 +144,10 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	handler = logging.StreamHandler()
 	if debug:
 		handler.setLevel(logging.DEBUG)
+		formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	else:
-		handler.setLevel(logging.WARNING)
-	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+		handler.setLevel(logging.INFO)
+		formatter = logging.Formatter("%(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
@@ -191,9 +219,10 @@ def main():
 	log_folder = args.log_folder
 	if not os.path.isdir(log_folder):
 		os.makedirs(log_folder)
-	log_filename = log_folder + args.log_name + ".log"
-	log_filename_debug = log_folder + args.log_name + "-debug.log"
+	log_filename = log_folder + args.log_name + "-" + args.hostname + ".log"
+	log_filename_debug = log_folder + args.log_name + "-" + args.hostname + "-debug.log"
 	initialize_logger(debug, log_filename, log_filename_debug)
+	logging.debug("===== Starting Logger =====")
 
 	# Authentication
 	# Setup creds for non-kerberos (if required)
@@ -242,10 +271,11 @@ def main():
 	except:
 		raise
 		sys.exit("Failed to run metrics check")
+
 	# Run check
+	logging.debug("Running check")
 	try:
 		check.main(verbose=args.verbose)
-		print "OK"
 	except:
 		raise
 
