@@ -670,11 +670,11 @@ connect — Connect to a database
 
 Synopsis
 
-!connect {url} {username} {password} [driver class]
+!connect [ -p property value ]* {url} [username password] [driver class]
 
 Description
 
-Connect to a database.
+Connect to a database. Quotes could be used in case of having spaces
 
 Example of "connect" command
 

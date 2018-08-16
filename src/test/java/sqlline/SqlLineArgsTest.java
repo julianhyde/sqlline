@@ -676,6 +676,39 @@ public class SqlLineArgsTest {
 
   /**
    * Test the connect line
+   * !connect -p PASSWORD_HASH TRUE jdbc:h2:mem sa 6e6f6e456d707479506173737764
+   * */
+  @Test
+  public void testConnectWithDbPropertyAsParameter() throws Throwable {
+    SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream beelineOutputStream = new PrintStream(os);
+    beeLine.setOutputStream(beelineOutputStream);
+    beeLine.setErrorStream(beelineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    assertThat(status, equalTo(SqlLine.Status.OK));
+    DispatchCallback dc = new DispatchCallback();
+    beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+    String fakeNonEmptyPassword = "nonEmptyPasswd";
+    beeLine.runCommands(
+        Collections.singletonList("!connect "
+            + " -p PASSWORD_HASH TRUE "
+            + ConnectionSpec.H2.url + " "
+            + ConnectionSpec.H2.username + " "
+            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())),
+        dc);
+    beeLine.runCommands(Collections.singletonList("!tables"), dc);
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("| TABLE_CAT | TABLE_SCHEM | "
+        + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |"));
+    beeLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(beeLine.isExit());
+  }
+
+  /**
+   * Test the connect line
    * !connect "jdbc:h2:mem; PASSWORD_HASH=TRUE" sa 6e6f6e456d707479506173737764
    * */
   @Test
