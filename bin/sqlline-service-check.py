@@ -64,14 +64,6 @@ class Load(nagiosplugin.Resource):
 			queryfile, "-n", self.username, "-p", self.PASSWORD], \
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-		# Poll for status to ensure things are running
-		logging.debug("Checking for process status")
-		while sqlline_cmd_stream.poll() is None:
-			logging.debug("Process not yet complete, sleeping for 2 seconds")
-			time.sleep(2)
-			logging.debug("Polling for status")
-			continue
-
 		# Poll for status on the process to check if it's running
 		try:	
 			logging.debug("Getting stdout/stderr")
