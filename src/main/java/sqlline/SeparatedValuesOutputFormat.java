@@ -14,15 +14,14 @@ package sqlline;
 /**
  * OutputFormat for values separated by a delimiter.
  */
-class SeparatedValuesOutputFormat implements OutputFormat {
+class SeparatedValuesOutputFormat extends AbstractOutputFormat {
   private static final char DEFAULT_QUOTE_CHARACTER = '"';
-  private final SqlLine sqlLine;
   final String separator;
   final char quoteCharacter;
 
   public SeparatedValuesOutputFormat(SqlLine sqlLine,
       String separator, char quoteCharacter) {
-    this.sqlLine = sqlLine;
+    super(sqlLine);
     this.separator = separator;
     this.quoteCharacter = quoteCharacter;
   }
@@ -31,17 +30,22 @@ class SeparatedValuesOutputFormat implements OutputFormat {
     this(sqlLine, separator, DEFAULT_QUOTE_CHARACTER);
   }
 
-  public int print(Rows rows) {
-    int count = 0;
-    while (rows.hasNext()) {
-      printRow(rows, rows.next());
-      count++;
-    }
-
-    return count - 1; // sans header row
+  @Override
+  void printHeader(Rows.Row header) {
+    printRow(header);
   }
 
-  public void printRow(Rows rows, Rows.Row row) {
+  @Override
+  void printFooter(Rows.Row header) {
+
+  }
+
+  @Override
+  void printRow(Rows rows, Rows.Row header, Rows.Row row) {
+    printRow(row);
+  }
+
+  private void printRow(Rows.Row row) {
     String[] vals = row.values;
     StringBuilder buf = new StringBuilder();
     for (String val : vals) {

@@ -50,10 +50,10 @@ class TableOutputFormat implements OutputFormat {
                 headerCols.getVisibleLength());
       }
 
-      if ((index == 0)
+      if (((index == 0)
           || (sqlLine.getOpts().getHeaderInterval() > 0
-          && (index % sqlLine.getOpts().getHeaderInterval() == 0)
-          && sqlLine.getOpts().getShowHeader())) {
+          && (index % sqlLine.getOpts().getHeaderInterval() == 0)))
+          && sqlLine.getOpts().getShowHeader()) {
         printRow(header, true);
         printRow(headerCols, false);
         printRow(header, true);
