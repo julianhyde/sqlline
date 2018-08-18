@@ -882,6 +882,30 @@ public class SqlLineArgsTest {
             containsString(line1)));
   }
 
+  /**
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/107">[SQLLINE-107],
+   * Script fails if the wrong driver is specified with -d option
+   * and there is a valid registered driver for the specified url</a>.
+   */
+  @Test
+  public void testTablesH2WithErrorDriver() throws Throwable {
+    connectionSpec = ConnectionSpec.ERROR_H2_DRIVER;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!tables\n";
+    final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
+    final String line1 =
+        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        CoreMatchers.allOf(containsString("The specified driver "
+            + connectionSpec.driver
+            + " not found. The registered driver org.h2.Driver will be used instead"),
+            not(containsString("NullPointerException")),
+            containsString(line0),
+            containsString(line1)));
+  }
+
   @Test
   public void testEmptyMetadata() throws Throwable {
     final String script = "!metadata\n";
@@ -939,6 +963,9 @@ public class SqlLineArgsTest {
 
     public static final ConnectionSpec H2 =
         new ConnectionSpec("jdbc:h2:mem:", "sa", "", "org.h2.Driver");
+
+    public static final ConnectionSpec ERROR_H2_DRIVER =
+        new ConnectionSpec("jdbc:h2:mem:", "sa", "", "ERROR_DRIVER");
 
     public static final ConnectionSpec HSQLDB =
         new ConnectionSpec(

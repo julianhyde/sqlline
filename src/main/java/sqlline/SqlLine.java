@@ -1590,31 +1590,32 @@ public class SqlLine {
     }
   }
 
-  boolean scanForDriver(String url) {
+  String scanForDriver(String url) {
     try {
       // already registered
-      if (findRegisteredDriver(url) != null) {
-        return true;
+      Driver driver;
+      if ((driver = findRegisteredDriver(url)) != null) {
+        return driver.getClass().getCanonicalName();
       }
 
       // first try known drivers...
       scanDrivers(true);
 
-      if (findRegisteredDriver(url) != null) {
-        return true;
+      if ((driver = findRegisteredDriver(url)) != null) {
+        return driver.getClass().getCanonicalName();
       }
 
       // now really scan...
       scanDrivers(false);
 
-      if (findRegisteredDriver(url) != null) {
-        return true;
+      if ((driver = findRegisteredDriver(url)) != null) {
+        return driver.getClass().getCanonicalName();
       }
 
-      return false;
+      return null;
     } catch (Exception e) {
       debug(e.toString());
-      return false;
+      return null;
     }
   }
 

@@ -1084,10 +1084,24 @@ public class Commands {
       return;
     }
     if (driver == null || driver.length() == 0) {
-      if (!sqlLine.scanForDriver(url)) {
+      if (sqlLine.scanForDriver(url) == null) {
         callback.setToFailure();
         sqlLine.error(sqlLine.loc("no-driver", url));
         return;
+      }
+    } else {
+      try {
+        Class.forName(driver);
+      } catch (ClassNotFoundException cnfe) {
+        String specifiedDriver = driver;
+        if ((driver = sqlLine.scanForDriver(url)) == null) {
+          callback.setToFailure();
+          sqlLine.error(sqlLine.loc("no-specified-driver", specifiedDriver));
+          return;
+        }
+        sqlLine.info(
+            sqlLine.loc(
+                "no-specified-driver-use-existing", specifiedDriver, driver));
       }
     }
 
