@@ -263,6 +263,17 @@ public class SqlLineArgsTest {
                             + "+-------------+-------------+-----+\n"));
   }
 
+  @Test
+  public void testScan() throws Throwable {
+    checkScriptFile(
+        "!scan\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        containsString(
+            "Compliant Version Driver Class\n"
+            + "yes       2.3     org.hsqldb.jdbcDriver"));
+  }
+
   /**
    * Table output without header.
    */
