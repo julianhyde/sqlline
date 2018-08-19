@@ -153,14 +153,14 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	logger.addHandler(handler)
 
 	# create inof file handler and set level to info
-	handler = logging.FileHandler(log_filename,"a", encoding=None, delay="true")
+	handler = logging.FileHandler(log_filename,"w", encoding=None, delay="true")
 	handler.setLevel(logging.INFO)
 	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
 	# create debug file handler and set level to debug
-	handler = logging.FileHandler(log_filename_debug,"a")
+	handler = logging.FileHandler(log_filename_debug,"w")
 	handler.setLevel(logging.DEBUG)
 	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	handler.setFormatter(formatter)
