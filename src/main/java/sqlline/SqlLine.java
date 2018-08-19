@@ -827,7 +827,9 @@ public class SqlLine {
       return false;
     }
 
-    if (line.startsWith(COMMAND_PREFIX)) {
+    if (line.startsWith(COMMAND_PREFIX)
+        && !line.regionMatches(1, "sql", 0, "sql".length())
+        && !line.regionMatches(1, "all", 0, "all".length())) {
       return false;
     }
 

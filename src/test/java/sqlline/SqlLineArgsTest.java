@@ -970,6 +970,42 @@ public class SqlLineArgsTest {
         allOf(containsString(line), not(containsString("Exception"))));
   }
 
+  @Test
+  public void testSqlMultiline() throws Throwable {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!sql \n"
+        + "values \n"
+        + "(1, 2) \n"
+        + ";\n";
+    final String line1 = "+-------------+-------------+\n"
+        + "|     C1      |     C2      |\n"
+        + "+-------------+-------------+\n"
+        + "| 1           | 2           |\n"
+        + "+-------------+-------------+";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1)
+    );
+  }
+
+  @Test
+  public void testAllMultiline() throws Throwable {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!all \n"
+        + "values \n"
+        + "(1, '2') \n"
+        + ";\n";
+    final String line1 = "+-------------+----+\n"
+        + "|     C1      | C2 |\n"
+        + "+-------------+----+\n"
+        + "| 1           | 2  |\n"
+        + "+-------------+----+";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1)
+    );
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {
