@@ -113,23 +113,64 @@ public class SqlLineTest extends TestCase {
     }
   }
 
-  public void testDequote() {
+  public void testSplit() {
     SqlLine line = new SqlLine();
-    assertEquals("'", line.dequote("\"'\""));
-    assertEquals("\"", line.dequote("'\"'"));
-    assertEquals("!", line.dequote("'!'"));
-    assertEquals("", line.dequote("''"));
-    assertEquals("", line.dequote("\"\""));
-    assertEquals("a", line.dequote("\"a\""));
-    assertEquals("a", line.dequote("'a'"));
+    String[] strings;
+
+    // query check
+    strings = line.split("values (1, cast(null as integer), "
+        + "cast(null as varchar(3));", " ");
+    assertEquals(new String[] {"values", "(1,", "cast(null", "as", "integer),",
+      "cast(null", "as", "varchar(3));"}, strings);
+    // space
+    strings = line.split("set csvdelimiter ' '", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", " "}, strings);
+    // space with double quotes
+    strings = line.split("set csvdelimiter \" \"", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", " "}, strings);
+    // table and space
+    strings = line.split("set csvdelimiter '\t. '", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", "\t. "}, strings);
+    // \n
+    strings = line.split("set csvdelimiter ' ,\n; '", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", " ,\n; "}, strings);
+    // double quote inside singles
+    strings = line.split("set csvdelimiter ' \"\" \" '", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", " \"\" \" "}, strings);
+    // single quotes inside doubles
+    strings = line.split("set csvdelimiter \" ' '' \"", " ");
+    assertEquals(new String[]{"set", "csvdelimiter", " ' '' "}, strings);
+    // timestamp string
+    strings = line.split("set timestampformat 01/01/1970T12:32:12", " ");
+    assertEquals(
+        new String[]{"set", "timestampformat", "01/01/1970T12:32:12"}, strings);
+
     try {
-      line.dequote("'");
+      line.split("set csvdelimiter '", " ");
       fail("Non-paired quote is not allowed");
     } catch (IllegalArgumentException e) {
       //ok
     }
     try {
-      line.dequote("\"");
+      line.split("set csvdelimiter \"", " ");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.split("set csvdelimiter \"'", " ");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.split("set csvdelimiter \"a", " ");
+      fail("Non-paired quote is not allowed");
+    } catch (IllegalArgumentException e) {
+      //ok
+    }
+    try {
+      line.split("set csvdelimiter q'", " ");
       fail("Non-paired quote is not allowed");
     } catch (IllegalArgumentException e) {
       //ok
@@ -163,6 +204,19 @@ public class SqlLineTest extends TestCase {
       for (int j = 0; j < expecteds.length; ++j) {
         String expected = expecteds[j];
         String actual = actuals[j];
+        assertEquals(expected, actual);
+      }
+    }
+  }
+
+  void assertEquals(String[] expectedses, String[] actualses) {
+    assertEquals(expectedses.length, actualses.length);
+    for (int j = 0; j < expectedses.length; ++j) {
+      String expected = expectedses[j];
+      String actual = actualses[j];
+      if (expected == null) {
+        assertNull(actual);
+      } else {
         assertEquals(expected, actual);
       }
     }

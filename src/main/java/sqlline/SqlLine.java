@@ -1349,7 +1349,8 @@ public class SqlLine {
             || str.charAt(str.length() - 1) == '"'
             || str.charAt(str.length() - 1) == '\'')
             && str.charAt(0) != str.charAt(str.length() - 1))) {
-      throw new IllegalArgumentException("A quote should be closed");
+      throw new IllegalArgumentException(
+          "A quote should be closed for <" + str + ">");
     }
     char prevQuote = 0;
     int index = 0;
@@ -1379,17 +1380,59 @@ public class SqlLine {
     return split(line, delim, 0);
   }
 
-  String[] split(String line, String delim, int limit) {
-    StringTokenizer tok = new StringTokenizer(line, delim);
-    final int count = tok.countTokens();
-    String[] ret = new String[limit > 0 && count > limit ? limit : count];
-    int index = 0;
-    while (tok.hasMoreTokens() && index < ret.length) {
-      String t = tok.nextToken();
+  public String[] split(String line, String delim, int limit) {
+    if (delim.indexOf('\'') != -1 || delim.indexOf('"') != -1) {
+      // quotes in delim are not supported yet
+      throw new UnsupportedOperationException();
+    }
+    boolean inQuotes = false;
+    int tokenStart = 0;
+    int lastProcessedIndex = 0;
 
-      t = dequote(t);
+    List<String> tokens = new ArrayList<String>();
+    for (int i = 0; i < line.length(); i++) {
+      if (limit > 0 && tokens.size() == limit) {
+        break;
+      }
+      if (line.charAt(i) == '\'' || line.charAt(i) == '"') {
+        if (inQuotes) {
+          if (line.charAt(tokenStart) == line.charAt(i)) {
+            inQuotes = false;
+            tokens.add(line.substring(tokenStart, i + 1));
+            lastProcessedIndex = i;
+          }
+        } else {
+          tokenStart = i;
+          inQuotes = true;
+        }
+      } else if (line.regionMatches(i, delim, 0, delim.length())) {
+        if (inQuotes) {
+          i += delim.length() - 1;
+          continue;
+        } else if (i > 0 && (
+            !line.regionMatches(i - delim.length(), delim, 0, delim.length())
+            && line.charAt(i - 1) != '\''
+            && line.charAt(i - 1) != '"')) {
+          tokens.add(line.substring(tokenStart, i));
+          lastProcessedIndex = i;
+          i += delim.length() - 1;
 
-      ret[index++] = t;
+        }
+      } else if (i > 0
+          && line.regionMatches(i - delim.length(), delim, 0, delim.length())) {
+        if (inQuotes) {
+          continue;
+        }
+        tokenStart = i;
+      }
+    }
+    if (lastProcessedIndex != line.length() - 1
+        && (limit == 0 || limit > tokens.size())) {
+      tokens.add(line.substring(tokenStart, line.length()));
+    }
+    String[] ret = new String[tokens.size()];
+    for (int i = 0; i < tokens.size(); i++) {
+      ret[i] = dequote(tokens.get(i));
     }
 
     return ret;
@@ -1692,8 +1735,10 @@ public class SqlLine {
     if ("csv".equals(format)) {
       final SeparatedValuesOutputFormat csvOutput
         = (SeparatedValuesOutputFormat) f;
-      if (!csvOutput.separator.equals(opts.getCsvDelimiter())
-          || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter()) {
+      if ((csvOutput.separator == null && opts.getCsvDelimiter() != null)
+          || (csvOutput.separator != null
+              && !csvOutput.separator.equals(opts.getCsvDelimiter())
+              || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter())) {
         f = new SeparatedValuesOutputFormat(this,
             opts.getCsvDelimiter(), opts.getCsvQuoteCharacter());
         formats.put("csv", f);
