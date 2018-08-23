@@ -775,6 +775,71 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testCommandHandlerOnStartup() throws IOException {
+    SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    sqlLine.begin(
+        new String[]{"-ch", "sqlline.commandhandler.HelloWorldCommandHandler"},
+            is, false);
+
+    sqlLine.runCommands(Collections.singletonList("!hello"),
+        new DispatchCallback());
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("HELLO WORLD"));
+    os.reset();
+    sqlLine.runCommands(Collections.singletonList("!test"),
+        new DispatchCallback());
+    output = os.toString("UTF8");
+    assertThat(output, containsString("HELLO WORLD"));
+    os.reset();
+    sqlLine.runCommands(Collections.singletonList("!help hello"),
+        new DispatchCallback());
+    output = os.toString("UTF8");
+    assertThat(output, containsString("help for hello test"));
+    sqlLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(sqlLine.isExit());
+  }
+
+  @Test
+  public void testCommandHandler() throws IOException {
+    SqlLine sqlLine = new SqlLine();
+
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream sqllineOutputStream = new PrintStream(os);
+    sqlLine.setOutputStream(sqllineOutputStream);
+    sqlLine.setErrorStream(sqllineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = sqlLine.begin(new String[]{}, is, false);
+
+    final String script = "!commandhandler"
+        + " sqlline.commandhandler.HelloWorld2CommandHandler"
+        + " sqlline.commandhandler.HelloWorldCommandHandler";
+    sqlLine.runCommands(Collections.singletonList(script),
+        new DispatchCallback());
+    sqlLine.runCommands(Collections.singletonList("!hello"),
+        new DispatchCallback());
+    String output = os.toString("UTF8");
+    assertThat(output, containsString("HELLO WORLD2"));
+    final String expected = "Could not add command handler "
+        + "sqlline.commandhandler.HelloWorldCommandHandler as one of commands "
+        + "[hello, test] is already present";
+    assertThat(output, containsString(expected));
+    os.reset();
+    sqlLine.runCommands(Collections.singletonList("!help hello"),
+        new DispatchCallback());
+    output = os.toString("UTF8");
+    assertThat(output, containsString("help for hello2"));
+    sqlLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(sqlLine.isExit());
+  }
+
+  @Test
   public void testTablesCsv() throws Throwable {
     final String script = "!set outputformat csv\n"
         + "!tables\n";

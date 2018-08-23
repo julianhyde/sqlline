@@ -1429,6 +1429,48 @@ public class Commands {
     }
   }
 
+  public void commandhandler(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    if (cmd.length < 2) {
+      sqlLine.error("Usage: commandhandler "
+          + "<commandHandler class name> [<commandHandler class name>]*");
+      callback.setToFailure();
+      return;
+    }
+    Class commandHandlerClass;
+    for (int i = 1; i < cmd.length; i++) {
+      try {
+        commandHandlerClass = Class.forName(cmd[i]);
+        CommandHandler commandHandler =
+            (CommandHandler) commandHandlerClass.getConstructor(SqlLine.class)
+                .newInstance(sqlLine);
+        Set<String> existingNames = new HashSet<String>();
+        for (CommandHandler existingCommandHandler : sqlLine.commandHandlers) {
+          existingNames.addAll(existingCommandHandler.getNames());
+        }
+        boolean isAlreadyPresent = false;
+        for (String newName : commandHandler.getNames()) {
+          if (isAlreadyPresent) {
+            break;
+          }
+          isAlreadyPresent = existingNames.contains(newName);
+        }
+        if (isAlreadyPresent) {
+          sqlLine.error("Could not add command handler " + cmd[i] + " as one "
+              + "of commands " + commandHandler.getNames() + " is already present");
+        } else {
+          sqlLine.commandHandlers.add(commandHandler);
+        }
+      } catch (Exception e) {
+        sqlLine.error(e);
+        callback.setToFailure();
+      }
+    }
+    if (!callback.isFailure()) {
+      callback.setToSuccess();
+    }
+  }
+
   /**
    * Stop writing output to the record file.
    */
