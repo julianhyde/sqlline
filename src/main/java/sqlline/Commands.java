@@ -651,6 +651,42 @@ public class Commands {
     set("set " + line, callback);
   }
 
+  public void hide(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    if (cmd.length < 2) {
+      sqlLine.error("Usage: hide command [command]*");
+      callback.setToFailure();
+      return;
+    }
+
+    Set<String> commands2Hide = new HashSet<String>(
+        Arrays.asList(Arrays.copyOfRange(cmd, 1, cmd.length)));
+    Iterator<CommandHandler> commandHandlerIterator =
+        sqlLine.commandHandlers.iterator();
+    while (commandHandlerIterator.hasNext() && !commands2Hide.isEmpty()) {
+      CommandHandler ch = commandHandlerIterator.next();
+      for (String name: ch.getNames()) {
+        if (commands2Hide.contains(name)) {
+          if (ch.isAllowedToHide()) {
+            commandHandlerIterator.remove();
+          } else {
+            sqlLine.error("Not allowed to hide " + name);
+          }
+          commands2Hide.remove(name);
+          break;
+        }
+      }
+    }
+    // reinit completer
+    sqlLine.initCommandCompleter();
+    if (commands2Hide.isEmpty()) {
+      callback.setToSuccess();
+    } else {
+      sqlLine.error("There is no command(s) " + commands2Hide);
+      callback.setToFailure();
+    }
+  }
+
   public void brief(String line, DispatchCallback callback) {
     sqlLine.info("verbose: off");
     set("set verbose false", callback);
@@ -1387,6 +1423,48 @@ public class Commands {
       startRecording(line, callback);
     } else {
       stopRecording(line, callback);
+    }
+  }
+
+  public void commandhandler(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    if (cmd.length < 2) {
+      sqlLine.error("Usage: commandhandler "
+          + "<commandHandler class name> [<commandHandler class name>]*");
+      callback.setToFailure();
+      return;
+    }
+    Class commandHandlerClass;
+    for (int i = 1; i < cmd.length; i++) {
+      try {
+        commandHandlerClass = Class.forName(cmd[i]);
+        CommandHandler commandHandler =
+            (CommandHandler) commandHandlerClass.getConstructor(SqlLine.class)
+                .newInstance(sqlLine);
+        Set<String> existingNames = new HashSet<String>();
+        for (CommandHandler existingCommandHandler : sqlLine.commandHandlers) {
+          existingNames.addAll(existingCommandHandler.getNames());
+        }
+        boolean isAlreadyPresent = false;
+        for (String newName : commandHandler.getNames()) {
+          if (isAlreadyPresent) {
+            break;
+          }
+          isAlreadyPresent = existingNames.contains(newName);
+        }
+        if (isAlreadyPresent) {
+          sqlLine.error("Could not add command handler " + cmd[i] + " as one "
+              + "of commands " + commandHandler.getNames() + " is already present");
+        } else {
+          sqlLine.commandHandlers.add(commandHandler);
+        }
+      } catch (Exception e) {
+        sqlLine.error(e);
+        callback.setToFailure();
+      }
+    }
+    if (!callback.isFailure()) {
+      callback.setToSuccess();
     }
   }
 

@@ -22,8 +22,20 @@ import jline.console.completer.Completer;
  */
 public class ReflectiveCommandHandler extends AbstractCommandHandler {
   public ReflectiveCommandHandler(SqlLine sqlLine, List<Completer> completers,
+      boolean allowedToHide, String... cmds) {
+    super(sqlLine, cmds,
+        sqlLine.loc("help-" + cmds[0]), completers, allowedToHide);
+  }
+
+  public ReflectiveCommandHandler(SqlLine sqlLine, List<Completer> completers,
       String... cmds) {
     super(sqlLine, cmds, sqlLine.loc("help-" + cmds[0]), completers);
+  }
+
+  public ReflectiveCommandHandler(SqlLine sqlLine, Completer completer,
+      boolean allowedToHide, String... cmds) {
+    this(sqlLine,
+        Collections.<Completer>singletonList(completer), allowedToHide, cmds);
   }
 
   public ReflectiveCommandHandler(SqlLine sqlLine, Completer completer,

@@ -28,13 +28,20 @@ public abstract class AbstractCommandHandler implements CommandHandler {
   private final List<String> names;
   private final String helpText;
   private final List<Completer> parameterCompleters;
+  private final boolean allowedToHide;
 
   public AbstractCommandHandler(SqlLine sqlLine, String[] names,
       String helpText, List<Completer> completers) {
+    this(sqlLine, names, helpText, completers, true);
+  }
+
+  public AbstractCommandHandler(SqlLine sqlLine, String[] names,
+      String helpText, List<Completer> completers, boolean allowedToHide) {
     this.sqlLine = sqlLine;
     name = names[0];
     this.names = Arrays.asList(names);
     this.helpText = helpText;
+    this.allowedToHide = allowedToHide;
     if (completers == null || completers.size() == 0) {
       this.parameterCompleters =
           Collections.singletonList((Completer) new NullCompleter());
@@ -78,6 +85,10 @@ public abstract class AbstractCommandHandler implements CommandHandler {
 
   public List<Completer> getParameterCompleters() {
     return parameterCompleters;
+  }
+
+  public boolean isAllowedToHide() {
+    return allowedToHide;
   }
 }
 

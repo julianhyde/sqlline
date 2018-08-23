@@ -579,6 +579,48 @@ sqlline>
       </refentry>
       </section>
 
+      <section id="sect_command_command_handler">
+      <title>commandhandler</title>
+      <refentry id="command_command_handler">
+        <refmeta>
+        <refentrytitle>commandhandler</refentrytitle>
+        <manvolnum>1</manvolnum>
+        </refmeta>
+
+
+        <refnamediv>
+          <refname>commandhandler</refname>
+          <refpurpose>
+          Adds command handlers with commands
+          </refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+          <cmdsynopsis>
+          <command>!commandhandler</command>
+          <arg choice="req"><replaceable>command handler</replaceable></arg>
+          </cmdsynopsis>
+        </refsynopsisdiv>
+        <refsect1>
+          <title>Description</title>
+          <para>
+          Adds command handlers with commands.
+          </para>
+        </refsect1>
+        <refsect1>
+        <title>Example of "commandhandler" command</title>
+        <screen>
+sqlline> !hello
+Unknown command: hello
+sqlline> !commandhandler sqlline.commandhandler.HelloWorldCommandHandler
+sqlline> !hello
+HELLO WORLD
+sqlline>
+        </screen>
+        </refsect1>
+      </refentry>
+      </section>
+
       <section id="sect_command_commit">
       <title>commit</title>
       <refentry id="command_commit">
@@ -1151,6 +1193,47 @@ sqlline>
 
           </screen>
           </refsect1>
+      </refentry>
+      </section>
+
+      <section id="sect_command_hide">
+      <title>hide</title>
+      <refentry id="command_hide">
+        <refmeta>
+        <refentrytitle>hide</refentrytitle>
+        <manvolnum>1</manvolnum>
+        </refmeta>
+
+
+        <refnamediv>
+          <refname>hide</refname>
+          <refpurpose>
+          Hides commands which are allowed to be hidden
+          </refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+          <cmdsynopsis>
+            <command>!hide</command>
+          </cmdsynopsis>
+        </refsynopsisdiv>
+
+        <refsect1>
+          <title>Description</title>
+          <para>
+          Hides commands which are allowed to be hidden.
+          </para>
+        </refsect1>
+        <refsect1>
+          <title>Example of "hide" command</title>
+          <screen>
+sqlline> !hide scan
+sqlline> !scan
+Unknown command: scan
+sqlline> !hide quit
+Not allowed to hide quit
+          </screen>
+        </refsect1>
       </refentry>
       </section>
 
