@@ -129,6 +129,7 @@ class DatabaseConnection {
     if (!foundDriver) {
       sqlLine.output(sqlLine.loc("autoloading-known-drivers", url));
       sqlLine.registerKnownDrivers();
+      theDriver = DriverManager.getDriver(url);
     }
 
     try {

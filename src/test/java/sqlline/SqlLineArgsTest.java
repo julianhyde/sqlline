@@ -952,6 +952,16 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testH2TablesWithErrorUrl() throws Throwable {
+    connectionSpec = ConnectionSpec.ERROR_H2_URL;
+    final String script = "!tables\n";
+
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        CoreMatchers.allOf(containsString("No suitable driver"),
+            not(containsString("NullPointerException"))));
+  }
+
+  @Test
   public void testEmptyMetadata() throws Throwable {
     final String script = "!metadata\n";
     final String line = "Usage: metadata <methodname> <params...>";
@@ -1007,6 +1017,9 @@ public class SqlLineArgsTest {
 
     public static final ConnectionSpec ERROR_H2_DRIVER =
         new ConnectionSpec("jdbc:h2:mem:", "sa", "", "ERROR_DRIVER");
+
+    public static final ConnectionSpec ERROR_H2_URL =
+        new ConnectionSpec("ERROR_URL", "sa", "", "org.h2.Driver");
 
     public static final ConnectionSpec HSQLDB =
         new ConnectionSpec(
