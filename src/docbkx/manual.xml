@@ -1151,6 +1151,7 @@ Really drop every table in the database? (y/n) y
 sqlline> !help
 
 !all              Execute the specified SQL against all the current connections
+!appconfig        Sets application configuration class name
 !autocommit       Set autocommit mode on or off
 !batch            Start or execute a batch of statements
 !brief            Set verbose mode off
@@ -2653,6 +2654,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 
     <chapter id="settings">
       <title>Parameter Reference</title>
+      <sect1 id="setting_appconfig">
+        <title>appconfig</title>
+        <para>
+          Sets application configuration class name in order to customize
+          output formats, commands, application information message.
+        </para>
+      </sect1>
       <sect1 id="setting_autocommit">
         <title>autocommit</title>
         <para>
@@ -2787,7 +2795,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           current width, falls back to 80.
         </para>
       </sect1>
-      <sect1 id="setting_numberformat">
+      <sect1 id="setting_nullvalue">
         <title>nullvalue</title>
         <para>
           The value which will be used instead of null values. Setting
