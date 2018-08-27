@@ -24,8 +24,6 @@ import jline.*;
 import jline.console.ConsoleReader;
 import jline.console.UserInterruptException;
 import jline.console.completer.Completer;
-import jline.console.completer.FileNameCompleter;
-import jline.console.completer.StringsCompleter;
 import jline.console.history.FileHistory;
 
 /**
@@ -51,7 +49,6 @@ public class SqlLine {
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
-  private final SqlLineOpts opts = new SqlLineOpts(this);
   private String lastProgress = null;
   private final Map<SQLWarning, Date> seenWarnings =
       new HashMap<SQLWarning, Date>();
@@ -63,6 +60,8 @@ public class SqlLine {
   private ConsoleReader consoleReader;
   private List<String> batch = null;
   private final Reflector reflector;
+  private Application application;
+  private Config appConfig;
 
   // saveDir() is used in various opts that assume it's set. But that means
   // properties starting with "sqlline" are read into props in unspecific
@@ -70,86 +69,10 @@ public class SqlLine {
   // confusion/NullPointer due about order of config by prefixing it.
   public static final String SQLLINE_BASE_DIR = "x.sqlline.basedir";
 
-  static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
-
   private static boolean initComplete = false;
 
   private SqlLineSignalHandler signalHandler = null;
   private final Completer sqlLineCommandCompleter;
-
-  private final Map<String, OutputFormat> formats = map(
-      "vertical", (OutputFormat) new VerticalOutputFormat(this),
-      "table", new TableOutputFormat(this),
-      "csv", new SeparatedValuesOutputFormat(this, ","),
-      "tsv", new SeparatedValuesOutputFormat(this, "\t"),
-      "xmlattr", new XmlAttributeOutputFormat(this),
-      "xmlelements", new XmlElementOutputFormat(this),
-      "json", new JsonOutputFormat(this));
-
-  final List<CommandHandler> commandHandlers = new ArrayList<CommandHandler>();
-
-  static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
-      Arrays.asList(
-          "centura.java.sqlbase.SqlbaseDriver",
-          "com.amazonaws.athena.jdbc.AthenaDriver",
-          "COM.cloudscape.core.JDBCDriver",
-          "com.ddtek.jdbc.db2.DB2Driver",
-          "com.ddtek.jdbc.informix.InformixDriver",
-          "com.ddtek.jdbc.oracle.OracleDriver",
-          "com.ddtek.jdbc.sqlserver.SQLServerDriver",
-          "com.ddtek.jdbc.sybase.SybaseDriver",
-          "COM.FirstSQL.Dbcp.DbcpDriver",
-          "com.ibm.as400.access.AS400JDBCDriver",
-          "com.ibm.db2.jcc.DB2Driver",
-          "COM.ibm.db2.jdbc.app.DB2Driver",
-          "COM.ibm.db2.jdbc.net.DB2Driver",
-          "com.imaginary.sql.msql.MsqlDriver",
-          "com.inet.tds.TdsDriver",
-          "com.informix.jdbc.IfxDriver",
-          "com.internetcds.jdbc.tds.Driver",
-          "com.internetcds.jdbc.tds.SybaseDriver",
-          "com.jnetdirect.jsql.JSQLDriver",
-          "com.lucidera.jdbc.LucidDbRmiDriver",
-          "com.mckoi.JDBCDriver",
-          "com.merant.datadirect.jdbc.db2.DB2Driver",
-          "com.merant.datadirect.jdbc.informix.InformixDriver",
-          "com.merant.datadirect.jdbc.oracle.OracleDriver",
-          "com.merant.datadirect.jdbc.sqlserver.SQLServerDriver",
-          "com.merant.datadirect.jdbc.sybase.SybaseDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "com.mysql.jdbc.DatabaseMetaData",
-          "com.mysql.jdbc.Driver",
-          "com.mysql.jdbc.NonRegisteringDriver",
-          "com.pointbase.jdbc.jdbcDriver",
-          "com.pointbase.jdbc.jdbcEmbeddedDriver",
-          "com.pointbase.jdbc.jdbcUniversalDriver",
-          "com.sap.dbtech.jdbc.DriverSapDB",
-          "com.sqlstream.jdbc.Driver",
-          "com.sybase.jdbc2.jdbc.SybDriver",
-          "com.sybase.jdbc.SybDriver",
-          "com.thinweb.tds.Driver",
-          "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-          "interbase.interclient.Driver",
-          "intersolv.jdbc.sequelink.SequeLinkDriver",
-          "net.sourceforge.jtds.jdbc.Driver",
-          "openlink.jdbc2.Driver",
-          "oracle.jdbc.driver.OracleDriver",
-          "oracle.jdbc.OracleDriver",
-          "oracle.jdbc.pool.OracleDataSource",
-          "org.axiondb.jdbc.AxionDriver",
-          "org.enhydra.instantdb.jdbc.idbDriver",
-          "org.gjt.mm.mysql.Driver",
-          "org.hsqldb.jdbcDriver",
-          "org.hsql.jdbcDriver",
-          "org.luciddb.jdbc.LucidDbClientDriver",
-          "org.postgresql.Driver",
-          "org.sourceforge.jxdbcon.JXDBConDriver",
-          "postgres95.PGDriver",
-          "postgresql.Driver",
-          "solid.jdbc.SolidDriver",
-          "sun.jdbc.odbc.JdbcOdbcDriver",
-          "weblogic.jdbc.mssqlserver4.Driver",
-          "weblogic.jdbc.pool.Driver"));
 
   static {
     String testClass = "jline.console.ConsoleReader";
@@ -197,26 +120,12 @@ public class SqlLine {
   }
 
   String getApplicationTitle() {
-    InputStream inputStream =
-        getClass().getResourceAsStream(
-            "/META-INF/maven/sqlline/sqlline/pom.properties");
-    Properties properties = new Properties();
-    properties.put("artifactId", "sqlline");
-    properties.put("version", "???");
-    if (inputStream != null) {
-      // If not running from a .jar, pom.properties will not exist, and
-      // inputStream is null.
-      try {
-        properties.load(inputStream);
-      } catch (IOException e) {
-        handleException(e);
-      }
+    try {
+      return application.getInfoMessage();
+    } catch (Exception e) {
+      handleException(e);
+      return Application.DEFAULT_APP_INFO_MESSAGE;
     }
-
-    return loc(
-        "app-introduction",
-        properties.getProperty("artifactId"),
-        properties.getProperty("version"));
   }
 
   static String getApplicationContactInformation() {
@@ -286,65 +195,10 @@ public class SqlLine {
   }
 
   public SqlLine() {
-    final TableNameCompleter tableCompleter = new TableNameCompleter(this);
-    final List<Completer> empty = Collections.emptyList();
-
-    final List<CommandHandler> handlers = Arrays.<CommandHandler>asList(
-        new ReflectiveCommandHandler(this, empty, "quit", "done", "exit"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(getConnectionURLExamples()),
-            "connect", "open"),
-        new ReflectiveCommandHandler(this, empty, "nickname"),
-        new ReflectiveCommandHandler(this, tableCompleter, "describe"),
-        new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
-        new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
-        new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
-        new ReflectiveCommandHandler(this, empty, "manual"),
-        new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
-        new ReflectiveCommandHandler(this, empty, "procedures"),
-        new ReflectiveCommandHandler(this, empty, "tables"),
-        new ReflectiveCommandHandler(this, empty, "typeinfo"),
-        new ReflectiveCommandHandler(this, empty, "commandhandler"),
-        new ReflectiveCommandHandler(this, tableCompleter, "columns"),
-        new ReflectiveCommandHandler(this, empty, "reconnect"),
-        new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
-        new ReflectiveCommandHandler(this, empty, "history"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(getMetadataMethodNames()), "metadata"),
-        new ReflectiveCommandHandler(this, empty, "nativesql"),
-        new ReflectiveCommandHandler(this, empty, "dbinfo"),
-        new ReflectiveCommandHandler(this, empty, "rehash"),
-        new ReflectiveCommandHandler(this, empty, "verbose"),
-        new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
-        new ReflectiveCommandHandler(this, empty, "batch"),
-        new ReflectiveCommandHandler(this, empty, "list"),
-        new ReflectiveCommandHandler(this, empty, "all"),
-        new ReflectiveCommandHandler(this, empty, "go", "#"),
-        new ReflectiveCommandHandler(this, new FileNameCompleter(), "script"),
-        new ReflectiveCommandHandler(this, new FileNameCompleter(), "record"),
-        new ReflectiveCommandHandler(this, empty, "brief"),
-        new ReflectiveCommandHandler(this, empty, "close"),
-        new ReflectiveCommandHandler(this, empty, "closeall"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(getIsolationLevels()), "isolation"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(formats.keySet()), "outputformat"),
-        new ReflectiveCommandHandler(this, empty, "autocommit"),
-        new ReflectiveCommandHandler(this, empty, "commit"),
-        new ReflectiveCommandHandler(this, new FileNameCompleter(),
-            "properties"),
-        new ReflectiveCommandHandler(this, empty, "rollback"),
-        new ReflectiveCommandHandler(this, empty, "help", "?"),
-        new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
-        new ReflectiveCommandHandler(this, empty, "save"),
-        new ReflectiveCommandHandler(this, empty, "scan"),
-        new ReflectiveCommandHandler(this, empty, "sql"),
-        new ReflectiveCommandHandler(this, empty, "call"));
-    commandHandlers.addAll(handlers);
-
-    sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
     reflector = new Reflector(this);
-    opts.loadProperties(System.getProperties());
+    setAppConfig(new Application());
+    getOpts().loadProperties(System.getProperties());
+    sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
 
     // attempt to dynamically load signal handler
     try {
@@ -406,68 +260,6 @@ public class SqlLine {
     return connections.current().getDatabaseMetaData();
   }
 
-  public List<String> getIsolationLevels() {
-    return Arrays.asList(
-      "TRANSACTION_NONE",
-      "TRANSACTION_READ_COMMITTED",
-      "TRANSACTION_READ_UNCOMMITTED",
-      "TRANSACTION_REPEATABLE_READ",
-      "TRANSACTION_SERIALIZABLE");
-  }
-
-  public Set<String> getMetadataMethodNames() {
-    try {
-      TreeSet<String> methodNames = new TreeSet<String>();
-      for (Method method : DatabaseMetaData.class.getDeclaredMethods()) {
-        methodNames.add(method.getName());
-      }
-
-      return methodNames;
-    } catch (Throwable t) {
-      return Collections.emptySet();
-    }
-  }
-
-  public List<String> getConnectionURLExamples() {
-    return Arrays.asList(
-      "jdbc:JSQLConnect://<hostname>/database=<database>",
-      "jdbc:cloudscape:<database>;create=true",
-      "jdbc:twtds:sqlserver://<hostname>/<database>",
-      "jdbc:daffodilDB_embedded:<database>;create=true",
-      "jdbc:datadirect:db2://<hostname>:50000;databaseName=<database>",
-      "jdbc:inetdae:<hostname>:1433",
-      "jdbc:datadirect:oracle://<hostname>:1521;SID=<database>;"
-          + "MaxPooledStatements=0",
-      "jdbc:datadirect:sqlserver://<hostname>:1433;SelectMethod=cursor;"
-          + "DatabaseName=<database>",
-      "jdbc:datadirect:sybase://<hostname>:5000",
-      "jdbc:db2://<hostname>/<database>",
-      "jdbc:hsqldb:<database>",
-      "jdbc:idb:<database>.properties",
-      "jdbc:informix-sqli://<hostname>:1526/<database>:INFORMIXSERVER"
-          + "=<database>",
-      "jdbc:interbase://<hostname>//<database>.gdb",
-      "jdbc:luciddb:http://<hostname>",
-      "jdbc:microsoft:sqlserver://<hostname>:1433;"
-          + "DatabaseName=<database>;SelectMethod=cursor",
-      "jdbc:mysql://<hostname>/<database>?autoReconnect=true",
-      "jdbc:oracle:thin:@<hostname>:1521:<database>",
-      "jdbc:pointbase:<database>,database.home=<database>,create=true",
-      "jdbc:postgresql://<hostname>:5432/<database>",
-      "jdbc:postgresql:net//<hostname>/<database>",
-      "jdbc:sybase:Tds:<hostname>:4100/<database>?ServiceName=<database>",
-      "jdbc:weblogic:mssqlserver4:<database>@<hostname>:1433",
-      "jdbc:odbc:<database>",
-      "jdbc:sequelink://<hostname>:4003/[Oracle]",
-      "jdbc:sequelink://<hostname>:4004/[Informix];Database=<database>",
-      "jdbc:sequelink://<hostname>:4005/[Sybase];Database=<database>",
-      "jdbc:sequelink://<hostname>:4006/[SQLServer];Database=<database>",
-      "jdbc:sequelink://<hostname>:4011/[ODBC MS Access];"
-          + "Database=<database>",
-      "jdbc:openlink://<hostname>/DSN=SQLServerDB/UID=sa/PWD=",
-      "jdbc:solid://<hostname>:<port>/<UID>/<PWD>",
-      "jdbc:dbaw://<hostname>:8889/<database>");
-  }
 
   /**
    * Entry point to creating a {@link ColorBuffer} with color
@@ -489,7 +281,7 @@ public class SqlLine {
    * Walk through all the known drivers and try to register them.
    */
   void registerKnownDrivers() {
-    for (String driverName : KNOWN_DRIVERS) {
+    for (String driverName : appConfig.knownDrivers) {
       try {
         Class.forName(driverName);
       } catch (Throwable t) {
@@ -514,6 +306,7 @@ public class SqlLine {
     String nickname = null;
     String logFile = null;
     String commandHandler = null;
+    String appConfig = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -528,9 +321,9 @@ public class SqlLine {
           boolean ret;
 
           if (parts.length >= 2) {
-            ret = opts.set(parts[0], parts[1], true);
+            ret = getOpts().set(parts[0], parts[1], true);
           } else {
-            ret = opts.set(parts[0], "true", true);
+            ret = getOpts().set(parts[0], "true", true);
           }
 
           if (!ret) {
@@ -563,12 +356,19 @@ public class SqlLine {
           logFile = args[++i];
         } else if (args[i].equals("-nn")) {
           nickname = args[++i];
+        } else if (args[i].equals("-ac")) {
+          appConfig = args[++i];
         } else {
           return Status.ARGS;
         }
       } else {
         files.add(args[i]);
       }
+    }
+
+    if (appConfig != null) {
+      dispatch(COMMAND_PREFIX + "appconfig " + appConfig,
+          new DispatchCallback());
     }
 
     if (url != null) {
@@ -606,8 +406,8 @@ public class SqlLine {
 
     if (commands.size() > 0) {
       // for single command execute, disable color
-      opts.setColor(false);
-      opts.setHeaderInterval(-1);
+      getOpts().setColor(false);
+      getOpts().setHeaderInterval(-1);
 
       for (String command : commands) {
         debug(loc("executing-command", command));
@@ -620,8 +420,8 @@ public class SqlLine {
     Status status = Status.OK;
 
     // if a script file was specified, run the file and quit
-    if (opts.getRun() != null) {
-      dispatch(COMMAND_PREFIX + "run \"" + opts.getRun() + "\"", callback);
+    if (getOpts().getRun() != null) {
+      dispatch(COMMAND_PREFIX + "run \"" + getOpts().getRun() + "\"", callback);
       if (callback.isFailure()) {
         status = Status.OTHER;
       }
@@ -644,13 +444,13 @@ public class SqlLine {
   public Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {
     try {
-      opts.load();
+      getOpts().load();
     } catch (Exception e) {
       handleException(e);
     }
 
     FileHistory fileHistory =
-        new FileHistory(new File(opts.getHistoryFile()));
+        new FileHistory(new File(getOpts().getHistoryFile()));
 
     ConsoleReader reader;
     boolean runningScript = getOpts().getRun() != null;
@@ -799,7 +599,7 @@ public class SqlLine {
       Map<String, CommandHandler> cmdMap =
           new TreeMap<String, CommandHandler>();
       line = line.substring(1);
-      for (CommandHandler commandHandler: commandHandlers) {
+      for (CommandHandler commandHandler : getCommandHandlers()) {
         String match = commandHandler.matches(line);
         if (match != null) {
           cmdMap.put(match, commandHandler);
@@ -892,13 +692,13 @@ public class SqlLine {
   }
 
   public void info(String msg) {
-    if (!opts.getSilent()) {
+    if (!getOpts().getSilent()) {
       output(msg, true, getErrorStream());
     }
   }
 
   public void info(ColorBuffer msg) {
-    if (!opts.getSilent()) {
+    if (!getOpts().getSilent()) {
       output(msg, true, getErrorStream());
     }
   }
@@ -920,7 +720,7 @@ public class SqlLine {
   }
 
   public void debug(String msg) {
-    if (opts.getVerbose()) {
+    if (getOpts().getVerbose()) {
       output(getColorBuffer().blue(msg), true, errorStream);
     }
   }
@@ -1021,7 +821,7 @@ public class SqlLine {
       return;
     }
 
-    if (!opts.getShowWarnings()) {
+    if (!getOpts().getShowWarnings()) {
       return;
     }
 
@@ -1559,7 +1359,7 @@ public class SqlLine {
     Arrays.fill(head, ' ');
 
     for (StringTokenizer tok = new StringTokenizer(toWrap, " ");
-        tok.hasMoreTokens();) {
+         tok.hasMoreTokens();) {
       String next = tok.nextToken();
       final int x = line.length();
       line.append(line.length() == 0 ? "" : " ").append(next);
@@ -1624,7 +1424,7 @@ public class SqlLine {
       handleSQLException((SQLException) e);
     } else if (e instanceof WrappedSqlException) {
       handleSQLException((SQLException) e.getCause());
-    } else if (!initComplete && !opts.getVerbose()) {
+    } else if (!initComplete && !getOpts().getVerbose()) {
       // all init errors must be verbose
       if (e.getMessage() == null) {
         error(e.getClass().getName());
@@ -1638,9 +1438,9 @@ public class SqlLine {
 
   void handleSQLException(SQLException e) {
     // all init errors must be verbose
-    final boolean showWarnings = !initComplete || opts.getShowWarnings();
-    final boolean verbose = !initComplete || opts.getVerbose();
-    final boolean showNested = !initComplete || opts.getShowNestedErrs();
+    final boolean showWarnings = !initComplete || getOpts().getShowWarnings();
+    final boolean verbose = !initComplete || getOpts().getVerbose();
+    final boolean showNested = !initComplete || getOpts().getShowNestedErrs();
 
     if (e instanceof SQLWarning && !showWarnings) {
       return;
@@ -1730,7 +1530,7 @@ public class SqlLine {
       classNames.addAll(ClassNameCompleter.getClassNames());
     }
 
-    classNames.addAll(KNOWN_DRIVERS);
+    classNames.addAll(appConfig.knownDrivers);
 
     Set<Driver> driverClasses = new HashSet<Driver>();
 
@@ -1767,28 +1567,32 @@ public class SqlLine {
   ///////////////////////////////////////
 
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
-    String format = opts.getOutputFormat();
-    OutputFormat f = formats.get(format);
+    String format = getOpts().getOutputFormat();
+    OutputFormat f = getOutputFormats().get(format);
     if ("csv".equals(format)) {
-      final SeparatedValuesOutputFormat csvOutput
-        = (SeparatedValuesOutputFormat) f;
-      if ((csvOutput.separator == null && opts.getCsvDelimiter() != null)
+      final SeparatedValuesOutputFormat csvOutput =
+          (SeparatedValuesOutputFormat) f;
+      if ((csvOutput.separator == null && getOpts().getCsvDelimiter() != null)
           || (csvOutput.separator != null
-              && !csvOutput.separator.equals(opts.getCsvDelimiter())
-              || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter())) {
+              && !csvOutput.separator.equals(getOpts().getCsvDelimiter())
+              || csvOutput.quoteCharacter
+                  != getOpts().getCsvQuoteCharacter())) {
         f = new SeparatedValuesOutputFormat(this,
-            opts.getCsvDelimiter(), opts.getCsvQuoteCharacter());
-        formats.put("csv", f);
+            getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
+        Map<String, OutputFormat> updFormats =
+            new HashMap<String, OutputFormat>(getOutputFormats());
+        updFormats.put("csv", f);
+        updateOutputFormats(updFormats);
       }
     }
 
     if (f == null) {
-      error(loc("unknown-format", format, formats.keySet()));
+      error(loc("unknown-format", format, getOutputFormats().keySet()));
       f = new TableOutputFormat(this);
     }
 
     Rows rows;
-    if (opts.getIncremental()) {
+    if (getOpts().getIncremental()) {
       rows = new IncrementalRows(this, rs, callback);
     } else {
       rows = new BufferedRows(this, rs);
@@ -1799,11 +1603,11 @@ public class SqlLine {
 
   Statement createStatement() throws SQLException {
     Statement stmnt = getDatabaseConnection().connection.createStatement();
-    if (opts.timeout > -1) {
-      stmnt.setQueryTimeout(opts.timeout);
+    if (getOpts().timeout > -1) {
+      stmnt.setQueryTimeout(getOpts().timeout);
     }
-    if (opts.rowLimit != 0) {
-      stmnt.setMaxRows(opts.rowLimit);
+    if (getOpts().rowLimit != 0) {
+      stmnt.setMaxRows(getOpts().rowLimit);
     }
 
     return stmnt;
@@ -1856,7 +1660,7 @@ public class SqlLine {
         boolean success = callback.isSuccess();
         // if we do not force script execution, abort
         // when a failure occurs.
-        if (!success && !opts.getForce()) {
+        if (!success && !getOpts().getForce()) {
           error(loc("abort-on-error", cmd));
           return successCount;
         }
@@ -1871,12 +1675,12 @@ public class SqlLine {
 
   void setCompletions() throws SQLException, IOException {
     if (getDatabaseConnection() != null) {
-      getDatabaseConnection().setCompletions(opts.getFastConnect());
+      getDatabaseConnection().setCompletions(getOpts().getFastConnect());
     }
   }
 
   public SqlLineOpts getOpts() {
-    return opts;
+    return appConfig.opts;
   }
 
   DatabaseConnections getDatabaseConnections() {
@@ -1963,10 +1767,69 @@ public class SqlLine {
     return sqlLineCommandCompleter;
   }
 
+  void setAppConfig(Application application) {
+    this.application = application;
+    this.appConfig = new Config(application);
+  }
+
+  public Collection<CommandHandler> getCommandHandlers() {
+    return appConfig.commandHandlers;
+  }
+
+  public void updateCommandHandlers(
+      Collection<CommandHandler> commandHandlers) {
+    appConfig = appConfig.withCommandHandlers(commandHandlers);
+  }
+
+  public Map<String, OutputFormat> getOutputFormats() {
+    return appConfig.formats;
+  }
+
+  public void updateOutputFormats(Map<String, OutputFormat> formats) {
+    appConfig = appConfig.withFormats(formats);
+  }
+
   /** Exit status returned to the operating system. OK, ARGS, OTHER
    * correspond to 0, 1, 2. */
   public enum Status {
     OK, ARGS, OTHER
+  }
+
+  /** Cache of configuration settings that come from
+   * {@link Application}. */
+  private class Config {
+    final Collection<String> knownDrivers;
+    final SqlLineOpts opts;
+    final Collection<CommandHandler> commandHandlers;
+    final Map<String, OutputFormat> formats;
+
+    Config(Application application) {
+      this(application.initDrivers(),
+          application.getOpts(SqlLine.this),
+          application.getCommandHandlers(SqlLine.this),
+          application.getOutputFormats(SqlLine.this));
+    }
+
+    Config(Collection<String> knownDrivers,
+        SqlLineOpts opts,
+        Collection<CommandHandler> commandHandlers,
+        Map<String, OutputFormat> formats) {
+      this.knownDrivers = Collections.unmodifiableSet(
+          new HashSet<String>(knownDrivers));
+      this.opts = opts;
+      this.commandHandlers = Collections.unmodifiableList(
+          new ArrayList<CommandHandler>(commandHandlers));
+      this.formats = Collections.unmodifiableMap(formats);
+
+    }
+
+    Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
+      return new Config(this.knownDrivers, opts, commandHandlers, this.formats);
+    }
+
+    Config withFormats(Map<String, OutputFormat> formats) {
+      return new Config(this.knownDrivers, opts, this.commandHandlers, formats);
+    }
   }
 }
 

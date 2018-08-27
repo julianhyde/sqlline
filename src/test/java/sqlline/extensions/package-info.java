@@ -13,8 +13,11 @@
 /**
  * A different package for
  * Unit tests for SQLLine, the JDBC shell
- * to check methods (required for command handlers) visibility between packages.
+ * to check methods visibility between packages.
+ * (required for command handlers,
+ * output formats, application, session options
+ * extensions etc).
  */
-package sqlline.commandhandler;
+package sqlline.extensions;
 
 // End package-info.java

@@ -24,7 +24,7 @@ import jline.console.completer.StringsCompleter;
 /**
  * Session options.
  */
-class SqlLineOpts implements Completer {
+public class SqlLineOpts implements Completer {
   public static final String PROPERTY_PREFIX = "sqlline.";
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";

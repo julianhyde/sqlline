@@ -12,6 +12,7 @@
 package sqlline;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.*;
@@ -1437,38 +1438,53 @@ public class Commands {
       callback.setToFailure();
       return;
     }
-    Class commandHandlerClass;
+
+    final List<CommandHandler> commandHandlers =
+        new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
+    final Set<String> existingNames = new HashSet<String>();
+    for (CommandHandler existingCommandHandler : commandHandlers) {
+      existingNames.addAll(existingCommandHandler.getNames());
+    }
+
+    int commandHandlerUpdateCount = 0;
     for (int i = 1; i < cmd.length; i++) {
       try {
-        commandHandlerClass = Class.forName(cmd[i]);
-        CommandHandler commandHandler =
-            (CommandHandler) commandHandlerClass.getConstructor(SqlLine.class)
-                .newInstance(sqlLine);
-        Set<String> existingNames = new HashSet<String>();
-        for (CommandHandler existingCommandHandler : sqlLine.commandHandlers) {
-          existingNames.addAll(existingCommandHandler.getNames());
-        }
-        boolean isAlreadyPresent = false;
-        for (String newName : commandHandler.getNames()) {
-          if (isAlreadyPresent) {
-            break;
-          }
-          isAlreadyPresent = existingNames.contains(newName);
-        }
-        if (isAlreadyPresent) {
+        @SuppressWarnings("unchecked")
+        Class<CommandHandler> commandHandlerClass =
+            (Class<CommandHandler>) Class.forName(cmd[i]);
+        final Constructor<CommandHandler> constructor =
+            commandHandlerClass.getConstructor(SqlLine.class);
+        CommandHandler commandHandler = constructor.newInstance(sqlLine);
+        if (intersects(existingNames, commandHandler.getNames())) {
           sqlLine.error("Could not add command handler " + cmd[i] + " as one "
               + "of commands " + commandHandler.getNames() + " is already present");
         } else {
-          sqlLine.commandHandlers.add(commandHandler);
+          commandHandlers.add(commandHandler);
+          existingNames.addAll(commandHandler.getNames());
+          ++commandHandlerUpdateCount;
         }
       } catch (Exception e) {
         sqlLine.error(e);
         callback.setToFailure();
       }
     }
+
+    if (commandHandlerUpdateCount > 0) {
+      sqlLine.updateCommandHandlers(commandHandlers);
+    }
+
     if (!callback.isFailure()) {
       callback.setToSuccess();
     }
+  }
+
+  private static <E> boolean intersects(Collection<E> c1, Collection<E> c2) {
+    for (E e : c2) {
+      if (c1.contains(e)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1540,7 +1556,7 @@ public class Commands {
     String cmd = parts.length > 1 ? parts[1] : "";
     TreeSet<ColorBuffer> clist = new TreeSet<ColorBuffer>();
 
-    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
+    for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
         String help = commandHandler.getHelpText();
@@ -1597,6 +1613,29 @@ public class Commands {
     breader.close();
 
     callback.setToSuccess();
+  }
+
+  public void appconfig(String line, DispatchCallback callback) {
+    String example =
+        "Usage: appconfig <class name for application configuration>"
+        + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 2) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    try {
+      Application appConfig = (Application) Class.forName(parts[1])
+          .getConstructor().newInstance();
+      sqlLine.setAppConfig(appConfig);
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error("Could not initialize " + parts[1]);
+    }
   }
 
   static Map<String, String> asMap(Properties properties) {

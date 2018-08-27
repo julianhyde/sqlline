@@ -14,7 +14,7 @@ package sqlline;
 /**
  * Abstract OutputFormat.
  */
-abstract class AbstractOutputFormat implements OutputFormat {
+public abstract class AbstractOutputFormat implements OutputFormat {
   protected final SqlLine sqlLine;
 
   public AbstractOutputFormat(SqlLine sqlLine) {
