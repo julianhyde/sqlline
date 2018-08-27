@@ -22,7 +22,7 @@ import jline.console.completer.Completer;
  * determining that the command is appropriate with the
  * {@link #matches(String)} method.
  */
-interface CommandHandler {
+public interface CommandHandler {
   /**
    * @return the name of the command
    */

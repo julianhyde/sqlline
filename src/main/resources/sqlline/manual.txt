@@ -17,6 +17,8 @@ Command Completion
 Command Reference
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -139,6 +141,8 @@ Command Completion
 Command Reference
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -349,6 +353,8 @@ Command Reference
 
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -996,6 +1002,7 @@ Example of "help" command
 sqlline> !help
 
 !all              Execute the specified SQL against all the current connections
+!appconfig        Sets application configuration class name
 !autocommit       Set autocommit mode on or off
 !batch            Start or execute a batch of statements
 !brief            Set verbose mode off
