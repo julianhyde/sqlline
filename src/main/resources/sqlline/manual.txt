@@ -45,8 +45,6 @@ go
 go — Change to a different active connection
 help
 help — Display help information
-hide
-hide — Hides commands
 history
 history — Display the command history
 importedkeys
@@ -171,8 +169,6 @@ go
 go — Change to a different active connection
 help
 help — Display help information
-hide
-hide — Hides commands
 history
 history — Display the command history
 importedkeys
@@ -385,8 +381,6 @@ go
 go — Change to a different active connection
 help
 help — Display help information
-hide
-hide — Hides commands
 history
 history — Display the command history
 importedkeys
@@ -1073,29 +1067,6 @@ sqlline> !help
 Comments, bug reports, and patches go to mwp1@cornell.edu
 
 sqlline>
-
-
-hide
-
-Name
-
-hide — Hides commands which are allowed to be hidden
-
-Synopsis
-
-!hide command {command}*
-
-Description
-
-Hides commands which are allowed to be hidden.
-
-Example of "hide" command
-
-sqlline> !hide scan
-sqlline> !scan
-Unknown command: scan
-sqlline> !hide quit
-Not allowed to hide quit
 
 
 history

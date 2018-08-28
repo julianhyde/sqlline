@@ -739,58 +739,6 @@ public class SqlLineArgsTest {
   }
 
   @Test
-  public void testHide() throws IOException {
-    SqlLine sqlLine = new SqlLine();
-
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
-    sqlLine.setOutputStream(sqllineOutputStream);
-    sqlLine.setErrorStream(sqllineOutputStream);
-    final InputStream is = new ByteArrayInputStream(new byte[0]);
-    sqlLine.begin(new String[]{}, is, false);
-    sqlLine.runCommands(Collections.singletonList("!hide scan quit"),
-        new DispatchCallback());
-    String output = os.toString("UTF8");
-    assertThat(output, containsString("Not allowed to hide quit"));
-    os.reset();
-    sqlLine.runCommands(Collections.singletonList("!scan"),
-        new DispatchCallback());
-    output = os.toString("UTF8");
-    assertThat(output, containsString("Unknown command: scan"));
-    os.reset();
-    sqlLine.runCommands(
-        Collections.singletonList("!quit"), new DispatchCallback());
-    assertTrue(sqlLine.isExit());
-  }
-
-  @Test
-  public void testHideOnStartup() throws IOException {
-    SqlLine sqlLine = new SqlLine();
-
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
-    sqlLine.setOutputStream(sqllineOutputStream);
-    sqlLine.setErrorStream(sqllineOutputStream);
-    final InputStream is = new ByteArrayInputStream(new byte[0]);
-    sqlLine.begin(
-        new String[]{"-hide", "tables,dbinfo"}, is, false);
-
-    sqlLine.runCommands(Collections.singletonList("!tables"),
-        new DispatchCallback());
-    String output = os.toString("UTF8");
-    assertThat(output, containsString("Unknown command: tables"));
-    os.reset();
-    sqlLine.runCommands(Collections.singletonList("!dbinfo"),
-        new DispatchCallback());
-    output = os.toString("UTF8");
-    assertThat(output, containsString("Unknown command: dbinfo"));
-    os.reset();
-    sqlLine.runCommands(
-        Collections.singletonList("!quit"), new DispatchCallback());
-    assertTrue(sqlLine.isExit());
-  }
-
-  @Test
   public void testCommandHandlerOnStartup() throws IOException {
     SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();

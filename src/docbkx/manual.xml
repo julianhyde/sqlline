@@ -1196,47 +1196,6 @@ sqlline>
       </refentry>
       </section>
 
-      <section id="sect_command_hide">
-      <title>hide</title>
-      <refentry id="command_hide">
-        <refmeta>
-        <refentrytitle>hide</refentrytitle>
-        <manvolnum>1</manvolnum>
-        </refmeta>
-
-
-        <refnamediv>
-          <refname>hide</refname>
-          <refpurpose>
-          Hides commands which are allowed to be hidden
-          </refpurpose>
-        </refnamediv>
-
-        <refsynopsisdiv>
-          <cmdsynopsis>
-            <command>!hide</command>
-          </cmdsynopsis>
-        </refsynopsisdiv>
-
-        <refsect1>
-          <title>Description</title>
-          <para>
-          Hides commands which are allowed to be hidden.
-          </para>
-        </refsect1>
-        <refsect1>
-          <title>Example of "hide" command</title>
-          <screen>
-sqlline> !hide scan
-sqlline> !scan
-Unknown command: scan
-sqlline> !hide quit
-Not allowed to hide quit
-          </screen>
-        </refsect1>
-      </refentry>
-      </section>
-
       <section id="sect_command_history">
       <title>history</title>
       <refentry id="command_history">

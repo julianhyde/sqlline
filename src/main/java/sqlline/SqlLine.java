@@ -75,7 +75,7 @@ public class SqlLine {
   private static boolean initComplete = false;
 
   private SqlLineSignalHandler signalHandler = null;
-  private Completer sqlLineCommandCompleter;
+  private final Completer sqlLineCommandCompleter;
 
   private final Map<String, OutputFormat> formats = map(
       "vertical", (OutputFormat) new VerticalOutputFormat(this),
@@ -290,8 +290,7 @@ public class SqlLine {
     final List<Completer> empty = Collections.emptyList();
 
     commandHandlers.addAll(Arrays.<CommandHandler>asList(
-        new ReflectiveCommandHandler(this,
-            empty, false, "quit", "done", "exit"),
+        new ReflectiveCommandHandler(this, empty, "quit", "done", "exit"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getConnectionURLExamples()),
             "connect", "open"),
@@ -300,7 +299,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
         new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
         new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
-        new ReflectiveCommandHandler(this, empty, false, "manual"),
+        new ReflectiveCommandHandler(this, empty, "manual"),
         new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
         new ReflectiveCommandHandler(this, empty, "procedures"),
         new ReflectiveCommandHandler(this, empty, "tables"),
@@ -309,13 +308,13 @@ public class SqlLine {
         new ReflectiveCommandHandler(this, tableCompleter, "columns"),
         new ReflectiveCommandHandler(this, empty, "reconnect"),
         new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
-        new ReflectiveCommandHandler(this, empty, false, "history"),
+        new ReflectiveCommandHandler(this, empty, "history"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getMetadataMethodNames()), "metadata"),
         new ReflectiveCommandHandler(this, empty, "nativesql"),
         new ReflectiveCommandHandler(this, empty, "dbinfo"),
         new ReflectiveCommandHandler(this, empty, "rehash"),
-        new ReflectiveCommandHandler(this, empty, false, "verbose"),
+        new ReflectiveCommandHandler(this, empty, "verbose"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
         new ReflectiveCommandHandler(this, empty, "batch"),
         new ReflectiveCommandHandler(this, empty, "list"),
@@ -323,22 +322,20 @@ public class SqlLine {
         new ReflectiveCommandHandler(this, empty, "go", "#"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "script"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "record"),
-        new ReflectiveCommandHandler(this, empty, false, "brief"),
+        new ReflectiveCommandHandler(this, empty, "brief"),
         new ReflectiveCommandHandler(this, empty, "close"),
         new ReflectiveCommandHandler(this, empty, "closeall"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getIsolationLevels()), "isolation"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(formats.keySet()), "outputformat"),
-        new ReflectiveCommandHandler(this, empty, "hide"),
         new ReflectiveCommandHandler(this, empty, "autocommit"),
         new ReflectiveCommandHandler(this, empty, "commit"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(),
             "properties"),
         new ReflectiveCommandHandler(this, empty, "rollback"),
-        new ReflectiveCommandHandler(this, empty, false, "help", "?"),
-        new ReflectiveCommandHandler(this,
-            opts.optionCompleters(), false, "set"),
+        new ReflectiveCommandHandler(this, empty, "help", "?"),
+        new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
         new ReflectiveCommandHandler(this, empty, "save"),
         new ReflectiveCommandHandler(this, empty, "scan"),
         new ReflectiveCommandHandler(this, empty, "sql"),
@@ -516,7 +513,6 @@ public class SqlLine {
     String nickname = null;
     String logFile = null;
     String cHandler = null;
-    String hide = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -552,8 +548,6 @@ public class SqlLine {
           driver = args[++i];
         } else if (args[i].equals("-ch")) {
           cHandler = args[++i];
-        } else if (args[i].equals("-hide")) {
-          hide = args[++i];
         } else if (args[i].equals("-n")) {
           user = args[++i];
         } else if (args[i].equals("-p")) {
@@ -601,15 +595,6 @@ public class SqlLine {
         sb.append(chElem).append(" ");
       }
       dispatch(COMMAND_PREFIX + "commandhandler " + sb.toString(),
-          new DispatchCallback());
-    }
-
-    if (hide != null) {
-      StringBuilder sb = new StringBuilder();
-      for (String hideElem: hide.split(",")) {
-        sb.append(hideElem).append(" ");
-      }
-      dispatch(COMMAND_PREFIX + "hide " + sb.toString(),
           new DispatchCallback());
     }
 
@@ -1952,10 +1937,6 @@ public class SqlLine {
 
   public Completer getCommandCompleter() {
     return sqlLineCommandCompleter;
-  }
-
-  protected void initCommandCompleter() {
-    sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
   }
 
   /** Exit status returned to the operating system. OK, ARGS, OTHER

@@ -61,13 +61,6 @@ interface CommandHandler {
    * @return Completers that can handle parameters
    */
   List<Completer> getParameterCompleters();
-
-  /**
-   * Returns if it is allowed to hide this command handler
-   *
-   * @return boolean
-   */
-  boolean isAllowedToHide();
 }
 
 // End CommandHandler.java
