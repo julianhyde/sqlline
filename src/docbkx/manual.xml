@@ -163,6 +163,7 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
         <para>
         SQLLine is only useful once you are connected to a database.
         In order to do so, you need to use the "!connect" command,
+        with an optional list of properties definition
         with the JDBC URL of the database you are going to
         connect to, followed by the username and password (followed
         optionally by the driver class name). The JDBC URL
@@ -170,6 +171,8 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
         your database, but will always start with "jdbc:", and
         usually has the machine name of the database and the
         name of the database itself as part of the string.
+        Quotes (both single and double) could be used in
+        case of url, username, password contain spaces.
         Consult your driver's documentation for details on the
         URL to use.
         </para>

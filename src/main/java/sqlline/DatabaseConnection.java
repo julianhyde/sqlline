@@ -28,19 +28,20 @@ class DatabaseConnection {
   Quoting quoting;
   private final String driver;
   private final String url;
-  private final String username;
-  private final String password;
+  private final Properties info;
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
 
   public DatabaseConnection(SqlLine sqlLine, String driver, String url,
-      String username, String password) throws SQLException {
+      String username, String password, Properties properties)
+      throws SQLException {
     this.sqlLine = sqlLine;
     this.driver = driver;
     this.url = url;
-    this.username = username;
-    this.password = password;
+    this.info = properties == null ? new Properties() : properties;
+    this.info.put("user", username);
+    this.info.put("password", password);
   }
 
   @Override public String toString() {
@@ -151,9 +152,6 @@ class DatabaseConnection {
 */
     // Instead, we use the driver instance to make the connection
 
-    final Properties info = new Properties();
-    info.put("user", username);
-    info.put("password", password);
     connection = theDriver.connect(url, info);
     meta = connection.getMetaData();
 
