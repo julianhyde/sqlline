@@ -49,6 +49,13 @@ class DatabaseConnections implements Iterable<DatabaseConnection> {
     }
   }
 
+  public void removeConnection(DatabaseConnection connection) {
+    if (connections.indexOf(connection) != -1) {
+      connections.remove(connection);
+      index--;
+    }
+  }
+
   public void setConnection(DatabaseConnection connection) {
     if (connections.indexOf(connection) == -1) {
       connections.add(connection);

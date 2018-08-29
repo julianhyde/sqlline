@@ -35,7 +35,7 @@ class DatabaseConnection {
   private Completer sqlCompleter = null;
 
   public DatabaseConnection(SqlLine sqlLine, String driver, String url,
-      String username, String password) throws SQLException {
+      String username, String password) {
     this.sqlLine = sqlLine;
     this.driver = driver;
     this.url = url;

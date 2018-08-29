@@ -897,6 +897,42 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testConnectWithDbProperty() throws Throwable {
+    SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream beelineOutputStream = new PrintStream(os);
+    beeLine.setOutputStream(beelineOutputStream);
+    beeLine.setErrorStream(beelineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    assertThat(status, equalTo(SqlLine.Status.OK));
+    DispatchCallback dc = new DispatchCallback();
+    beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+    //fail attempt
+    String fakeNonEmptyPassword = "nonEmptyPasswd";
+    beeLine.runCommands(
+        Collections.singletonList("!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE\" "
+            + ConnectionSpec.H2.username
+            + " \"" + fakeNonEmptyPassword + "\""), dc);
+    String output = os.toString("UTF8");
+    assertThat(output,
+        containsString("Error: Hexadecimal string contains "
+            + "non-hex character: \"" + fakeNonEmptyPassword + "\" "
+            + "[90004-191] (state=90004,code=90004)"));
+    os.reset();
+
+    beeLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    output = os.toString("UTF8");
+    assertThat(output, allOf(not(containsString(
+        "Error: Hexadecimal string contains")),
+        containsString("!quit")));
+    assertTrue(beeLine.isExit());
+  }
+
+  @Test
   public void testTables() throws Throwable {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
