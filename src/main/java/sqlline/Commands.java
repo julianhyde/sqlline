@@ -1120,14 +1120,16 @@ public class Commands {
           .readLine("Enter password for " + url + ": ", '*');
     }
 
+    DatabaseConnection connection =
+        new DatabaseConnection(sqlLine, driver, url, username, password);
     try {
-      sqlLine.getDatabaseConnections().setConnection(
-          new DatabaseConnection(sqlLine, driver, url, username, password));
+      sqlLine.getDatabaseConnections().setConnection(connection);
       sqlLine.getDatabaseConnection().getConnection();
-
       sqlLine.setCompletions();
       callback.setToSuccess();
     } catch (Exception e) {
+      connection.close();
+      sqlLine.getDatabaseConnections().removeConnection(connection);
       callback.setToFailure();
       sqlLine.error(e);
     }
