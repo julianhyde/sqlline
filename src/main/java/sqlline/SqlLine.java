@@ -1426,8 +1426,9 @@ public class SqlLine {
         tokenStart = i;
       }
     }
-    if (lastProcessedIndex != line.length() - 1
-        && (limit == 0 || limit > tokens.size())) {
+    if ((lastProcessedIndex != line.length() - 1
+            && (limit == 0 || limit > tokens.size()))
+        || (lastProcessedIndex == 0 && line.length() == 1)) {
       tokens.add(line.substring(tokenStart, line.length()));
     }
     String[] ret = new String[tokens.size()];
