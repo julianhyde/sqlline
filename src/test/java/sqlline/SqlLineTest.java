@@ -145,6 +145,12 @@ public class SqlLineTest extends TestCase {
     assertEquals(
         new String[]{"set", "timestampformat", "01/01/1970T12:32:12"}, strings);
 
+    strings = line.split("?", " ");
+    assertEquals(new String[]{"?"}, strings);
+
+    strings = line.split("#", " ");
+    assertEquals(new String[]{"#"}, strings);
+
     try {
       line.split("set csvdelimiter '", " ");
       fail("Non-paired quote is not allowed");
