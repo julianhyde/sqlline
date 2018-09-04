@@ -19,7 +19,7 @@ import sqlline.DispatchCallback;
 import sqlline.SqlLine;
 
 /**
- * Hello world command handler test.
+ * Hello world command handler.
  */
 public class HelloWorldCommandHandler extends AbstractCommandHandler {
 

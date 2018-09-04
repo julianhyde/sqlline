@@ -11,22 +11,59 @@
 */
 package sqlline.commandhandler;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import jline.console.completer.Completer;
-import sqlline.AbstractCommandHandler;
+import sqlline.CommandHandler;
 import sqlline.DispatchCallback;
 import sqlline.SqlLine;
 
 /**
- * Hello world command handler test to check possibility to add
- * commands with the same names from different command handlers.
+ * Hello world command handler .
  */
-public class HelloWorld2CommandHandler extends AbstractCommandHandler {
+public class HelloWorld2CommandHandler implements CommandHandler {
+  private static final String[] NAMES = new String[] {"hello"};
+  private final SqlLine sqlLine;
 
   public HelloWorld2CommandHandler(SqlLine sqlLine) {
-    super(sqlLine, new String[]{"hello"}, "help for hello2",
-        Collections.<Completer>emptyList());
+    this.sqlLine = sqlLine;
+  }
+
+  @Override
+  public String getName() {
+    return "hello";
+  }
+
+  @Override
+  public List<String> getNames() {
+    return Arrays.asList(NAMES);
+  }
+
+  @Override
+  public String getHelpText() {
+    return "help for hello2";
+  }
+
+  @Override
+  public String matches(String line) {
+    if (line == null || line.length() == 0) {
+      return null;
+    }
+
+    String[] parts = line.split(" ", 2);
+    if (parts.length < 1) {
+      return null;
+    }
+
+    for (String name2 : NAMES) {
+      if (name2.startsWith(parts[0])) {
+        return name2;
+      }
+    }
+
+    return null;
   }
 
   @Override
@@ -38,6 +75,11 @@ public class HelloWorld2CommandHandler extends AbstractCommandHandler {
       sqlLine.error(e);
       sqlLine.handleException(e);
     }
+  }
+
+  @Override
+  public List<Completer> getParameterCompleters() {
+    return Collections.emptyList();
   }
 }
 
