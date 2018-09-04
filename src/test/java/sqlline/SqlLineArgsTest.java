@@ -237,7 +237,6 @@ public class SqlLineArgsTest {
     os.close();
 
     File outputFile = new File("testScriptWithOutput.out");
-    System.out.println("outputFile " + outputFile.getAbsoluteFile());
     outputFile.deleteOnExit();
     runScript(scriptFile, true, outputFile.getAbsolutePath());
     assertFileContains(outputFile,
@@ -266,11 +265,11 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScan() throws Throwable {
-    final String expected = "Compliant Version Driver Class\n"
-        + "yes       2.3     org.hsqldb.jdbcDriver";
+    final String line0 = "Compliant Version Driver Class\n";
+    final String line1 = "yes       2.3     org.hsqldb.jdbcDriver";
     checkScriptFile("!scan\n", false,
         equalTo(SqlLine.Status.OK),
-        containsString(expected));
+        allOf(containsString(line0), containsString(line1)));
   }
 
   /**
