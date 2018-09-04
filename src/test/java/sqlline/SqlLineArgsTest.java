@@ -374,6 +374,24 @@ public class SqlLineArgsTest {
 
   /**
    * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/121">!?, !#
+   * and other one-symbol length commands stopped working</a>
+   *
+   * <p>'!?' should work in the same way as '!help'.
+   */
+  @Test
+  public void testHelpAsQuestionMark() throws Throwable {
+    final String script = "!?\n";
+    final String expected =
+        "!autocommit         Set autocommit mode on or off";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+        allOf(not(containsString("Unknown command: ?")),
+            containsString(expected)));
+  }
+
+  /**
+   * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/49">[SQLLINE-49]
    * !manual command fails</a>.
    */
