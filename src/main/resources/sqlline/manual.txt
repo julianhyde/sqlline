@@ -644,6 +644,7 @@ Synopsis
 Description
 
 Adds command handlers with commands.
+Command handler class must have a constructor accepting Sqlline and implement sqlline.CommandHandler
 
 Example of "commandhandler" command
 
