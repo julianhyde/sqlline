@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -1164,6 +1165,53 @@ public class SqlLineArgsTest {
         allOf(containsString(line), not(containsString("Exception"))));
   }
 
+  @Test
+  public void testAppInfoMessage() throws Throwable {
+    Pair pair = run();
+    assertThat(pair.status,
+        equalTo(SqlLine.Status.OK));
+    assertThat(pair.output,
+        containsString(ApplicationConfig.DEFAULT_APP_INFO_MESSAGE));
+
+    String[] args = new String[]{"-ac", "INCORRECT_CLASS_NAME"};
+    pair = run(args);
+    assertThat(pair.status, equalTo(SqlLine.Status.OK));
+    assertThat(pair.output,
+        containsString("Could not initialize INCORRECT_CLASS_NAME"));
+    assertThat(pair.output,
+        containsString(CustomApplicationConfig.DEFAULT_APP_INFO_MESSAGE));
+
+    args = new String[]{"-ac", "sqlline.SqlLineArgsTest$"
+        + "CustomApplicationConfig"};
+    pair = run(args);
+    assertThat(pair.status, equalTo(SqlLine.Status.OK));
+    assertThat(pair.output,
+        containsString(CustomApplicationConfig.CUSTOM_INFO_MESSAGE));
+  }
+
+  @Test
+  public void testCustomOutputFormats() throws Throwable {
+    // json format was removed
+    String script =
+        "!appconfig sqlline.SqlLineArgsTest$"
+        + "CustomApplicationConfig\n"
+        + "!set outputformat json\n"
+        + "values 1;";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("Unknown output format \"json\""));
+  }
+
+  @Test
+  public void testCustomCommands() throws Throwable {
+    // table command was removed
+    String script =
+        "!appconfig sqlline.SqlLineArgsTest$"
+        + "CustomApplicationConfig\n"
+        + "!tables";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        containsString("Unknown command: tables"));
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {
@@ -1228,6 +1276,42 @@ public class SqlLineArgsTest {
       description.appendText("regular expression ").appendText(pattern);
     }
   }
+
+  /**
+   * Is used to test custom application configuration.
+   * Overrides information message, output formats and commands.
+   */
+  public static class CustomApplicationConfig extends ApplicationConfig {
+
+    public static final String CUSTOM_INFO_MESSAGE = "my_custom_info_message";
+
+    public CustomApplicationConfig(SqlLine sqlLine) {
+      super(sqlLine);
+    }
+
+    @Override
+    public String getInfoMessage() throws Exception {
+      return CUSTOM_INFO_MESSAGE;
+    }
+
+    @Override
+    protected Map<String, OutputFormat> initOutputFormats(SqlLine sqlLine) {
+      Map<String, OutputFormat> outputFormats =
+          super.initOutputFormats(sqlLine);
+      outputFormats.remove("json");
+      return outputFormats;
+    }
+
+    @Override
+    protected Map<String, CommandHandler> initCommandHandlers(SqlLine sqlLine) {
+      Map<String, CommandHandler> commandHandlers =
+          super.initCommandHandlers(sqlLine);
+      commandHandlers.remove("tables");
+      return commandHandlers;
+    }
+
+  }
+
 }
 
 // End SqlLineArgsTest.java

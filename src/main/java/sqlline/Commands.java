@@ -1479,7 +1479,7 @@ public class Commands {
     String cmd = parts.length > 1 ? parts[1] : "";
     TreeSet<ColorBuffer> clist = new TreeSet<ColorBuffer>();
 
-    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
+    for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
         String help = commandHandler.getHelpText();
@@ -1536,6 +1536,29 @@ public class Commands {
     breader.close();
 
     callback.setToSuccess();
+  }
+
+  public void appconfig(String line, DispatchCallback callback) {
+    String example =
+        "Usage: appconfig <class name for application configuration>"
+        + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 2) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    try {
+      ApplicationConfig appConfig = (ApplicationConfig) Class.forName(parts[1])
+          .getConstructor(SqlLine.class).newInstance(sqlLine);
+      sqlLine.setAppConfig(appConfig);
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error("Could not initialize " + parts[1]);
+    }
   }
 
   static Map<String, String> asMap(Properties properties) {
