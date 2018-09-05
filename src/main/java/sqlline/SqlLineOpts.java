@@ -34,6 +34,8 @@ class SqlLineOpts implements Completer {
       TerminalFactory.get().getWidth();
   private static final int DEFAULT_MAX_HEIGHT =
       TerminalFactory.get().getHeight();
+  public static final String DEFAULT_TRANSACTION_ISOLATION =
+      "TRANSACTION_REPEATABLE_READ";
   private SqlLine sqlLine;
   private boolean autoSave = false;
   private boolean silent = false;
@@ -60,7 +62,7 @@ class SqlLineOpts implements Completer {
   private int maxColumnWidth = 15;
   int rowLimit = 0;
   int timeout = -1;
-  private String isolation = "TRANSACTION_REPEATABLE_READ";
+  private String isolation = DEFAULT_TRANSACTION_ISOLATION;
   private String outputFormat = "table";
   private boolean trimScripts = true;
   private File rcFile = new File(saveDir(), "sqlline.properties");
@@ -377,7 +379,11 @@ class SqlLineOpts implements Completer {
   }
 
   public void setIsolation(String isolation) {
-    this.isolation = isolation;
+    if (DEFAULT.equalsIgnoreCase(isolation)) {
+      this.isolation = DEFAULT_TRANSACTION_ISOLATION;
+    } else {
+      this.isolation = isolation.toUpperCase(Locale.ROOT);
+    }
   }
 
   public String getIsolation() {

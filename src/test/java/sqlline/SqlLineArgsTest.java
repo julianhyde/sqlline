@@ -730,6 +730,24 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testIsolationSetting() throws Throwable {
+    final String script0 = "!isolation TRANSACTION_NONE\n";
+    final String expected = "Transaction isolation level TRANSACTION_NONE "
+        + "is not supported. Default (TRANSACTION_READ_COMMITTED) "
+        + "will be used instead.";
+    checkScriptFile(script0, true, equalTo(SqlLine.Status.OTHER),
+        containsString(expected));
+  }
+
+  @Test
+  public void testDefaultIsolation() throws Throwable {
+    final String script1 = "!isolation default\n";
+    checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
+        allOf(not(containsString("Transaction isolation level")),
+            not(containsString("is not supported"))));
+  }
+
   /**
    * HIVE-4566, "NullPointerException if typeinfo and nativesql commands are
    * executed at beeline before a DB connection is established".
