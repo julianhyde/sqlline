@@ -753,39 +753,9 @@ public class Commands {
       callback.setStatus(DispatchCallback.Status.FAILURE);
       return;
     }
-
-    // ### FIXME:  doing the multi-line handling down here means
-    // higher-level logic never sees the extra lines.  So,
-    // for example, if a script is being saved, it won't include
-    // the continuation lines!  This is logged as sf.net
-    // bug 879518.
-
-    // use multiple lines for statements not terminated by ";"
-    try {
-      while (!(line.trim().endsWith(";"))) {
-        StringBuilder prompt = new StringBuilder(sqlLine.getPrompt());
-        for (int i = 0; i < prompt.length() - 1; i++) {
-          if (prompt.charAt(i) != '>') {
-            prompt.setCharAt(i, i % 2 == 0 ? '.' : ' ');
-          }
-        }
-
-        String extra = sqlLine.getConsoleReader().readLine(prompt.toString());
-        if (null == extra) {
-          break; // reader is at the end of data
-        }
-        if (!sqlLine.isComment(extra)) {
-          line += SqlLine.getSeparator() + extra;
-        }
-      }
-    } catch (UserInterruptException uie) {
-      // CTRL-C'd out of the command. Note it, but don't call it an
-      // error.
-      callback.setStatus(DispatchCallback.Status.CANCELED);
-      sqlLine.output(sqlLine.loc("command-canceled"));
+    line = getMultilineInput(line, callback);
+    if (line == null) {
       return;
-    } catch (Exception e) {
-      sqlLine.handleException(e);
     }
 
     if (line.trim().endsWith(";")) {
@@ -875,6 +845,46 @@ public class Commands {
 
     sqlLine.showWarnings();
     callback.setToSuccess();
+  }
+
+  private String getMultilineInput(String line, DispatchCallback callback) {
+    // ### FIXME:  doing the multi-line handling down here means
+    // higher-level logic never sees the extra lines.  So,
+    // for example, if a script is being saved, it won't include
+    // the continuation lines!  This is logged as sf.net
+    // bug 879518.
+
+    // use multiple lines for statements not terminated by ";"
+    try {
+      StringBuilder lineBuilder = new StringBuilder(line);
+      while (!(lineBuilder.toString().trim().endsWith(";"))) {
+        StringBuilder prompt = new StringBuilder(sqlLine.getPrompt());
+        for (int i = 0; i < prompt.length() - 1; i++) {
+          if (prompt.charAt(i) != '>') {
+            prompt.setCharAt(i, i % 2 == 0 ? '.' : ' ');
+          }
+        }
+
+        String extra = sqlLine.getConsoleReader().readLine(prompt.toString());
+        if (null == extra) {
+          break; // reader is at the end of data
+        }
+        if (!sqlLine.isComment(extra)) {
+          lineBuilder.append(SqlLine.getSeparator()).append(extra);
+        }
+      }
+      line = lineBuilder.toString();
+    } catch (UserInterruptException uie) {
+      // CTRL-C'd out of the command. Note it, but don't call it an
+      // error.
+      callback.setStatus(DispatchCallback.Status.CANCELED);
+      sqlLine.output(sqlLine.loc("command-canceled"));
+      return null;
+    } catch (Exception e) {
+      sqlLine.handleException(e);
+    }
+
+    return line;
   }
 
   public void quit(String line, DispatchCallback callback) {
@@ -1204,7 +1214,7 @@ public class Commands {
   public void all(String line, DispatchCallback callback) {
     int index = sqlLine.getDatabaseConnections().getIndex();
     boolean success = true;
-
+    line = getMultilineInput(line, callback);
     for (int i = 0; i < sqlLine.getDatabaseConnections().size(); i++) {
       sqlLine.getDatabaseConnections().setIndex(i);
       sqlLine.output(
