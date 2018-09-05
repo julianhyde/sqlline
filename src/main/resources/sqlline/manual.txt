@@ -1134,6 +1134,7 @@ Synopsis
 Description
 
 Set the isolation level for the current transaction. For a description of the different isolation levels, see http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail.
+If the specified isolation level is not supported or DEFAULT is specified then there will be used level returned by java.sql.DatabaseMetaData#getDefaultTransactionIsolation
 
 Example of "isolation" command
 
