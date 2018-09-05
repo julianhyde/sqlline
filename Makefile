@@ -22,8 +22,6 @@ install: build
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
-	# Needed due to Tidal checks using old Icinga script that requires nagiosplugin library
-	pipenv install
 
 install-icinga: build
 	# Build pipenv environment for python wrapper
