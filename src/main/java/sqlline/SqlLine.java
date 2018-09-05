@@ -86,7 +86,7 @@ public class SqlLine {
       "xmlelements", new XmlElementOutputFormat(this),
       "json", new JsonOutputFormat(this));
 
-  final List<CommandHandler> commandHandlers;
+  final List<CommandHandler> commandHandlers = new ArrayList<CommandHandler>();
 
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
       Arrays.asList(
@@ -289,7 +289,7 @@ public class SqlLine {
     final TableNameCompleter tableCompleter = new TableNameCompleter(this);
     final List<Completer> empty = Collections.emptyList();
 
-    commandHandlers = Arrays.<CommandHandler>asList(
+    commandHandlers.addAll(Arrays.<CommandHandler>asList(
         new ReflectiveCommandHandler(this, empty, "quit", "done", "exit"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getConnectionURLExamples()),
@@ -304,6 +304,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this, empty, "procedures"),
         new ReflectiveCommandHandler(this, empty, "tables"),
         new ReflectiveCommandHandler(this, empty, "typeinfo"),
+        new ReflectiveCommandHandler(this, empty, "commandhandler"),
         new ReflectiveCommandHandler(this, tableCompleter, "columns"),
         new ReflectiveCommandHandler(this, empty, "reconnect"),
         new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
@@ -338,7 +339,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this, empty, "save"),
         new ReflectiveCommandHandler(this, empty, "scan"),
         new ReflectiveCommandHandler(this, empty, "sql"),
-        new ReflectiveCommandHandler(this, empty, "call"));
+        new ReflectiveCommandHandler(this, empty, "call")));
 
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
     reflector = new Reflector(this);
@@ -511,6 +512,7 @@ public class SqlLine {
     String url = null;
     String nickname = null;
     String logFile = null;
+    String cHandler = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -544,6 +546,8 @@ public class SqlLine {
         }
         if (args[i].equals("-d")) {
           driver = args[++i];
+        } else if (args[i].equals("-ch")) {
+          cHandler = args[++i];
         } else if (args[i].equals("-n")) {
           user = args[++i];
         } else if (args[i].equals("-p")) {
@@ -583,6 +587,15 @@ public class SqlLine {
 
     if (logFile != null) {
       dispatch(COMMAND_PREFIX + "record " + logFile, new DispatchCallback());
+    }
+
+    if (cHandler != null) {
+      StringBuilder sb = new StringBuilder();
+      for (String chElem: cHandler.split(",")) {
+        sb.append(chElem).append(" ");
+      }
+      dispatch(COMMAND_PREFIX + "commandhandler " + sb.toString(),
+          new DispatchCallback());
     }
 
     // now load properties files
@@ -785,7 +798,7 @@ public class SqlLine {
       Map<String, CommandHandler> cmdMap =
           new TreeMap<String, CommandHandler>();
       line = line.substring(1);
-      for (CommandHandler commandHandler : commandHandlers) {
+      for (CommandHandler commandHandler: commandHandlers) {
         String match = commandHandler.matches(line);
         if (match != null) {
           cmdMap.put(match, commandHandler);
@@ -873,17 +886,17 @@ public class SqlLine {
    *
    * @param msg the message to print
    */
-  void output(String msg) {
+  public void output(String msg) {
     output(msg, true);
   }
 
-  void info(String msg) {
+  public void info(String msg) {
     if (!opts.getSilent()) {
       output(msg, true, getErrorStream());
     }
   }
 
-  void info(ColorBuffer msg) {
+  public void info(ColorBuffer msg) {
     if (!opts.getSilent()) {
       output(msg, true, getErrorStream());
     }
@@ -895,35 +908,35 @@ public class SqlLine {
    * @param msg the message to issue
    * @return false always
    */
-  boolean error(String msg) {
+  public boolean error(String msg) {
     output(getColorBuffer().red(msg), true, errorStream);
     return false;
   }
 
-  boolean error(Throwable t) {
+  public boolean error(Throwable t) {
     handleException(t);
     return false;
   }
 
-  void debug(String msg) {
+  public void debug(String msg) {
     if (opts.getVerbose()) {
       output(getColorBuffer().blue(msg), true, errorStream);
     }
   }
 
-  void output(ColorBuffer msg) {
+  public void output(ColorBuffer msg) {
     output(msg, true);
   }
 
-  void output(String msg, boolean newline, PrintStream out) {
+  public void output(String msg, boolean newline, PrintStream out) {
     output(getColorBuffer(msg), newline, out);
   }
 
-  void output(ColorBuffer msg, boolean newline) {
+  public void output(ColorBuffer msg, boolean newline) {
     output(msg, newline, getOutputStream());
   }
 
-  void output(ColorBuffer msg, boolean newline, PrintStream out) {
+  public void output(ColorBuffer msg, boolean newline, PrintStream out) {
     if (newline) {
       out.println(msg.getColor());
     } else {
@@ -947,7 +960,7 @@ public class SqlLine {
    * @param msg     the message to print
    * @param newline if false, do not append a newline
    */
-  void output(String msg, boolean newline) {
+  public void output(String msg, boolean newline) {
     output(getColorBuffer(msg), newline);
   }
 
@@ -1601,7 +1614,7 @@ public class SqlLine {
   // Exception handling routines
   ///////////////////////////////
 
-  void handleException(Throwable e) {
+  public void handleException(Throwable e) {
     while (e instanceof InvocationTargetException) {
       e = ((InvocationTargetException) e).getTargetException();
     }

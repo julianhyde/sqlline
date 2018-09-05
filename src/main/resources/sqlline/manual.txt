@@ -27,6 +27,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -149,6 +151,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -359,6 +363,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -623,6 +629,31 @@ Example of "columns" command
 +-------------+--------------+------------+------------+
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+
+commandhandler
+
+Name
+
+commandhandler — Adds command handlers with commands
+
+Synopsis
+
+!commandhandler {command handler} {command handler}*
+
+Description
+
+Adds command handlers with commands.
+Command handler class must have a constructor accepting Sqlline and implement sqlline.CommandHandler
+
+Example of "commandhandler" command
+
+sqlline> !hello
+Unknown command: hello
+sqlline> !commandhandler sqlline.commandhandler.HelloWorldCommandHandler
+sqlline> !hello
+HELLO WORLD
+
 
 commit
 
