@@ -228,11 +228,17 @@
           <mapping>
             <directoryIncluded>false</directoryIncluded>
             <directory>/usr/local/bin</directory>
+			<filemode>755</filemode>
             <username>root</username>
             <groupname>root</groupname>
             <sources>
               <source>
                 <location>bin/sqlline</location>
+                <destination>sqlline</destination>
+              </source>
+              <source>
+                <location>bin/query-safety-check.py</location>
+                <destination>query-safety-check</destination>
               </source>
             </sources>
           </mapping>
