@@ -665,8 +665,10 @@ public class Commands {
     }
 
     int i;
-
-    if (line.endsWith("TRANSACTION_NONE")) {
+    line = line.toUpperCase(Locale.ROOT);
+    if (line.endsWith(SqlLineOpts.DEFAULT.toUpperCase(Locale.ROOT))) {
+      i = sqlLine.getDatabaseMetaData().getDefaultTransactionIsolation();
+    } else if (line.endsWith("TRANSACTION_NONE")) {
       i = Connection.TRANSACTION_NONE;
     } else if (line.endsWith("TRANSACTION_READ_COMMITTED")) {
       i = Connection.TRANSACTION_READ_COMMITTED;
@@ -683,7 +685,20 @@ public class Commands {
               + "| TRANSACTION_READ_COMMITTED "
               + "| TRANSACTION_READ_UNCOMMITTED "
               + "| TRANSACTION_REPEATABLE_READ "
-              + "| TRANSACTION_SERIALIZABLE>");
+              + "| TRANSACTION_SERIALIZABLE "
+              + "| DEFAULT>");
+      return;
+    }
+
+    if (!sqlLine.getDatabaseMetaData().supportsTransactionIsolationLevel(i)) {
+      callback.setToFailure();
+      sqlLine.error(
+          sqlLine.loc(
+              "isolation-level-not-supported",
+              getTransactionIsolationName(i),
+              getTransactionIsolationName(
+                  sqlLine.getDatabaseMetaData()
+                      .getDefaultTransactionIsolation())));
       return;
     }
 
@@ -691,29 +706,27 @@ public class Commands {
     connection.setTransactionIsolation(i);
 
     int isol = connection.getTransactionIsolation();
-    final String isolDesc;
+
+    sqlLine.debug(
+        sqlLine.loc("isolation-status", getTransactionIsolationName(i)));
+    callback.setToSuccess();
+  }
+
+  private String getTransactionIsolationName(int i) {
     switch (i) {
     case Connection.TRANSACTION_NONE:
-      isolDesc = "TRANSACTION_NONE";
-      break;
+      return "TRANSACTION_NONE";
     case Connection.TRANSACTION_READ_COMMITTED:
-      isolDesc = "TRANSACTION_READ_COMMITTED";
-      break;
+      return "TRANSACTION_READ_COMMITTED";
     case Connection.TRANSACTION_READ_UNCOMMITTED:
-      isolDesc = "TRANSACTION_READ_UNCOMMITTED";
-      break;
+      return "TRANSACTION_READ_UNCOMMITTED";
     case Connection.TRANSACTION_REPEATABLE_READ:
-      isolDesc = "TRANSACTION_REPEATABLE_READ";
-      break;
+      return "TRANSACTION_REPEATABLE_READ";
     case Connection.TRANSACTION_SERIALIZABLE:
-      isolDesc = "TRANSACTION_SERIALIZABLE";
-      break;
+      return "TRANSACTION_SERIALIZABLE";
     default:
-      isolDesc = "UNKNOWN";
+      return "UNKNOWN";
     }
-
-    sqlLine.debug(sqlLine.loc("isolation-status", isolDesc));
-    callback.setToSuccess();
   }
 
   public void batch(String line, DispatchCallback callback) {
