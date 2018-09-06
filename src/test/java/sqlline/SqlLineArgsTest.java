@@ -345,8 +345,8 @@ public class SqlLineArgsTest {
       if (i < 0) {
         break;
       }
-      if (i > 61) {
-        fail("line exceeds 61 chars: " + help.substring(0, i));
+      if (i > 71) {
+        fail("line exceeds 71 chars: " + help.substring(0, i));
       }
       help = help.substring(i);
     }
