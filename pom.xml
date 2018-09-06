@@ -12,7 +12,13 @@
   <packaging>jar</packaging>
   <version>1.5.0-SNAPSHOT</version>
   <name>sqlline</name>
+  <description>Shell for issuing SQL to relational databases via JDBC</description>
   <url>http://github.com/julianhyde/sqlline</url>
+  <inceptionYear>2002</inceptionYear>
+  <organization>
+    <name>Julian Hyde</name>
+    <url>http://www.hydromatic.net</url>
+  </organization>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,8 +31,10 @@
     <jline.version>2.14.4</jline.version>
     <jmockit.version>1.30</jmockit.version>
     <junit.version>4.12</junit.version>
+    <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
+    <maven-jar-plugin.version>3.0.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
@@ -210,10 +218,28 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
         <configuration>
           <archive>
             <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <mainClass>sqlline.SqlLine</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               <mainClass>sqlline.SqlLine</mainClass>
             </manifest>
           </archive>
