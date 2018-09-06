@@ -1560,9 +1560,9 @@ public class Commands {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
         String help = commandHandler.getHelpText();
-        if (!help.contains("\n ")) {
-          // Do not wrap if text appears to be pre-formatted (e.g. '!help set')
-          help = sqlLine.wrap(help, 60, 20);
+        help = sqlLine.wrap(help, 60, 20);
+        if (cmd.equals("set")) {
+          help += sqlLine.loc("variables");
         }
         clist.add(sqlLine.getColorBuffer()
             .pad("!" + commandHandler.getName(), 20)
@@ -1575,6 +1575,7 @@ public class Commands {
     }
 
     if (cmd.length() == 0) {
+      sqlLine.output(sqlLine.loc("variables"));
       sqlLine.output("");
       sqlLine.output(
           sqlLine.loc("comments", SqlLine.getApplicationContactInformation()));

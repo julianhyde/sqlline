@@ -319,10 +319,13 @@ public class SqlLineArgsTest {
     final String expected = "1/1          !help set\n"
         + "!set                Set a sqlline variable\n"
         + "\n"
+        + "Variables:\n"
+        + "\n"
         + "Variable        Value      Description\n"
-        + "=============== ========== ================================\n"
-        + "autoCommit      true/false Enable/disable automatic\n"
-        + "                           transaction commit\n"
+        + "=============== ========== "
+        + "==================================================\n"
+        + "autoCommit      true/false "
+        + "Enable/disable automatic transaction commit\n"
         + "autoSave        true/false Automatically save preferences\n";
     checkScriptFile("!help set\n", false, equalTo(SqlLine.Status.OK),
         containsString(expected));
@@ -330,7 +333,8 @@ public class SqlLineArgsTest {
     // Make sure that each variable (autoCommit, autoSave, color, etc.) has a
     // line in the output of '!help set'
     final SqlLine sqlLine = new SqlLine();
-    String help = sqlLine.loc("help-set");
+    String help = sqlLine.loc("help-set")
+        + sqlLine.loc("variables");
     for (String p : sqlLine.getOpts().propertyNamesMixed()) {
       assertThat(help, containsString("\n" + p + " "));
     }
@@ -346,8 +350,8 @@ public class SqlLineArgsTest {
       if (i < 0) {
         break;
       }
-      if (i > 61) {
-        fail("line exceeds 61 chars: " + help.substring(0, i));
+      if (i > 78) {
+        fail("line exceeds 78 chars: " + i + ": " + help.substring(0, i));
       }
       help = help.substring(i);
     }
@@ -370,6 +374,21 @@ public class SqlLineArgsTest {
         + "sqlline version ???\n";
     checkScriptFile("!help all\n", false, equalTo(SqlLine.Status.OK),
         is(expected));
+  }
+
+  /**
+   * Tests "!help go". "go" and "#" are synonyms.
+   */
+  @Test
+  public void testHelpGo() throws Throwable {
+    for (String c : new String[] {"go", "#"}) {
+      final String expected = "1/1          !help " + c + "\n"
+          + "!go                 Select the current connection\n"
+          + "Closing: org.hsqldb.jdbc.JDBCConnection\n"
+          + "sqlline version ???\n";
+      checkScriptFile("!help " + c + "\n", false, equalTo(SqlLine.Status.OK),
+          is(expected));
+    }
   }
 
   /**
