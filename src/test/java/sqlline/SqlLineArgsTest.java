@@ -1355,6 +1355,16 @@ public class SqlLineArgsTest {
       containsString("TABLE_CAT"));
   }
 
+  @Test
+  public void testCustomOpts() throws Throwable {
+    // nulls are displayed as custom_null
+    final String script = "!appconfig"
+      + " sqlline.extensions.CustomApplication\n"
+      + "values(null)";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+      containsString("custom_null"));
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {

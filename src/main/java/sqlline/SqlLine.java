@@ -49,7 +49,6 @@ public class SqlLine {
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
-  private final SqlLineOpts opts = new SqlLineOpts(this);
   private String lastProgress = null;
   private final Map<SQLWarning, Date> seenWarnings =
       new HashMap<SQLWarning, Date>();
@@ -197,8 +196,8 @@ public class SqlLine {
 
   public SqlLine() {
     reflector = new Reflector(this);
-    opts.loadProperties(System.getProperties());
     setAppConfig(new Application());
+    getOpts().loadProperties(System.getProperties());
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
 
     // attempt to dynamically load signal handler
@@ -322,9 +321,9 @@ public class SqlLine {
           boolean ret;
 
           if (parts.length >= 2) {
-            ret = opts.set(parts[0], parts[1], true);
+            ret = getOpts().set(parts[0], parts[1], true);
           } else {
-            ret = opts.set(parts[0], "true", true);
+            ret = getOpts().set(parts[0], "true", true);
           }
 
           if (!ret) {
@@ -407,8 +406,8 @@ public class SqlLine {
 
     if (commands.size() > 0) {
       // for single command execute, disable color
-      opts.setColor(false);
-      opts.setHeaderInterval(-1);
+      getOpts().setColor(false);
+      getOpts().setHeaderInterval(-1);
 
       for (String command : commands) {
         debug(loc("executing-command", command));
@@ -421,8 +420,8 @@ public class SqlLine {
     Status status = Status.OK;
 
     // if a script file was specified, run the file and quit
-    if (opts.getRun() != null) {
-      dispatch(COMMAND_PREFIX + "run \"" + opts.getRun() + "\"", callback);
+    if (getOpts().getRun() != null) {
+      dispatch(COMMAND_PREFIX + "run \"" + getOpts().getRun() + "\"", callback);
       if (callback.isFailure()) {
         status = Status.OTHER;
       }
@@ -445,13 +444,13 @@ public class SqlLine {
   public Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {
     try {
-      opts.load();
+      getOpts().load();
     } catch (Exception e) {
       handleException(e);
     }
 
     FileHistory fileHistory =
-        new FileHistory(new File(opts.getHistoryFile()));
+        new FileHistory(new File(getOpts().getHistoryFile()));
 
     ConsoleReader reader;
     boolean runningScript = getOpts().getRun() != null;
@@ -693,13 +692,13 @@ public class SqlLine {
   }
 
   public void info(String msg) {
-    if (!opts.getSilent()) {
+    if (!getOpts().getSilent()) {
       output(msg, true, getErrorStream());
     }
   }
 
   public void info(ColorBuffer msg) {
-    if (!opts.getSilent()) {
+    if (!getOpts().getSilent()) {
       output(msg, true, getErrorStream());
     }
   }
@@ -721,7 +720,7 @@ public class SqlLine {
   }
 
   public void debug(String msg) {
-    if (opts.getVerbose()) {
+    if (getOpts().getVerbose()) {
       output(getColorBuffer().blue(msg), true, errorStream);
     }
   }
@@ -822,7 +821,7 @@ public class SqlLine {
       return;
     }
 
-    if (!opts.getShowWarnings()) {
+    if (!getOpts().getShowWarnings()) {
       return;
     }
 
@@ -1425,7 +1424,7 @@ public class SqlLine {
       handleSQLException((SQLException) e);
     } else if (e instanceof WrappedSqlException) {
       handleSQLException((SQLException) e.getCause());
-    } else if (!initComplete && !opts.getVerbose()) {
+    } else if (!initComplete && !getOpts().getVerbose()) {
       // all init errors must be verbose
       if (e.getMessage() == null) {
         error(e.getClass().getName());
@@ -1439,9 +1438,9 @@ public class SqlLine {
 
   void handleSQLException(SQLException e) {
     // all init errors must be verbose
-    final boolean showWarnings = !initComplete || opts.getShowWarnings();
-    final boolean verbose = !initComplete || opts.getVerbose();
-    final boolean showNested = !initComplete || opts.getShowNestedErrs();
+    final boolean showWarnings = !initComplete || getOpts().getShowWarnings();
+    final boolean verbose = !initComplete || getOpts().getVerbose();
+    final boolean showNested = !initComplete || getOpts().getShowNestedErrs();
 
     if (e instanceof SQLWarning && !showWarnings) {
       return;
@@ -1568,17 +1567,18 @@ public class SqlLine {
   ///////////////////////////////////////
 
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
-    String format = opts.getOutputFormat();
+    String format = getOpts().getOutputFormat();
     OutputFormat f = getOutputFormats().get(format);
     if ("csv".equals(format)) {
       final SeparatedValuesOutputFormat csvOutput
         = (SeparatedValuesOutputFormat) f;
-      if ((csvOutput.separator == null && opts.getCsvDelimiter() != null)
+      if ((csvOutput.separator == null && getOpts().getCsvDelimiter() != null)
           || (csvOutput.separator != null
-              && !csvOutput.separator.equals(opts.getCsvDelimiter())
-              || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter())) {
+              && !csvOutput.separator.equals(getOpts().getCsvDelimiter())
+              || csvOutput.quoteCharacter
+                  != getOpts().getCsvQuoteCharacter())) {
         f = new SeparatedValuesOutputFormat(this,
-            opts.getCsvDelimiter(), opts.getCsvQuoteCharacter());
+          getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
         Map<String, OutputFormat> updFormats =
           new HashMap<String, OutputFormat>(getOutputFormats());
         updFormats.put("csv", f);
@@ -1592,7 +1592,7 @@ public class SqlLine {
     }
 
     Rows rows;
-    if (opts.getIncremental()) {
+    if (getOpts().getIncremental()) {
       rows = new IncrementalRows(this, rs, callback);
     } else {
       rows = new BufferedRows(this, rs);
@@ -1603,11 +1603,11 @@ public class SqlLine {
 
   Statement createStatement() throws SQLException {
     Statement stmnt = getDatabaseConnection().connection.createStatement();
-    if (opts.timeout > -1) {
-      stmnt.setQueryTimeout(opts.timeout);
+    if (getOpts().timeout > -1) {
+      stmnt.setQueryTimeout(getOpts().timeout);
     }
-    if (opts.rowLimit != 0) {
-      stmnt.setMaxRows(opts.rowLimit);
+    if (getOpts().rowLimit != 0) {
+      stmnt.setMaxRows(getOpts().rowLimit);
     }
 
     return stmnt;
@@ -1660,7 +1660,7 @@ public class SqlLine {
         boolean success = callback.isSuccess();
         // if we do not force script execution, abort
         // when a failure occurs.
-        if (!success && !opts.getForce()) {
+        if (!success && !getOpts().getForce()) {
           error(loc("abort-on-error", cmd));
           return successCount;
         }
@@ -1675,12 +1675,12 @@ public class SqlLine {
 
   void setCompletions() throws SQLException, IOException {
     if (getDatabaseConnection() != null) {
-      getDatabaseConnection().setCompletions(opts.getFastConnect());
+      getDatabaseConnection().setCompletions(getOpts().getFastConnect());
     }
   }
 
   public SqlLineOpts getOpts() {
-    return opts;
+    return appConfig.opts;
   }
 
   DatabaseConnections getDatabaseConnections() {
@@ -1799,31 +1799,36 @@ public class SqlLine {
    * {@link Application}. */
   private class Config {
     final Collection<String> knownDrivers;
+    final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
 
     Config(Application application) {
       this(application.initDrivers(),
+        application.getOpts(SqlLine.this),
         application.getCommandHandlers(SqlLine.this),
         application.getOutputFormats(SqlLine.this));
     }
 
     Config(Collection<String> knownDrivers,
+           SqlLineOpts opts,
            Collection<CommandHandler> commandHandlers,
            Map<String, OutputFormat> formats) {
       this.knownDrivers = Collections.unmodifiableSet(
         new HashSet<String>(knownDrivers));
+      this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
         new ArrayList<CommandHandler>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
+
     }
 
     Config clone(Collection<CommandHandler> commandHandlers) {
-      return new Config(this.knownDrivers, commandHandlers, this.formats);
+      return new Config(this.knownDrivers, opts, commandHandlers, this.formats);
     }
 
     Config clone(Map<String, OutputFormat> formats) {
-      return new Config(this.knownDrivers, this.commandHandlers, formats);
+      return new Config(this.knownDrivers, opts, this.commandHandlers, formats);
     }
 
   }

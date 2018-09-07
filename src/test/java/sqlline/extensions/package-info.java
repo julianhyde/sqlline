@@ -15,7 +15,8 @@
  * Unit tests for SQLLine, the JDBC shell
  * to check methods visibility between packages.
  * (required for command handlers,
- * output formats, application extensions etc).
+ * output formats, application, session options
+ * extensions etc).
  */
 package sqlline.extensions;
 

@@ -33,13 +33,14 @@ import jline.console.completer.StringsCompleter;
  * Defines the configuration of a SQLLine application.
  *
  * <p>This class can be extended to allow customizations for:
- * known drivers, output formats, commands, information message.
+ * known drivers, output formats, commands,
+ * information message, session options.
  *
  * <p>You can pass the name of the sub-class to SQLLine
  * via the {@code -ac} command-line parameter or {@code !appconfig} command.
  *
  * <p> Use {@code !appconfig sqlline.Application} to reset
- * SQLLine application configuration to defaults at runtime.
+ * SQLLine application configuration to default at runtime.
 */
 public class Application {
 
@@ -302,7 +303,7 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
       new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
       new ReflectiveCommandHandler(sqlLine,
-          sqlLine.getOpts().optionCompleters(), "set"),
+          getOpts(sqlLine).optionCompleters(), "set"),
       new ReflectiveCommandHandler(sqlLine, empty, "save"),
       new ReflectiveCommandHandler(sqlLine, empty, "scan"),
       new ReflectiveCommandHandler(sqlLine, empty, "sql"),
@@ -310,6 +311,23 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
     };
     return Collections.unmodifiableList(Arrays.asList(handlers));
+  }
+
+  /**
+   * Override this method to modify session options.
+   *
+   * <p>If method is not overridden, current state of options will be
+   * reset to default ({@code super.getOpts(sqlLine)}).
+   *
+   * <p>To update / leave current state, override this method
+   * and use {@code sqlLine.getOpts()}.
+   *
+   * @param sqlLine SQLLine instance
+   *
+   * @return SQLLine session options
+   */
+  public SqlLineOpts getOpts(SqlLine sqlLine) {
+    return new SqlLineOpts(sqlLine);
   }
 
   private Set<String> getMetadataMethodNames() {

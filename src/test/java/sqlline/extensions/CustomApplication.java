@@ -25,13 +25,14 @@ import sqlline.CommandHandler;
 import sqlline.OutputFormat;
 import sqlline.ReflectiveCommandHandler;
 import sqlline.SqlLine;
+import sqlline.SqlLineOpts;
 
 /**
  * Sub-class of {@link Application} that is used to test custom
  * application configuration.
  *
  * <p>Overrides information message, output formats, commands,
- * connection url examples.
+ * connection url examples, session options.
  */
 public class CustomApplication extends Application {
 
@@ -83,5 +84,12 @@ public class CustomApplication extends Application {
   @Override
   public Collection<String> getConnectionUrlExamples() {
     return Collections.singletonList("my_custom_url_connection_example");
+  }
+
+  @Override
+  public SqlLineOpts getOpts(SqlLine sqlLine) {
+    SqlLineOpts opts = sqlLine.getOpts();
+    opts.setNullValue("custom_null");
+    return opts;
   }
 }
