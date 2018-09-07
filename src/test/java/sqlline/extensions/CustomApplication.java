@@ -38,58 +38,55 @@ public class CustomApplication extends Application {
 
   public static final String CUSTOM_INFO_MESSAGE = "my_custom_info_message";
 
-  @Override
-  public String getInfoMessage() {
+  @Override public String getInfoMessage() {
     return CUSTOM_INFO_MESSAGE;
   }
 
-  @Override
-  public Map<String, OutputFormat> getOutputFormats(SqlLine sqlLine) {
+  @Override public Map<String, OutputFormat> getOutputFormats(SqlLine sqlLine) {
     final Map<String, OutputFormat> outputFormats =
-      new HashMap<String, OutputFormat>(
-        sqlLine.getOutputFormats());
+        new HashMap<String, OutputFormat>(sqlLine.getOutputFormats());
     outputFormats.remove("json");
     return outputFormats;
   }
 
-  @Override
-  public Collection<CommandHandler> getCommandHandlers(SqlLine sqlLine) {
+  @Override public Collection<CommandHandler> getCommandHandlers(
+      SqlLine sqlLine) {
     final List<CommandHandler> commandHandlers =
-      new ArrayList<CommandHandler>(
-        sqlLine.getCommandHandlers());
+        new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
     final Iterator<CommandHandler> iterator =
-      commandHandlers.iterator();
+        commandHandlers.iterator();
     while (iterator.hasNext()) {
       CommandHandler next = iterator.next();
       List<String> names = next.getNames();
       if (names.contains("tables")
-        || names.contains("connect")
-        || names.contains("outputformat")) {
+          || names.contains("connect")
+          || names.contains("outputformat")) {
         iterator.remove();
       }
     }
 
-    commandHandlers.add(new ReflectiveCommandHandler(sqlLine,
-      new StringsCompleter(getConnectionUrlExamples()),
-      "connect", "open"));
+    commandHandlers.add(
+        new ReflectiveCommandHandler(sqlLine,
+            new StringsCompleter(getConnectionUrlExamples()), "connect",
+            "open"));
 
-
-    commandHandlers.add(new ReflectiveCommandHandler(sqlLine,
-      new StringsCompleter(getOutputFormats(sqlLine).keySet()),
-      "outputformat"));
+    commandHandlers.add(
+        new ReflectiveCommandHandler(sqlLine,
+            new StringsCompleter(getOutputFormats(sqlLine).keySet()),
+            "outputformat"));
 
     return commandHandlers;
   }
 
-  @Override
-  public Collection<String> getConnectionUrlExamples() {
+  @Override public Collection<String> getConnectionUrlExamples() {
     return Collections.singletonList("my_custom_url_connection_example");
   }
 
-  @Override
-  public SqlLineOpts getOpts(SqlLine sqlLine) {
+  @Override public SqlLineOpts getOpts(SqlLine sqlLine) {
     SqlLineOpts opts = sqlLine.getOpts();
     opts.setNullValue("custom_null");
     return opts;
   }
 }
+
+// End CustomApplication.java

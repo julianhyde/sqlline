@@ -1359,7 +1359,7 @@ public class SqlLine {
     Arrays.fill(head, ' ');
 
     for (StringTokenizer tok = new StringTokenizer(toWrap, " ");
-        tok.hasMoreTokens();) {
+         tok.hasMoreTokens();) {
       String next = tok.nextToken();
       final int x = line.length();
       line.append(line.length() == 0 ? "" : " ").append(next);
@@ -1570,17 +1570,17 @@ public class SqlLine {
     String format = getOpts().getOutputFormat();
     OutputFormat f = getOutputFormats().get(format);
     if ("csv".equals(format)) {
-      final SeparatedValuesOutputFormat csvOutput
-        = (SeparatedValuesOutputFormat) f;
+      final SeparatedValuesOutputFormat csvOutput =
+          (SeparatedValuesOutputFormat) f;
       if ((csvOutput.separator == null && getOpts().getCsvDelimiter() != null)
           || (csvOutput.separator != null
               && !csvOutput.separator.equals(getOpts().getCsvDelimiter())
               || csvOutput.quoteCharacter
                   != getOpts().getCsvQuoteCharacter())) {
         f = new SeparatedValuesOutputFormat(this,
-          getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
+            getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
         Map<String, OutputFormat> updFormats =
-          new HashMap<String, OutputFormat>(getOutputFormats());
+            new HashMap<String, OutputFormat>(getOutputFormats());
         updFormats.put("csv", f);
         updateOutputFormats(updFormats);
       }
@@ -1777,8 +1777,8 @@ public class SqlLine {
   }
 
   public void updateCommandHandlers(
-    Collection<CommandHandler> commandHandlers) {
-    appConfig = appConfig.clone(commandHandlers);
+      Collection<CommandHandler> commandHandlers) {
+    appConfig = appConfig.withCommandHandlers(commandHandlers);
   }
 
   public Map<String, OutputFormat> getOutputFormats() {
@@ -1786,7 +1786,7 @@ public class SqlLine {
   }
 
   public void updateOutputFormats(Map<String, OutputFormat> formats) {
-    appConfig = appConfig.clone(formats);
+    appConfig = appConfig.withFormats(formats);
   }
 
   /** Exit status returned to the operating system. OK, ARGS, OTHER
@@ -1805,32 +1805,31 @@ public class SqlLine {
 
     Config(Application application) {
       this(application.initDrivers(),
-        application.getOpts(SqlLine.this),
-        application.getCommandHandlers(SqlLine.this),
-        application.getOutputFormats(SqlLine.this));
+          application.getOpts(SqlLine.this),
+          application.getCommandHandlers(SqlLine.this),
+          application.getOutputFormats(SqlLine.this));
     }
 
     Config(Collection<String> knownDrivers,
-           SqlLineOpts opts,
-           Collection<CommandHandler> commandHandlers,
-           Map<String, OutputFormat> formats) {
+        SqlLineOpts opts,
+        Collection<CommandHandler> commandHandlers,
+        Map<String, OutputFormat> formats) {
       this.knownDrivers = Collections.unmodifiableSet(
-        new HashSet<String>(knownDrivers));
+          new HashSet<String>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
-        new ArrayList<CommandHandler>(commandHandlers));
+          new ArrayList<CommandHandler>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
 
     }
 
-    Config clone(Collection<CommandHandler> commandHandlers) {
+    Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
       return new Config(this.knownDrivers, opts, commandHandlers, this.formats);
     }
 
-    Config clone(Map<String, OutputFormat> formats) {
+    Config withFormats(Map<String, OutputFormat> formats) {
       return new Config(this.knownDrivers, opts, this.commandHandlers, formats);
     }
-
   }
 }
 

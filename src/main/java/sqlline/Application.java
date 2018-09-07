@@ -39,7 +39,7 @@ import jline.console.completer.StringsCompleter;
  * <p>You can pass the name of the sub-class to SQLLine
  * via the {@code -ac} command-line parameter or {@code !appconfig} command.
  *
- * <p> Use {@code !appconfig sqlline.Application} to reset
+ * <p>Use {@code !appconfig sqlline.Application} to reset
  * SQLLine application configuration to default at runtime.
 */
 public class Application {
@@ -154,7 +154,7 @@ public class Application {
   private static final List<String> DEFAULT_CONNECTION_URL_EXAMPLES =
       Collections.unmodifiableList(Arrays.asList(CONNECTION_URLS));
 
-  /** Creates an ApplicationConfig. */
+  /** Creates an Application. */
   public Application() {
   }
 
@@ -168,8 +168,8 @@ public class Application {
    * @see #DEFAULT_APP_INFO_MESSAGE
    */
   public String getInfoMessage() throws Exception {
-    InputStream inputStream = getClass().
-        getResourceAsStream("/META-INF/maven/sqlline/sqlline/pom.properties");
+    final String path = "/META-INF/maven/sqlline/sqlline/pom.properties";
+    InputStream inputStream = getClass().getResourceAsStream(path);
     Properties properties = new Properties();
     properties.put("artifactId", "sqlline");
     properties.put("version", "???");

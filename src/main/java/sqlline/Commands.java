@@ -12,6 +12,7 @@
 package sqlline;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.*;
@@ -1439,34 +1440,28 @@ public class Commands {
     }
 
     final List<CommandHandler> commandHandlers =
-      new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
+        new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
     final Set<String> existingNames = new HashSet<String>();
     for (CommandHandler existingCommandHandler : commandHandlers) {
       existingNames.addAll(existingCommandHandler.getNames());
     }
 
-    boolean updateCommandHandlers = false;
-    Class commandHandlerClass;
+    int commandHandlerUpdateCount = 0;
     for (int i = 1; i < cmd.length; i++) {
       try {
-        commandHandlerClass = Class.forName(cmd[i]);
-        CommandHandler commandHandler =
-            (CommandHandler) commandHandlerClass.getConstructor(SqlLine.class)
-                .newInstance(sqlLine);
-        boolean isAlreadyPresent = false;
-        for (String newName : commandHandler.getNames()) {
-          if (isAlreadyPresent) {
-            break;
-          }
-          isAlreadyPresent = existingNames.contains(newName);
-        }
-        if (isAlreadyPresent) {
+        @SuppressWarnings("unchecked")
+        Class<CommandHandler> commandHandlerClass =
+            (Class<CommandHandler>) Class.forName(cmd[i]);
+        final Constructor<CommandHandler> constructor =
+            commandHandlerClass.getConstructor(SqlLine.class);
+        CommandHandler commandHandler = constructor.newInstance(sqlLine);
+        if (intersects(existingNames, commandHandler.getNames())) {
           sqlLine.error("Could not add command handler " + cmd[i] + " as one "
               + "of commands " + commandHandler.getNames() + " is already present");
         } else {
           commandHandlers.add(commandHandler);
           existingNames.addAll(commandHandler.getNames());
-          updateCommandHandlers = true;
+          ++commandHandlerUpdateCount;
         }
       } catch (Exception e) {
         sqlLine.error(e);
@@ -1474,13 +1469,22 @@ public class Commands {
       }
     }
 
-    if (updateCommandHandlers) {
+    if (commandHandlerUpdateCount > 0) {
       sqlLine.updateCommandHandlers(commandHandlers);
     }
 
     if (!callback.isFailure()) {
       callback.setToSuccess();
     }
+  }
+
+  private static <E> boolean intersects(Collection<E> c1, Collection<E> c2) {
+    for (E e : c2) {
+      if (c1.contains(e)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
