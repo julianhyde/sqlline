@@ -615,7 +615,7 @@ sqlline>
         <screen>
 sqlline> !hello
 Unknown command: hello
-sqlline> !commandhandler sqlline.commandhandler.HelloWorldCommandHandler
+sqlline> !commandhandler sqlline.extensions.HelloWorldCommandHandler
 sqlline> !hello
 HELLO WORLD
 sqlline>

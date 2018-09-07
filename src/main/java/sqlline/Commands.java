@@ -1437,6 +1437,15 @@ public class Commands {
       callback.setToFailure();
       return;
     }
+
+    final List<CommandHandler> commandHandlers =
+      new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
+    final Set<String> existingNames = new HashSet<String>();
+    for (CommandHandler existingCommandHandler : commandHandlers) {
+      existingNames.addAll(existingCommandHandler.getNames());
+    }
+
+    boolean updateCommandHandlers = false;
     Class commandHandlerClass;
     for (int i = 1; i < cmd.length; i++) {
       try {
@@ -1444,12 +1453,6 @@ public class Commands {
         CommandHandler commandHandler =
             (CommandHandler) commandHandlerClass.getConstructor(SqlLine.class)
                 .newInstance(sqlLine);
-        Set<String> existingNames = new HashSet<String>();
-        final Collection<CommandHandler> commandHandlers =
-            sqlLine.getCommandHandlers();
-        for (CommandHandler existingCommandHandler : commandHandlers) {
-          existingNames.addAll(existingCommandHandler.getNames());
-        }
         boolean isAlreadyPresent = false;
         for (String newName : commandHandler.getNames()) {
           if (isAlreadyPresent) {
@@ -1462,12 +1465,19 @@ public class Commands {
               + "of commands " + commandHandler.getNames() + " is already present");
         } else {
           commandHandlers.add(commandHandler);
+          existingNames.addAll(commandHandler.getNames());
+          updateCommandHandlers = true;
         }
       } catch (Exception e) {
         sqlLine.error(e);
         callback.setToFailure();
       }
     }
+
+    if (updateCommandHandlers) {
+      sqlLine.updateCommandHandlers(commandHandlers);
+    }
+
     if (!callback.isFailure()) {
       callback.setToSuccess();
     }

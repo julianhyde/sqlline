@@ -14,8 +14,8 @@ package sqlline;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +37,9 @@ import jline.console.completer.StringsCompleter;
  *
  * <p>You can pass the name of the sub-class to SQLLine
  * via the {@code -ac} command-line parameter or {@code !appconfig} command.
+ *
+ * <p> Use {@code !appconfig sqlline.Application} to reset
+ * SQLLine application configuration to defaults at runtime.
 */
 public class Application {
 
@@ -184,16 +187,25 @@ public class Application {
    *
    * <p>Override this method to modify set of supported known drivers.
    *
-   * @return set of known drivers
+   * @return Collection of known drivers
    *
    * @see #DEFAULT_DRIVERS
    */
-  public Set<String> initDrivers() {
+  public Collection<String> initDrivers() {
     return DEFAULT_DRIVERS;
   }
 
   /**
    * Override this method to modify known output formats implementations.
+   *
+   * <p>If method is not overridden, current state of formats will be
+   * reset to default ({@code super.getOutputFormats(sqlLine)}).
+   *
+   * <p>To update / leave current state, override this method
+   * and use {@code sqlLine.getOutputFormats()}.
+   *
+   * <p>When overriding output formats outputformat command
+   * should be re-initialized unless default commands handlers are used.
    *
    * @param sqlLine SQLLine instance
    *
@@ -209,31 +221,38 @@ public class Application {
     outputFormats.put("xmlattr", new XmlAttributeOutputFormat(sqlLine));
     outputFormats.put("xmlelements", new XmlElementOutputFormat(sqlLine));
     outputFormats.put("json", new JsonOutputFormat(sqlLine));
-    return outputFormats;
+    return Collections.unmodifiableMap(outputFormats);
   }
 
   /**
    * Override this method to modify connection url examples.
    *
-   * @return list of connection url examples
+   * <p>When overriding connection url examples, connect / open command
+   * should be re-initialized unless default commands handlers are used.
+   *
+   * @return Collection of connection url examples
    */
-  public List<String> getConnectionUrlExamples() {
+  public Collection<String> getConnectionUrlExamples() {
     return DEFAULT_CONNECTION_URL_EXAMPLES;
   }
 
   /**
    * Override this method to modify supported commands.
    *
+   * <p>If method is not overridden, current state of commands will be
+   * reset to default ({@code super.getCommandHandlers(sqlLine)}).
+   *
+   * <p>To update / leave current state, override this method
+   * and use {@code sqlLine.getCommandHandlers()}.
+   *
    * @param sqlLine SQLLine instance
    *
-   * @return List of command handlers
+   * @return Collection of command handlers
    */
-  public List<CommandHandler> getCommandHandlers(SqlLine sqlLine) {
+  public Collection<CommandHandler> getCommandHandlers(SqlLine sqlLine) {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
-    final Map<String, OutputFormat> outputFormats =
-        new HashMap<String, OutputFormat>();
-    getOutputFormats(sqlLine);
+    final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
     final CommandHandler[] handlers = {
       new ReflectiveCommandHandler(sqlLine, empty, "quit", "done", "exit"),
       new ReflectiveCommandHandler(sqlLine,
@@ -290,9 +309,7 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "call"),
       new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
     };
-    List<CommandHandler> commandHandlers = new ArrayList<CommandHandler>();
-    Collections.addAll(commandHandlers, handlers);
-    return commandHandlers;
+    return Collections.unmodifiableList(Arrays.asList(handlers));
   }
 
   private Set<String> getMetadataMethodNames() {

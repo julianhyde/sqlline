@@ -9,7 +9,7 @@
 //
 // http://opensource.org/licenses/BSD-3-Clause
 */
-package sqlline.commandhandler;
+package sqlline.extensions;
 
 import java.util.Arrays;
 import java.util.Collections;

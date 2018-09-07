@@ -600,7 +600,7 @@ public class SqlLine {
       Map<String, CommandHandler> cmdMap =
           new TreeMap<String, CommandHandler>();
       line = line.substring(1);
-      for (CommandHandler commandHandler : appConfig.commandHandlers) {
+      for (CommandHandler commandHandler : getCommandHandlers()) {
         String match = commandHandler.matches(line);
         if (match != null) {
           cmdMap.put(match, commandHandler);
@@ -1569,7 +1569,7 @@ public class SqlLine {
 
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
     String format = opts.getOutputFormat();
-    OutputFormat f = appConfig.formats.get(format);
+    OutputFormat f = getOutputFormats().get(format);
     if ("csv".equals(format)) {
       final SeparatedValuesOutputFormat csvOutput
         = (SeparatedValuesOutputFormat) f;
@@ -1579,12 +1579,15 @@ public class SqlLine {
               || csvOutput.quoteCharacter != opts.getCsvQuoteCharacter())) {
         f = new SeparatedValuesOutputFormat(this,
             opts.getCsvDelimiter(), opts.getCsvQuoteCharacter());
-        appConfig.formats.put("csv", f);
+        Map<String, OutputFormat> updFormats =
+          new HashMap<String, OutputFormat>(getOutputFormats());
+        updFormats.put("csv", f);
+        updateOutputFormats(updFormats);
       }
     }
 
     if (f == null) {
-      error(loc("unknown-format", format, appConfig.formats.keySet()));
+      error(loc("unknown-format", format, getOutputFormats().keySet()));
       f = new TableOutputFormat(this);
     }
 
@@ -1773,6 +1776,19 @@ public class SqlLine {
     return appConfig.commandHandlers;
   }
 
+  public void updateCommandHandlers(
+    Collection<CommandHandler> commandHandlers) {
+    appConfig = appConfig.clone(commandHandlers);
+  }
+
+  public Map<String, OutputFormat> getOutputFormats() {
+    return appConfig.formats;
+  }
+
+  public void updateOutputFormats(Map<String, OutputFormat> formats) {
+    appConfig = appConfig.clone(formats);
+  }
+
   /** Exit status returned to the operating system. OK, ARGS, OTHER
    * correspond to 0, 1, 2. */
   public enum Status {
@@ -1783,14 +1799,33 @@ public class SqlLine {
    * {@link Application}. */
   private class Config {
     final Collection<String> knownDrivers;
-    final List<CommandHandler> commandHandlers;
+    final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
 
     Config(Application application) {
-      this.knownDrivers = application.initDrivers();
-      this.commandHandlers = application.getCommandHandlers(SqlLine.this);
-      this.formats = application.getOutputFormats(SqlLine.this);
+      this(application.initDrivers(),
+        application.getCommandHandlers(SqlLine.this),
+        application.getOutputFormats(SqlLine.this));
     }
+
+    Config(Collection<String> knownDrivers,
+           Collection<CommandHandler> commandHandlers,
+           Map<String, OutputFormat> formats) {
+      this.knownDrivers = Collections.unmodifiableSet(
+        new HashSet<String>(knownDrivers));
+      this.commandHandlers = Collections.unmodifiableList(
+        new ArrayList<CommandHandler>(commandHandlers));
+      this.formats = Collections.unmodifiableMap(formats);
+    }
+
+    Config clone(Collection<CommandHandler> commandHandlers) {
+      return new Config(this.knownDrivers, commandHandlers, this.formats);
+    }
+
+    Config clone(Map<String, OutputFormat> formats) {
+      return new Config(this.knownDrivers, this.commandHandlers, formats);
+    }
+
   }
 }
 

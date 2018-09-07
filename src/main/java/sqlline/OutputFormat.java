@@ -14,7 +14,7 @@ package sqlline;
 /**
  * Converts a collection of rows into text.
  */
-interface OutputFormat {
+public interface OutputFormat {
   int print(Rows rows);
 }
 

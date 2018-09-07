@@ -28,9 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -52,6 +50,7 @@ import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
+import sqlline.extensions.CustomApplication;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -785,7 +784,7 @@ public class SqlLineArgsTest {
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     final String[] args = {
-      "-ch", "sqlline.commandhandler.HelloWorldCommandHandler"};
+      "-ch", "sqlline.extensions.HelloWorldCommandHandler"};
     sqlLine.begin(args, is, false);
 
     sqlLine.runCommands(Collections.singletonList("!hello"),
@@ -819,8 +818,8 @@ public class SqlLineArgsTest {
     SqlLine.Status status = sqlLine.begin(new String[]{}, is, false);
 
     final String script = "!commandhandler"
-        + " sqlline.commandhandler.HelloWorld2CommandHandler"
-        + " sqlline.commandhandler.HelloWorldCommandHandler";
+        + " sqlline.extensions.HelloWorld2CommandHandler"
+        + " sqlline.extensions.HelloWorldCommandHandler";
     sqlLine.runCommands(Collections.singletonList(script),
         new DispatchCallback());
     sqlLine.runCommands(Collections.singletonList("!hello"),
@@ -828,7 +827,7 @@ public class SqlLineArgsTest {
     String output = os.toString("UTF8");
     assertThat(output, containsString("HELLO WORLD2"));
     final String expected = "Could not add command handler "
-        + "sqlline.commandhandler.HelloWorldCommandHandler as one of commands "
+        + "sqlline.extensions.HelloWorldCommandHandler as one of commands "
         + "[hello, test] is already present";
     assertThat(output, containsString(expected));
     os.reset();
@@ -1318,7 +1317,7 @@ public class SqlLineArgsTest {
     assertThat(pair.output,
         containsString(CustomApplication.DEFAULT_APP_INFO_MESSAGE));
 
-    String[] args2 = {"-ac", "sqlline.SqlLineArgsTest$CustomApplication"};
+    String[] args2 = {"-ac", "sqlline.extensions.CustomApplication"};
     pair = run(args2);
     assertThat(pair.status, equalTo(SqlLine.Status.OK));
     assertThat(pair.output,
@@ -1329,7 +1328,7 @@ public class SqlLineArgsTest {
   public void testCustomOutputFormats() throws Throwable {
     // json format was removed
     final String script = "!appconfig"
-        + " sqlline.SqlLineArgsTest$CustomApplication\n"
+        + " sqlline.extensions.CustomApplication\n"
         + "!set outputformat json\n"
         + "values 1;";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
@@ -1340,10 +1339,20 @@ public class SqlLineArgsTest {
   public void testCustomCommands() throws Throwable {
     // table command was removed
     final String script = "!appconfig"
-        + " sqlline.SqlLineArgsTest$CustomApplication\n"
+        + " sqlline.extensions.CustomApplication\n"
         + "!tables";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
         containsString("Unknown command: tables"));
+  }
+
+  @Test
+  public void testAppConfigReset() throws Throwable {
+    final String script = "!appconfig"
+      + " sqlline.extensions.CustomApplication\n"
+      + "!appconfig sqlline.Application\n"
+      + "!tables";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+      containsString("TABLE_CAT"));
   }
 
   // Work around compile error in JDK 1.6
@@ -1411,43 +1420,6 @@ public class SqlLineArgsTest {
     }
   }
 
-  /**
-   * Sub-class of {@link Application} that is used to test custom
-   * application configuration.
-   *
-   * <p>Overrides information message, output formats and commands.
-   */
-  public static class CustomApplication extends Application {
-    static final String CUSTOM_INFO_MESSAGE = "my_custom_info_message";
-
-    public CustomApplication() {
-      super();
-    }
-
-    @Override public String getInfoMessage() throws Exception {
-      return CUSTOM_INFO_MESSAGE;
-    }
-
-    @Override public Map<String, OutputFormat> getOutputFormats(
-        SqlLine sqlLine) {
-      final Map<String, OutputFormat> outputFormats =
-          super.getOutputFormats(sqlLine);
-      outputFormats.remove("json");
-      return outputFormats;
-    }
-
-    @Override public List<CommandHandler> getCommandHandlers(SqlLine sqlLine) {
-      List<CommandHandler> commandHandlers = super.getCommandHandlers(sqlLine);
-      final Iterator<CommandHandler> iterator = commandHandlers.iterator();
-      while (iterator.hasNext()) {
-        CommandHandler next =  iterator.next();
-        if (next.getNames().contains("tables")) {
-          iterator.remove();
-        }
-      }
-      return commandHandlers;
-    }
-  }
 }
 
 // End SqlLineArgsTest.java
