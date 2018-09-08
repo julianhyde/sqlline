@@ -213,7 +213,8 @@ class DatabaseConnection {
     try {
       try {
         if (connection != null && !connection.isClosed()) {
-          sqlLine.output(sqlLine.loc("closing", connection));
+          sqlLine.output(sqlLine.loc("closing",
+              connection.getClass().getName()));
           connection.close();
         }
       } catch (Exception e) {

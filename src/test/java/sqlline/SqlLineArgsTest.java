@@ -1365,6 +1365,15 @@ public class SqlLineArgsTest {
       containsString("custom_null"));
   }
 
+  @Test
+  public void testReconnect() throws Throwable {
+    final String script = "!reconnect";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(
+            "Reconnecting to \"jdbc:hsqldb:res:scott\"...\n"
+            + "Closing: org.hsqldb.jdbc.JDBCConnection"));
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {
