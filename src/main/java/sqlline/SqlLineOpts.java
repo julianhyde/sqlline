@@ -90,6 +90,8 @@ public class SqlLineOpts implements Completer {
   /**
    * The save directory if HOME/.sqlline/ on UNIX, and HOME/sqlline/ on
    * Windows.
+   *
+   * @return save directory
    */
   public File saveDir() {
     String dir = System.getProperty("sqlline.rcfile");
@@ -476,13 +478,21 @@ public class SqlLineOpts implements Completer {
     return this.silent;
   }
 
-  /** @deprecated Use {@link #setAutoSave(boolean)} */
+  /**
+   * @deprecated Use {@link #setAutoSave(boolean)}
+   *
+   * @param autoSave auto save flag
+   */
   @Deprecated
   public void setAutosave(boolean autoSave) {
     setAutoSave(autoSave);
   }
 
-  /** @deprecated Use {@link #getAutoSave()} */
+  /**
+   * @deprecated Use {@link #getAutoSave()}
+   *
+   * @return true if auto save is on, false otherwise
+   */
   @Deprecated
   public boolean getAutosave() {
     return getAutoSave();
