@@ -440,6 +440,13 @@ public class SqlLine {
    * <p>Before you invoke this method, you can redirect output by
    * calling {@link #setOutputStream(PrintStream)}
    * and/or {@link #setErrorStream(PrintStream)}.
+   *
+   * @param args init arguments
+   * @param inputStream input stream
+   * @param saveHistory save history flag
+   * @return exit status
+   * @throws IOException is case if was not able to obtain
+   *         history file or start console reader
    */
   public Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {

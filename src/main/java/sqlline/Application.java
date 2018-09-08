@@ -164,6 +164,8 @@ public class Application {
    * <p>Override this method to return a custom information message.
    *
    * @return custom information message
+   * @throws Exception in case of errors during
+   *         obtaining application info message
    *
    * @see #DEFAULT_APP_INFO_MESSAGE
    */
