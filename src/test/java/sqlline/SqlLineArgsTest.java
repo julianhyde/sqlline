@@ -39,7 +39,6 @@ import org.hamcrest.Matcher;
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -302,11 +301,9 @@ public class SqlLineArgsTest {
    * Tests the "close" command,
    * [HIVE-5768] Beeline connection cannot be closed with '!close' command.
    */
-  @Ignore
-  @Test
   public void testClose() throws Throwable {
-    checkScriptFile("!close 1\n", false, equalTo(SqlLine.Status.OK),
-            equalTo("xx"));
+    checkScriptFile("!close\n", false, equalTo(SqlLine.Status.OK),
+        containsString("!close\nClosing: org.hsqldb.jdbc.JDBCConnection"));
   }
 
   /**

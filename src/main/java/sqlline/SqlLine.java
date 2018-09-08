@@ -609,16 +609,24 @@ public class SqlLine {
       if (cmdMap.size() == 0) {
         callback.setStatus(DispatchCallback.Status.FAILURE);
         error(loc("unknown-command", line));
-      } else if (cmdMap.size() > 1) {
-        callback.setStatus(DispatchCallback.Status.FAILURE);
-        error(
-            loc(
-                "multiple-matches",
-                cmdMap.keySet().toString()));
-      } else {
-        callback.setStatus(DispatchCallback.Status.RUNNING);
-        cmdMap.values().iterator().next().execute(line, callback);
+        return;
       }
+
+      CommandHandler matchingHandler;
+      if (cmdMap.size() > 1) {
+        // look for the exact match
+        matchingHandler = cmdMap.get(split(line, 1)[0]);
+        if (matchingHandler == null) {
+          callback.setStatus(DispatchCallback.Status.FAILURE);
+          error(loc("multiple-matches", cmdMap.keySet().toString()));
+          return;
+        }
+      } else {
+        matchingHandler = cmdMap.values().iterator().next();
+      }
+
+      callback.setStatus(DispatchCallback.Status.RUNNING);
+      matchingHandler.execute(line, callback);
     } else {
       callback.setStatus(DispatchCallback.Status.RUNNING);
       commands.sql(line, callback);
