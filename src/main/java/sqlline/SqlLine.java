@@ -218,10 +218,13 @@ public class SqlLine {
    * @param args        args[] passed in directly from {@link #main(String[])}
    * @param inputStream Stream to read sql commands from (stdin or a file) or
    *                    null for an interactive shell
-   * @param saveHistory whether or not the commands issued will be saved to
-   *                    sqlline's history file
+   * @param saveHistory Whether to save the commands issued to SQLLine's history
+   *                    file
+   *
    * @return Whether successful
-   * @throws IOException on error
+   *
+   * @throws IOException if SQLLine cannot obtain
+   *         history file or start console reader
    */
   public static Status start(String[] args,
       InputStream inputStream,
@@ -432,7 +435,7 @@ public class SqlLine {
   }
 
   /**
-   * Runs SqlLine, accepting input from the given input stream,
+   * Runs SQLLine, accepting input from the given input stream,
    * dispatching it to the appropriate
    * {@link CommandHandler} until the global variable <code>exit</code> is
    * true.
@@ -440,6 +443,16 @@ public class SqlLine {
    * <p>Before you invoke this method, you can redirect output by
    * calling {@link #setOutputStream(PrintStream)}
    * and/or {@link #setErrorStream(PrintStream)}.
+   *
+   * @param args Command-line arguments
+   * @param inputStream Input stream
+   * @param saveHistory Whether to save the commands issued to SQLLine's history
+   *                    file
+   *
+   * @return exit status
+   *
+   * @throws IOException if SQLLine cannot obtain
+   *         history file or start console reader
    */
   public Status begin(String[] args, InputStream inputStream,
       boolean saveHistory) throws IOException {
