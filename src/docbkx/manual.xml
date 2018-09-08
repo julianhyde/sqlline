@@ -4,7 +4,7 @@
 [
     <!-- "http://www.docbook.org/xml/4.2/docbookx.dtd" -->
     <!-- "file:/sw/share/xml/dtd/docbookx/4.2.0/docbookx.dtd" -->
-    <!ENTITY VERSION "1.4">
+    <!ENTITY VERSION "1.5.0">
 ]>
 <book>
   <bookinfo>
@@ -12,8 +12,12 @@
       SQLLine &VERSION;
     </title>
     <copyright>
-         <year>2002, 2003, 2004, 2005</year>
+      <year>2002, 2003, 2004, 2005</year>
       <holder>Marc Prud'hommeaux</holder>
+    </copyright>
+    <copyright>
+      <year>2006-2018</year>
+      <holder>Julian Hyde</holder>
     </copyright>
   </bookinfo>
   <part id="manual">

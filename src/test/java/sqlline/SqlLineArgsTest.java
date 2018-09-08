@@ -266,9 +266,10 @@ public class SqlLineArgsTest {
   @Test
   public void testScan() throws Throwable {
     final String line0 = "Compliant Version Driver Class\n";
-    final String line1 = "yes       2.3     org.hsqldb.jdbcDriver";
-    checkScriptFile("!scan\n", false,
-        equalTo(SqlLine.Status.OK),
+    final String line1 = "yes       2.4     org.hsqldb.jdbcDriver";
+    final String script = "!set showHeader true\n"
+        + "!scan\n";
+    checkScriptFile(script, false, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
 
@@ -890,7 +891,7 @@ public class SqlLineArgsTest {
     final String line3 = "@C1@##@C2@##@C3@##@C4@##@C5@##@C6@";
     final String line4 = "@#@##@@@#@@@##@1@##@1969-07-20@##@@##@ 1'2\"3\t4@";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(containsString(line1), containsString(line2),
+        CoreMatchers.<String>allOf(containsString(line1), containsString(line2),
             containsString(line3), containsString(line4)));
   }
 
@@ -919,7 +920,7 @@ public class SqlLineArgsTest {
     final String script = "!set outputformat xmlelements\n"
         + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ' ]]>1''2\"3\t<>&4');\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(
+        CoreMatchers.<String>allOf(
             containsString("<resultset>"),
             containsString("<result>"),
             containsString("<C1>1</C1>"),
@@ -965,7 +966,7 @@ public class SqlLineArgsTest {
         + "!set nullValue \"'\"\n"
         + "values (NULL, -1.5, null, date '1969-07-20', null, 'null');\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(
+        CoreMatchers.<String>allOf(
             containsString("'C1','C2','C3','C4','C5','C6'"),
             containsString("'%%%','-1.5','%%%','1969-07-20','%%%','null'"),
             containsString("'C1','C2','C3','C4','C5','C6'"),
@@ -1251,7 +1252,7 @@ public class SqlLineArgsTest {
         + connectionSpec.driver
         + "; using registered driver org.h2.Driver instead";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.allOf(containsString(message),
+        CoreMatchers.<String>allOf(containsString(message),
             not(containsString("NullPointerException")),
             containsString(line0),
             containsString(line1)));
@@ -1263,7 +1264,7 @@ public class SqlLineArgsTest {
     final String script = "!tables\n";
 
     checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
-        CoreMatchers.allOf(containsString("No suitable driver"),
+        CoreMatchers.<String>allOf(containsString("No suitable driver"),
             not(containsString("NullPointerException"))));
   }
 

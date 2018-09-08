@@ -11,7 +11,7 @@ Capitalization is tricky:
 ## How to make a release (for committers)
 
 Make sure `mvn clean install` and `mvn site` pass under JDK 1.7, 8, 9,
-and 10.
+10 and 11.
 
 Write release notes. Run the
 [relNotes](https://github.com/julianhyde/share/blob/master/tools/relNotes)
@@ -20,7 +20,7 @@ script and append the output to [HISTORY.md](HISTORY.md).
 Update version numbers in README, README.md, src/docbkx/manual.xml,
 and the copyright date in NOTICE.
 
-Switch to JDK 1.7.
+Switch to JDK 10.
 
 Check that the sandbox is clean:
 
@@ -33,7 +33,7 @@ Prepare:
 
 ```bash
 read -s GPG_PASSPHRASE
-mvn -Prelease -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.y+1-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
+mvn -Prelease -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.(y+1).0-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
 ```
 
 Perform:

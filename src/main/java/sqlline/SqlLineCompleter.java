@@ -16,7 +16,7 @@ import java.util.List;
 import jline.console.completer.Completer;
 
 /**
- * Completer for SQLline. It dispatches to sub-completers based on the
+ * Completer for SQLLine. It dispatches to sub-completers based on the
  * current arguments.
  */
 class SqlLineCompleter
@@ -35,7 +35,7 @@ class SqlLineCompleter
       return sqlLine.getCommandCompleter().complete(buf, pos, candidates);
     } else {
       if (sqlLine.getDatabaseConnection() != null
-          && (sqlLine.getDatabaseConnection().getSqlCompleter() != null)) {
+          && sqlLine.getDatabaseConnection().getSqlCompleter() != null) {
         return sqlLine.getDatabaseConnection().getSqlCompleter()
             .complete(buf, pos, candidates);
       } else {

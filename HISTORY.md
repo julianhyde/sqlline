@@ -2,6 +2,104 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.5.0">1.5.0</a> (2018-09-09)
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/135">SQLLINE-135</a>]
+  Display connection class name during `!reconnect` (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/139">SQLLINE-139</a>]
+  `!close` command wrongly claims to be ambiguous with `!closeall` command
+  (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/106">SQLLINE-106</a>]
+  New `class Application` allows customization of command handlers, output
+  formats, startup message (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/114">SQLLINE-114</a>]
+  Pluggable commands, by means of `interface CommandHandler` (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/52">SQLLINE-52</a>]
+  Set isolation level if supported, otherwise use default (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/111">SQLLINE-111</a>]
+  Enable multiline calls for `!all`, `!sql` commands from file
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/121">SQLLINE-121</a>]
+  Cannot parse one-character commands `!?` and `!#` (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/109">SQLLINE-109</a>]
+  In XML output formats, escape all required symbols in case of attribute/text
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/43">SQLLINE-43</a>]
+  Allow quoting of arguments to `!connect` command (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/53">SQLLINE-53</a>]
+  In `!connect` command, allow passing of JDBC properties outside of the URL
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/120">SQLLINE-120</a>]
+  Do not keep connection if it fails to do connection stuff (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/55">SQLLINE-55</a>]
+  SQLLine throws `NullPointerException` when JDBC URL is invalid
+  (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/86">SQLLINE-86</a>]
+  Parse arguments that contain quoted strings with spaces (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/104">SQLLINE-104</a>]
+  Make output of `!scan` command valid (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/57">SQLLINE-57</a>]
+  Respect `showheader=false` in file output (Renny Koshy and Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/107">SQLLINE-107</a>]
+  If a user-specified driver cannot be found, fall back to the registered driver
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/101">SQLLINE-101</a>]
+  Add `nullValue` property, to override the value printed for NULL values
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/67">SQLLINE-67</a>]
+  Add `-log` command-line argument, equivalent to `!record` command
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/90">SQLLINE-90</a>]
+  Use more relevant exception messages for `!metadata`, `!record`, `!run`
+  and `!script` commands (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/88">SQLLINE-88</a>]
+  Make `!set` command stable for the case of variables with null values
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/50">SQLLINE-50</a>]
+  For CSV output format, specify delimiter and quote character (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/38">SQLLINE-38</a>]
+  In `!run` command, expand "~" to user's home directory (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/83">SQLLINE-83</a>]
+  Add `json` output format (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/66">SQLLINE-66</a>]
+  Add `dateFormat`, `timeFormat` and `timestampFormat` properties
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/77">SQLLINE-77</a>]
+  Poor performance with drivers that have a slow implementation of
+  `DatabaseMetaData.getPrimaryKeys` JDBC method (Kevin Minder)
+
+Other:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/131">SQLLINE-131</a>]
+  Release 1.5
+* Add committers: Arina Ielchiieva and Sergey Nuyanzin (committers were
+  previously called 'authors')
+* [<a href="https://github.com/julianhyde/sqlline/issues/132">SQLLINE-132</a>]
+  Fix 9 javadoc warnings (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/137">SQLLINE-137</a>]
+  Typo in description of `!save` command (Arina Ielchiieva)
+* [<a href="https://github.com/julianhyde/sqlline/issues/127">SQLLINE-127</a>]
+  In manual, update `!help` description with actual output (Sergey Nuyanzin)
+* Add more information to `pom.xml` and manifest
+* [<a href="https://github.com/julianhyde/sqlline/issues/123">SQLLINE-123</a>]
+  Make `SqlLineArgsTest.testScan` test stable in case of several registered
+  drivers (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/69">SQLLINE-69</a>]
+  Make `sqlline` and `sqlline.bat` scripts work in dev environment
+  (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/96">SQLLINE-96</a>]
+  Add to Travis CI all supported JDK versions (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/93">SQLLINE-93</a>]
+  To fix flaky tests on Windows, use static final fields for
+  `jline.Terminal#getWidth` and `jline.Terminal#getHeight` (Sergey Nuyanzin)
+* [<a href="https://github.com/julianhyde/sqlline/issues/95">SQLLINE-95</a>]
+  In `pom.xml`, replace 'prerequisites' element with `maven-enforcer-plugin`
+* [<a href="https://github.com/julianhyde/sqlline/issues/80">SQLLINE-80</a>]
+  In `HOWTO`, describe how to run SQLLine in IntelliJ IDEA's console on Windows
+  (slankka)
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.4.0">1.4.0</a> (2018-05-31)
 
 Bugs and functional changes:
