@@ -1194,6 +1194,15 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testReconnect() throws Throwable {
+    final String script = "!reconnect";
+    final String expected = "Reconnecting to \"jdbc:hsqldb:res:scott\"...\n"
+        + "Closing: org.hsqldb.jdbc.JDBCConnection";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(expected));
+  }
+
+  @Test
   public void testTables() throws Throwable {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
