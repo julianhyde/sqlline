@@ -109,17 +109,19 @@ cd sqlline
 mvn package
 ```
 
-## Authors
+## Committers
 
-* Marc Prud'hommeaux (mwp1@cornell.edu)
-* John V. Sichi (jsichi@gmail.com)
-* Stephan Zuercher (stephan@zuercher.us)
-* Sunny Choi
-* John Pham
-* Steve Herskovitz
+* [Arina Ielchiieva](https://github.com/arina-ielchiieva)
 * Jack Hahn
-* [Julian Hyde](https://github.com/julianhyde)
 * [Joe Posner](https://github.com/joeposner)
+* John Pham
+* [John V. Sichi](https://github.com/jsichi)
+* [Julian Hyde](https://github.com/julianhyde)
+* [Marc Prud'hommeaux](https://github.com/marcprux)
+* [Sergey Nuyanzin](https://github.com/snuyanzin)
+* [Stephan Zuercher](https://github.com/zuercher)
+* Steve Herskovitz
+* Sunny Choi
 
 ## More information
 
