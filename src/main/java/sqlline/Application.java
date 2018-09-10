@@ -189,11 +189,11 @@ public class Application {
    *
    * <p>Override this method to modify set of supported known drivers.
    *
-   * @return set of known drivers
+   * @return Collection of known drivers
    *
    * @see #DEFAULT_DRIVERS
    */
-  public Set<String> initDrivers() {
+  public Collection<String> initDrivers() {
     return DEFAULT_DRIVERS;
   }
 
@@ -309,6 +309,7 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "sql"),
       new ReflectiveCommandHandler(sqlLine, empty, "call"),
       new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
+      new ReflectiveCommandHandler(sqlLine, empty, "rerun", "/"),
     };
     return Collections.unmodifiableList(Arrays.asList(handlers));
   }

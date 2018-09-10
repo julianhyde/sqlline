@@ -40,7 +40,7 @@ class SqlLineCompleter
       sqlLine.getCommandCompleter().complete(reader, line, candidates);
     } else {
       if (sqlLine.getDatabaseConnection() != null
-          && (sqlLine.getDatabaseConnection().getSqlCompleter() != null)) {
+          && sqlLine.getDatabaseConnection().getSqlCompleter() != null) {
         sqlLine.getDatabaseConnection().getSqlCompleter()
             .complete(reader, line, candidates);
       } else {

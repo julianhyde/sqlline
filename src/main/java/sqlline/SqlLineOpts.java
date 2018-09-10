@@ -80,7 +80,7 @@ public class SqlLineOpts implements Completer {
   }
 
   public List<Completer> optionCompleters() {
-    return Collections.<Completer>singletonList(this);
+    return Collections.singletonList(this);
   }
 
   public List<String> possibleSettingValues() {
@@ -138,7 +138,7 @@ public class SqlLineOpts implements Completer {
     out.close();
   }
 
-  public void save(OutputStream out) throws IOException {
+  public void save(OutputStream out) {
     try {
       Properties props = toProperties();
 
@@ -152,8 +152,7 @@ public class SqlLineOpts implements Completer {
     }
   }
 
-  Set<String> propertyNames()
-      throws IllegalAccessException, InvocationTargetException {
+  Set<String> propertyNames() {
     final TreeSet<String> set = new TreeSet<>();
     for (String s : propertyNamesMixed()) {
       set.add(s.toLowerCase());
@@ -161,8 +160,7 @@ public class SqlLineOpts implements Completer {
     return set;
   }
 
-  Set<String> propertyNamesMixed()
-      throws IllegalAccessException, InvocationTargetException {
+  Set<String> propertyNamesMixed() {
     TreeSet<String> names = new TreeSet<>();
 
     // get all the values from getXXX methods
@@ -396,6 +394,10 @@ public class SqlLineOpts implements Completer {
 
   public void setHistoryFile(String historyFile) {
     this.historyFile = historyFile;
+    if (sqlLine != null && sqlLine.getLineReader() != null) {
+      sqlLine.getLineReader()
+          .setVariable(LineReader.HISTORY_FILE, this.historyFile);
+    }
   }
 
   public String getHistoryFile() {

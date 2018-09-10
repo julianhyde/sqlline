@@ -266,15 +266,15 @@ public class SqlLineArgsTest {
   @Test
   public void testNull() throws Throwable {
     checkScriptFile(
-            "values (1, cast(null as integer), cast(null as varchar(3));\n",
-            false,
-            equalTo(SqlLine.Status.OK),
-            containsString(
-                    "+-------------+-------------+-----+\n"
-                            + "|     C1      |     C2      | C3  |\n"
-                            + "+-------------+-------------+-----+\n"
-                            + "| 1           | null        |     |\n"
-                            + "+-------------+-------------+-----+\n"));
+        "values (1, cast(null as integer), cast(null as varchar(3));\n",
+        false,
+        equalTo(SqlLine.Status.OK),
+        containsString(
+            "+-------------+-------------+-----+\n"
+            + "|     C1      |     C2      | C3  |\n"
+            + "+-------------+-------------+-----+\n"
+            + "| 1           | null        |     |\n"
+            + "+-------------+-------------+-----+\n"));
   }
 
   @Test
@@ -685,9 +685,9 @@ public class SqlLineArgsTest {
   @Test
   public void testBreakOnErrorScriptFile() throws Throwable {
     checkScriptFile("select * from abcdefg01;\ncall 100 + 23;\n",
-            true,
-            equalTo(SqlLine.Status.OTHER),
-            not(containsString(" 123 ")));
+        true,
+        equalTo(SqlLine.Status.OTHER),
+        not(containsString(" 123 ")));
   }
 
   @Test
@@ -926,7 +926,7 @@ public class SqlLineArgsTest {
     final String line3 = "@C1@##@C2@##@C3@##@C4@##@C5@##@C6@";
     final String line4 = "@#@##@@@#@@@##@1@##@1969-07-20@##@@##@ 1'2\"3\t4@";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.<String>allOf(containsString(line1), containsString(line2),
+        CoreMatchers.allOf(containsString(line1), containsString(line2),
             containsString(line3), containsString(line4)));
   }
 
@@ -955,7 +955,7 @@ public class SqlLineArgsTest {
     final String script = "!set outputformat xmlelements\n"
         + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ' ]]>1''2\"3\t<>&4');\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.<String>allOf(
+        CoreMatchers.allOf(
             containsString("<resultset>"),
             containsString("<result>"),
             containsString("<C1>1</C1>"),
@@ -1001,7 +1001,7 @@ public class SqlLineArgsTest {
         + "!set nullValue \"'\"\n"
         + "values (NULL, -1.5, null, date '1969-07-20', null, 'null');\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.<String>allOf(
+        CoreMatchers.allOf(
             containsString("'C1','C2','C3','C4','C5','C6'"),
             containsString("'%%%','-1.5','%%%','1969-07-20','%%%','null'"),
             containsString("'C1','C2','C3','C4','C5','C6'"),
@@ -1296,7 +1296,7 @@ public class SqlLineArgsTest {
         + connectionSpec.driver
         + "; using registered driver org.h2.Driver instead";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        CoreMatchers.<String>allOf(containsString(message),
+        CoreMatchers.allOf(containsString(message),
             not(containsString("NullPointerException")),
             containsString(line0),
             containsString(line1)));
@@ -1308,7 +1308,7 @@ public class SqlLineArgsTest {
     final String script = "!tables\n";
 
     checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
-        CoreMatchers.<String>allOf(containsString("No suitable driver"),
+        CoreMatchers.allOf(containsString("No suitable driver"),
             not(containsString("NullPointerException"))));
   }
 
@@ -1441,10 +1441,52 @@ public class SqlLineArgsTest {
       containsString("custom_null"));
   }
 
+  @Test
+  public void testRerunWrongOptions() throws Throwable {
+    SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream beelineOutputStream = new PrintStream(os);
+    beeLine.setOutputStream(beelineOutputStream);
+    beeLine.setErrorStream(beelineOutputStream);
+    final InputStream is = new ByteArrayInputStream(new byte[0]);
+    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    // Here it is the status is SqlLine.Status.OTHER
+    // because of EOF as the result of InputStream which
+    // is not used in the current test so it is ok
+    // assertThat(status, equalTo(SqlLine.Status.OK));
+    DispatchCallback dc = new DispatchCallback();
+    beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+    beeLine.runCommands(
+        Collections.singletonList("!connect "
+            + ConnectionSpec.H2.url + " "
+            + ConnectionSpec.H2.username + " "
+            + "\"\""), dc);
+    os.reset();
+    beeLine.runCommands(
+        Collections.singletonList("!/ " + Integer.MAX_VALUE), dc);
+    String output = os.toString("UTF8");
+    final String expected0 = "Usage: rerun <offset>, max offset is";
+    final String expected1 =
+        // in case of empty history
+        "Usage: rerun <offset>, history should not be empty";
+    assertThat(output,
+        anyOf(containsString(expected0), containsString(expected1))
+    );
+    os.reset();
+    beeLine.runCommands(Collections.singletonList("!/ wrongnumber"), dc);
+    output = os.toString("UTF8");
+    assertThat(output,
+        anyOf(containsString(expected0), containsString(expected1))
+    );
+    beeLine.runCommands(
+        Collections.singletonList("!quit"), new DispatchCallback());
+    assertTrue(beeLine.isExit());
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {
-    return CoreMatchers.<String>allOf(m1, m2);
+    return CoreMatchers.allOf(m1, m2);
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run

@@ -78,6 +78,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rerun
+rerun — Execute previous command from the history file
 rollback
 rollback — Roll back the current transaction
 run
@@ -202,6 +204,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rerun
+rerun — Execute previous command from the history file
 rollback
 rollback — Roll back the current transaction
 run
@@ -416,6 +420,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rerun
+rerun — Execute previous command from the history file
 rollback
 rollback — Roll back the current transaction
 run
@@ -1070,6 +1076,7 @@ sqlline> !help
 !reconnect          Reconnect to the database
 !record             Record all output to the specified file
 !rehash             Fetch table and column names for command completion
+!rerun              Execute previous command from the history file
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
 !save               Save the current variabes and aliases
@@ -1147,17 +1154,21 @@ Synopsis
 Description
 
 Display the command history.
+history -  list history of commands
+Usage: history [OPTIONS]
+  -? --help                       Displays command help
+     --clear                      Clear history
+     --save                       Save history
+  -d                              Print timestamps for each event
 
-Example of "history" command
+Example of "history" command (if there is no option specified then -d will be used)
 
 sqlline> !history
-
-1.  !outputformat xmlelements
-2.  SELECT * FROM PCPOINT;
-3.  !outputformat vertical
-4.  SELECT * FROM PCPOINT;
-5.  !tables
-
+  1  14:52:56  !outputformat xmlelements
+  2  14:53:09  SELECT * FROM PCPOINT;
+  3  14:53:15  !outputformat vertical
+  4  14:58:28  SELECT * FROM PCPOINT;
+  5  14:58:52  !tables
 sqlline>
 
 
@@ -1654,6 +1665,25 @@ Warning on using "rehash"
 Caution
 
 This operation can be extremely slow for some databases.
+
+rerun
+
+Name
+
+rerun — Execute previous command from the history file
+
+Synopsis
+
+!rerun [command number in a history file]
+
+Description
+
+Execute previous command from the history file. If the specified command number is negative than it will be used as offset. If it is positive then it will be used as an index in a history file.
+If there is no number specified the previous command (the last one in the history file) will be executed.
+
+Example of "rerun" command
+
+0: jdbc:hsqldb:db-hypersonic> !rerun -5
 
 rollback
 

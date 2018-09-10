@@ -932,10 +932,7 @@ public class SqlLine {
       int total = rs.getRow();
       rs.beforeFirst();
       return total;
-    } catch (SQLException sqle) {
-      return -1;
-    } catch (AbstractMethodError ame) {
-      // JDBC 1 driver error
+    } catch (SQLException | AbstractMethodError sqle) {
       return -1;
     }
   }
@@ -1328,7 +1325,7 @@ public class SqlLine {
       case '>' :
         // could be skipped for xml attribute and there is no sequence ]]>
         // could be skipped for element text and there is no sequence ]]>
-        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 1) == ']')
+        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 2) == ']')
             || charsCouldBeNotEncoded.indexOf(ch) == -1) {
           sb.append("&gt;");
         } else {
@@ -1609,7 +1606,7 @@ public class SqlLine {
         f = new SeparatedValuesOutputFormat(this,
             getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
         Map<String, OutputFormat> updFormats =
-            new HashMap<String, OutputFormat>(getOutputFormats());
+            new HashMap<>(getOutputFormats());
         updFormats.put("csv", f);
         updateOutputFormats(updFormats);
       }
@@ -1844,10 +1841,10 @@ public class SqlLine {
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats) {
       this.knownDrivers = Collections.unmodifiableSet(
-          new HashSet<String>(knownDrivers));
+          new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
-          new ArrayList<CommandHandler>(commandHandlers));
+          new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
 
     }

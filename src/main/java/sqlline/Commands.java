@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.*;
 
+import org.jline.reader.History;
 import org.jline.reader.UserInterruptException;
 
 /**
@@ -233,6 +234,63 @@ public class Commands {
     callback.setToSuccess();
   }
 
+  public void rerun(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    History history = sqlLine.getLineReader().getHistory();
+    int size = history.size();
+    if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+      if (size == 0) {
+        sqlLine.error("Usage: rerun <offset>, history should not be empty");
+      } else {
+        sqlLine.error("Usage: rerun <offset>, max offset is +/-" + (size - 1));
+      }
+      callback.setToFailure();
+      return;
+    }
+
+    int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
+    if (size - 1 < Math.abs(offset) || offset == 0) {
+      if (offset == 0) {
+        sqlLine.error(
+            "Usage: rerun <offset>, offset should be positive or negative");
+      }
+      if (size == 0) {
+        sqlLine.error("Usage: rerun <offset>, history should not be empty");
+      } else {
+        sqlLine.error("Usage: rerun <offset>, max offset is +/-" + (size - 1));
+      }
+      callback.setToFailure();
+      return;
+    }
+
+    sqlLine.dispatch(calculateCommand(offset, new HashSet<>()), callback);
+  }
+
+  private String calculateCommand(int currentOffset, Set<Integer> offsets) {
+    if (!offsets.add(currentOffset)) {
+      throw new IllegalArgumentException(
+          "Cycled rerun of commands from history " + offsets);
+    }
+
+    History history = sqlLine.getLineReader().getHistory();
+    Iterator<History.Entry> iterator = currentOffset > 0
+        ? history.iterator(currentOffset - 1)
+        : history.reverseIterator(history.size() - 1 + currentOffset);
+    String command = iterator.next().line();
+    if (command.trim().startsWith("!/") || command.startsWith("!rerun")) {
+      String[] cmd = sqlLine.split(command);
+      if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+        return command;
+      }
+      int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
+      if (history.size() - 1 < Math.abs(offset)) {
+        return command;
+      }
+      return calculateCommand(offset, offsets);
+    }
+    return command;
+  }
+
   String arg1(String line, String paramName) {
     return arg1(line, paramName, null);
   }
@@ -344,8 +402,7 @@ public class Commands {
     metadata("getTables", args, callback);
   }
 
-  public void typeinfo(String line, DispatchCallback callback)
-      throws Exception {
+  public void typeinfo(String line, DispatchCallback callback) {
     metadata("getTypeInfo", Collections.emptyList(), callback);
   }
 
@@ -557,8 +614,7 @@ public class Commands {
     }
   }
 
-  public void commit(String line, DispatchCallback callback)
-      throws SQLException {
+  public void commit(String line, DispatchCallback callback) {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -582,8 +638,7 @@ public class Commands {
     }
   }
 
-  public void rollback(String line, DispatchCallback callback)
-      throws SQLException {
+  public void rollback(String line, DispatchCallback callback) {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -1015,8 +1070,7 @@ public class Commands {
     connect(props, callback);
   }
 
-  public void nickname(String line, DispatchCallback callback)
-      throws Exception {
+  public void nickname(String line, DispatchCallback callback) {
     String example = "Usage: nickname <nickname for current connection>"
         + SqlLine.getSeparator();
 
@@ -1060,8 +1114,7 @@ public class Commands {
     return null;
   }
 
-  public void connect(Properties props, DispatchCallback callback)
-      throws IOException {
+  public void connect(Properties props, DispatchCallback callback) {
     String url = getProperty(props,
         "url",
         "javax.jdo.option.ConnectionURL",
@@ -1400,7 +1453,7 @@ public class Commands {
 
     final List<CommandHandler> commandHandlers =
         new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
-    final Set<String> existingNames = new HashSet<String>();
+    final Set<String> existingNames = new HashSet<>();
     for (CommandHandler existingCommandHandler : commandHandlers) {
       existingNames.addAll(existingCommandHandler.getNames());
     }
@@ -1585,6 +1638,7 @@ public class Commands {
         String prompt = sqlLine.loc("enter-for-more");
         sqlLine.getLineReader().getTerminal().writer().write(prompt);
         int c;
+        // The logic to prevent reaction of SqlLineParser here
         do {
           c = sqlLine.getLineReader().getTerminal().reader().read(100);
         } while (c != -1 && c != 13 && c != 'q');
