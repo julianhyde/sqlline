@@ -70,6 +70,7 @@ public class SqlLineOpts implements Completer {
   private String historyFile =
       new File(saveDir(), "history").getAbsolutePath();
   private String runFile;
+  private Set<String> propertyNames;
 
   public SqlLineOpts(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
@@ -156,13 +157,19 @@ public class SqlLineOpts implements Completer {
     }
   }
 
-  Set<String> propertyNames()
+  public Set<String> propertyNames()
       throws IllegalAccessException, InvocationTargetException {
+    if (propertyNames != null) {
+      return propertyNames;
+    }
     final TreeSet<String> set = new TreeSet<String>();
     for (String s : propertyNamesMixed()) {
       set.add(s.toLowerCase());
     }
-    return set;
+    // properties names do not change at runtime
+    // cache for further re-use
+    propertyNames = Collections.unmodifiableSet(set);
+    return propertyNames;
   }
 
   Set<String> propertyNamesMixed()
@@ -207,8 +214,7 @@ public class SqlLineOpts implements Completer {
     Properties props = new Properties();
 
     for (String name : propertyNames()) {
-      props.setProperty(PROPERTY_PREFIX + name,
-          String.valueOf(sqlLine.getReflector().invoke(this, "get" + name)));
+      props.setProperty(PROPERTY_PREFIX + name, get(name));
     }
 
     sqlLine.debug("properties: " + props.toString());
@@ -268,6 +274,24 @@ public class SqlLineOpts implements Completer {
       }
       return false;
     }
+  }
+
+  public boolean hasProperty(String name) {
+    try {
+      return propertyNames().contains(name);
+    } catch (Exception e) {
+      // this should not happen
+      // since property names are retrieved
+      // based on available getters in this class
+      sqlLine.debug(e.getMessage());
+      return false;
+    }
+  }
+
+  public String get(String key) throws IllegalAccessException,
+      InvocationTargetException, ClassNotFoundException {
+    return String.valueOf(
+        sqlLine.getReflector().invoke(this, "get" + key));
   }
 
   public void setFastConnect(boolean fastConnect) {

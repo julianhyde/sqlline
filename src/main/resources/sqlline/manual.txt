@@ -78,6 +78,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+reset
+reset - Reset a preference
 rollback
 rollback — Roll back the current transaction
 run
@@ -89,7 +91,7 @@ scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
 set
-set — Set a preference
+set — Set a preference, or show its value
 sql
 sql — Execute a SQL against a database
 tables
@@ -418,6 +420,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+reset
+reset - Reset a preference
 rollback
 rollback — Roll back the current transaction
 run
@@ -429,7 +433,7 @@ scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
 set
-set — Set a preference
+set — Set a preference, or show its value
 sql
 sql — Execute a SQL against a database
 tables
@@ -1072,12 +1076,13 @@ sqlline> !help
 !reconnect          Reconnect to the database
 !record             Record all output to the specified file
 !rehash             Fetch table and column names for command completion
+!reset              Reset a sqlline variable
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
 !save               Save the current variables and aliases
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
-!set                Set a sqlline variable
+!set                Set a sqlline variable, or show its value
 !sql                Execute a SQL command
 !tables             List all the tables in the database
 !typeinfo           Display the type map for the current connection
@@ -1659,6 +1664,28 @@ Caution
 
 This operation can be extremely slow for some databases.
 
+reset
+
+Name
+
+reset — Reset a preference
+
+Synopsis
+
+!reset all
+!reset {preference}
+
+Description
+
+Reset a preference to its default value. When resetting a preference, if autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed settings can be saved for future SQLLine sessions with the "save" command.
+
+With "all" keyword, reset all preferences.
+
+Example of "reset" command
+
+0: jdbc:hsqldb:db-hypersonic> !reset timeout
+[timeout] was reset to [-1]
+
 rollback
 
 Name
@@ -1902,19 +1929,28 @@ set
 
 Name
 
-set — Set a preference
+set — Set a preference, or show its value
 
 Synopsis
 
+!set
+!set all
+!set {preference}
 !set {preference} {value}
 
 Description
 
 Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed settings can be saved for future SQLLine sessions with the "save" command.
 
-Example of "set" command
+The forms of the command without a "{value}" argument show the current value of the specified preference, or all preferences. "!set" and "!set all" commands are equivalent and list all preferences.
+
+Examples of "set" command
 
 0: jdbc:hsqldb:db-hypersonic> !set color on
+
+0: jdbc:hsqldb:db-hypersonic> !set color
+
+0: jdbc:hsqldb:db-hypersonic> !set
 
 sql
 

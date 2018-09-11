@@ -1710,8 +1710,19 @@ public class SqlLine {
     }
   }
 
+  void outputProperty(String key, String value) {
+    output(getColorBuffer()
+        .green(getColorBuffer()
+            .pad(key, 20)
+            .getMono())
+        .append(value));
+  }
   public SqlLineOpts getOpts() {
     return appConfig.opts;
+  }
+
+  public void setOpts(SqlLineOpts opts) {
+    appConfig = appConfig.withOpts(opts);
   }
 
   DatabaseConnections getDatabaseConnections() {
@@ -1855,11 +1866,18 @@ public class SqlLine {
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
-      return new Config(this.knownDrivers, opts, commandHandlers, this.formats);
+      return new Config(this.knownDrivers, this.opts,
+          commandHandlers, this.formats);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
-      return new Config(this.knownDrivers, opts, this.commandHandlers, formats);
+      return new Config(this.knownDrivers, this.opts,
+          this.commandHandlers, formats);
+    }
+
+    Config withOpts(SqlLineOpts opts) {
+      return new Config(this.knownDrivers, opts,
+          this.commandHandlers, this.formats);
     }
   }
 }
