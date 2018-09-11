@@ -1463,7 +1463,7 @@ public class SqlLine {
         error(e.getMessage());
       }
     } else {
-      e.printStackTrace(System.err);
+      e.printStackTrace(getErrorStream());
     }
   }
 

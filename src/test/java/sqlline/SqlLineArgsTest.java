@@ -807,6 +807,7 @@ public class SqlLineArgsTest {
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     final String[] args = {
+      "-e", "!set maxwidth 80",
       "-ch", "sqlline.extensions.HelloWorldCommandHandler"};
     sqlLine.begin(args, is, false);
 
@@ -838,7 +839,8 @@ public class SqlLineArgsTest {
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
-    SqlLine.Status status = sqlLine.begin(new String[]{}, is, false);
+    SqlLine.Status status =
+        sqlLine.begin(new String[]{"-e", "!set maxwidth 80"}, is, false);
 
     final String script = "!commandhandler"
         + " sqlline.extensions.HelloWorld2CommandHandler"
@@ -1067,7 +1069,8 @@ public class SqlLineArgsTest {
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
-    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    SqlLine.Status status =
+        beeLine.begin(new String[]{"-e", "!set maxwidth 80"}, is, false);
     assertThat(status, equalTo(SqlLine.Status.OK));
     DispatchCallback dc = new DispatchCallback();
     beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
@@ -1107,7 +1110,8 @@ public class SqlLineArgsTest {
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
-    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    SqlLine.Status status =
+        beeLine.begin(new String[]{"-e", "!set maxwidth 80"}, is, false);
     assertThat(status, equalTo(SqlLine.Status.OK));
     DispatchCallback dc = new DispatchCallback();
     beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
@@ -1144,7 +1148,8 @@ public class SqlLineArgsTest {
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
-    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    SqlLine.Status status =
+        beeLine.begin(new String[]{"-e", "!set maxwidth 80"}, is, false);
     assertThat(status, equalTo(SqlLine.Status.OK));
     DispatchCallback dc = new DispatchCallback();
     beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
@@ -1341,7 +1346,7 @@ public class SqlLineArgsTest {
     assertThat(pair.output,
         containsString(Application.DEFAULT_APP_INFO_MESSAGE));
 
-    String[] args = {"-ac", "INCORRECT_CLASS_NAME"};
+    String[] args = {"-e", "!set maxwidth 80", "-ac", "INCORRECT_CLASS_NAME"};
     pair = run(args);
     assertThat(pair.status, equalTo(SqlLine.Status.OK));
     assertThat(pair.output,
@@ -1349,7 +1354,8 @@ public class SqlLineArgsTest {
     assertThat(pair.output,
         containsString(CustomApplication.DEFAULT_APP_INFO_MESSAGE));
 
-    String[] args2 = {"-ac", "sqlline.extensions.CustomApplication"};
+    String[] args2 = {"-e", "!set maxwidth 80",
+      "-ac", "sqlline.extensions.CustomApplication"};
     pair = run(args2);
     assertThat(pair.status, equalTo(SqlLine.Status.OK));
     assertThat(pair.output,
