@@ -499,13 +499,9 @@ public class Commands {
       Properties props = sqlLine.getOpts().toProperties();
       Set<String> keys = new TreeSet<String>(asMap(props).keySet());
       for (String key : keys) {
-        sqlLine.output(sqlLine.getColorBuffer()
-            .green(sqlLine.getColorBuffer()
-                .pad(
-                    key.substring(
-                        SqlLineOpts.PROPERTY_PREFIX.length()), 20)
-                .getMono())
-            .append(props.getProperty(key)));
+        sqlLine.outputProperty(
+            key.substring(SqlLineOpts.PROPERTY_PREFIX.length()),
+            props.getProperty(key));
       }
     } catch (Exception e) {
       callback.setToFailure();
@@ -523,26 +519,91 @@ public class Commands {
       return;
     }
 
-    String[] parts = sqlLine.split(line, 3, "Usage: set <key> <value>");
-    if (parts == null) {
+    String[] parts = sqlLine.split(line);
+    if (parts.length > 3) {
+      sqlLine.error("Usage: set <key> / <key> <value>");
       callback.setToFailure();
       return;
     }
 
-    String key = parts[1];
-    String value = parts[2];
-    boolean success = sqlLine.getOpts().set(key, value, false);
+    String propertyName = parts[1].toLowerCase();
 
-    // if we autosave, then save
-    if (success && sqlLine.getOpts().getAutoSave()) {
-      try {
-        sqlLine.getOpts().save();
-      } catch (Exception saveException) {
-        // ignore
-      }
+    if ("all".equals(propertyName)) {
+      config(null, callback);
+      return;
     }
 
-    callback.setToSuccess();
+    if (!sqlLine.getOpts().hasProperty(propertyName)) {
+      sqlLine.error(sqlLine.loc("no-specified-prop", propertyName));
+      callback.setToFailure();
+      return;
+    }
+
+    if (parts.length == 2) {
+      try {
+        sqlLine.outputProperty(propertyName,
+            sqlLine.getOpts().get(propertyName));
+        callback.setToSuccess();
+      } catch (Exception e) {
+        sqlLine.error(e);
+        callback.setToFailure();
+      }
+    } else {
+      setProperty(propertyName, parts[2], null, callback);
+    }
+  }
+
+  public void reset(String line, DispatchCallback callback) {
+    String[] split = sqlLine.split(line, 2,
+        "Usage: reset <all>/<property_name>");
+    if (split == null) {
+      callback.setToFailure();
+      return;
+    }
+
+    String propertyName = split[1].toLowerCase();
+
+    if ("all".equals(propertyName)) {
+      sqlLine.setOpts(new SqlLineOpts(sqlLine));
+      sqlLine.output(sqlLine.loc("reset-all-props"));
+      // no need to auto save, since its off by default
+      callback.setToSuccess();
+      return;
+    }
+
+    if (!sqlLine.getOpts().hasProperty(propertyName)) {
+      sqlLine.error(sqlLine.loc("no-specified-prop", propertyName));
+      callback.setToFailure();
+      return;
+    }
+
+    try {
+      String defaultValue = new SqlLineOpts(sqlLine).get(propertyName);
+      setProperty(propertyName, defaultValue, "reset-prop", callback);
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error(e);
+    }
+  }
+
+  private void setProperty(String key, String value,
+                           String res, DispatchCallback callback) {
+    boolean success = sqlLine.getOpts().set(key, value, false);
+    if (success) {
+      if (sqlLine.getOpts().getAutoSave()) {
+        try {
+          sqlLine.getOpts().save();
+        } catch (Exception saveException) {
+          // ignore
+        }
+      }
+      if (res != null) {
+        sqlLine.output(sqlLine.loc(res, key, value));
+      }
+      callback.setToSuccess();
+    } else {
+      callback.setToFailure();
+    }
   }
 
   private void reportResult(String action, long start, long end) {

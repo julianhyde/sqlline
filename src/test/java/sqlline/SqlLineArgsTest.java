@@ -321,7 +321,7 @@ public class SqlLineArgsTest {
   @Test
   public void testHelpSet() throws Throwable {
     final String expected = "1/1          !help set\n"
-        + "!set                Set a sqlline variable\n"
+        + "!set                List / set a sqlline variable\n"
         + "\n"
         + "Variables:\n"
         + "\n"
@@ -1395,6 +1395,64 @@ public class SqlLineArgsTest {
       + "values(null)";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
       containsString("custom_null"));
+  }
+
+  @Test
+  public void testSetPropertySuccess() throws Throwable {
+    final String script = "!set timeout\n"
+        + "!set timeout 200\n"
+        + "!set timeout";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString("timeout             -1"),
+        containsString("timeout             200")));
+  }
+
+  @Test
+  public void testSetPropertyFailure() throws Throwable {
+    final String script = "!set unk";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        containsString("Specified property [unk] does not exist."
+            + " Use !set command to get list of all available properties."));
+  }
+
+  @Test
+  public void testSetUsage() throws Throwable {
+    final String script = "!set 1 2 3";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        containsString("Usage: set <key> / <key> <value>"));
+  }
+
+  @Test
+  public void testResetSuccess() throws Throwable {
+    final String script = "!set timeout 200\n"
+        + "!reset timeout";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("[timeout] was reset to [-1]"));
+  }
+
+  @Test
+  public void testResetFailure() throws Throwable {
+    final String script = "!reset unk";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        containsString("Specified property [unk] does not exist."
+            + " Use !set command to get list of all available properties."));
+  }
+
+  @Test
+  public void testResetAll() throws Throwable {
+    final String script = "!set timeout 200\n"
+        + "!reset all\n"
+        + "!set timeout";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString("All properties were reset to their defaults."),
+            containsString("timeout             -1")));
+  }
+
+  @Test
+  public void testResetUsage() throws Throwable {
+    final String script = "!reset";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        containsString("Usage: reset <all>/<property_name>"));
   }
 
   // Work around compile error in JDK 1.6
