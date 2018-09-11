@@ -1186,11 +1186,12 @@ sqlline> !help
 !record           Record all output to the specified file
 !rehash           Fetch table and column names for command completion
 !rollback         Roll back the current transaction (if autocommit is off)
+!reset            Reset a sqlline variable
 !run              Run a script from the specified file
 !save             Save the current variables and aliases
 !scan             Scan for installed JDBC drivers
 !script           Start saving a script to a file
-!set              Set a sqlline variable
+!set              List / set a sqlline variable
 !sql              Execute a SQL command
 !tables           List all the tables in the database
 !verbose          Set verbose mode on
@@ -2106,6 +2107,54 @@ Done
       </refentry>
       </section>
 
+      <section id="sect_command_reset">
+        <title>set</title>
+        <refentry id="command_reset">
+          <refmeta>
+            <refentrytitle>reset</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+
+          <refnamediv>
+            <refname>reset</refname>
+            <refpurpose>
+              Reset a preference
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!reset</command>
+              <arg choice="req"><replaceable>all</replaceable></arg>
+            </cmdsynopsis>
+            <cmdsynopsis>
+              <command>!reset</command>
+              <arg choice="req"><replaceable>preference</replaceable></arg>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+          <refsect1>
+            <title>Description</title>
+            <para>
+              Reset preference current value to default. When resetting a preference
+              if <link linkend="setting_autosave">autosave</link> is
+              on, then this will cause preferences to be
+              immediately saved. Otherwise, changed setting can be
+              saved for future SQLLine session with the
+              <link linkend="command_save">save</link> command.
+              With all keyword reset all preferences.
+            </para>
+          </refsect1>
+          <refsect1>
+            <title>Example of "reset" command</title>
+            <screen>
+              0: jdbc:hsqldb:db-hypersonic> !reset timeout
+              [timeout] was reset to [-1]
+            </screen>
+          </refsect1>
+        </refentry>
+      </section>
+
       <section id="sect_command_rollback">
       <title>rollback</title>
       <refentry id="command_rollback">
@@ -2470,11 +2519,22 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
         <refnamediv>
           <refname>set</refname>
           <refpurpose>
-          Set a preference
+          List / set a preference
           </refpurpose>
         </refnamediv>
 
         <refsynopsisdiv>
+          <cmdsynopsis>
+            <command>!set</command>
+          </cmdsynopsis>
+          <cmdsynopsis>
+            <command>!set</command>
+            <arg choice="req"><replaceable>all</replaceable></arg>
+          </cmdsynopsis>
+          <cmdsynopsis>
+            <command>!set</command>
+            <arg choice="req"><replaceable>preference</replaceable></arg>
+          </cmdsynopsis>
           <cmdsynopsis>
           <command>!set</command>
           <arg choice="req"><replaceable>preference</replaceable></arg>
@@ -2484,11 +2544,13 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           <refsect1>
           <title>Description</title>
           <para>
+          List preference current value. !set and !set all commands are equivalent
+          and list all preferences.
           Set the specified preference to the specified value. If
           <link linkend="setting_autosave">autosave</link> is
           on, then this will cause preferences to be
           immediately saved. Otherwise, changed setting can be
-          saved for future SQLLine session eith the
+          saved for future SQLLine session with the
           <link linkend="command_save">save</link> command.
           </para>
         </refsect1>

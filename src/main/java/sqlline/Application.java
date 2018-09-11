@@ -306,6 +306,8 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
       new ReflectiveCommandHandler(sqlLine,
           getOpts(sqlLine).optionCompleters(), "set"),
+      new ReflectiveCommandHandler(sqlLine,
+            getOpts(sqlLine).optionCompleters(), "reset"),
       new ReflectiveCommandHandler(sqlLine, empty, "save"),
       new ReflectiveCommandHandler(sqlLine, empty, "scan"),
       new ReflectiveCommandHandler(sqlLine, empty, "sql"),
