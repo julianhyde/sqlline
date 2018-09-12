@@ -1194,6 +1194,7 @@ sqlline> !help
 !sql              Execute a SQL command
 !tables           List all the tables in the database
 !verbose          Set verbose mode on
+!version          Print sqlline version
 
 Comments, bug reports, and patches go to mwp1@cornell.edu
 
@@ -2653,6 +2654,44 @@ java.sql.SQLException: ORA-00942: table or view does not exist
       </refentry>
       </section>
 
+      <section id="sect_command_version">
+      <title>version</title>
+      <refentry id="command_version">
+        <refmeta>
+        <refentrytitle>version</refentrytitle>
+        <manvolnum>1</manvolnum>
+        </refmeta>
+
+        <refnamediv>
+          <refname>version</refname>
+          <refpurpose>
+          Print sqlline version
+          </refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+          <cmdsynopsis>
+            <command>!version</command>
+          </cmdsynopsis>
+        </refsynopsisdiv>
+        <refsect1>
+          <title>Description</title>
+          <para>
+          Print sqlline version
+          </para>
+        </refsect1>
+        <refsect1>
+        <title>Example of "version" command</title>
+        <screen>
+sqlline> !version
+
+sqlline version 1.6.0-SNAPSHOT
+
+sqlline>
+        </screen>
+        </refsect1>
+      </refentry>
+      </section>
 
     </chapter>
 

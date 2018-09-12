@@ -1616,6 +1616,18 @@ public class Commands {
     callback.setToSuccess();
   }
 
+  public void version(String line, DispatchCallback callback) {
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 1) {
+      callback.setToFailure();
+      sqlLine.error("Usage: version");
+      return;
+    }
+
+    sqlLine.output(sqlLine.getVersion());
+    callback.setToSuccess();
+  }
+
   public void appconfig(String line, DispatchCallback callback) {
     String example =
         "Usage: appconfig <class name for application configuration>"

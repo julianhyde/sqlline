@@ -1080,6 +1080,7 @@ sqlline> !help
 !tables             List all the tables in the database
 !typeinfo           Display the type map for the current connection
 !verbose            Set verbose mode on
+!version            Print sqlline version
 
 
 Variables:
@@ -2004,6 +2005,28 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         at sqlline.SqlLine.main(SqlLine.java:332)
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+version
+
+Name
+
+version — Print sqlline version
+
+Synopsis
+
+!version
+
+Description
+
+Print sqlline version
+
+Example of "version" command
+
+sqlline> !version
+
+sqlline version 1.6.0-SNAPSHOT
+
+sqlline>
 
 Parameter Reference
 

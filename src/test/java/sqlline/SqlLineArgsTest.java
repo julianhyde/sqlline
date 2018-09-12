@@ -1397,6 +1397,13 @@ public class SqlLineArgsTest {
       containsString("custom_null"));
   }
 
+  @Test
+  public void testVersion() throws Throwable {
+    final String script = "!version\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("sqlline version"));
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {
