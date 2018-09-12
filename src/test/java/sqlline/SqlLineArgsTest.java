@@ -1397,6 +1397,20 @@ public class SqlLineArgsTest {
       containsString("custom_null"));
   }
 
+  @Test
+  public void testVersion() throws Throwable {
+    final String script = "!set\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(new Application().getVersion()));
+  }
+
+  @Test
+  public void testSetVersion() throws Throwable {
+    final String script = "!set version test-version\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("version property is read only"));
+  }
+
   // Work around compile error in JDK 1.6
   private static Matcher<String> allOf(Matcher<String> m1,
       Matcher<String> m2) {

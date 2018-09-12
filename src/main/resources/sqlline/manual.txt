@@ -124,6 +124,7 @@ timeformat
 timestampformat
 trimscripts
 verbose
+version
 JDBC Driver Support
 Project Information
 SQLLine Manual
@@ -248,6 +249,7 @@ timeformat
 timestampformat
 trimscripts
 verbose
+version
 JDBC Driver Support
 Introduction
 
@@ -1128,6 +1130,8 @@ timestampFormat pattern    Format timestamps using SimpleDateFormat pattern
 trimScripts     true/false Remove trailing spaces from lines read from script
                            files
 verbose         true/false Show verbose error messages and debug info
+version         version    Show the current sqlline version.
+                           The property is read only.
 
 Comments, bug reports, and patches go to ???
 
@@ -2034,6 +2038,8 @@ timeformat
 timestampformat
 trimscripts
 verbose
+version
+
 autocommit
 
 If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
@@ -2141,6 +2147,10 @@ If true, then trim leading and trailing whitespace from lines as they are proces
 verbose
 
 If true, then print out the entire java stack trace whenever an error occurs, as well as displaying debugging information. Defaults to false.
+
+version
+
+Show the current sqlline version. The property is read only.
 
 JDBC Driver Support
 
