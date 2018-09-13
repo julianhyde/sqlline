@@ -24,8 +24,9 @@ import org.junit.Test;
 public class SqlLineParserTest {
   @Test
   public void testSqlLineParserForOkLines() {
-    DefaultParser parser =
-        new SqlLineParser().eofOnUnclosedQuote(true).eofOnEscapedNewLine(true);
+    DefaultParser parser = new SqlLineParser(new SqlLine())
+        .eofOnUnclosedQuote(true)
+        .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
     String[] successfulLinesToCheck = new String[] {
       "!set",
@@ -43,8 +44,9 @@ public class SqlLineParserTest {
 
   @Test
   public void testSqlLineParserForWrongLines() {
-    DefaultParser parser =
-        new SqlLineParser().eofOnUnclosedQuote(true).eofOnEscapedNewLine(true);
+    DefaultParser parser = new SqlLineParser(new SqlLine())
+        .eofOnUnclosedQuote(true)
+        .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
     String[] successfulLinesToCheck = new String[] {
       "!sql",

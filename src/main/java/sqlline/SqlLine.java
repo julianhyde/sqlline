@@ -568,7 +568,7 @@ public class SqlLine {
         .terminal(terminal)
         .completer(new SqlLineCompleter(this))
         .appName("sqlline")
-        .parser(new SqlLineParser()
+        .parser(new SqlLineParser(this)
             .eofOnEscapedNewLine(true)
             .eofOnUnclosedQuote(true))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())

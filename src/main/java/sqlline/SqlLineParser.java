@@ -23,6 +23,12 @@ import org.jline.reader.impl.DefaultParser;
  * for sql, !sql, !all while its not ended with ';'.
  */
 public class SqlLineParser extends DefaultParser {
+  private final SqlLine sqlLine;
+
+  public SqlLineParser(final SqlLine sqlLine) {
+    this.sqlLine = sqlLine;
+  }
+
   public ParsedLine parse(
       final String line, final int cursor, ParseContext context) {
     List<String> words = new LinkedList<>();
@@ -100,17 +106,20 @@ public class SqlLineParser extends DefaultParser {
     }
 
     if (isEofOnEscapedNewLine() && isEscapeChar(line, line.length() - 1)) {
-      throw new EOFError(-1, -1, "Escaped new line", "newline");
+      throw new EOFError(
+          -1, -1, "Escaped new line", getPaddedPrompt("newline"));
     }
     if (isEofOnUnclosedQuote() && quoteStart >= 0
         && context != ParseContext.COMPLETE) {
       throw new EOFError(-1, -1, "Missing closing quote",
-          line.charAt(quoteStart) == '\'' ? "quote" : "dquote");
+          getPaddedPrompt(line.charAt(quoteStart) == '\''
+              ? "quote" : "dquote"));
     }
 
     if (isSql && !line.trim().endsWith(";")
         && context != ParseContext.COMPLETE) {
-      throw new EOFError(-1, -1, "Missing semicolon at the end", "semicolon");
+      throw new EOFError(-1, -1, "Missing semicolon at the end",
+          getPaddedPrompt("semicolon"));
     }
     String openingQuote = quoteStart >= 0
         ? line.substring(quoteStart, quoteStart + 1) : null;
@@ -136,6 +145,16 @@ public class SqlLineParser extends DefaultParser {
       i++;
     }
     return line.substring(i);
+  }
+
+  private String getPaddedPrompt(String waitingPattern) {
+    int length = sqlLine.getPrompt().length();
+    StringBuilder prompt = new StringBuilder(length - 2);
+    for (int i = 0; i < length - 2 - waitingPattern.length(); i++) {
+      prompt.append(i % 2 == 0 ? '.' : ' ');
+    }
+    prompt.append(waitingPattern);
+    return prompt.toString();
   }
 }
 
