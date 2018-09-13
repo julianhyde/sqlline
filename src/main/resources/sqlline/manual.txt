@@ -251,7 +251,7 @@ verbose
 JDBC Driver Support
 Introduction
 
-SQLLine is a pure-Java console based utility for connecting to relational databases and executing SQL commands. It is similiar to other command-line database access utilities like sqlplus for Oracle, mysql for MySQL, and isql for Sybase/SQL Server. Since it is pure-Java, it is platform independant, and will run on any platform that can run Java 1.3 or higher.
+SQLLine is a pure-Java console based utility for connecting to relational databases and executing SQL commands. It is similar to other command-line database access utilities like sqlplus for Oracle, mysql for MySQL, and isql for Sybase/SQL Server. Since it is pure-Java, it is platform independent, and will run on any platform that can run Java 1.3 or higher.
 
 License and Terms of Use
 
@@ -279,7 +279,7 @@ JDBC™ Driver(s) - Since SQLLine uses the Java Database Connectivity package to
 
 Installing SQLLine
 
-There are currently no set standards for installing Java software on different platforms. The simplest method for installing SQLLine in a platform independant way is as follows:
+There are currently no set standards for installing Java software on different platforms. The simplest method for installing SQLLine in a platform independent way is as follows:
 
 Create a new directory/folder where you like. This will be referred to as sqllinedir.
 
@@ -1072,7 +1072,7 @@ sqlline> !help
 !rehash             Fetch table and column names for command completion
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
-!save               Save the current variabes and aliases
+!save               Save the current variables and aliases
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
 !set                Set a sqlline variable
@@ -1279,7 +1279,7 @@ Synopsis
 
 Description
 
-Execute an arbitrary metadata method agains the current connection. refpurpose are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
+Execute an arbitrary metadata method against the current connection. Refpurposes are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
 
 Example of "metadata" command
 
@@ -1339,7 +1339,7 @@ Synopsis
 
 Description
 
-Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parseable format.
+Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parsable format.
 
 Example of table output formatting
 
@@ -1514,7 +1514,7 @@ Connect to the database defined in the specified properties file. The properties
 
 url: the database URL to which to connect
 
-driver: the driver class that handles the URL. If unspecifed, SQLLine with automatically scan the CLASSPATH for an appropriate driver
+driver: the driver class that handles the URL. If unspecified, SQLLine with automatically scan the CLASSPATH for an appropriate driver
 
 user: the username to use to connect to the database. If unspecified, SQLLine will prompt for it.
 
@@ -1906,7 +1906,7 @@ Synopsis
 
 Description
 
-Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed setting can be saved for future SQLLine session eith the save command.
+Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed setting can be saved for future SQLLine session with the save command.
 
 Example of "set" command
 
@@ -2036,11 +2036,11 @@ trimscripts
 verbose
 autocommit
 
-If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
+If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitly committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
 
 autosave
 
-When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitely saved using the save command. Defaults to false.
+When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitly saved using the save command. Defaults to false.
 
 color
 
@@ -2084,7 +2084,7 @@ The default transaction isolation that will be used for new connections. To chan
 
 maxcolumnwidth
 
-The maximum column width to display for each colummn before truncating data when using the "table" outputformat. Defaults to 15.
+The maximum column width to display for each column before truncating data when using the "table" outputformat. Defaults to 15.
 
 maxwidth
 
