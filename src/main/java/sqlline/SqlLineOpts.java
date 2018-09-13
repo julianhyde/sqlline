@@ -19,9 +19,11 @@ import java.util.*;
 
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
+import org.jline.reader.History;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.reader.impl.history.DefaultHistory;
 
 /**
  * Session options.
@@ -36,6 +38,8 @@ public class SqlLineOpts implements Completer {
   public static final Date TEST_DATE = new Date();
   public static final String DEFAULT_TRANSACTION_ISOLATION =
       "TRANSACTION_REPEATABLE_READ";
+  private static final String DEFAULT_HISTORY_FILE =
+      new File(saveDir(), "history").getAbsolutePath();
   private SqlLine sqlLine;
   private boolean autoSave = false;
   private boolean silent = false;
@@ -66,8 +70,7 @@ public class SqlLineOpts implements Completer {
   private String outputFormat = "table";
   private boolean trimScripts = true;
   private File rcFile = new File(saveDir(), "sqlline.properties");
-  private String historyFile =
-      new File(saveDir(), "history").getAbsolutePath();
+  private String historyFile = DEFAULT_HISTORY_FILE;
   private String runFile;
 
   public SqlLineOpts(SqlLine sqlLine) {
@@ -93,7 +96,7 @@ public class SqlLineOpts implements Completer {
    *
    * @return save directory
    */
-  public File saveDir() {
+  public static File saveDir() {
     String dir = System.getProperty("sqlline.rcfile");
     if (dir != null && dir.length() > 0) {
       return new File(dir);
@@ -393,10 +396,27 @@ public class SqlLineOpts implements Completer {
   }
 
   public void setHistoryFile(String historyFile) {
-    this.historyFile = historyFile;
+    if (Objects.equals(this.historyFile, historyFile)
+        || Objects.equals(this.historyFile, Commands.expand(historyFile))) {
+      return;
+    }
+    if (DEFAULT.equals(historyFile)) {
+      this.historyFile = DEFAULT_HISTORY_FILE;
+    } else {
+      this.historyFile = Commands.expand(historyFile);
+    }
     if (sqlLine != null && sqlLine.getLineReader() != null) {
+      final History history = sqlLine.getLineReader().getHistory();
+      if (history != null) {
+        try {
+          history.save();
+        } catch (IOException e) {
+          sqlLine.handleException(e);
+        }
+      }
       sqlLine.getLineReader()
           .setVariable(LineReader.HISTORY_FILE, this.historyFile);
+      new DefaultHistory().attach(sqlLine.getLineReader());
     }
   }
 

@@ -2102,7 +2102,7 @@ The interval between which the column headers will be redisplayed when using the
 
 historyfile
 
-The file to which SQLLine will save a record of all the commands issued. Defaults to HOME/sqlline/history on Windows, and HOME/.sqlline/history on all other platforms.
+The file to which SQLLine will save a record of all the commands issued. Defaults to HOME/sqlline/history on Windows, and HOME/.sqlline/history on all other platforms. ~ will be expanded in user home.
 
 incremental
 

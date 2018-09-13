@@ -242,14 +242,15 @@ public class Commands {
       if (size == 0) {
         sqlLine.error("Usage: rerun <offset>, history should not be empty");
       } else {
-        sqlLine.error("Usage: rerun <offset>, max offset is +/-" + (size - 1));
+        sqlLine.error("Usage: rerun <offset>, available range of offset is -"
+            + (size - 1) + ".." + size);
       }
       callback.setToFailure();
       return;
     }
 
     int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
-    if (size - 1 < Math.abs(offset) || offset == 0) {
+    if (size < offset || size - 1 < -offset || offset == 0) {
       if (offset == 0) {
         sqlLine.error(
             "Usage: rerun <offset>, offset should be positive or negative");
@@ -257,7 +258,8 @@ public class Commands {
       if (size == 0) {
         sqlLine.error("Usage: rerun <offset>, history should not be empty");
       } else {
-        sqlLine.error("Usage: rerun <offset>, max offset is +/-" + (size - 1));
+        sqlLine.error("Usage: rerun <offset>, available range of offset is -"
+            + (size - 1) + ".." + size);
       }
       callback.setToFailure();
       return;
@@ -283,7 +285,7 @@ public class Commands {
         return command;
       }
       int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
-      if (history.size() - 1 < Math.abs(offset)) {
+      if (history.size() < offset || history.size() - 1 < -offset) {
         return command;
       }
       return calculateCommand(offset, offsets);
@@ -1414,7 +1416,7 @@ public class Commands {
   }
 
   /** Expands "~" to the home directory. */
-  private static String expand(String filename) {
+  public static String expand(String filename) {
     if (filename.startsWith("~" + File.separator)) {
       try {
         String home = System.getProperty("user.home");

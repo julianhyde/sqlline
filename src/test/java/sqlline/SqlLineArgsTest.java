@@ -1442,14 +1442,30 @@ public class SqlLineArgsTest {
   }
 
   @Test
-  public void testRerunWrongOptions() throws Throwable {
+  public void testRerun() throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     PrintStream beelineOutputStream = new PrintStream(os);
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
-    SqlLine.Status status = beeLine.begin(new String[]{}, is, false);
+    File tmpHistoryFile = File.createTempFile("tmpHistory", "temp");
+    try (BufferedWriter bw =
+        new BufferedWriter(new FileWriter(tmpHistoryFile))) {
+      bw.write("1536743099591:SELECT \\n CURRENT_TIMESTAMP \\n as \\n c1;\n"
+          + "1536743104551:!/ 4\n"
+          + "1536743104551:!/ 5\n"
+          + "1536743104551:!/ 2\n"
+          + "1536743104551:!/ 7\n"
+          + "1536743107526:!history\n"
+          + "1536743115431:!/ 3\n"
+          + "1536743115431:!/ 8\n");
+      bw.flush();
+    }
+    tmpHistoryFile.deleteOnExit();
+    SqlLine.Status status = beeLine.begin(
+        new String[]{"--historyfile=" + tmpHistoryFile.getAbsolutePath()},
+        is, true);
     // Here it is the status is SqlLine.Status.OTHER
     // because of EOF as the result of InputStream which
     // is not used in the current test so it is ok
@@ -1463,21 +1479,38 @@ public class SqlLineArgsTest {
             + "\"\""), dc);
     os.reset();
     beeLine.runCommands(
-        Collections.singletonList("!/ " + Integer.MAX_VALUE), dc);
+        Collections.singletonList("!/ 1"), dc);
     String output = os.toString("UTF8");
-    final String expected0 = "Usage: rerun <offset>, max offset is";
-    final String expected1 =
-        // in case of empty history
-        "Usage: rerun <offset>, history should not be empty";
-    assertThat(output,
-        anyOf(containsString(expected0), containsString(expected1))
-    );
+    final String expected0 = "+-------------------------+";
+    final String expected1 = "|           C1            |";
+    final String expected2 = "1 row selected";
+    assertThat(output, CoreMatchers.allOf(
+        containsString(expected0),
+        containsString(expected1),
+        containsString(expected2)
+    ));
     os.reset();
-    beeLine.runCommands(Collections.singletonList("!/ wrongnumber"), dc);
+    beeLine.runCommands(Collections.singletonList("!/ 4"), dc);
     output = os.toString("UTF8");
-    assertThat(output,
-        anyOf(containsString(expected0), containsString(expected1))
-    );
+    String expectedLine3 = "Cycled rerun of commands from history [2, 4]";
+    assertThat(output, containsString(expectedLine3));
+    os.reset();
+    beeLine.runCommands(Collections.singletonList("!/ 3"), dc);
+    output = os.toString("UTF8");
+    String expectedLine4 = "Cycled rerun of commands from history [3, 5, 7]";
+    assertThat(output, containsString(expectedLine4));
+    os.reset();
+    beeLine.runCommands(Collections.singletonList("!/ 8"), dc);
+    output = os.toString("UTF8");
+    String expectedLine5 = "Cycled rerun of commands from history [8]";
+    assertThat(output, containsString(expectedLine5));
+    os.reset();
+    beeLine.runCommands(
+        Collections.singletonList("!rerun " + Integer.MAX_VALUE), dc);
+    output = os.toString("UTF8");
+    String expectedLine6 =
+        "Usage: rerun <offset>, available range of offset is -7..8";
+    assertThat(output, containsString(expectedLine6));
     beeLine.runCommands(
         Collections.singletonList("!quit"), new DispatchCallback());
     assertTrue(beeLine.isExit());
