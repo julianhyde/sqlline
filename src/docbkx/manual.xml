@@ -28,7 +28,7 @@
       <para>
       SQLLine is a pure-Java console based utility for connecting
       to relational databases and executing SQL commands. It is
-      similiar to other command-line database access utilities like
+      similar to other command-line database access utilities like
       <filename>sqlplus</filename> for Oracle, <filename>mysql</filename>
       for MySQL, and <filename>isql</filename> for Sybase/SQL Server.
       Since it is pure Java, it is platform independent, and will
@@ -1459,7 +1459,7 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
           <title>Description</title>
           <para>
           Execute an arbitrary metadata method against the current
-            connection. refpurpose are separated by spaces.
+            connection. Refpurposes are separated by spaces.
 
           Use "" for a blank String, and null for a null parameter.
           For information on available metadata methods, see
@@ -1583,7 +1583,7 @@ true
           Set the mode for displaying results from statements.
           This is useful for saving output from SQL statements to
           either a visually pleasing format or an easily
-          parseable format.
+          parsable format.
           </para>
         </refsect1>
         <refsect1>
@@ -1850,7 +1850,7 @@ NAME        Microsoft
             </para></listitem>
             <listitem><para>
               driver: the driver class that handles the URL. If
-                unspecifed, SQLLine with automatically
+                unspecified, SQLLine with automatically
                 scan the CLASSPATH for an appropriate driver
             </para></listitem>
             <listitem><para>
@@ -2488,7 +2488,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           <link linkend="setting_autosave">autosave</link> is
           on, then this will cause preferences to be
           immediately saved. Otherwise, changed setting can be
-          saved for future SQLLine session eith the
+          saved for future SQLLine session with the
           <link linkend="command_save">save</link> command.
           </para>
         </refsect1>
@@ -2669,7 +2669,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         <title>autocommit</title>
         <para>
           If <literal>true</literal>, then new connections will have autocommit
-          set, otherwise, transactions will need to be explicitely
+          set, otherwise, transactions will need to be explicitly
           <link linkend="command_commit">committed</link> or
           <link linkend="command_rollback">rolled back</link>.
           Defaults to <literal>true</literal>.
@@ -2686,7 +2686,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           to preferences using the
           <link linkend="command_set">set</link> command will cause
           the preferences to be saved. Otherwise, preferences will
-          need to be explicitely saved using the
+          need to be explicitly saved using the
           <link linkend="command_save">save</link> command.
           Defaults to <literal>false</literal>.
         </para>
@@ -2722,7 +2722,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           in order to provide them as candidates for tab-completion.
           This can be a very slow operation for some databases, do
           by default it is off. Table and column information can
-          always be explicitely retrieved using the
+          always be explicitly retrieved using the
           <link linkend="command_rehash">rehash</link> command.
         </para>
       </sect1>
@@ -2783,7 +2783,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
       <sect1 id="setting_maxcolumnwidth">
         <title>maxcolumnwidth</title>
         <para>
-          The maximum column width to display for each colummn
+          The maximum column width to display for each column
           before truncating data when using the "table"
           <link linkend="setting_outputformat">outputformat</link>.
           Defaults to 15.
