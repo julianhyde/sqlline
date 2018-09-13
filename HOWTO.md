@@ -10,7 +10,7 @@ Capitalization is tricky:
 
 ## How to make a release (for committers)
 
-Make sure `mvn clean install` and `mvn site` pass under JDK 1.7, 8, 9,
+Make sure `mvn clean install` and `mvn site` pass under JDK 8, 9,
 10 and 11.
 
 Write release notes. Run the

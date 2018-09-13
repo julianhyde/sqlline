@@ -19,7 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
+
 import sqlline.Application;
 import sqlline.CommandHandler;
 import sqlline.OutputFormat;
@@ -44,7 +45,7 @@ public class CustomApplication extends Application {
 
   @Override public Map<String, OutputFormat> getOutputFormats(SqlLine sqlLine) {
     final Map<String, OutputFormat> outputFormats =
-        new HashMap<String, OutputFormat>(sqlLine.getOutputFormats());
+        new HashMap<>(sqlLine.getOutputFormats());
     outputFormats.remove("json");
     return outputFormats;
   }
@@ -52,7 +53,7 @@ public class CustomApplication extends Application {
   @Override public Collection<CommandHandler> getCommandHandlers(
       SqlLine sqlLine) {
     final List<CommandHandler> commandHandlers =
-        new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
+        new ArrayList<>(sqlLine.getCommandHandlers());
     final Iterator<CommandHandler> iterator =
         commandHandlers.iterator();
     while (iterator.hasNext()) {

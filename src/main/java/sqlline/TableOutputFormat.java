@@ -25,7 +25,10 @@ class TableOutputFormat implements OutputFormat {
     int index = 0;
     ColorBuffer header = null;
     ColorBuffer headerCols = null;
-    final int width = sqlLine.getOpts().getMaxWidth() - 4;
+    final int width = (sqlLine.getOpts().getMaxWidth() == 0
+            && sqlLine.getLineReader() != null
+        ? sqlLine.getLineReader().getTerminal().getWidth()
+        : sqlLine.getOpts().getMaxWidth()) - 4;
 
     // normalize the columns sizes
     rows.normalizeWidths();

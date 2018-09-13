@@ -20,8 +20,7 @@ import java.util.Map;
  * Implementation of {@link OutputFormat} that formats rows as JSON.
  */
 public class JsonOutputFormat extends AbstractOutputFormat {
-  private static final Map<Character, String> ESCAPING_MAP =
-    new HashMap<Character, String>();
+  private static final Map<Character, String> ESCAPING_MAP = new HashMap<>();
   static {
     ESCAPING_MAP.put('\\', "\\\\");
     ESCAPING_MAP.put('\"', "\\\"");

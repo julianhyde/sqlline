@@ -17,9 +17,13 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import jline.TerminalFactory;
-import jline.console.completer.Completer;
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
+import org.jline.reader.History;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.reader.impl.history.DefaultHistory;
 
 /**
  * Session options.
@@ -29,13 +33,13 @@ public class SqlLineOpts implements Completer {
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
   public static final String DEFAULT = "default";
+  private static final int DEFAULT_MAX_WIDTH = 80;
+  private static final int DEFAULT_MAX_HEIGHT = 80;
   public static final Date TEST_DATE = new Date();
-  private static final int DEFAULT_MAX_WIDTH =
-      TerminalFactory.get().getWidth();
-  private static final int DEFAULT_MAX_HEIGHT =
-      TerminalFactory.get().getHeight();
   public static final String DEFAULT_TRANSACTION_ISOLATION =
       "TRANSACTION_REPEATABLE_READ";
+  private static final String DEFAULT_HISTORY_FILE =
+      new File(saveDir(), "history").getAbsolutePath();
   private SqlLine sqlLine;
   private boolean autoSave = false;
   private boolean silent = false;
@@ -66,8 +70,7 @@ public class SqlLineOpts implements Completer {
   private String outputFormat = "table";
   private boolean trimScripts = true;
   private File rcFile = new File(saveDir(), "sqlline.properties");
-  private String historyFile =
-      new File(saveDir(), "history").getAbsolutePath();
+  private String historyFile = DEFAULT_HISTORY_FILE;
   private String runFile;
 
   public SqlLineOpts(SqlLine sqlLine) {
@@ -80,7 +83,7 @@ public class SqlLineOpts implements Completer {
   }
 
   public List<Completer> optionCompleters() {
-    return Collections.<Completer>singletonList(this);
+    return Collections.singletonList(this);
   }
 
   public List<String> possibleSettingValues() {
@@ -93,7 +96,7 @@ public class SqlLineOpts implements Completer {
    *
    * @return save directory
    */
-  public File saveDir() {
+  public static File saveDir() {
     String dir = System.getProperty("sqlline.rcfile");
     if (dir != null && dir.length() > 0) {
       return new File(dir);
@@ -121,12 +124,14 @@ public class SqlLineOpts implements Completer {
     return f;
   }
 
-  public int complete(String buf, int pos, List<CharSequence> candidates) {
+  @Override
+  public void complete(
+      LineReader lineReader, ParsedLine parsedLine, List<Candidate> list) {
     try {
-      return new StringsCompleter(propertyNames())
-          .complete(buf, pos, candidates);
+      new StringsCompleter(propertyNames())
+          .complete(lineReader, parsedLine, list);
     } catch (Throwable t) {
-      return -1;
+      return;
     }
   }
 
@@ -136,7 +141,7 @@ public class SqlLineOpts implements Completer {
     out.close();
   }
 
-  public void save(OutputStream out) throws IOException {
+  public void save(OutputStream out) {
     try {
       Properties props = toProperties();
 
@@ -150,18 +155,16 @@ public class SqlLineOpts implements Completer {
     }
   }
 
-  Set<String> propertyNames()
-      throws IllegalAccessException, InvocationTargetException {
-    final TreeSet<String> set = new TreeSet<String>();
+  Set<String> propertyNames() {
+    final TreeSet<String> set = new TreeSet<>();
     for (String s : propertyNamesMixed()) {
       set.add(s.toLowerCase());
     }
     return set;
   }
 
-  Set<String> propertyNamesMixed()
-      throws IllegalAccessException, InvocationTargetException {
-    TreeSet<String> names = new TreeSet<String>();
+  Set<String> propertyNamesMixed() {
+    TreeSet<String> names = new TreeSet<>();
 
     // get all the values from getXXX methods
     for (Method method : getClass().getDeclaredMethods()) {
@@ -393,7 +396,28 @@ public class SqlLineOpts implements Completer {
   }
 
   public void setHistoryFile(String historyFile) {
-    this.historyFile = historyFile;
+    if (Objects.equals(this.historyFile, historyFile)
+        || Objects.equals(this.historyFile, Commands.expand(historyFile))) {
+      return;
+    }
+    if (DEFAULT.equals(historyFile)) {
+      this.historyFile = DEFAULT_HISTORY_FILE;
+    } else {
+      this.historyFile = Commands.expand(historyFile);
+    }
+    if (sqlLine != null && sqlLine.getLineReader() != null) {
+      final History history = sqlLine.getLineReader().getHistory();
+      if (history != null) {
+        try {
+          history.save();
+        } catch (IOException e) {
+          sqlLine.handleException(e);
+        }
+      }
+      sqlLine.getLineReader()
+          .setVariable(LineReader.HISTORY_FILE, this.historyFile);
+      new DefaultHistory().attach(sqlLine.getLineReader());
+    }
   }
 
   public String getHistoryFile() {
@@ -554,6 +578,7 @@ public class SqlLineOpts implements Completer {
     }
     return dateTimePattern;
   }
+
 }
 
 // End SqlLineOpts.java

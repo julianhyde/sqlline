@@ -16,11 +16,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.util.*;
 
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Suggests completions for SQL statements.
@@ -28,9 +26,12 @@ import jline.console.completer.StringsCompleter;
 class SqlCompleter extends StringsCompleter {
   public SqlCompleter(SqlLine sqlLine, boolean skipMeta)
       throws IOException, SQLException {
-    super(new String[0]);
+    super(getCompletions(sqlLine, skipMeta));
+  }
 
-    Set<String> completions = new TreeSet<String>();
+  private static Iterable<String> getCompletions(
+      SqlLine sqlLine, boolean skipMeta) throws IOException, SQLException {
+    Set<String> completions = new TreeSet<>();
 
     // add the default SQL completions
     String keywords =
@@ -82,7 +83,7 @@ class SqlCompleter extends StringsCompleter {
     }
 
     // set the Strings that will be completed
-    getStrings().addAll(completions);
+    return completions;
   }
 }
 

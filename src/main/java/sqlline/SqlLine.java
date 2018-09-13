@@ -11,20 +11,27 @@
 */
 package sqlline;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.*;
-import java.text.*;
+import java.text.ChoiceFormat;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.Date;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
-import jline.*;
-import jline.console.ConsoleReader;
-import jline.console.UserInterruptException;
-import jline.console.completer.Completer;
-import jline.console.history.FileHistory;
+import org.jline.reader.*;
+import org.jline.reader.impl.history.DefaultHistory;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 /**
  * A console SQL shell with command completion.
@@ -50,14 +57,13 @@ public class SqlLine {
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
   private String lastProgress = null;
-  private final Map<SQLWarning, Date> seenWarnings =
-      new HashMap<SQLWarning, Date>();
+  private final Map<SQLWarning, Date> seenWarnings = new HashMap<>();
   private final Commands commands = new Commands(this);
   private OutputFile scriptOutputFile = null;
   private OutputFile recordOutputFile = null;
   private PrintStream outputStream = new PrintStream(System.out, true);
   private PrintStream errorStream = new PrintStream(System.err, true);
-  private ConsoleReader consoleReader;
+  private LineReader lineReader;
   private List<String> batch = null;
   private final Reflector reflector;
   private Application application;
@@ -75,7 +81,7 @@ public class SqlLine {
   private final Completer sqlLineCommandCompleter;
 
   static {
-    String testClass = "jline.console.ConsoleReader";
+    String testClass = "org.jline.reader.LineReader";
     try {
       Class.forName(testClass);
     } catch (Throwable t) {
@@ -300,8 +306,8 @@ public class SqlLine {
    * @return Whether arguments parsed successfully
    */
   Status initArgs(String[] args, DispatchCallback callback) {
-    List<String> commands = new LinkedList<String>();
-    List<String> files = new LinkedList<String>();
+    List<String> commands = new LinkedList<>();
+    List<String> files = new LinkedList<>();
     String driver = null;
     String user = null;
     String pass = null;
@@ -462,10 +468,8 @@ public class SqlLine {
       handleException(e);
     }
 
-    FileHistory fileHistory =
-        new FileHistory(new File(getOpts().getHistoryFile()));
-
-    ConsoleReader reader;
+    History fileHistory = new DefaultHistory();
+    LineReader reader;
     boolean runningScript = getOpts().getRun() != null;
     if (runningScript) {
       try {
@@ -509,13 +513,13 @@ public class SqlLine {
         signalHandler.setCallback(callback);
         dispatch(reader.readLine(getPrompt()), callback);
         if (saveHistory) {
-          fileHistory.flush();
+          fileHistory.save();
         }
         if (!callback.isSuccess() && runningScript) {
           commands.quit(null, callback);
           status = Status.OTHER;
         }
-      } catch (EOFException eof) {
+      } catch (EndOfFileException eof) {
         // CTRL-D
         commands.quit(null, callback);
       } catch (UserInterruptException ioe) {
@@ -542,33 +546,37 @@ public class SqlLine {
     return status;
   }
 
-  public ConsoleReader getConsoleReader(InputStream inputStream,
-      FileHistory fileHistory) throws IOException {
-    Terminal terminal = TerminalFactory.create();
-    try {
-      terminal.init();
-    } catch (Exception e) {
-      // For backwards compatibility with code that used to use this lib
-      // and expected only IOExceptions, convert back to that. We can't
-      // use IOException(Throwable) constructor, which is only JDK 1.6 and
-      // later.
-      final IOException ioException = new IOException(e.toString());
-      ioException.initCause(e);
-      throw ioException;
+  public LineReader getConsoleReader(InputStream inputStream,
+      History fileHistory) throws IOException {
+    if (getLineReader() != null) {
+      return getLineReader();
     }
+    TerminalBuilder terminalBuilder = TerminalBuilder.builder();
+    final Terminal terminal;
     if (inputStream != null) {
-      // ### NOTE:  fix for sf.net bug 879425.
-      consoleReader = new ConsoleReader(inputStream, System.out);
+      terminalBuilder =
+          terminalBuilder.streams(inputStream, System.out);
+      terminal = terminalBuilder.build();
     } else {
-      consoleReader = new ConsoleReader();
+      terminalBuilder = terminalBuilder.system(true);
+      terminal = terminalBuilder.build();
+      getOpts().setMaxWidth(terminal.getWidth());
+      getOpts().setMaxHeight(terminal.getHeight());
     }
 
-    consoleReader.addCompleter(new SqlLineCompleter(this));
-    consoleReader.setHistory(fileHistory);
-    consoleReader.setHandleUserInterrupt(true); // CTRL-C handling
-    consoleReader.setExpandEvents(false);
-
-    return consoleReader;
+    final LineReader lineReader = LineReaderBuilder.builder()
+        .terminal(terminal)
+        .completer(new SqlLineCompleter(this))
+        .appName("sqlline")
+        .parser(new SqlLineParser(this)
+            .eofOnEscapedNewLine(true)
+            .eofOnUnclosedQuote(true))
+        .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
+        .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
+        .build();
+    fileHistory.attach(lineReader);
+    setLineReader(lineReader);
+    return lineReader;
   }
 
   void usage() {
@@ -609,8 +617,7 @@ public class SqlLine {
     }
 
     if (line.startsWith(COMMAND_PREFIX)) {
-      Map<String, CommandHandler> cmdMap =
-          new TreeMap<String, CommandHandler>();
+      Map<String, CommandHandler> cmdMap = new TreeMap<>();
       line = line.substring(1);
       for (CommandHandler commandHandler : getCommandHandlers()) {
         String match = commandHandler.matches(line);
@@ -925,10 +932,7 @@ public class SqlLine {
       int total = rs.getRow();
       rs.beforeFirst();
       return total;
-    } catch (SQLException sqle) {
-      return -1;
-    } catch (AbstractMethodError ame) {
-      // JDBC 1 driver error
+    } catch (SQLException | AbstractMethodError sqle) {
       return -1;
     }
   }
@@ -958,7 +962,7 @@ public class SqlLine {
   }
 
   Set<String> getColumnNames(DatabaseMetaData meta) throws SQLException {
-    Set<String> names = new HashSet<String>();
+    Set<String> names = new HashSet<>();
     info(loc("building-tables"));
 
     try {
@@ -1056,8 +1060,8 @@ public class SqlLine {
       --n;
     }
 
-    final List<String[]> words = new ArrayList<String[]>();
-    final List<String> current = new ArrayList<String>();
+    final List<String[]> words = new ArrayList<>();
+    final List<String> current = new ArrayList<>();
     for (int i = 0; i < n;) {
       char c = chars[i];
       switch (state) {
@@ -1227,7 +1231,7 @@ public class SqlLine {
     int tokenStart = 0;
     int lastProcessedIndex = 0;
 
-    List<String> tokens = new ArrayList<String>();
+    List<String> tokens = new ArrayList<>();
     for (int i = 0; i < line.length(); i++) {
       if (limit > 0 && tokens.size() == limit) {
         break;
@@ -1278,7 +1282,7 @@ public class SqlLine {
   }
 
   static <K, V> Map<K, V> map(K key, V value, Object... obs) {
-    final Map<K, V> m = new HashMap<K, V>();
+    final Map<K, V> m = new HashMap<>();
     m.put(key, value);
     for (int i = 0; i < obs.length - 1; i += 2) {
       //noinspection unchecked
@@ -1321,7 +1325,7 @@ public class SqlLine {
       case '>' :
         // could be skipped for xml attribute and there is no sequence ]]>
         // could be skipped for element text and there is no sequence ]]>
-        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 1) == ']')
+        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 2) == ']')
             || charsCouldBeNotEncoded.indexOf(ch) == -1) {
           sb.append("&gt;");
         } else {
@@ -1454,7 +1458,7 @@ public class SqlLine {
         error(e.getMessage());
       }
     } else {
-      e.printStackTrace(System.err);
+      e.printStackTrace(getErrorStream());
     }
   }
 
@@ -1546,7 +1550,7 @@ public class SqlLine {
   Set<Driver> scanDrivers(boolean knownOnly) throws IOException {
     long start = System.currentTimeMillis();
 
-    Set<String> classNames = new HashSet<String>();
+    Set<String> classNames = new HashSet<>();
 
     if (!knownOnly) {
       classNames.addAll(ClassNameCompleter.getClassNames());
@@ -1554,7 +1558,7 @@ public class SqlLine {
 
     classNames.addAll(appConfig.knownDrivers);
 
-    Set<Driver> driverClasses = new HashSet<Driver>();
+    Set<Driver> driverClasses = new HashSet<>();
 
     for (String className : classNames) {
       if (!className.toLowerCase().contains("driver")) {
@@ -1602,7 +1606,7 @@ public class SqlLine {
         f = new SeparatedValuesOutputFormat(this,
             getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
         Map<String, OutputFormat> updFormats =
-            new HashMap<String, OutputFormat>(getOutputFormats());
+            new HashMap<>(getOutputFormats());
         updFormats.put("csv", f);
         updateOutputFormats(updFormats);
       }
@@ -1765,12 +1769,12 @@ public class SqlLine {
     return errorStream;
   }
 
-  ConsoleReader getConsoleReader() {
-    return consoleReader;
+  LineReader getLineReader() {
+    return lineReader;
   }
 
-  void setConsoleReader(ConsoleReader reader) {
-    this.consoleReader = reader;
+  void setLineReader(LineReader reader) {
+    this.lineReader = reader;
   }
 
   List<String> getBatch() {
@@ -1837,10 +1841,10 @@ public class SqlLine {
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats) {
       this.knownDrivers = Collections.unmodifiableSet(
-          new HashSet<String>(knownDrivers));
+          new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
-          new ArrayList<CommandHandler>(commandHandlers));
+          new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
 
     }
