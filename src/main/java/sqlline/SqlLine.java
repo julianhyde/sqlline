@@ -283,7 +283,7 @@ public class SqlLine {
 
   /**
    * Entry point to creating a {@link ColorBuffer} with color enabled or
-   * disabled depending on the calue of {@link SqlLineOpts#getColor}.
+   * disabled depending on the value of {@link SqlLineOpts#getColor}.
    */
   ColorBuffer getColorBuffer(String msg) {
     return new ColorBuffer(msg, getOpts().getColor());
