@@ -37,6 +37,7 @@ public class SqlLineOpts implements Completer {
   public static final String DEFAULT_TRANSACTION_ISOLATION =
       "TRANSACTION_REPEATABLE_READ";
   private SqlLine sqlLine;
+  private final String version;
   private boolean autoSave = false;
   private boolean silent = false;
   private boolean color = false;
@@ -72,6 +73,7 @@ public class SqlLineOpts implements Completer {
 
   public SqlLineOpts(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+    this.version = sqlLine.getVersion();
   }
 
   public SqlLineOpts(SqlLine sqlLine, Properties props) {
@@ -143,6 +145,10 @@ public class SqlLineOpts implements Completer {
       // don't save maxwidth: it is automatically set based on
       // the terminal configuration
       props.remove(PROPERTY_PREFIX + "maxwidth");
+
+      // don't save version: it is automatically set based on
+      // Application#getVersion
+      props.remove("version");
 
       props.store(out, sqlLine.getApplicationTitle());
     } catch (Exception e) {
@@ -245,16 +251,20 @@ public class SqlLineOpts implements Completer {
       return true;
     } catch (Exception e) {
       if (!quiet) {
-        // need to use System.err here because when bad command args
-        // are passed this is called before init is done, meaning
-        // that sqlline's error() output chokes because it depends
-        // on properties like text coloring that can get set in
-        // arbitrary order.
-        System.err.println(
-            sqlLine.loc(
-                "error-setting",
-                key,
-                e.getCause() == null ? e : e.getCause()));
+        if ("version".equals(key)) {
+          sqlLine.error(sqlLine.loc("property-readonly", key));
+        } else {
+          // need to use System.err here because when bad command args
+          // are passed this is called before init is done, meaning
+          // that sqlline's error() output chokes because it depends
+          // on properties like text coloring that can get set in
+          // arbitrary order.
+          System.err.println(
+              sqlLine.loc(
+                  "error-setting",
+                  key,
+                  e.getCause() == null ? e : e.getCause()));
+        }
       }
       return false;
     }
@@ -532,6 +542,10 @@ public class SqlLineOpts implements Completer {
 
   public File getPropertiesFile() {
     return rcFile;
+  }
+
+  public String getVersion() {
+    return version;
   }
 
   public void setRun(String runFile) {

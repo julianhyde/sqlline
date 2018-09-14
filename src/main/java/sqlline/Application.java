@@ -170,6 +170,10 @@ public class Application {
    * @see #DEFAULT_APP_INFO_MESSAGE
    */
   public String getInfoMessage() throws Exception {
+    return getVersion();
+  }
+
+  public String getVersion() throws Exception {
     final String path = "/META-INF/maven/sqlline/sqlline/pom.properties";
     InputStream inputStream = getClass().getResourceAsStream(path);
     Properties properties = new Properties();

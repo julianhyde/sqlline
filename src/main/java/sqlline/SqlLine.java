@@ -128,6 +128,15 @@ public class SqlLine {
     }
   }
 
+  String getVersion() {
+    try {
+      return application.getVersion();
+    } catch (Exception e) {
+      handleException(e);
+      return Application.DEFAULT_APP_INFO_MESSAGE;
+    }
+  }
+
   static String getApplicationContactInformation() {
     return getManifestAttribute("Implementation-Vendor");
   }
