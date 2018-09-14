@@ -315,7 +315,6 @@ public class Application {
       new ReflectiveCommandHandler(sqlLine, empty, "sql"),
       new ReflectiveCommandHandler(sqlLine, empty, "call"),
       new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
-      new ReflectiveCommandHandler(sqlLine, empty, "version"),
     };
     return Collections.unmodifiableList(Arrays.asList(handlers));
   }

@@ -1399,9 +1399,16 @@ public class SqlLineArgsTest {
 
   @Test
   public void testVersion() throws Throwable {
-    final String script = "!version\n";
+    final String script = "!set\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        containsString("sqlline version"));
+        containsString(new Application().getVersion()));
+  }
+
+  @Test
+  public void testSetVersion() throws Throwable {
+    final String script = "!set version test-version\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("version property is read only"));
   }
 
   // Work around compile error in JDK 1.6
