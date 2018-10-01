@@ -115,7 +115,7 @@ public class SqlLineOpts implements Completer {
     File f =
         new File(
             System.getProperty("user.home"),
-            ((System.getProperty("os.name").toLowerCase()
+            ((System.getProperty("os.name").toLowerCase(Locale.ROOT)
                 .indexOf("windows") != -1) ? "" : ".") + "sqlline")
             .getAbsoluteFile();
     try {
@@ -168,7 +168,7 @@ public class SqlLineOpts implements Completer {
     }
     final TreeSet<String> set = new TreeSet<>();
     for (String s : propertyNamesMixed()) {
-      set.add(s.toLowerCase());
+      set.add(s.toLowerCase(Locale.ROOT));
     }
     // properties names do not change at runtime
     // cache for further re-use
@@ -206,7 +206,7 @@ public class SqlLineOpts implements Completer {
 
   /** Converts "CamelCase" to "camelCase". */
   private static String deCamel(String s) {
-    return s.substring(0, 1).toLowerCase()
+    return s.substring(0, 1).toLowerCase(Locale.ROOT)
         + s.substring(1);
   }
 
@@ -609,7 +609,7 @@ public class SqlLineOpts implements Completer {
       return dateTimePattern;
     }
     try {
-      SimpleDateFormat sdf = new SimpleDateFormat(dateTimePattern);
+      SimpleDateFormat sdf = new SimpleDateFormat(dateTimePattern, Locale.ROOT);
       sdf.format(TEST_DATE);
     } catch (Exception e) {
       throw new IllegalArgumentException(e.getMessage());

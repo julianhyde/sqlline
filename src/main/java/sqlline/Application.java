@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -183,7 +184,7 @@ public class Application {
       // inputStream is null.
       properties.load(inputStream);
     }
-    return String.format("%s version %s",
+    return String.format(Locale.ROOT, "%s version %s",
         properties.getProperty("artifactId"),
         properties.getProperty("version"));
   }

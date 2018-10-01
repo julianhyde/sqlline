@@ -12,6 +12,7 @@
 package sqlline;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,7 +70,8 @@ public class SqlLineArgsTest {
   private static Pair run(String... args) throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream beelineOutputStream = new PrintStream(os);
+    PrintStream beelineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -119,7 +121,11 @@ public class SqlLineArgsTest {
     // Put the script content in a temp file
     File scriptFile = File.createTempFile("foo", "temp");
     scriptFile.deleteOnExit();
-    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    PrintStream os =
+        new PrintStream(
+            new FileOutputStream(scriptFile),
+            false,
+            StandardCharsets.UTF_8.name());
     os.print(scriptText);
     os.close();
 
@@ -221,7 +227,11 @@ public class SqlLineArgsTest {
 
     File scriptFile = File.createTempFile("Script with Spaces", ".sql");
     scriptFile.deleteOnExit();
-    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    PrintStream os =
+        new PrintStream(
+            new FileOutputStream(scriptFile),
+            false,
+            StandardCharsets.UTF_8.name());
     os.print(scriptText);
     os.close();
 
@@ -239,7 +249,10 @@ public class SqlLineArgsTest {
 
     File scriptFile = File.createTempFile("Script file name", ".sql");
     scriptFile.deleteOnExit();
-    PrintStream os = new PrintStream(new FileOutputStream(scriptFile));
+    PrintStream os = new PrintStream(
+        new FileOutputStream(scriptFile),
+        false,
+        StandardCharsets.UTF_8.name());
     os.print(scriptText);
     os.close();
 
@@ -353,7 +366,7 @@ public class SqlLineArgsTest {
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
         is(false));
     assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
-            is(true));
+        is(true));
 
     while (help.length() > 0) {
       int i = help.indexOf("\n", 1);
@@ -439,7 +452,8 @@ public class SqlLineArgsTest {
     };
 
     SqlLine beeLine = new SqlLine();
-    PrintStream baoswriter = new PrintStream(baos);
+    PrintStream baoswriter =
+        new PrintStream(baos, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(baoswriter);
     beeLine.setErrorStream(baoswriter);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -466,7 +480,8 @@ public class SqlLineArgsTest {
     tmpFolder.create();
     try {
       File tmpFile = tmpFolder.newFile("test.sql");
-      Writer fw = new FileWriter(tmpFile);
+      Writer fw = new OutputStreamWriter(
+          new FileOutputStream(tmpFile), StandardCharsets.UTF_8);
       try {
         fw.write("!set outputformat csv\n");
         fw.write("values (1, 2, 3, 4, 5);");
@@ -512,21 +527,21 @@ public class SqlLineArgsTest {
                 + "\\+-------------\\+\n"
                 + "\\| 1           \\|\n"
                 + "\\+-------------\\+\n"
-                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "1 row selected \\([0-9.,]+ seconds\\)\n"
                 + "2/7          !record .*.log\n"
                 + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
                 + "3/7          !set outputformat csv\n"
                 + "4/7          values 2;\n"
                 + "'C1'\n"
                 + "'2'\n"
-                + "1 row selected \\([0-9.]+ seconds\\)\n"
+                + "1 row selected \\([0-9.,]+ seconds\\)\n"
                 + "5/7          !record\n"
                 + "Recording stopped.\n"
                 + "6/7          !set outputformat csv\n"
                 + "7/7          values 3;\n"
                 + "'C1'\n"
                 + "'3'\n"
-                + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+                + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
 
     // Now check that the right stuff got into the file.
     assertFileContains(file,
@@ -536,7 +551,7 @@ public class SqlLineArgsTest {
             + "4/7          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "1 row selected \\([0-9.,]+ seconds\\)\n"
             + "5/7          !record\n"));
   }
 
@@ -560,7 +575,7 @@ public class SqlLineArgsTest {
         + "3/4          values 2;\n"
         + "'C1'\n"
         + "'2'\n"
-        + "1 row selected \\([0-9.]+ seconds\\)\n"
+        + "1 row selected \\([0-9.,]+ seconds\\)\n"
         + "4/4          !record\n";
     checkScriptFile("!record " + file.getAbsolutePath() + "\n"
             + "!set outputformat csv\n"
@@ -602,21 +617,21 @@ public class SqlLineArgsTest {
             + "\\+-------------\\+\n"
             + "\\| 1           \\|\n"
             + "\\+-------------\\+\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "1 row selected \\([0-9.,]+ seconds\\)\n"
             + "2/7          !record .*.log\n"
             + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
             + "3/7          !set outputformat csv\n"
             + "4/7          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "1 row selected \\([0-9.,]+ seconds\\)\n"
             + "5/7          !record\n"
             + "Recording stopped.\n"
             + "6/7          !set outputformat csv\n"
             + "7/7          values 3;\n"
             + "'C1'\n"
             + "'3'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n.*"));
+            + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
 
     // Now check that the right stuff got into the file.
     assertFileContains(file,
@@ -626,13 +641,15 @@ public class SqlLineArgsTest {
             + "4/7          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
-            + "1 row selected \\([0-9.]+ seconds\\)\n"
+            + "1 row selected \\([0-9.,]+ seconds\\)\n"
             + "5/7          !record\n"));
   }
 
   private void assertFileContains(File file, Matcher matcher)
       throws IOException {
-    final BufferedReader br = new BufferedReader(new FileReader(file));
+    final BufferedReader br = new BufferedReader(
+        new InputStreamReader(
+            new FileInputStream(file), StandardCharsets.UTF_8.name()));
     final StringWriter stringWriter = new StringWriter();
     for (;;) {
       final String line = br.readLine();
@@ -661,12 +678,12 @@ public class SqlLineArgsTest {
         + "2/4          values 1;\n"
         + "'C1'\n"
         + "'1'\n"
-        + "1 row selected \\([0-9.]+ seconds\\)\n"
+        + "1 row selected \\([0-9.,]+ seconds\\)\n"
         + "3/4          !nickname foo\n"
         + "4/4          values 2;\n"
         + "'C1'\n"
         + "'2'\n"
-        + "1 row selected \\([0-9.]+ seconds\\)\n.*";
+        + "1 row selected \\([0-9.,]+ seconds\\)\n.*";
     checkScriptFile(script, false, equalTo(SqlLine.Status.OK),
         RegexMatcher.of(expected));
   }
@@ -698,7 +715,8 @@ public class SqlLineArgsTest {
     };
     SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
+    PrintStream sqllineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
     String[] args = {
@@ -811,7 +829,8 @@ public class SqlLineArgsTest {
     SqlLine sqlLine = new SqlLine();
 
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
+    PrintStream sqllineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
 
@@ -830,7 +849,8 @@ public class SqlLineArgsTest {
   public void testCommandHandlerOnStartup() throws IOException {
     SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
+    PrintStream sqllineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -863,7 +883,8 @@ public class SqlLineArgsTest {
     SqlLine sqlLine = new SqlLine();
 
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream sqllineOutputStream = new PrintStream(os);
+    PrintStream sqllineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -1003,7 +1024,8 @@ public class SqlLineArgsTest {
     final PrintStream originalErr = System.err;
     try {
       final ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
-      System.setErr(new PrintStream(errBaos));
+      System.setErr(
+          new PrintStream(errBaos, false, StandardCharsets.UTF_8.name()));
 
       // successful patterns
       final String okTimeFormat = "!set timeFormat HH:mm:ss\n";
@@ -1087,7 +1109,8 @@ public class SqlLineArgsTest {
   public void testConnectWithDbPropertyAsParameter() throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream beelineOutputStream = new PrintStream(os);
+    PrintStream beelineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -1102,7 +1125,8 @@ public class SqlLineArgsTest {
             + " -p PASSWORD_HASH TRUE "
             + ConnectionSpec.H2.url + " "
             + ConnectionSpec.H2.username + " "
-            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())),
+            + StringUtils.convertBytesToHex(
+                fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))),
         dc);
     beeLine.runCommands(Collections.singletonList("!tables"), dc);
     String output = os.toString("UTF8");
@@ -1128,7 +1152,8 @@ public class SqlLineArgsTest {
   public void testConnectWithDbPropertyAsParameter2() throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream beelineOutputStream = new PrintStream(os);
+    PrintStream beelineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -1143,12 +1168,12 @@ public class SqlLineArgsTest {
             + " -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE "
             + ConnectionSpec.H2.url + " "
             + ConnectionSpec.H2.username + " "
-            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())),
+            + StringUtils.convertBytesToHex(
+                fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))),
         dc);
     beeLine.runCommands(Collections.singletonList("select 1;"), dc);
     String output = os.toString("UTF8");
-    final String expected =
-        "Error: Literals of this kind are not allowed; SQL statement:";
+    final String expected = "Error:";
     assertThat(output, containsString(expected));
     beeLine.runCommands(
         Collections.singletonList("!quit"), new DispatchCallback());
@@ -1166,7 +1191,8 @@ public class SqlLineArgsTest {
   public void testConnectWithDbProperty() throws Throwable {
     SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream beelineOutputStream = new PrintStream(os);
+    PrintStream beelineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
@@ -1185,10 +1211,7 @@ public class SqlLineArgsTest {
             + ConnectionSpec.H2.username
             + " \"" + fakeNonEmptyPassword + "\""), dc);
     String output = os.toString("UTF8");
-    final String expected0 = ""
-        + "Error: Hexadecimal string contains " + "non-hex character: \""
-        + fakeNonEmptyPassword + "\" "
-        + "[90004-191] (state=90004,code=90004)";
+    final String expected0 = "Error:";
     assertThat(output, containsString(expected0));
     os.reset();
 
@@ -1198,7 +1221,8 @@ public class SqlLineArgsTest {
             + ConnectionSpec.H2.url
             + " ;PASSWORD_HASH=TRUE;ALLOW_LITERALS=NONE\" "
             + ConnectionSpec.H2.username + " \""
-            + StringUtils.convertBytesToHex(fakeNonEmptyPassword.getBytes())
+            + StringUtils.convertBytesToHex(
+                fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))
             + "\""), dc);
     beeLine.runCommands(Collections.singletonList("!tables"), dc);
     output = os.toString("UTF8");
@@ -1208,16 +1232,15 @@ public class SqlLineArgsTest {
 
     beeLine.runCommands(Collections.singletonList("select 5;"), dc);
     output = os.toString("UTF8");
-    final String expected2 =
-        "Error: Literals of this kind are not allowed; SQL statement:";
+    final String expected2 = "Error:";
     assertThat(output, containsString(expected2));
+    os.reset();
 
     beeLine.runCommands(
         Collections.singletonList("!quit"), new DispatchCallback());
     output = os.toString("UTF8");
     assertThat(output,
-        allOf(not(containsString("Error: Hexadecimal string contains")),
-            containsString("!quit")));
+        allOf(not(containsString("Error:")), containsString("!quit")));
     assertTrue(beeLine.isExit());
   }
 
@@ -1497,13 +1520,17 @@ public class SqlLineArgsTest {
   public void testRerun() throws Throwable {
     final SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream beelineOutputStream = new PrintStream(os);
+    PrintStream beelineOutputStream =
+        new PrintStream(os, false, StandardCharsets.UTF_8.name());
     beeLine.setOutputStream(beelineOutputStream);
     beeLine.setErrorStream(beelineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     final File tmpHistoryFile = File.createTempFile("tmpHistory", "temp");
     try (BufferedWriter bw =
-             new BufferedWriter(new FileWriter(tmpHistoryFile))) {
+             new BufferedWriter(
+                 new OutputStreamWriter(
+                     new FileOutputStream(tmpHistoryFile),
+                     StandardCharsets.UTF_8))) {
       bw.write("1536743099591:SELECT \\n CURRENT_TIMESTAMP \\n as \\n c1;\n"
           + "1536743104551:!/ 4\n"
           + "1536743104551:!/ 5\n"
@@ -1533,8 +1560,8 @@ public class SqlLineArgsTest {
 
     beeLine.runCommands(Collections.singletonList("!/ 1"), dc);
     String output = os.toString("UTF8");
-    final String expected0 = "+-------------------------+";
-    final String expected1 = "|           C1            |";
+    final String expected0 = "+----------------------------+";
+    final String expected1 = "|             C1             |";
     final String expected2 = "1 row selected";
     assertThat(output,
         allOf(containsString(expected0),

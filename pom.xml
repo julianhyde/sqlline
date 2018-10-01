@@ -26,7 +26,8 @@
 
     <!-- The following list is sorted. -->
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
-    <h2.version>1.4.191</h2.version>
+    <forbiddenapis.version>2.6</forbiddenapis.version>
+    <h2.version>1.4.197</h2.version>
     <hsqldb.version>2.4.1</hsqldb.version>
     <jline.version>3.9.0</jline.version>
     <jmockit.version>1.30</jmockit.version>
@@ -37,6 +38,8 @@
     <maven-jar-plugin.version>3.0.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
 
@@ -117,6 +120,38 @@
           </entities>
           <includes>manual.xml</includes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>de.thetaphi</groupId>
+        <artifactId>forbiddenapis</artifactId>
+        <configuration>
+          <!-- if the used Java version is too new, don't fail, just do nothing: -->
+          <failOnUnsupportedJava>false</failOnUnsupportedJava>
+          <bundledSignatures>
+            <!--
+              This will automatically choose the right
+              signatures based on 'maven.compiler.target':
+            -->
+            <bundledSignature>jdk-unsafe</bundledSignature>
+            <bundledSignature>jdk-deprecated</bundledSignature>
+            <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+            <bundledSignature>jdk-non-portable</bundledSignature>
+          </bundledSignatures>
+          <signaturesFiles>
+            <signaturesFile>${top.dir}/src/main/config/forbidden-apis/signatures.txt</signaturesFile>
+          </signaturesFiles>
+          <excludes>
+            <exclude>**/sqlline/SunSignalHandler.class</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+              <goal>testCheck</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -208,12 +243,17 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <compilerArgument>-Xlint:deprecation</compilerArgument>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <systemPropertyVariables>
+            <user.language>TR</user.language>
+            <user.country>tr</user.country>
+          </systemPropertyVariables>
           <argLine>-Xmx1024m -javaagent:${org.jmockit:jmockit:jar}</argLine>
         </configuration>
       </plugin>
@@ -258,6 +298,16 @@
         </executions>
       </plugin>
     </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>de.thetaphi</groupId>
+          <artifactId>forbiddenapis</artifactId>
+          <version>${forbiddenapis.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <dependencies>

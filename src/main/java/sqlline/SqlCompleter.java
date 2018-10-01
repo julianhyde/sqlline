@@ -14,6 +14,7 @@ package sqlline;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.*;
@@ -38,7 +39,8 @@ class SqlCompleter extends StringsCompleter {
         new BufferedReader(
             new InputStreamReader(
                 SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"))).readLine();
+                    "sql-keywords.properties"), StandardCharsets.UTF_8)
+      ).readLine();
 
     // now add the keywords from the current connection
 
@@ -70,7 +72,7 @@ class SqlCompleter extends StringsCompleter {
     }
 
     // also allow lower-case versions of all the keywords
-    keywords += "," + keywords.toLowerCase();
+    keywords += "," + keywords.toLowerCase(Locale.ROOT);
 
     for (StringTokenizer tok = new StringTokenizer(keywords, ", ");
         tok.hasMoreTokens();) {
