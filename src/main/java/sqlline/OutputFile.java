@@ -12,9 +12,11 @@
 package sqlline;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Output file.
@@ -25,7 +27,9 @@ public class OutputFile {
 
   public OutputFile(String filename) throws IOException {
     file = new File(filename);
-    out = new PrintWriter(new FileWriter(file), true);
+    out = new PrintWriter(
+        new OutputStreamWriter(
+            new FileOutputStream(file), StandardCharsets.UTF_8), true);
   }
 
   @Override public String toString() {

@@ -15,11 +15,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.text.ChoiceFormat;
 import java.text.MessageFormat;
@@ -49,7 +51,7 @@ import org.jline.terminal.TerminalBuilder;
  */
 public class SqlLine {
   private static final ResourceBundle RESOURCE_BUNDLE =
-      ResourceBundle.getBundle(SqlLine.class.getName());
+      ResourceBundle.getBundle(SqlLine.class.getName(), Locale.ROOT);
 
   private static final String SEPARATOR = System.getProperty("line.separator");
   private boolean exit = false;
@@ -61,8 +63,8 @@ public class SqlLine {
   private final Commands commands = new Commands(this);
   private OutputFile scriptOutputFile = null;
   private OutputFile recordOutputFile = null;
-  private PrintStream outputStream = new PrintStream(System.out, true);
-  private PrintStream errorStream = new PrintStream(System.err, true);
+  private PrintStream outputStream;
+  private PrintStream errorStream;
   private LineReader lineReader;
   private List<String> batch = null;
   private final Reflector reflector;
@@ -149,9 +151,9 @@ public class SqlLine {
 
   String loc(String res, int param) {
     try {
-      return MessageFormat.format(
+      return new MessageFormat(
           new ChoiceFormat(RESOURCE_BUNDLE.getString(res)).format(param),
-          param);
+          Locale.ROOT).format(new Object[]{param});
     } catch (Exception e) {
       return res + ": " + param;
     }
@@ -164,7 +166,8 @@ public class SqlLine {
   static String locStatic(ResourceBundle resourceBundle, PrintStream err,
       String res, Object... params) {
     try {
-      return MessageFormat.format(resourceBundle.getString(res), params);
+      return new MessageFormat(resourceBundle.getString(res), Locale.ROOT)
+          .format(params);
     } catch (Exception e) {
       e.printStackTrace(err);
 
@@ -210,15 +213,26 @@ public class SqlLine {
   }
 
   public SqlLine() {
-    reflector = new Reflector(this);
     setAppConfig(new Application());
+
+    try {
+      outputStream =
+          new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
+      errorStream =
+          new PrintStream(System.err, true, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      handleException(e);
+    }
+
+    reflector = new Reflector(this);
     getOpts().loadProperties(System.getProperties());
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
 
     // attempt to dynamically load signal handler
     try {
       Class handlerClass = Class.forName("sqlline.SunSignalHandler");
-      signalHandler = (SqlLineSignalHandler) handlerClass.newInstance();
+      signalHandler =
+          (SqlLineSignalHandler) handlerClass.getConstructor().newInstance();
     } catch (Throwable t) {
       handleException(t);
     }
@@ -1130,7 +1144,7 @@ public class SqlLine {
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
           } else if (quoting.upper) {
-            word = word.toUpperCase();
+            word = word.toUpperCase(Locale.ROOT);
           }
           current.add(word);
           state = c == '.' ? DOT_SPACE : SPACE;
@@ -1154,7 +1168,7 @@ public class SqlLine {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
         } else if (quoting.upper) {
-          word = word.toUpperCase();
+          word = word.toUpperCase(Locale.ROOT);
         }
       }
       current.add(word);
@@ -1570,7 +1584,7 @@ public class SqlLine {
     Set<Driver> driverClasses = new HashSet<>();
 
     for (String className : classNames) {
-      if (!className.toLowerCase().contains("driver")) {
+      if (!className.toLowerCase(Locale.ROOT).contains("driver")) {
         continue;
       }
 
@@ -1587,7 +1601,7 @@ public class SqlLine {
         }
 
         // now instantiate and initialize it
-        driverClasses.add((Driver) c.newInstance());
+        driverClasses.add((Driver) c.getConstructor().newInstance());
       } catch (Throwable t) {
         // ignore
       }
@@ -1774,7 +1788,12 @@ public class SqlLine {
   }
 
   public void setOutputStream(PrintStream outputStream) {
-    this.outputStream = new PrintStream(outputStream, true);
+    try {
+      this.outputStream =
+          new PrintStream(outputStream, true, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      handleException(e);
+    }
   }
 
   PrintStream getOutputStream() {
@@ -1782,7 +1801,12 @@ public class SqlLine {
   }
 
   public void setErrorStream(PrintStream errorStream) {
-    this.errorStream = new PrintStream(errorStream, true);
+    try {
+      this.errorStream = new PrintStream(
+          errorStream, true, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      handleException(e);
+    }
   }
 
   PrintStream getErrorStream() {

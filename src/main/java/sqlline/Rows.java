@@ -18,12 +18,14 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,23 +51,27 @@ abstract class Rows implements Iterator<Rows.Row> {
     if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNumberFormat())) {
       numberFormat = null;
     } else {
-      numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat());
+      numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat(),
+          DecimalFormatSymbols.getInstance(Locale.ROOT));
     }
     if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getDateFormat())) {
       dateFormat = null;
     } else {
-      dateFormat = new SimpleDateFormat(sqlLine.getOpts().getDateFormat());
+      dateFormat =
+          new SimpleDateFormat(sqlLine.getOpts().getDateFormat(), Locale.ROOT);
     }
     if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimeFormat())) {
       timeFormat = null;
     } else {
-      timeFormat = new SimpleDateFormat(sqlLine.getOpts().getTimeFormat());
+      timeFormat =
+          new SimpleDateFormat(sqlLine.getOpts().getTimeFormat(), Locale.ROOT);
     }
     if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimestampFormat())) {
       timestampFormat = null;
     } else {
       timestampFormat =
-          new SimpleDateFormat(sqlLine.getOpts().getTimestampFormat());
+          new SimpleDateFormat(
+              sqlLine.getOpts().getTimestampFormat(), Locale.ROOT);
     }
     if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNullValue())) {
       nullValue = null;

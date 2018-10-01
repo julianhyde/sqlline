@@ -14,6 +14,7 @@ package sqlline;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 
@@ -186,10 +187,10 @@ public class Commands {
       Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
         methodNames.add(method.getName());
-        methodNamesUpper.add(method.getName().toUpperCase());
+        methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
       }
 
-      if (!methodNamesUpper.contains(cmd.toUpperCase())) {
+      if (!methodNamesUpper.contains(cmd.toUpperCase(Locale.ROOT))) {
         sqlLine.error(sqlLine.loc("no-such-method", cmd));
         sqlLine.error(sqlLine.loc("possible-methods"));
         for (String methodName : methodNames) {
@@ -313,15 +314,15 @@ public class Commands {
 
   /**
    * Constructs a list of string parameters for a metadata call.
-   * <p/>
+   *
    * <p>The number of items is equal to the number of items in the
    * <tt>strings</tt> parameter, typically three (catalog, schema, table
    * name).
-   * <p/>
+   *
    * <p>Parses the command line, and assumes that the the first word is
    * a compound identifier. If the compound identifier has fewer parts
    * than required, fills from the right.
-   * <p/>
+   *
    * <p>The result is a mutable list of strings.
    *
    *
@@ -522,7 +523,8 @@ public class Commands {
 
     for (String name : names) {
       try {
-        Driver driver = (Driver) Class.forName(name).newInstance();
+        final Class<?> klass = Class.forName(name);
+        Driver driver = (Driver) klass.getConstructor().newInstance();
         ColorBuffer msg = sqlLine.getColorBuffer()
             .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
             .pad(driver.getMajorVersion() + "."
@@ -589,7 +591,7 @@ public class Commands {
       return;
     }
 
-    String propertyName = parts[1].toLowerCase();
+    String propertyName = parts[1].toLowerCase(Locale.ROOT);
 
     if ("all".equals(propertyName)) {
       config(null, callback);
@@ -624,7 +626,7 @@ public class Commands {
       return;
     }
 
-    String propertyName = split[1].toLowerCase();
+    String propertyName = split[1].toLowerCase(Locale.ROOT);
 
     if ("all".equals(propertyName)) {
       sqlLine.setOpts(new SqlLineOpts(sqlLine));
@@ -1416,7 +1418,10 @@ public class Commands {
 
     try {
       BufferedReader reader =
-          new BufferedReader(new FileReader(expand(filename)));
+          new BufferedReader(
+              new InputStreamReader(
+                  new FileInputStream(
+                      expand(filename)), StandardCharsets.UTF_8));
       try {
         // ### NOTE: fix for sf.net bug 879427
         StringBuilder cmd = null;
@@ -1674,7 +1679,8 @@ public class Commands {
 
     // Workaround for windows because of
     // https://github.com/jline/jline3/issues/304
-    if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+    if (System.getProperty("os.name")
+        .toLowerCase(Locale.ROOT).contains("windows")) {
       sillyLess(in);
     } else {
       try {
@@ -1693,7 +1699,7 @@ public class Commands {
 
   private void sillyLess(InputStream in) throws IOException {
     BufferedReader breader =
-        new BufferedReader(new InputStreamReader(in));
+        new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     String man;
     int index = 0;
     while ((man = breader.readLine()) != null) {
