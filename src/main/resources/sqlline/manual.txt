@@ -78,10 +78,6 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
-rerun
-rerun — Execute previous command from the history file
-reset
-reset - Reset a preference
 rollback
 rollback — Roll back the current transaction
 run
@@ -93,7 +89,7 @@ scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
 set
-set — Set a preference, or show its value
+set — Set a preference
 sql
 sql — Execute a SQL against a database
 tables
@@ -128,7 +124,6 @@ timeformat
 timestampformat
 trimscripts
 verbose
-version
 JDBC Driver Support
 Project Information
 SQLLine Manual
@@ -207,8 +202,6 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
-rerun
-rerun — Execute previous command from the history file
 rollback
 rollback — Roll back the current transaction
 run
@@ -255,11 +248,10 @@ timeformat
 timestampformat
 trimscripts
 verbose
-version
 JDBC Driver Support
 Introduction
 
-SQLLine is a pure-Java console based utility for connecting to relational databases and executing SQL commands. It is similar to other command-line database access utilities like sqlplus for Oracle, mysql for MySQL, and isql for Sybase/SQL Server. Since it is pure-Java, it is platform independent, and will run on any platform that can run Java 1.3 or higher.
+SQLLine is a pure-Java console based utility for connecting to relational databases and executing SQL commands. It is similiar to other command-line database access utilities like sqlplus for Oracle, mysql for MySQL, and isql for Sybase/SQL Server. Since it is pure-Java, it is platform independant, and will run on any platform that can run Java 1.3 or higher.
 
 License and Terms of Use
 
@@ -287,7 +279,7 @@ JDBC™ Driver(s) - Since SQLLine uses the Java Database Connectivity package to
 
 Installing SQLLine
 
-There are currently no set standards for installing Java software on different platforms. The simplest method for installing SQLLine in a platform independent way is as follows:
+There are currently no set standards for installing Java software on different platforms. The simplest method for installing SQLLine in a platform independant way is as follows:
 
 Create a new directory/folder where you like. This will be referred to as sqllinedir.
 
@@ -424,10 +416,6 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
-rerun
-rerun — Execute previous command from the history file
-reset
-reset - Reset a preference
 rollback
 rollback — Roll back the current transaction
 run
@@ -439,7 +427,7 @@ scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
 set
-set — Set a preference, or show its value
+set — Set a preference
 sql
 sql — Execute a SQL against a database
 tables
@@ -1082,14 +1070,12 @@ sqlline> !help
 !reconnect          Reconnect to the database
 !record             Record all output to the specified file
 !rehash             Fetch table and column names for command completion
-!rerun              Execute previous command from the history file
-!reset              Reset a sqlline variable
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
-!save               Save the current variables and aliases
+!save               Save the current variabes and aliases
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
-!set                Set a sqlline variable, or show its value
+!set                Set a sqlline variable
 !sql                Execute a SQL command
 !tables             List all the tables in the database
 !typeinfo           Display the type map for the current connection
@@ -1142,8 +1128,6 @@ timestampFormat pattern    Format timestamps using SimpleDateFormat pattern
 trimScripts     true/false Remove trailing spaces from lines read from script
                            files
 verbose         true/false Show verbose error messages and debug info
-version         version    Show the current sqlline version.
-                           The property is read only.
 
 Comments, bug reports, and patches go to ???
 
@@ -1163,21 +1147,17 @@ Synopsis
 Description
 
 Display the command history.
-history -  list history of commands
-Usage: history [OPTIONS]
-  -? --help                       Displays command help
-     --clear                      Clear history
-     --save                       Save history
-  -d                              Print timestamps for each event
 
-Example of "history" command (if there is no option specified then -d will be used)
+Example of "history" command
 
 sqlline> !history
-  1  14:52:56  !outputformat xmlelements
-  2  14:53:09  SELECT * FROM PCPOINT;
-  3  14:53:15  !outputformat vertical
-  4  14:58:28  SELECT * FROM PCPOINT;
-  5  14:58:52  !tables
+
+1.  !outputformat xmlelements
+2.  SELECT * FROM PCPOINT;
+3.  !outputformat vertical
+4.  SELECT * FROM PCPOINT;
+5.  !tables
+
 sqlline>
 
 
@@ -1299,7 +1279,7 @@ Synopsis
 
 Description
 
-Execute an arbitrary metadata method against the current connection. Parameters are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
+Execute an arbitrary metadata method agains the current connection. refpurpose are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
 
 Example of "metadata" command
 
@@ -1359,7 +1339,7 @@ Synopsis
 
 Description
 
-Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parsable format.
+Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parseable format.
 
 Example of table output formatting
 
@@ -1534,7 +1514,7 @@ Connect to the database defined in the specified properties file. The properties
 
 url: the database URL to which to connect
 
-driver: the driver class that handles the URL. If unspecified, SQLLine will automatically scan the CLASSPATH for an appropriate driver
+driver: the driver class that handles the URL. If unspecifed, SQLLine with automatically scan the CLASSPATH for an appropriate driver
 
 user: the username to use to connect to the database. If unspecified, SQLLine will prompt for it.
 
@@ -1674,47 +1654,6 @@ Warning on using "rehash"
 Caution
 
 This operation can be extremely slow for some databases.
-
-rerun
-
-Name
-
-rerun — Execute previous command from the history file
-
-Synopsis
-
-!rerun [command number in a history file]
-
-Description
-
-Execute previous command from the history file. If the specified command number is negative than it will be used as offset. If it is positive then it will be used as an index in a history file.
-If there is no number specified the previous command (the last one in the history file) will be executed.
-
-Example of "rerun" command
-
-0: jdbc:hsqldb:db-hypersonic> !rerun -5
-
-reset
-
-Name
-
-reset — Reset a preference
-
-Synopsis
-
-!reset all
-!reset {preference}
-
-Description
-
-Reset a preference to its default value. When resetting a preference, if autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed settings can be saved for future SQLLine sessions with the "save" command.
-
-With "all" keyword, reset all preferences.
-
-Example of "reset" command
-
-0: jdbc:hsqldb:db-hypersonic> !reset timeout
-[timeout] was reset to [-1]
 
 rollback
 
@@ -1959,28 +1898,19 @@ set
 
 Name
 
-set — Set a preference, or show its value
+set — Set a preference
 
 Synopsis
 
-!set
-!set all
-!set {preference}
 !set {preference} {value}
 
 Description
 
-Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed settings can be saved for future SQLLine sessions with the "save" command.
+Set the specified preference to the specified value. If autosave is on, then this will cause preferences to be immediately saved. Otherwise, changed setting can be saved for future SQLLine session eith the save command.
 
-The forms of the command without a "{value}" argument show the current value of the specified preference, or all preferences. "!set" and "!set all" commands are equivalent and list all preferences.
-
-Examples of "set" command
+Example of "set" command
 
 0: jdbc:hsqldb:db-hypersonic> !set color on
-
-0: jdbc:hsqldb:db-hypersonic> !set color
-
-0: jdbc:hsqldb:db-hypersonic> !set
 
 sql
 
@@ -2104,15 +2034,13 @@ timeformat
 timestampformat
 trimscripts
 verbose
-version
-
 autocommit
 
-If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitly committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
+If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
 
 autosave
 
-When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitly saved using the save command. Defaults to false.
+When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitely saved using the save command. Defaults to false.
 
 color
 
@@ -2144,7 +2072,7 @@ The interval between which the column headers will be redisplayed when using the
 
 historyfile
 
-The file to which SQLLine will save a record of all the commands issued. Defaults to HOME/sqlline/history on Windows, and HOME/.sqlline/history on all other platforms. ~ will be expanded in user home.
+The file to which SQLLine will save a record of all the commands issued. Defaults to HOME/sqlline/history on Windows, and HOME/.sqlline/history on all other platforms.
 
 incremental
 
@@ -2156,7 +2084,7 @@ The default transaction isolation that will be used for new connections. To chan
 
 maxcolumnwidth
 
-The maximum column width to display for each column before truncating data when using the "table" outputformat. Defaults to 15.
+The maximum column width to display for each colummn before truncating data when using the "table" outputformat. Defaults to 15.
 
 maxwidth
 
@@ -2213,10 +2141,6 @@ If true, then trim leading and trailing whitespace from lines as they are proces
 verbose
 
 If true, then print out the entire java stack trace whenever an error occurs, as well as displaying debugging information. Defaults to false.
-
-version
-
-Show the current sqlline version. The property is read only.
 
 JDBC Driver Support
 
