@@ -126,13 +126,13 @@ mvn package
 ## More information
 
 * License: Modified BSD License
-* [Home page](http://julianhyde.github.io/sqlline)
-* [API](http://www.hydromatic.net/sqlline/apidocs)
-* [Source code](http://github.com/julianhyde/sqlline)
+* [Home page](https://julianhyde.github.io/sqlline)
+* [API](https://julianhyde.github.io/sqlline/apidocs)
+* [Source code](https://github.com/julianhyde/sqlline)
 * Developers list:
   <a href="mailto:sqlline-dev@googlegroups.com">sqlline-dev at googlegroups.com</a>
-  (<a href="http://groups.google.com/group/sqlline-dev/topics">archive</a>,
-  <a href="http://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
+  (<a href="https://groups.google.com/group/sqlline-dev/topics">archive</a>,
+  <a href="https://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
 * [Issues](https://github.com/julianhyde/sqlline/issues)
 * [Release notes and history](HISTORY.md)
 * [HOWTO](HOWTO.md)
