@@ -109,11 +109,11 @@ public class SqlLineArgsTest {
    * Attempts to execute a simple script file with the -f option to SqlLine.
    * Tests for presence of an expected pattern in the output (stdout or stderr).
    *
-   * @param scriptText Script text
-   * @param flag Command flag (--run or -f)
+   * @param scriptText    Script text
+   * @param flag          Command flag (--run or -f)
    * @param statusMatcher Checks whether status is as expected
    * @param outputMatcher Checks whether output is as expected
-   * @throws Exception on command execution error
+   * @throws Throwable on command execution error
    */
   private void checkScriptFile(String scriptText, boolean flag,
       Matcher<SqlLine.Status> statusMatcher,
@@ -162,6 +162,8 @@ public class SqlLineArgsTest {
    * Attempt to execute a simple script file with the -f option to SqlLine.
    * Test for presence of an expected pattern
    * in the output (stdout or stderr), fail if not found.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testPositiveScriptFile() throws Throwable {
@@ -173,6 +175,8 @@ public class SqlLineArgsTest {
 
   /**
    * As above, but using '-run' rather than '-f'.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testPositiveScriptFileUsingRun() throws Throwable {
@@ -186,6 +190,8 @@ public class SqlLineArgsTest {
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/42">[SQLLINE-42],
    * Script fails if first line is a comment</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testScriptFileStartsWithComment() throws Throwable {
@@ -215,10 +221,14 @@ public class SqlLineArgsTest {
         allOf(containsString(" 33 "), containsString(" 123 ")));
   }
 
-  /** Test case for
+  /**
+   * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/72">[SQLLINE-72]
    * Allow quoted file names (including spaces) in <tt>!record</tt>,
-   * <tt>!run</tt> and <tt>!script</tt> commands</a>. */
+   * <tt>!run</tt> and <tt>!script</tt> commands</a>.
+   *
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testScriptFilenameWithSpace() throws Throwable {
     final String scriptText = "values 10 + 23;\n"
@@ -268,6 +278,8 @@ public class SqlLineArgsTest {
 
   /**
    * Values that contain null.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testNull() throws Throwable {
@@ -294,6 +306,8 @@ public class SqlLineArgsTest {
 
   /**
    * Table output without header.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testTableOutputNullWithoutHeader() throws Throwable {
@@ -306,6 +320,8 @@ public class SqlLineArgsTest {
 
   /**
    * Csv output without header.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testCsvNullWithoutHeader() throws Throwable {
@@ -323,6 +339,8 @@ public class SqlLineArgsTest {
    * Beeline connection cannot be closed with '!close' command</a> and
    * <a href="https://github.com/julianhyde/sqlline/issues/139">[SQLLINE-139]
    * Look for the exact match if there are multiple matches</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testClose() throws Throwable {
@@ -336,6 +354,8 @@ public class SqlLineArgsTest {
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/32">[SQLLINE-32]
    * !help set' should print documentation for all variables</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testHelpSet() throws Throwable {
@@ -386,6 +406,8 @@ public class SqlLineArgsTest {
    * 'help set' should not break long lines</a>.
    *
    * <p>But it should break 'help all', which consists of a single long line.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testHelpAll() throws Throwable {
@@ -401,6 +423,8 @@ public class SqlLineArgsTest {
 
   /**
    * Tests "!help go". "go" and "#" are synonyms.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testHelpGo() throws Throwable {
@@ -420,6 +444,8 @@ public class SqlLineArgsTest {
    * and other one-symbol length commands stopped working</a>
    *
    * <p>'!?' should work in the same way as '!help'.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testHelpAsQuestionMark() throws Throwable {
@@ -436,6 +462,8 @@ public class SqlLineArgsTest {
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/49">[SQLLINE-49]
    * !manual command fails</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testManual() throws Throwable {
@@ -470,9 +498,13 @@ public class SqlLineArgsTest {
     assertThat(output, containsString(expectedLine));
   }
 
-  /** Test case for
+  /**
+   * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/38">[SQLLINE-38]
-   * Expand ~ to user's home directory</a>. */
+   * Expand ~ to user's home directory</a>.
+   *
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testRunFromHome() throws Throwable {
     File home = new File(System.getProperty("user.home"));
@@ -507,6 +539,8 @@ public class SqlLineArgsTest {
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/26">[SQLLINE-26]
    * Flush output for each command when using !record command</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testRecord() throws Throwable {
@@ -555,9 +589,13 @@ public class SqlLineArgsTest {
             + "5/7          !record\n"));
   }
 
-  /** Test case for
+  /**
+   * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/62">[SQLLINE-62]
-   * Expand ~ to user's home directory</a>. */
+   * Expand ~ to user's home directory</a>.
+   *
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testRecordHome() throws Throwable {
     File home = new File(System.getProperty("user.home"));
@@ -597,6 +635,8 @@ public class SqlLineArgsTest {
   /**
    * As {@link #testRecord()}, but file name is double-quoted and contains a
    * space.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testRecordFilenameWithSpace() throws Throwable {
@@ -667,6 +707,8 @@ public class SqlLineArgsTest {
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/61">[SQLLINE-61]
    * Add !nickname command</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testNickname() throws Throwable {
@@ -691,6 +733,8 @@ public class SqlLineArgsTest {
   /**
    * Attempts to execute a simple script file with the -f option to SqlLine.
    * The first command should fail and the second command should not execute.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testBreakOnErrorScriptFile() throws Throwable {
@@ -748,6 +792,8 @@ public class SqlLineArgsTest {
 
   /**
    * Attempts to execute a missing script file with the -f option to SqlLine.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testNegativeScriptFile() throws Throwable {
@@ -761,7 +807,11 @@ public class SqlLineArgsTest {
     assertThat(pair.output, not(containsString(" 123 ")));
   }
 
-  /** Displays usage. */
+  /**
+   * Displays usage.
+   *
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testUsage() throws Throwable {
     Pair pair = run("--help");
@@ -780,7 +830,11 @@ public class SqlLineArgsTest {
     return n;
   }
 
-  /** Invalid arguments. */
+  /**
+   * Invalid arguments.
+   *
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testInvalidArguments() throws Throwable {
     Pair pair = run("--fuzz");
@@ -914,6 +968,10 @@ public class SqlLineArgsTest {
     assertTrue(sqlLine.isExit());
   }
 
+  /**
+   * Test csv output format.
+   * @throws Throwable on command execution error
+   */
   @Test
   public void testTablesCsv() throws Throwable {
     final String script = "!set outputformat csv\n"
@@ -924,8 +982,10 @@ public class SqlLineArgsTest {
   }
 
   /**
-   *  java.lang.NullPointerException test case from
-   *  https://github.com/julianhyde/sqlline/pull/86#issuecomment-410868361
+   * java.lang.NullPointerException test case from
+   * https://github.com/julianhyde/sqlline/pull/86#issuecomment-410868361
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testCsvDelimiterAndQuoteCharacter() throws Throwable {
@@ -1104,6 +1164,8 @@ public class SqlLineArgsTest {
    * <blockquote>
    * !connect -p PASSWORD_HASH TRUE jdbc:h2:mem sa 6e6f6e456d707479506173737764
    * </blockquote>
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testConnectWithDbPropertyAsParameter() throws Throwable {
@@ -1147,6 +1209,8 @@ public class SqlLineArgsTest {
    * !connect -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE
    * jdbc:h2:mem sa 6e6f6e456d707479506173737764
    * </blockquote>
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testConnectWithDbPropertyAsParameter2() throws Throwable {
@@ -1186,6 +1250,8 @@ public class SqlLineArgsTest {
    * <blockquote>
    * !connect "jdbc:h2:mem; PASSWORD_HASH=TRUE" sa 6e6f6e456d707479506173737764
    * </blockquote>
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testConnectWithDbProperty() throws Throwable {
@@ -1284,6 +1350,8 @@ public class SqlLineArgsTest {
    * <a href="https://github.com/julianhyde/sqlline/issues/107">[SQLLINE-107]
    * Script fails if the wrong driver is specified with -d option
    * and there is a valid registered driver for the specified url</a>.
+   *
+   * @throws Throwable on command execution error
    */
   @Test
   public void testTablesH2WithErrorDriver() throws Throwable {
