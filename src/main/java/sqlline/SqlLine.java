@@ -587,16 +587,21 @@ public class SqlLine {
       getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
     }
 
-    final LineReader lineReader = LineReaderBuilder.builder()
+    LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
         .terminal(terminal)
-        .completer(new SqlLineCompleter(this))
-        .appName("sqlline")
         .parser(new SqlLineParser(this)
             .eofOnEscapedNewLine(true)
             .eofOnUnclosedQuote(true))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
-        .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
-        .build();
+        .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
+    final LineReader lineReader = inputStream == null
+      ? lineReaderBuilder
+          .appName("sqlline")
+          .completer(new SqlLineCompleter(this))
+          .highlighter(new SqlLineHighlighter(this))
+          .build()
+      : lineReaderBuilder.build();
+
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;
@@ -1886,6 +1891,10 @@ public class SqlLine {
     this.appConfig = new Config(application);
   }
 
+  public Application.HightlightConfig getHighlightConfig() {
+    return appConfig.hightlightConfig;
+  }
+
   public Collection<CommandHandler> getCommandHandlers() {
     return appConfig.commandHandlers;
   }
@@ -1916,40 +1925,42 @@ public class SqlLine {
     final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
-
+    final Application.HightlightConfig hightlightConfig;
     Config(Application application) {
       this(application.initDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
-          application.getOutputFormats(SqlLine.this));
+          application.getOutputFormats(SqlLine.this),
+          application.getHighlightConfig());
     }
 
     Config(Collection<String> knownDrivers,
         SqlLineOpts opts,
         Collection<CommandHandler> commandHandlers,
-        Map<String, OutputFormat> formats) {
+        Map<String, OutputFormat> formats,
+        Application.HightlightConfig hightlightConfig) {
       this.knownDrivers = Collections.unmodifiableSet(
           new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
           new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
-
+      this.hightlightConfig = hightlightConfig;
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
       return new Config(this.knownDrivers, this.opts,
-          commandHandlers, this.formats);
+          commandHandlers, this.formats, this.hightlightConfig);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
       return new Config(this.knownDrivers, this.opts,
-          this.commandHandlers, formats);
+          this.commandHandlers, formats, this.hightlightConfig);
     }
 
     Config withOpts(SqlLineOpts opts) {
       return new Config(this.knownDrivers, opts,
-          this.commandHandlers, this.formats);
+          this.commandHandlers, this.formats, this.hightlightConfig);
     }
   }
 }

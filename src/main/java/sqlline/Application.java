@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import org.jline.builtins.Completers.FileNameCompleter;
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.utils.AttributedStyle;
 
 /**
  * Defines the configuration of a SQLLine application.
@@ -366,6 +367,49 @@ public class Application {
         "TRANSACTION_SERIALIZABLE");
   }
 
+  public HightlightConfig getHighlightConfig() {
+    return new HightlightConfig();
+  }
+
+  /** Cache of configuration settings that come from
+   * {@link Application}. */
+  public static class HightlightConfig {
+    private static final AttributedStyle SQL_KEYWORD_STYLE = AttributedStyle.BOLD.foreground(AttributedStyle.BLUE);
+    private static final AttributedStyle QUOTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN);
+    private static final AttributedStyle DOUBLE_QUOTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN);
+    private static final AttributedStyle COMMENTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT);
+    private static final AttributedStyle NUMBERS_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW);
+    private static final AttributedStyle DEFAULT_STYLE = AttributedStyle.DEFAULT;
+    private static final AttributedStyle COMMAND_STYLE = AttributedStyle.DEFAULT.bold();
+
+    public AttributedStyle getSqlKeywordStyle() {
+      return SQL_KEYWORD_STYLE;
+    }
+
+    public AttributedStyle getQuotedStyle() {
+      return QUOTED_STYLE;
+    }
+
+    public AttributedStyle getDoubleQuotedStyle() {
+      return DOUBLE_QUOTED_STYLE;
+    }
+
+    public AttributedStyle getCommentedStyle() {
+      return COMMENTED_STYLE;
+    }
+
+    public AttributedStyle getNumbersStyle() {
+      return NUMBERS_STYLE;
+    }
+
+    public AttributedStyle getDefaultStyle() {
+      return DEFAULT_STYLE;
+    }
+
+    public AttributedStyle getCommandStyle() {
+      return COMMAND_STYLE;
+    }
+  }
 }
 
 // End Application.java
