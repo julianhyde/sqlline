@@ -82,6 +82,8 @@ public class SqlLineParser extends DefaultParser {
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+    eofOnUnclosedQuote(true);
+    eofOnEscapedNewLine(true);
   }
 
   public ParsedLine parse(final String line, final int cursor,
