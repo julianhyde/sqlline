@@ -32,6 +32,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
+  private SqlLineHighlighter.HighlightRule highlighterRule;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -168,6 +169,23 @@ class DatabaseConnection {
     sqlLine.showWarnings();
 
     return true;
+  }
+
+  /** Gets or creates the rule for highlighting in the current connection.
+   *
+   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
+   * not tied to the highlighter, only to the connection.
+   *
+   * <p>In future, this method may also deduce rules for other
+   * connection-specific behaviors, say completion and line-continuation. */
+  SqlLineHighlighter.HighlightRule deduceHighlighterRule(
+      SqlLineHighlighter highlighter) {
+    Objects.requireNonNull(highlighter);
+    if (highlighterRule == null) {
+      // It's OK to use a rule created by a previous highlighter.
+      highlighterRule = Objects.requireNonNull(highlighter.createRule(this));
+    }
+    return highlighterRule;
   }
 
   public Connection getConnection() throws SQLException {

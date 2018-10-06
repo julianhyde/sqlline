@@ -100,6 +100,7 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -227,6 +228,7 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -1095,6 +1097,8 @@ Variable        Value      Description
 autoCommit      true/false Enable/disable automatic transaction commit
 autoSave        true/false Automatically save preferences
 color           true/false Control whether color is used for display
+colorScheme     chester/dark/dracula/light/obsidian/solarized/vs2010
+                           Syntax highlight schema
 csvDelimiter    String     Delimiter in csv outputFormat
 csvQuoteCharacter char     Quote character in csv outputFormat
 dateFormat      pattern    Format dates using SimpleDateFormat pattern
@@ -2021,6 +2025,7 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -2050,15 +2055,19 @@ trimscripts
 verbose
 autocommit
 
-If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
+If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitly committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
 
 autosave
 
-When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitely saved using the save command. Defaults to false.
+When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitly saved using the save command. Defaults to false.
 
 color
 
 If true, then output to the terminal will use color for a more pleasing visual experience. Requires that the terminal support ANSI control codes (most do). Defaults to false.
+
+colorScheme
+
+If chester/dark/dracula/light/obsidian/solarized/vs2010, then this scheme will be used for command/sql syntax highlighting. If default then there is no syntax highlighting.
 
 csvDelimiter
 

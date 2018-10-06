@@ -366,6 +366,9 @@ public class Application {
         "TRANSACTION_SERIALIZABLE");
   }
 
+  public Map<String, HighlightStyle> getName2HighlightStyle() {
+    return BuiltInHighlightStyle.BY_NAME;
+  }
 }
 
 // End Application.java

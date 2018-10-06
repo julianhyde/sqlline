@@ -32,6 +32,7 @@ import sqlline.SqlLineProperty.Type;
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
 import static sqlline.BuiltInProperty.COLOR;
+import static sqlline.BuiltInProperty.COLOR_SCHEME;
 import static sqlline.BuiltInProperty.CSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
@@ -84,6 +85,7 @@ public class SqlLineOpts implements Completer {
       Collections.unmodifiableMap(
           new HashMap<SqlLineProperty, SqlLineProperty.Writer>() {
             {
+              put(COLOR_SCHEME, SqlLineOpts.this::setColorScheme);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
@@ -468,6 +470,21 @@ public class SqlLineOpts implements Completer {
           .setVariable(LineReader.HISTORY_FILE, get(HISTORY_FILE));
       new DefaultHistory().attach(sqlLine.getLineReader());
     }
+  }
+
+  public void setColorScheme(String colorScheme) {
+    if (DEFAULT.equals(colorScheme)
+        || BuiltInHighlightStyle.BY_NAME.containsKey(colorScheme)) {
+      propertiesMap.put(COLOR_SCHEME, colorScheme);
+      return;
+    }
+    throw new IllegalArgumentException(
+        sqlLine.loc("unknown-colorscheme", colorScheme,
+            new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet())));
+  }
+
+  public String getColorScheme() {
+    return get(COLOR_SCHEME);
   }
 
   public boolean getColor() {

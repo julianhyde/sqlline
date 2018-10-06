@@ -11,7 +11,11 @@
 */
 package sqlline;
 
+import java.util.Objects;
+
 import junit.framework.TestCase;
+
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Test cases for SQLLine.
@@ -199,6 +203,22 @@ public class SqlLineTest extends TestCase {
     } catch (IllegalArgumentException e) {
       //ok
     }
+  }
+
+  public void testNextColorScheme() {
+    final SqlLine sqlLine = new SqlLine();
+    final String initialScheme = sqlLine.getOpts().getColorScheme();
+    String currentScheme = null;
+    // the artificial limit to check
+    // if finally we will come to the initial color scheme
+    final int limit = 10000;
+    int counter = 0;
+    while (counter++ < 10000 && !Objects.equals(initialScheme, currentScheme)) {
+      sqlLine.nextColorSchemeWidget();
+      currentScheme = sqlLine.getOpts().getColorScheme();
+    }
+    assertNotEquals(limit, counter);
+    assertEquals(initialScheme, currentScheme);
   }
 
   void assertEquals(String[][] expectedses, String[][] actualses) {

@@ -35,6 +35,8 @@ import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+import static org.jline.keymap.KeyMap.alt;
+
 /**
  * A console SQL shell with command completion.
  *
@@ -587,19 +589,58 @@ public class SqlLine {
       getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
     }
 
-    final LineReader lineReader = LineReaderBuilder.builder()
+    final LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
         .terminal(terminal)
-        .completer(new SqlLineCompleter(this))
-        .appName("sqlline")
-        .parser(new SqlLineParser(this)
-            .eofOnEscapedNewLine(true)
-            .eofOnUnclosedQuote(true))
+        .parser(new SqlLineParser(this))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
-        .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
-        .build();
+        .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
+    final LineReader lineReader = inputStream == null
+        ? lineReaderBuilder
+          .appName("sqlline")
+          .completer(new SqlLineCompleter(this))
+          .highlighter(new SqlLineHighlighter(this))
+          .build()
+        : lineReaderBuilder.build();
+
+    addWidget(lineReader,
+        this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;
+  }
+
+  private void addWidget(
+      LineReader lineReader, Widget widget, String name, CharSequence keySeq) {
+    lineReader.getWidgets().put(name, widget);
+    lineReader.getKeyMaps().get(LineReader.EMACS).bind(widget, keySeq);
+  }
+
+  boolean nextColorSchemeWidget() {
+    String current = getOpts().getColorScheme();
+    Set<String> colorSchemes = application.getName2HighlightStyle().keySet();
+    if (BuiltInProperty.DEFAULT.equalsIgnoreCase(current)) {
+      if (!colorSchemes.isEmpty()) {
+        getOpts().setColorScheme(colorSchemes.iterator().next());
+      } else {
+        getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+      }
+      return true;
+    }
+
+    Iterator<String> colorSchemeIterator = colorSchemes.iterator();
+    while (colorSchemeIterator.hasNext()) {
+      String nextColorScheme = colorSchemeIterator.next();
+      if (Objects.equals(nextColorScheme, current)) {
+        if (colorSchemeIterator.hasNext()) {
+          getOpts().setColorScheme(colorSchemeIterator.next());
+        } else {
+          getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+        }
+        return true;
+      }
+    }
+    getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+    return true;
   }
 
   void usage() {
@@ -1886,6 +1927,10 @@ public class SqlLine {
     this.appConfig = new Config(application);
   }
 
+  public HighlightStyle getHighlightStyle() {
+    return appConfig.name2highlightStyle.get(getOpts().getColorScheme());
+  }
+
   public Collection<CommandHandler> getCommandHandlers() {
     return appConfig.commandHandlers;
   }
@@ -1916,40 +1961,42 @@ public class SqlLine {
     final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
-
+    final Map<String, HighlightStyle> name2highlightStyle;
     Config(Application application) {
       this(application.initDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
-          application.getOutputFormats(SqlLine.this));
+          application.getOutputFormats(SqlLine.this),
+          application.getName2HighlightStyle());
     }
 
     Config(Collection<String> knownDrivers,
         SqlLineOpts opts,
         Collection<CommandHandler> commandHandlers,
-        Map<String, OutputFormat> formats) {
+        Map<String, OutputFormat> formats,
+        Map<String, HighlightStyle> name2HighlightStyle) {
       this.knownDrivers = Collections.unmodifiableSet(
           new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
           new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
-
+      this.name2highlightStyle = name2HighlightStyle;
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
       return new Config(this.knownDrivers, this.opts,
-          commandHandlers, this.formats);
+          commandHandlers, this.formats, this.name2highlightStyle);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
       return new Config(this.knownDrivers, this.opts,
-          this.commandHandlers, formats);
+          this.commandHandlers, formats, this.name2highlightStyle);
     }
 
     Config withOpts(SqlLineOpts opts) {
       return new Config(this.knownDrivers, opts,
-          this.commandHandlers, this.formats);
+          this.commandHandlers, this.formats, this.name2highlightStyle);
     }
   }
 }

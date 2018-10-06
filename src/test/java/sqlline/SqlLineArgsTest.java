@@ -1868,6 +1868,32 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testSetWrongColorScheme() {
+    final SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      SqlLine.Status status = begin(sqlLine, os, false);
+      // Here the status is SqlLine.Status.OTHER
+      // because of EOF as the result of InputStream which
+      // is not used in the current test so it is ok
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      DispatchCallback dc = new DispatchCallback();
+      final String invalidColorScheme = "invalid";
+      sqlLine.runCommands(
+          Collections.singletonList(
+              "!set colorscheme " + invalidColorScheme), dc);
+      assertThat(os.toString("UTF8"),
+          containsString(
+              sqlLine.loc("unknown-colorscheme", invalidColorScheme,
+                  new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet()))));
+      os.reset();
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
