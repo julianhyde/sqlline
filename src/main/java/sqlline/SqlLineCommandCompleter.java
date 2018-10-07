@@ -24,7 +24,7 @@ import org.jline.reader.impl.completer.StringsCompleter;
  * Suggests completions for a command.
  */
 class SqlLineCommandCompleter extends AggregateCompleter {
-  public SqlLineCommandCompleter(SqlLine sqlLine) {
+  SqlLineCommandCompleter(SqlLine sqlLine) {
     super(new LinkedList<>());
     List<ArgumentCompleter> completers = new LinkedList<>();
 

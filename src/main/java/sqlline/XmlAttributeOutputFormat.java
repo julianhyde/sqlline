@@ -19,7 +19,7 @@ class XmlAttributeOutputFormat extends AbstractOutputFormat {
   // '> in case double quotes for attribute value
   // "> in case single quotes for attribute value
   private static final String ALLOWED_NOT_ENCODE_SYMBOLS = "'>";
-  public XmlAttributeOutputFormat(SqlLine sqlLine) {
+  XmlAttributeOutputFormat(SqlLine sqlLine) {
     super(sqlLine);
   }
 

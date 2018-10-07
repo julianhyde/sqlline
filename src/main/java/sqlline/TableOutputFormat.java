@@ -17,7 +17,7 @@ package sqlline;
 class TableOutputFormat implements OutputFormat {
   private final SqlLine sqlLine;
 
-  public TableOutputFormat(SqlLine sqlLine) {
+  TableOutputFormat(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 

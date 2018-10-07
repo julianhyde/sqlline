@@ -25,7 +25,7 @@ import org.jline.reader.impl.completer.StringsCompleter;
 class TableNameCompleter implements Completer {
   private SqlLine sqlLine;
 
-  public TableNameCompleter(SqlLine sqlLine) {
+  TableNameCompleter(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 

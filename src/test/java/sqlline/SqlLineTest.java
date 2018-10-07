@@ -121,7 +121,7 @@ public class SqlLineTest extends TestCase {
     strings = line.split("values (1, cast(null as integer), "
         + "cast(null as varchar(3));", " ");
     assertEquals(new String[] {"values", "(1,", "cast(null", "as", "integer),",
-      "cast(null", "as", "varchar(3));"}, strings);
+        "cast(null", "as", "varchar(3));"}, strings);
     // space
     strings = line.split("set csvdelimiter ' '", " ");
     assertEquals(new String[]{"set", "csvdelimiter", " "}, strings);

@@ -33,7 +33,7 @@ class DatabaseConnection {
   private Schema schema = null;
   private Completer sqlCompleter = null;
 
-  public DatabaseConnection(SqlLine sqlLine, String driver, String url,
+  DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
     this.sqlLine = sqlLine;
     this.driver = driver;
@@ -286,7 +286,7 @@ class DatabaseConnection {
       final String name;
       Column[] columns;
 
-      public Table(String name) {
+      Table(String name) {
         this.name = name;
       }
 
@@ -299,7 +299,7 @@ class DatabaseConnection {
         final String name;
         boolean isPrimaryKey;
 
-        public Column(String name) {
+        Column(String name) {
           this.name = name;
         }
       }

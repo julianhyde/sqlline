@@ -25,10 +25,8 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
-
 import org.jline.builtins.Commands;
 import org.jline.terminal.Terminal;
 import org.junit.Test;
@@ -41,7 +39,6 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
-
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 import sqlline.extensions.CustomApplication;
 
@@ -706,11 +703,14 @@ public class SqlLineArgsTest {
     new Expectations() {
       {
         // prevent calls to functions that also call resultSet.next
-        meta.getDatabaseProductName(); result = "hsqldb";
+        meta.getDatabaseProductName();
+        result = "hsqldb";
         // prevent calls to functions that also call resultSet.next
-        meta.getDatabaseProductVersion(); result = "1.0";
+        meta.getDatabaseProductVersion();
+        result = "1.0";
         // Generate an exception on a call to resultSet.next
-        resultSet.next(); result = new SQLException("Generated Exception.");
+        resultSet.next();
+        result = new SQLException("Generated Exception.");
       }
     };
     SqlLine sqlLine = new SqlLine();
@@ -720,14 +720,14 @@ public class SqlLineArgsTest {
     sqlLine.setOutputStream(sqllineOutputStream);
     sqlLine.setErrorStream(sqllineOutputStream);
     String[] args = {
-      "-d",
-      "org.hsqldb.jdbcDriver",
-      "-u",
-      "jdbc:hsqldb:res:scott",
-      "-n",
-      "SCOTT",
-      "-p",
-      "TIGER"
+        "-d",
+        "org.hsqldb.jdbcDriver",
+        "-u",
+        "jdbc:hsqldb:res:scott",
+        "-n",
+        "SCOTT",
+        "-p",
+        "TIGER"
     };
     DispatchCallback callback = new DispatchCallback();
     sqlLine.initArgs(args, callback);
@@ -855,8 +855,8 @@ public class SqlLineArgsTest {
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     final String[] args = {
-      "-e", "!set maxwidth 80",
-      "-ch", "sqlline.extensions.HelloWorldCommandHandler"};
+        "-e", "!set maxwidth 80",
+        "-ch", "sqlline.extensions.HelloWorldCommandHandler"};
     sqlLine.begin(args, is, false);
 
     sqlLine.runCommands(Collections.singletonList("!hello"),
@@ -1397,7 +1397,7 @@ public class SqlLineArgsTest {
         containsString(CustomApplication.DEFAULT_APP_INFO_MESSAGE));
 
     String[] args2 = {"-e", "!set maxwidth 80",
-      "-ac", "sqlline.extensions.CustomApplication"};
+        "-ac", "sqlline.extensions.CustomApplication"};
     pair = run(args2);
     assertThat(pair.output,
         containsString(CustomApplication.CUSTOM_INFO_MESSAGE));
@@ -1427,21 +1427,21 @@ public class SqlLineArgsTest {
   @Test
   public void testAppConfigReset() throws Throwable {
     final String script = "!appconfig"
-      + " sqlline.extensions.CustomApplication\n"
-      + "!appconfig sqlline.Application\n"
-      + "!tables";
+        + " sqlline.extensions.CustomApplication\n"
+        + "!appconfig sqlline.Application\n"
+        + "!tables";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-      containsString("TABLE_CAT"));
+        containsString("TABLE_CAT"));
   }
 
   @Test
   public void testCustomOpts() throws Throwable {
     // nulls are displayed as custom_null
     final String script = "!appconfig"
-      + " sqlline.extensions.CustomApplication\n"
-      + "values(null)";
+        + " sqlline.extensions.CustomApplication\n"
+        + "values(null)";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-      containsString("custom_null"));
+        containsString("custom_null"));
   }
 
   @Test
@@ -1638,7 +1638,7 @@ public class SqlLineArgsTest {
   private static class RegexMatcher extends BaseMatcher<String> {
     private final String pattern;
 
-    public RegexMatcher(String pattern) {
+    RegexMatcher(String pattern) {
       super();
       this.pattern = pattern;
     }

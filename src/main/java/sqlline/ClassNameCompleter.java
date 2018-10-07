@@ -57,7 +57,7 @@ public class ClassNameCompleter extends StringsCompleter {
     // some JVMs do not report the core classes jar in the list of
     // class loaders.
     Class[] systemClasses = {
-      String.class, javax.swing.JFrame.class
+        String.class, javax.swing.JFrame.class
     };
 
     for (Class systemClass : systemClasses) {
