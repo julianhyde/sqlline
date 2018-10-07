@@ -26,11 +26,11 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * SqlLineHighlighterTest.
+ * Tests for sql and command syntax highlighting in sqlline.
  */
 public class SqlLineHighlighterTest extends TestCase {
   @Test
-  public void testHandleNumbers() {
+  public void testHandleNumbers() throws IOException {
     SqlLineHighlighter highlighter = new SqlLineHighlighter(new SqlLine());
     String inputString = "select 1+1, 2*2, 3-1, 1/1 from dual where 0=0";
     BitSet expectedBitSet = new BitSet(inputString.length());
@@ -55,7 +55,7 @@ public class SqlLineHighlighterTest extends TestCase {
   }
 
   @Test
-  public void testHandleKeyWords() {
+  public void testHandleKeyWords() throws IOException {
     SqlLineHighlighter highlighter = new SqlLineHighlighter(new SqlLine());
     String inputString = "select 1+1, 2*2, 3-1, 1/1 from dual where 0=0";
     BitSet expectedBitSet = new BitSet(inputString.length());

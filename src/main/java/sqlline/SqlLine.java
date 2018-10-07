@@ -587,7 +587,7 @@ public class SqlLine {
       getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
     }
 
-    LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
+    final LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
         .terminal(terminal)
         .parser(new SqlLineParser(this))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
