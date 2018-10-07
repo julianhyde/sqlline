@@ -367,20 +367,27 @@ public class Application {
         "TRANSACTION_SERIALIZABLE");
   }
 
-  public HightlightConfig getHighlightConfig() {
-    return new HightlightConfig();
+  public HighlightConfig getHighlightConfig() {
+    return new HighlightConfig();
   }
 
   /** Cache of configuration settings that come from
    * {@link Application}. */
-  public static class HightlightConfig {
-    private static final AttributedStyle SQL_KEYWORD_STYLE = AttributedStyle.BOLD.foreground(AttributedStyle.BLUE);
-    private static final AttributedStyle QUOTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN);
-    private static final AttributedStyle DOUBLE_QUOTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN);
-    private static final AttributedStyle COMMENTED_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT);
-    private static final AttributedStyle NUMBERS_STYLE = AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW);
-    private static final AttributedStyle DEFAULT_STYLE = AttributedStyle.DEFAULT;
-    private static final AttributedStyle COMMAND_STYLE = AttributedStyle.DEFAULT.bold();
+  public static class HighlightConfig {
+    private static final AttributedStyle SQL_KEYWORD_STYLE =
+        AttributedStyle.BOLD.foreground(AttributedStyle.BLUE);
+    private static final AttributedStyle QUOTED_STYLE =
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN);
+    private static final AttributedStyle DOUBLE_QUOTED_STYLE =
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN);
+    private static final AttributedStyle COMMENTED_STYLE =
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT);
+    private static final AttributedStyle NUMBERS_STYLE =
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW);
+    private static final AttributedStyle DEFAULT_STYLE =
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE);
+    private static final AttributedStyle COMMAND_STYLE =
+        AttributedStyle.DEFAULT.bold();
 
     public AttributedStyle getSqlKeywordStyle() {
       return SQL_KEYWORD_STYLE;
