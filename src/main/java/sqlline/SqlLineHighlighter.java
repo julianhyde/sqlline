@@ -189,8 +189,11 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     }
 
     AttributedStringBuilder sb = new AttributedStringBuilder();
-    final int commandStart = buffer.indexOf(SqlLine.COMMAND_PREFIX);
-    final int commandEnd = buffer.indexOf(' ', commandStart);
+    final int commandStart = command
+        ? buffer.indexOf(SqlLine.COMMAND_PREFIX) : -1;
+    final int commandEnd = command
+        ? buffer.indexOf(' ', commandStart) : -1;
+
     final Application.HighlightConfig highlightConfig =
         sqlLine.getHighlightConfig();
     for (int i = 0; i < buffer.length(); i++) {
@@ -221,6 +224,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (i == commandStart && command) {
         sb.style(highlightConfig.getCommandStyle());
       }
+      if (i == commandEnd) {
+        sb.style(highlightConfig.getDefaultStyle());
+      }
       if (i >= underlineStart && i <= underlineEnd) {
         sb.style(sb.style().underline());
       }
@@ -247,10 +253,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (i == negativeEnd) {
         sb.style(sb.style().inverseOff());
       }
-      if (i == commandEnd) {
-        sb.style(highlightConfig.getDefaultStyle());
-      }
-
     }
     return sb.toAttributedString();
   }
@@ -262,7 +264,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         || !isCommandPresent;
   }
 
-  protected int handleDoubleQuotes(
+  private int handleDoubleQuotes(
       String buffer, BitSet doubleQuoteBitSet, int pos) {
     int end = buffer.indexOf('"', pos + 1);
     end = end == -1 ? buffer.length() - 1 : end;
@@ -271,7 +273,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return pos;
   }
 
-  protected int handleNumbers(String buffer, BitSet numberBitSet, int pos) {
+  private int handleNumbers(String buffer, BitSet numberBitSet, int pos) {
     int end = pos + 1;
     while (end < buffer.length() && Character.isDigit(buffer.charAt(end))) {
       end++;
@@ -314,7 +316,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return pos;
   }
 
-  protected int handleSqlSingleQuotes(
+  private int handleSqlSingleQuotes(
       String buffer, BitSet quoteBitSet, int pos) {
     int end;
     int quoteCounter = 1;
