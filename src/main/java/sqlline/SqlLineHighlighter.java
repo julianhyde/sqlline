@@ -35,24 +35,20 @@ import org.jline.utils.WCWidth;
  */
 public class SqlLineHighlighter extends DefaultHighlighter {
   private final SqlLine sqlLine;
-  private Set<String> sqlKeyWords;
+  private final Set<String> sqlKeyWords;
 
-  public SqlLineHighlighter(SqlLine sqlLine) {
+  public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
     this.sqlLine = sqlLine;
-    try {
-      String keywords =
-          new BufferedReader(
-              new InputStreamReader(
-                  SqlCompleter.class.getResourceAsStream(
-                      "sql-keywords.properties"), StandardCharsets.UTF_8)
-          ).readLine();
-      sqlKeyWords = new TreeSet<>();
-      for (StringTokenizer tok = new StringTokenizer(keywords, ",");
-           tok.hasMoreTokens();) {
-        sqlKeyWords.add(tok.nextToken());
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
+    String keywords =
+        new BufferedReader(
+            new InputStreamReader(
+                SqlCompleter.class.getResourceAsStream(
+                    "sql-keywords.properties"), StandardCharsets.UTF_8)
+        ).readLine();
+    sqlKeyWords = new TreeSet<>();
+    for (StringTokenizer tok = new StringTokenizer(keywords, ",");
+         tok.hasMoreTokens();) {
+      sqlKeyWords.add(tok.nextToken());
     }
   }
 
@@ -63,20 +59,14 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     int negativeStart = -1;
     int negativeEnd = -1;
     boolean command = false;
-    boolean isSql = false;
-    BitSet sqlKeyWordsBitSet = null;
-    BitSet quoteBitSet = new BitSet(buffer.length());
-    BitSet doubleQuoteBitSet = new BitSet(buffer.length());
-    BitSet commentBitSet = null;
-    BitSet numberBitSet = new BitSet(buffer.length());
-    String trimmed = buffer.trim();
+    final BitSet sqlKeyWordsBitSet = new BitSet(buffer.length());
+    final BitSet quoteBitSet = new BitSet(buffer.length());
+    final BitSet doubleQuoteBitSet = new BitSet(buffer.length());
+    final BitSet commentBitSet = new BitSet(buffer.length());
+    final BitSet numberBitSet = new BitSet(buffer.length());
+    final String trimmed = buffer.trim();
     boolean isCommandPresent = trimmed.startsWith(SqlLine.COMMAND_PREFIX);
-    if (trimmed.startsWith("!all")
-        || trimmed.startsWith("!call")
-        || trimmed.startsWith("!sql")
-        || !isCommandPresent) {
-      isSql = true;
-    }
+    final boolean isSql = isSqlQuery(trimmed, isCommandPresent);
 
     String possibleCommand;
     if (trimmed.length() > 1 && isCommandPresent) {
@@ -111,9 +101,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
                 ? buffer.substring(wordStart, pos)
                 : buffer.substring(wordStart);
             if (sqlKeyWords.contains(word.toUpperCase(Locale.ROOT))) {
-              if (sqlKeyWordsBitSet == null) {
-                sqlKeyWordsBitSet = new BitSet(buffer.length());
-              }
               sqlKeyWordsBitSet.set(wordStart, wordStart + word.length());
             }
             wordStart = -1;
@@ -122,21 +109,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           }
         }
         if (ch == '"') {
-          if (doubleQuoteBitSet == null) {
-            doubleQuoteBitSet = new BitSet(buffer.length());
-          }
           pos = handleDoubleQuotes(buffer, doubleQuoteBitSet, pos);
         }
         if (ch == '\'') {
-          if (quoteBitSet == null) {
-            quoteBitSet = new BitSet(buffer.length());
-          }
           pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
         }
         if (pos < buffer.length() - 1) {
-          if (commentBitSet == null) {
-            commentBitSet = new BitSet(buffer.length());
-          }
           pos = handleComments(buffer, commentBitSet, pos, ch);
         }
         if (wordStart == -1
@@ -217,15 +195,15 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         sqlLine.getHighlightConfig();
     for (int i = 0; i < buffer.length(); i++) {
       if (isSql) {
-        if (sqlKeyWordsBitSet != null && sqlKeyWordsBitSet.get(i)) {
+        if (sqlKeyWordsBitSet.get(i)) {
           sb.style(highlightConfig.getSqlKeywordStyle());
-        } else if (quoteBitSet != null && quoteBitSet.get(i)) {
+        } else if (quoteBitSet.get(i)) {
           sb.style(highlightConfig.getQuotedStyle());
-        } else if (doubleQuoteBitSet != null && doubleQuoteBitSet.get(i)) {
+        } else if (doubleQuoteBitSet.get(i)) {
           sb.style(highlightConfig.getDoubleQuotedStyle());
-        } else if (commentBitSet != null && commentBitSet.get(i)) {
+        } else if (commentBitSet.get(i)) {
           sb.style(highlightConfig.getCommentedStyle());
-        } else if (numberBitSet != null && numberBitSet.get(i)) {
+        } else if (numberBitSet.get(i)) {
           sb.style(highlightConfig.getNumbersStyle());
         } else if (i > commandEnd
             && (i < underlineStart || i > underlineEnd)
@@ -275,6 +253,13 @@ public class SqlLineHighlighter extends DefaultHighlighter {
 
     }
     return sb.toAttributedString();
+  }
+
+  private boolean isSqlQuery(String trimmed, boolean isCommandPresent) {
+    return trimmed.startsWith("!all")
+        || trimmed.startsWith("!call")
+        || trimmed.startsWith("!sql")
+        || !isCommandPresent;
   }
 
   protected int handleDoubleQuotes(
