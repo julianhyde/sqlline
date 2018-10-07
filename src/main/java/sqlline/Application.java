@@ -381,10 +381,10 @@ public class Application {
     private static final AttributedStyle DOUBLE_QUOTED_STYLE =
         AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN);
     private static final AttributedStyle COMMENTED_STYLE =
-        AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT);
+        AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT).italic();
     private static final AttributedStyle NUMBERS_STYLE =
         AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW);
-    private static final AttributedStyle DEFAULT_STYLE =
+    public static final AttributedStyle DEFAULT_STYLE =
         AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE);
     private static final AttributedStyle COMMAND_STYLE =
         AttributedStyle.DEFAULT.bold();
