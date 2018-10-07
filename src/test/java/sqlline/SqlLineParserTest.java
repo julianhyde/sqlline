@@ -27,7 +27,7 @@ public class SqlLineParserTest {
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = new String[] {
+    String[] successfulLinesToCheck = {
         "!set",
         " !history",
         "   !scan",
@@ -47,7 +47,7 @@ public class SqlLineParserTest {
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = new String[] {
+    String[] successfulLinesToCheck = {
         "!sql",
         "   !all",
         " \n select",
