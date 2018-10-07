@@ -25,6 +25,7 @@
     <top.dir>${project.basedir}</top.dir>
 
     <!-- The following list is sorted. -->
+    <checkstyle.version>7.8.2</checkstyle.version>
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
     <forbiddenapis.version>2.6</forbiddenapis.version>
     <h2.version>1.4.197</h2.version>
@@ -33,6 +34,7 @@
     <jmockit.version>1.30</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+    <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
@@ -173,6 +175,13 @@
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

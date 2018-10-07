@@ -14,7 +14,6 @@ package sqlline;
 import org.jline.reader.EOFError;
 import org.jline.reader.Parser;
 import org.jline.reader.impl.DefaultParser;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,14 +27,14 @@ public class SqlLineParserTest {
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = new String[] {
-      "!set",
-      " !history",
-      "   !scan",
-      " \n !set",
-      " \n test;",
-      " \n test';\n;\n';",
-      "select \n 1\n, '\na\n ';",
+    String[] successfulLinesToCheck = {
+        "!set",
+        " !history",
+        "   !scan",
+        " \n !set",
+        " \n test;",
+        " \n test';\n;\n';",
+        "select \n 1\n, '\na\n ';",
     };
     for (String line : successfulLinesToCheck) {
       parser.parse(line, line.length(), acceptLine);
@@ -48,13 +47,13 @@ public class SqlLineParserTest {
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = new String[] {
-      "!sql",
-      "   !all",
-      " \n select",
-      " \n test ",
-      "  test ';",
-      " \n test ';'\";",
+    String[] successfulLinesToCheck = {
+        "!sql",
+        "   !all",
+        " \n select",
+        " \n test ",
+        "  test ';",
+        " \n test ';'\";",
     };
     for (String line : successfulLinesToCheck) {
       try {

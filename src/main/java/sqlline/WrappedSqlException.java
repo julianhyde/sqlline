@@ -25,7 +25,7 @@ import java.sql.SQLException;
 class WrappedSqlException extends RuntimeException {
 
   /** Creates a WrappedSQLException. */
-  public WrappedSqlException(SQLException ex) {
+  WrappedSqlException(SQLException ex) {
     super(ex);
   }
 

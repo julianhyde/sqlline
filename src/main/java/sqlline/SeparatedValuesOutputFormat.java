@@ -19,14 +19,14 @@ class SeparatedValuesOutputFormat extends AbstractOutputFormat {
   final String separator;
   final char quoteCharacter;
 
-  public SeparatedValuesOutputFormat(SqlLine sqlLine,
+  SeparatedValuesOutputFormat(SqlLine sqlLine,
       String separator, char quoteCharacter) {
     super(sqlLine);
     this.separator = separator;
     this.quoteCharacter = quoteCharacter;
   }
 
-  public SeparatedValuesOutputFormat(SqlLine sqlLine, String separator) {
+  SeparatedValuesOutputFormat(SqlLine sqlLine, String separator) {
     this(sqlLine, separator, DEFAULT_QUOTE_CHARACTER);
   }
 

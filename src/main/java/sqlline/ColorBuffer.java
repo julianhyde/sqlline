@@ -49,12 +49,12 @@ final class ColorBuffer implements Comparable {
 
   private final boolean useColor;
 
-  public ColorBuffer(boolean useColor) {
+  ColorBuffer(boolean useColor) {
     this.useColor = useColor;
     append("");
   }
 
-  public ColorBuffer(String str, boolean useColor) {
+  ColorBuffer(String str, boolean useColor) {
     this.useColor = useColor;
     append(str);
   }

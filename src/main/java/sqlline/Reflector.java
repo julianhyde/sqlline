@@ -24,7 +24,7 @@ import java.util.List;
 class Reflector {
   private final SqlLine sqlLine;
 
-  public Reflector(SqlLine sqlLine) {
+  Reflector(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 

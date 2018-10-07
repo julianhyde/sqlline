@@ -25,7 +25,7 @@ import org.jline.reader.impl.completer.StringsCompleter;
  * Suggests completions for SQL statements.
  */
 class SqlCompleter extends StringsCompleter {
-  public SqlCompleter(SqlLine sqlLine, boolean skipMeta)
+  SqlCompleter(SqlLine sqlLine, boolean skipMeta)
       throws IOException, SQLException {
     super(getCompletions(sqlLine, skipMeta));
   }

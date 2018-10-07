@@ -26,7 +26,7 @@ class SqlLineCompleter
     implements Completer {
   private SqlLine sqlLine;
 
-  public SqlLineCompleter(SqlLine sqlLine) {
+  SqlLineCompleter(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 

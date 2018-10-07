@@ -17,7 +17,7 @@ package sqlline;
  */
 class XmlElementOutputFormat extends AbstractOutputFormat {
   private static final String ALLOWED_NOT_ENCODE_SYMBOLS = "'\">";
-  public XmlElementOutputFormat(SqlLine sqlLine) {
+  XmlElementOutputFormat(SqlLine sqlLine) {
     super(sqlLine);
   }
 

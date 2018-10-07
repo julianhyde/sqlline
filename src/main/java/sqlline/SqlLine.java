@@ -1130,7 +1130,7 @@ public class SqlLine {
           } else {
             state = SPACE;
             final String word =
-                new String(chars, idStart, i - idStart - 1);
+                String.copyValueOf(chars, idStart, i - idStart - 1);
             current.add(word);
           }
         }
@@ -1140,7 +1140,7 @@ public class SqlLine {
         // the identifier, anything else extends it.
         ++i;
         if (Character.isWhitespace(c) || c == '.') {
-          String word = new String(chars, idStart, i - idStart - 1);
+          String word = String.copyValueOf(chars, idStart, i - idStart - 1);
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
           } else if (quoting.upper) {
@@ -1163,7 +1163,7 @@ public class SqlLine {
     case UNQUOTED:
       // In the middle of a quoted string. Be lenient, and complete the
       // word.
-      String word = new String(chars, idStart, n - idStart);
+      String word = String.copyValueOf(chars, idStart, n - idStart);
       if (state == UNQUOTED) {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
@@ -1210,7 +1210,7 @@ public class SqlLine {
     }
 
     if ((str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"'))
-      || ((str.charAt(0) == '"' || str.charAt(0) == '\''
+        || ((str.charAt(0) == '"' || str.charAt(0) == '\''
             || str.charAt(str.length() - 1) == '"'
             || str.charAt(str.length() - 1) == '\'')
             && str.charAt(0) != str.charAt(str.length() - 1))) {
