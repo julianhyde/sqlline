@@ -370,27 +370,38 @@ public class SqlLine {
         if (i == args.length - 1) {
           return Status.ARGS;
         }
-        if (args[i].equals("-d")) {
+        switch (args[i]) {
+        case "-d":
           driver = args[++i];
-        } else if (args[i].equals("-ch")) {
+          break;
+        case "-ch":
           commandHandler = args[++i];
-        } else if (args[i].equals("-n")) {
+          break;
+        case "-n":
           user = args[++i];
-        } else if (args[i].equals("-p")) {
+          break;
+        case "-p":
           pass = args[++i];
-        } else if (args[i].equals("-u")) {
+          break;
+        case "-u":
           url = args[++i];
-        } else if (args[i].equals("-e")) {
+          break;
+        case "-e":
           commands.add(args[++i]);
-        } else if (args[i].equals("-f")) {
+          break;
+        case "-f":
           getOpts().setRun(args[++i]);
-        } else if (args[i].equals("-log")) {
+          break;
+        case "-log":
           logFile = args[++i];
-        } else if (args[i].equals("-nn")) {
+          break;
+        case "-nn":
           nickname = args[++i];
-        } else if (args[i].equals("-ac")) {
+          break;
+        case "-ac":
           appConfig = args[++i];
-        } else {
+          break;
+        default:
           return Status.ARGS;
         }
       } else {
@@ -1889,8 +1900,8 @@ public class SqlLine {
     this.appConfig = new Config(application);
   }
 
-  public Application.HighlightConfig getHighlightConfig() {
-    return appConfig.highlightConfig;
+  public HighlightStyle getHighlightStyle() {
+    return appConfig.name2highlightStyle.get(getOpts().getColorScheme());
   }
 
   public Collection<CommandHandler> getCommandHandlers() {
@@ -1923,42 +1934,42 @@ public class SqlLine {
     final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
-    final Application.HighlightConfig highlightConfig;
+    final Map<String, HighlightStyle> name2highlightStyle;
     Config(Application application) {
       this(application.initDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
           application.getOutputFormats(SqlLine.this),
-          application.getHighlightConfig());
+          application.getName2HighlightStyle());
     }
 
     Config(Collection<String> knownDrivers,
         SqlLineOpts opts,
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats,
-        Application.HighlightConfig highlightConfig) {
+        Map<String, HighlightStyle> name2HighlightStyle) {
       this.knownDrivers = Collections.unmodifiableSet(
           new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
           new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
-      this.highlightConfig = highlightConfig;
+      this.name2highlightStyle = name2HighlightStyle;
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
       return new Config(this.knownDrivers, this.opts,
-          commandHandlers, this.formats, this.highlightConfig);
+          commandHandlers, this.formats, this.name2highlightStyle);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
       return new Config(this.knownDrivers, this.opts,
-          this.commandHandlers, formats, this.highlightConfig);
+          this.commandHandlers, formats, this.name2highlightStyle);
     }
 
     Config withOpts(SqlLineOpts opts) {
       return new Config(this.knownDrivers, opts,
-          this.commandHandlers, this.formats, this.highlightConfig);
+          this.commandHandlers, this.formats, this.name2highlightStyle);
     }
   }
 }

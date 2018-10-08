@@ -2765,6 +2765,17 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Defaults to <literal>false</literal>.
         </para>
       </sect1>
+      <sect1 id="setting_colorscheme">
+        <title>colorscheme</title>
+        <para>
+            If <literal>chester</literal>/<literal>dark</literal>
+            /<literal>dracula</literal>/<literal>light</literal>
+            /<literal>ozbsidian</literal>/<literal>solarized</literal>
+            /<literal>vs2010</literal>,
+            then this scheme will be used for command/sql syntax highlighting.
+            If <literal>default</literal> then there is no syntax highlighting.
+        </para>
+      </sect1>
       <sect1 id="setting_dateformat">
         <title>dateformat</title>
         <para>
