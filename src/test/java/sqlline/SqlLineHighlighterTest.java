@@ -20,30 +20,45 @@ import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
 import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStyle;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 /**
  * Tests for sql and command syntax highlighting in sqlline.
  */
-public class SqlLineHighlighterTest extends TestCase {
+public class SqlLineHighlighterTest {
 
-  private SqlLine sqlLine = null;
-  private SqlLineHighlighter highlighter;
+  private SqlLine darkSqlLine = null;
+  private SqlLine defaultSqlline = null;
+  private SqlLine lightSqlLine = null;
+  private SqlLineHighlighter darkHighlighter;
+  private SqlLineHighlighter defaultHighlighter;
+  private SqlLineHighlighter lightHighlighter;
 
-  public void setUp() throws Exception {
-    sqlLine = getSqlLine();
-    highlighter = new SqlLineHighlighter(sqlLine);
+  @Before public void setUp() throws Exception {
+    darkSqlLine = getSqlLine(SqlLineOpts.DARK_SCHEME);
+    defaultSqlline = getSqlLine(SqlLineOpts.DEFAULT);
+    lightSqlLine = getSqlLine(SqlLineOpts.LIGHT_SCHEME);
+    darkHighlighter = new SqlLineHighlighter(darkSqlLine);
+    defaultHighlighter = new SqlLineHighlighter(defaultSqlline);
+    lightHighlighter = new SqlLineHighlighter(lightSqlLine);
   }
 
-  public void tearDown() {
-    sqlLine = null;
-    highlighter = null;
+  @After public void tearDown() {
+    darkSqlLine = null;
+    defaultSqlline = null;
+    lightSqlLine = null;
+    darkHighlighter = null;
+    defaultHighlighter = null;
+    lightHighlighter = null;
   }
 
-  public void testCommands() {
+  @Test public void testCommands() {
     String[] linesRequiredToBeCommands = {
         "!set",
         "!commandhandler",
@@ -58,11 +73,11 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.commands.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testKeywords() {
+  @Test public void testKeywords() {
     String[] linesRequiredToBeKeywords = {
         "from",
         "outer",
@@ -77,11 +92,11 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.keywords.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testSingleQuotedStrings() {
+  @Test public void testSingleQuotedStrings() {
     String[] linesRequiredToBeSingleQuoted = {
         "'from'",
         "''''",
@@ -97,11 +112,11 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.singleQuotes.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testDoubleQuotedStrings() {
+  @Test public void testDoubleQuotedStrings() {
     String[] linesRequiredToBeDoubleQuoted = {
         "\"",
         "\"\"",
@@ -118,11 +133,11 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.doubleQuotes.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testCommentedStrings() {
+  @Test public void testCommentedStrings() {
     String[] linesRequiredToBeComments = {
         "-- 'asdasd'asd",
         "--select",
@@ -137,11 +152,11 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.comments.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testNumberStrings() {
+  @Test public void testNumberStrings() {
     String[] linesRequiredToBeNumbers = {
         "123456789",
         "0123",
@@ -152,21 +167,18 @@ public class SqlLineHighlighterTest extends TestCase {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.numbers.set(0, line.length());
-      checkLine(sqlLine, line, expectedStyle, highlighter);
+      checkLine(line, expectedStyle);
     }
   }
 
-  public void testComplexStrings() throws IOException {
-    final SqlLine sqlLine = getSqlLine();
-    final SqlLineHighlighter highlighter = new SqlLineHighlighter(sqlLine);
-
+  @Test public void testComplexStrings() {
     // command with argument
     String line = "!set version";
     ExpectedHighlightStyle expectedStyle =
         new ExpectedHighlightStyle(line.length());
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     // command with quoted argument
     line = "!set csvdelimiter '\"'";
@@ -174,7 +186,7 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.indexOf("'\"'"));
     expectedStyle.singleQuotes.set(line.indexOf("'\"'"), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     // command with double quoted argument
     line = "!set csvdelimiter \"'\"";
@@ -182,7 +194,7 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.indexOf("\"'\""));
     expectedStyle.doubleQuotes.set(line.indexOf("\"'\""), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     // command with double quoted argument and \n
     line = "!set csvdelimiter \"'\n\"";
@@ -190,14 +202,14 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.indexOf("\"'\n\""));
     expectedStyle.doubleQuotes.set(line.indexOf("\"'\n\""), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     line = "select '1'";
     expectedStyle = new ExpectedHighlightStyle(line.length());
     expectedStyle.keywords.set(0, "select".length());
     expectedStyle.defaults.set("select".length(), line.indexOf(' ') + 1);
     expectedStyle.singleQuotes.set(line.indexOf(' ') + 1, line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     //no spaces
     line = "select'1'as\"21\"";
@@ -207,7 +219,7 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.singleQuotes.set(line.indexOf('\''), line.indexOf("as"));
     expectedStyle.keywords.set(line.indexOf("as"), line.indexOf("\"21\""));
     expectedStyle.doubleQuotes.set(line.indexOf("\"21\""), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     //not valid sql with comments /**/ and not ended quoted line
     line = "select/*123'1'*/'as\"21\"";
@@ -216,7 +228,7 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.comments
         .set(line.indexOf("/*123'1'*/"), line.indexOf("'as\"21\""));
     expectedStyle.singleQuotes.set(line.indexOf("'as\"21\""), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     //not valid sql with not ended multiline comment
     line = "select /*\n * / \n 123 as \"q\" \nfrom dual\n where\n 1 = 1";
@@ -225,7 +237,7 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.defaults.set("select".length());
     expectedStyle.comments
         .set(line.indexOf("/*\n"), line.length());
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
 
     //multiline sql with comments
     line = "select/*multiline\ncomment\n*/0 as \"0\","
@@ -257,24 +269,24 @@ public class SqlLineHighlighterTest extends TestCase {
     expectedStyle.numbers.set(line.indexOf("1=1"));
     expectedStyle.defaults.set(line.indexOf("=1"));
     expectedStyle.numbers.set(line.indexOf("=1") + 1);
-    checkLine(sqlLine, line, expectedStyle, highlighter);
+    checkLine(line, expectedStyle);
   }
 
-  private void checkLine(
+  private void checkHighlightedLine(
       SqlLine sqlLine,
       String line,
       ExpectedHighlightStyle expectedHighlightStyle,
       SqlLineHighlighter highlighter) {
-    AttributedString attributedString =
+    final AttributedString attributedString =
         highlighter.highlight(sqlLine.getLineReader(), line);
-    Application.HighlightConfig highlightConfig = sqlLine.getHighlightConfig();
-    int commandsStyle = highlightConfig.getCommandStyle().getStyle();
-    int keyWordStyle = highlightConfig.getSqlKeywordStyle().getStyle();
-    int singleQuoteStyle = highlightConfig.getQuotedStyle().getStyle();
-    int doubleQuoteStyle = highlightConfig.getDoubleQuotedStyle().getStyle();
-    int commentsStyle = highlightConfig.getCommentedStyle().getStyle();
-    int numbersStyle = highlightConfig.getNumbersStyle().getStyle();
-    int defaultStyle = highlightConfig.getDefaultStyle().getStyle();
+    final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
+    int commandsStyle = highlightStyle.getCommandStyle().getStyle();
+    int keyWordStyle = highlightStyle.getSqlKeywordStyle().getStyle();
+    int singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
+    int doubleQuoteStyle = highlightStyle.getDoubleQuotedStyle().getStyle();
+    int commentsStyle = highlightStyle.getCommentedStyle().getStyle();
+    int numbersStyle = highlightStyle.getNumbersStyle().getStyle();
+    int defaultStyle = highlightStyle.getDefaultStyle().getStyle();
 
     for (int i = 0; i < line.length(); i++) {
       checkSymbolStyle(line, i, expectedHighlightStyle.commands,
@@ -298,6 +310,32 @@ public class SqlLineHighlighterTest extends TestCase {
       checkSymbolStyle(line, i, expectedHighlightStyle.defaults,
           attributedString, defaultStyle, "default");
     }
+  }
+
+  private void checkDefaultLine(
+      SqlLine sqlLine,
+      String line) {
+    final AttributedString attributedString =
+        defaultHighlighter.highlight(sqlLine.getLineReader(), line);
+    int defaultStyle = AttributedStyle.DEFAULT.getStyle();
+
+    for (int i = 0; i < line.length(); i++) {
+      if (Character.isWhitespace(line.charAt(i))) {
+        continue;
+      }
+      assertEquals(getFailedStyleMessage(line, i, "default"),
+          i == 0 ? defaultStyle + 32 : defaultStyle,
+          attributedString.styleAt(i).getStyle());
+    }
+  }
+
+  private void checkLine(
+      String line, ExpectedHighlightStyle expectedHighlightStyle) {
+    checkHighlightedLine(
+        darkSqlLine, line, expectedHighlightStyle, darkHighlighter);
+    checkHighlightedLine(
+        lightSqlLine, line, expectedHighlightStyle, lightHighlighter);
+    checkDefaultLine(defaultSqlline, line);
   }
 
   private void checkSymbolStyle(
@@ -336,7 +374,7 @@ public class SqlLineHighlighterTest extends TestCase {
         + (positive ? "" : "not ") + "be " + style + " style";
   }
 
-  private SqlLine getSqlLine() throws IOException {
+  private SqlLine getSqlLine(String colorScheme) throws IOException {
     SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     PrintStream sqllineOutputStream =
@@ -345,6 +383,7 @@ public class SqlLineHighlighterTest extends TestCase {
     sqlLine.setErrorStream(sqllineOutputStream);
     final InputStream is = new ByteArrayInputStream(new byte[0]);
     sqlLine.begin(new String[]{"-e", "!set maxwidth 80"}, is, false);
+    sqlLine.getOpts().setColorScheme(colorScheme);
     return sqlLine;
   }
 

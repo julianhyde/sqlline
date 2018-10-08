@@ -52,8 +52,14 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     }
   }
 
-  @Override
-  public AttributedString highlight(LineReader reader, String buffer) {
+  @Override public AttributedString highlight(
+      LineReader reader, String buffer) {
+    boolean skipSyntaxHighlighter =
+        SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme());
+    if (skipSyntaxHighlighter) {
+      return super.highlight(reader, buffer);
+    }
+
     int underlineStart = -1;
     int underlineEnd = -1;
     int negativeStart = -1;
@@ -82,85 +88,18 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
     }
     if (isSql) {
-      int wordStart = -1;
-      int start = 0;
-      if (isCommandPresent) {
-        start = buffer.indexOf(
-            SqlLine.COMMAND_PREFIX) + SqlLine.COMMAND_PREFIX.length();
-        int nextSpace =
-            buffer.indexOf(' ', buffer.indexOf(SqlLine.COMMAND_PREFIX));
-        start = nextSpace == -1 ? buffer.length() : start + nextSpace;
-      }
-
-      for (int pos = start; pos < buffer.length(); pos++) {
-        char ch = buffer.charAt(pos);
-        if (wordStart > -1) {
-          if (pos == buffer.length() - 1
-              || (!Character.isLetterOrDigit(ch) && ch != '_')) {
-            String word = !Character.isLetterOrDigit(ch)
-                ? buffer.substring(wordStart, pos)
-                : buffer.substring(wordStart);
-            if (sqlKeyWords.contains(word.toUpperCase(Locale.ROOT))) {
-              sqlKeyWordsBitSet.set(wordStart, wordStart + word.length());
-            }
-            wordStart = -1;
-          } else {
-            continue;
-          }
-        }
-        if (ch == '"') {
-          pos = handleDoubleQuotes(buffer, doubleQuoteBitSet, pos);
-        }
-        if (ch == '\'') {
-          pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
-        }
-        if (pos < buffer.length() - 1) {
-          pos = handleComments(buffer, commentBitSet, pos, ch);
-        }
-        if (wordStart == -1
-            && (Character.isLetter(ch)
-             || ch == '@' || ch == '#' || ch == '_')
-            && (pos == 0 || buffer.charAt(pos - 1) != '.')) {
-          wordStart = pos;
-          continue;
-        }
-        if (wordStart == -1 && Character.isDigit(ch)
-            && (pos == 0
-                || (!Character.isLetterOrDigit(buffer.charAt(pos - 1))
-                    && buffer.charAt(pos - 1) != '_'))) {
-          pos = handleNumbers(buffer, numberBitSet, pos);
-          continue;
-        }
-      }
+      handleSqlSyntax(
+          buffer,
+          sqlKeyWordsBitSet,
+          quoteBitSet,
+          doubleQuoteBitSet,
+          commentBitSet,
+          numberBitSet,
+          isCommandPresent);
     } else {
-      int doubleQuoteStart = -1;
-      int quoteStart = -1;
-      for (int pos = 0; pos < buffer.length(); pos++) {
-        char ch = buffer.charAt(pos);
-        if (doubleQuoteStart > -1) {
-          doubleQuoteBitSet.set(pos);
-          if (ch == '"') {
-            doubleQuoteStart = -1;
-          }
-          continue;
-        } else if (quoteStart > -1) {
-          quoteBitSet.set(pos);
-          if (ch == '\'') {
-            quoteStart = -1;
-          }
-          continue;
-        }
-        if (quoteStart == -1 && doubleQuoteStart == -1 && ch == '"') {
-          doubleQuoteBitSet.set(pos);
-          doubleQuoteStart = pos;
-        }
-
-        if (doubleQuoteStart == -1 && quoteStart == -1 && ch == '\'') {
-          quoteBitSet.set(pos);
-          quoteStart = pos;
-        }
-      }
+      handleQuotesInCommands(buffer, quoteBitSet, doubleQuoteBitSet);
     }
+
     String search = reader.getSearchTerm();
     if (search != null && search.length() > 0) {
       underlineStart = buffer.indexOf(search);
@@ -194,38 +133,38 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     final int commandEnd = command
         ? buffer.indexOf(' ', commandStart) : -1;
 
-    final Application.HighlightConfig highlightConfig =
-        sqlLine.getHighlightConfig();
+
+    final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
     for (int i = 0; i < buffer.length(); i++) {
       if (isSql) {
         if (sqlKeyWordsBitSet.get(i)) {
-          sb.style(highlightConfig.getSqlKeywordStyle());
+          sb.style(highlightStyle.getSqlKeywordStyle());
         } else if (quoteBitSet.get(i)) {
-          sb.style(highlightConfig.getQuotedStyle());
+          sb.style(highlightStyle.getQuotedStyle());
         } else if (doubleQuoteBitSet.get(i)) {
-          sb.style(highlightConfig.getDoubleQuotedStyle());
+          sb.style(highlightStyle.getDoubleQuotedStyle());
         } else if (commentBitSet.get(i)) {
-          sb.style(highlightConfig.getCommentedStyle());
+          sb.style(highlightStyle.getCommentedStyle());
         } else if (numberBitSet.get(i)) {
-          sb.style(highlightConfig.getNumbersStyle());
+          sb.style(highlightStyle.getNumbersStyle());
         } else if (i > commandEnd
             && (i < underlineStart || i > underlineEnd)
             && (i < negativeStart || i > negativeEnd)) {
-          sb.style(highlightConfig.getDefaultStyle());
+          sb.style(highlightStyle.getDefaultStyle());
         }
       } else {
         if (quoteBitSet != null && quoteBitSet.get(i)) {
-          sb.style(highlightConfig.getQuotedStyle());
+          sb.style(highlightStyle.getQuotedStyle());
         } else if (doubleQuoteBitSet != null && doubleQuoteBitSet.get(i)) {
-          sb.style(highlightConfig.getDoubleQuotedStyle());
+          sb.style(highlightStyle.getDoubleQuotedStyle());
         }
       }
 
       if (i == commandStart && command) {
-        sb.style(highlightConfig.getCommandStyle());
+        sb.style(highlightStyle.getCommandStyle());
       }
       if (i == commandEnd) {
-        sb.style(highlightConfig.getDefaultStyle());
+        sb.style(highlightStyle.getDefaultStyle());
       }
       if (i >= underlineStart && i <= underlineEnd) {
         sb.style(sb.style().underline());
@@ -233,6 +172,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (i >= negativeStart && i <= negativeEnd) {
         sb.style(sb.style().inverse());
       }
+
       char c = buffer.charAt(i);
       if (c == '\t' || c == '\n') {
         sb.append(c);
@@ -242,6 +182,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
             .append((char) (c + '@'))
             .style(AttributedStyle::inverseNeg);
       } else {
+
         int w = WCWidth.wcwidth(c);
         if (w > 0) {
           sb.append(c);
@@ -255,6 +196,99 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
     }
     return sb.toAttributedString();
+  }
+
+  private void handleSqlSyntax(
+      String buffer,
+      BitSet sqlKeyWordsBitSet,
+      BitSet quoteBitSet,
+      BitSet doubleQuoteBitSet,
+      BitSet commentBitSet,
+      BitSet numberBitSet,
+      boolean isCommandPresent) {
+    int wordStart = -1;
+    int start = 0;
+    if (isCommandPresent) {
+      start = buffer.indexOf(
+          SqlLine.COMMAND_PREFIX) + SqlLine.COMMAND_PREFIX.length();
+      int nextSpace =
+          buffer.indexOf(' ', buffer.indexOf(SqlLine.COMMAND_PREFIX));
+      start = nextSpace == -1 ? buffer.length() : start + nextSpace;
+    }
+
+    for (int pos = start; pos < buffer.length(); pos++) {
+      char ch = buffer.charAt(pos);
+      if (wordStart > -1) {
+        if (pos == buffer.length() - 1
+            || (!Character.isLetterOrDigit(ch) && ch != '_')) {
+          String word = !Character.isLetterOrDigit(ch)
+              ? buffer.substring(wordStart, pos)
+              : buffer.substring(wordStart);
+          if (sqlKeyWords.contains(word.toUpperCase(Locale.ROOT))) {
+            sqlKeyWordsBitSet.set(wordStart, wordStart + word.length());
+          }
+          wordStart = -1;
+        } else {
+          continue;
+        }
+      }
+      if (ch == '"') {
+        pos = handleDoubleQuotes(buffer, doubleQuoteBitSet, pos);
+      }
+      if (ch == '\'') {
+        pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
+      }
+      if (pos < buffer.length() - 1) {
+        pos = handleComments(buffer, commentBitSet, pos, ch);
+      }
+      if (wordStart == -1
+          && (Character.isLetter(ch)
+           || ch == '@' || ch == '#' || ch == '_')
+          && (pos == 0 || buffer.charAt(pos - 1) != '.')) {
+        wordStart = pos;
+        continue;
+      }
+      if (wordStart == -1 && Character.isDigit(ch)
+          && (pos == 0
+              || (!Character.isLetterOrDigit(buffer.charAt(pos - 1))
+                  && buffer.charAt(pos - 1) != '_'))) {
+        pos = handleNumbers(buffer, numberBitSet, pos);
+        continue;
+      }
+    }
+  }
+
+  private void handleQuotesInCommands(
+      String buffer, BitSet quoteBitSet, BitSet doubleQuoteBitSet) {
+    int doubleQuoteStart = -1;
+    int quoteStart = -1;
+    for (int pos = 0; pos < buffer.length(); pos++) {
+      char ch = buffer.charAt(pos);
+      if (doubleQuoteStart > -1) {
+        doubleQuoteBitSet.set(pos);
+        if (ch == '"') {
+          doubleQuoteStart = -1;
+        }
+        continue;
+      } else if (quoteStart > -1) {
+        quoteBitSet.set(pos);
+        if (ch == '\'') {
+          quoteStart = -1;
+        }
+        continue;
+      }
+      // so far doubleQuoteStart MUST BE -1 and quoteStart MUST BE -1
+      if (ch == '"') {
+        doubleQuoteBitSet.set(pos);
+        doubleQuoteStart = pos;
+      }
+
+      // so far quoteStart MUST BE -1
+      if (doubleQuoteStart == -1 && ch == '\'') {
+        quoteBitSet.set(pos);
+        quoteStart = pos;
+      }
+    }
   }
 
   private boolean isSqlQuery(String trimmed, boolean isCommandPresent) {

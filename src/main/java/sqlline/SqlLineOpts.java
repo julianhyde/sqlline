@@ -32,6 +32,7 @@ import sqlline.SqlLineProperty.Type;
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
 import static sqlline.BuiltInProperty.COLOR;
+import static sqlline.BuiltInProperty.COLOR_SCHEME;
 import static sqlline.BuiltInProperty.CSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
@@ -468,6 +469,21 @@ public class SqlLineOpts implements Completer {
           .setVariable(LineReader.HISTORY_FILE, get(HISTORY_FILE));
       new DefaultHistory().attach(sqlLine.getLineReader());
     }
+  }
+
+  public void setColorScheme(String colorScheme) {
+    if (DEFAULT.equals(colorScheme)
+        || HighlightStyle.NAME2HIGHLIGHT_STYLE.containsKey(colorScheme)) {
+      propertiesMap.put(COLOR_SCHEME, colorScheme);
+      return;
+    }
+    throw new IllegalArgumentException(
+        "Possible values are: "
+            + new TreeSet<>(HighlightStyle.NAME2HIGHLIGHT_STYLE.keySet()));
+  }
+
+  public String getColorScheme() {
+    return get(COLOR_SCHEME);
   }
 
   public boolean getColor() {

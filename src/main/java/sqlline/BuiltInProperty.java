@@ -25,6 +25,7 @@ public enum BuiltInProperty implements SqlLineProperty {
 
   AUTO_COMMIT("autoCommit", Type.BOOLEAN, true),
   AUTO_SAVE("autoSave", Type.BOOLEAN, false),
+  COLOR_SCHEME("colorScheme", Type.STRING, DEFAULT),
   COLOR("color", Type.BOOLEAN, false),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
