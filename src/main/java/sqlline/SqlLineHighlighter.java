@@ -98,7 +98,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
     }
     if (isSql) {
-      initConnectionSpecificRuleIfAbsent();
       handleSqlSyntax(
           buffer,
           sqlKeyWordsBitSet,
@@ -209,13 +208,15 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return sb.toAttributedString();
   }
 
-  private void initConnectionSpecificRuleIfAbsent() {
+  private HighlightRule getConnectionSpecificRule() {
     try {
       DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
       if (databaseConnection != null
           && databaseConnection.connection != null
-          && !databaseConnection.connection.isClosed()
-          && connection2rules.get(databaseConnection) == null) {
+          && !databaseConnection.connection.isClosed()) {
+        if (connection2rules.get(databaseConnection) != null) {
+          return connection2rules.get(databaseConnection);
+        }
         DatabaseMetaData meta = databaseConnection.meta;
         Set<String> connectionSQLKeyWords =
             new HashSet<>(
@@ -223,15 +224,17 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         String sqlIdentifier = meta.getIdentifierQuoteString();
         sqlIdentifier = " ".equals(sqlIdentifier)
             ? DEFAULT_SQL_IDENTIFIER_QUOTE : sqlIdentifier;
-        HighlightRule rules =
+        HighlightRule rule =
             new HighlightRule(connectionSQLKeyWords, sqlIdentifier);
-        connection2rules.put(databaseConnection, rules);
+        connection2rules.put(databaseConnection, rule);
+        return rule;
       } else {
         connection2rules.remove(databaseConnection);
       }
     } catch (SQLException sqle) {
       sqlLine.handleException(sqle);
     }
+    return null;
   }
 
   private void handleSqlSyntax(
@@ -252,8 +255,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final HighlightRule highlightRule =
-        connection2rules.get(sqlLine.getDatabaseConnection());
+    final HighlightRule highlightRule = getConnectionSpecificRule();
     final Set<String> connectionSpecificSqlKeyWords =
         highlightRule == null
             ? null : highlightRule.connectionBasedSqlKeyWordsSet;

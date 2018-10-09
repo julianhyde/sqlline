@@ -453,10 +453,17 @@ public class SqlLineHighlighterTest {
   }
 
   @Test
-  public void testSqlKeywordsFromDatabase() {
+  public void testH2SqlKeywordsFromDatabase() {
+    // The list is taken from H2 1.4.197 getSQLKeywords output
     String[] linesRequiredToBeNumbers = {
-        "minus",
-        "today",
+        "LIMIT",
+        "MINUS",
+        "OFFSET",
+        "ROWNUM",
+        "SYSDATE",
+        "SYSTIME",
+        "SYSTIMESTAMP",
+        "TODAY",
     };
 
     for (String line : linesRequiredToBeNumbers) {
