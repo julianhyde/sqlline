@@ -32,6 +32,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
+  private SqlLineHighlighter highlighter;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -170,6 +171,10 @@ class DatabaseConnection {
     return true;
   }
 
+  public void addHighlighter(SqlLineHighlighter highlighter) {
+    this.highlighter = highlighter;
+  }
+
   public Connection getConnection() throws SQLException {
     if (connection != null) {
       return connection;
@@ -192,6 +197,7 @@ class DatabaseConnection {
           sqlLine.output(
               sqlLine.loc("closing", connection.getClass().getName()));
           connection.close();
+          highlighter.removeConnection(this);
         }
       } catch (Exception e) {
         sqlLine.handleException(e);

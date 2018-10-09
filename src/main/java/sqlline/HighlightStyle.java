@@ -77,9 +77,6 @@ public class HighlightStyle {
   private static final AttributedStyle ITALIC_BLUE =
       AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.BLUE);
 
-  private static final AttributedStyle COMMAND_STYLE =
-      AttributedStyle.DEFAULT.bold();
-
   static final Map<String, HighlightStyle> NAME2HIGHLIGHT_STYLE =
       new HashMap<String, HighlightStyle>() {{
           put("dark", new HighlightStyle(
@@ -88,6 +85,9 @@ public class HighlightStyle {
           put("light", new HighlightStyle(
               BOLD_RED, BOLD_BLACK, GREEN, CYAN,
               ITALIC_BRIGHT, YELLOW, BLACK));
+          // The next four schemes inspired by
+          // https://github.com/Gillisdc/sqldeveloper-syntax-highlighting
+          // not the same but more or less similar
           put("chester", new HighlightStyle(
               BOLD_BLUE, BOLD_WHITE, RED, CYAN, ITALIC_GREEN, YELLOW, WHITE));
           put("dracula", new HighlightStyle(
@@ -98,6 +98,8 @@ public class HighlightStyle {
           put("vs2010", new HighlightStyle(
               BOLD_BLUE, BOLD_WHITE, RED, MAGENTA,
               ITALIC_GREEN, BRIGHT, WHITE));
+          // inspired by https://github.com/ozmoroz/ozbsidian-sqldeveloper
+          // not the same but more or less similar
           put("ozbsidian", new HighlightStyle(
               BOLD_GREEN, BOLD_WHITE, RED, MAGENTA,
               ITALIC_BRIGHT, YELLOW, WHITE));
