@@ -224,7 +224,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
                 Arrays.asList(meta.getSQLKeywords().split(",")));
         String sqlIdentifier = meta.getIdentifierQuoteString();
         sqlIdentifier = " ".equals(sqlIdentifier)
-            ? DEFAULT_SQL_IDENTIFIER_QUOTE : sqlIdentifier;
+            ? getDefaultSqlIdentifierQuote() : sqlIdentifier;
         HighlightRule rule =
             new HighlightRule(connectionSQLKeyWords, sqlIdentifier);
         connection2rules.put(databaseConnection.connection, rule);
@@ -236,6 +236,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       sqlLine.handleException(sqle);
     }
     return null;
+  }
+
+  String getDefaultSqlIdentifierQuote() {
+    return DEFAULT_SQL_IDENTIFIER_QUOTE;
   }
 
   private void handleSqlSyntax(
@@ -261,7 +265,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         highlightRule == null
             ? null : highlightRule.connectionBasedSqlKeyWordsSet;
     final String sqlIdentifier = highlightRule == null
-        ? DEFAULT_SQL_IDENTIFIER_QUOTE : highlightRule.sqlIdentifierQuote;
+        ? getDefaultSqlIdentifierQuote() : highlightRule.sqlIdentifierQuote;
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
