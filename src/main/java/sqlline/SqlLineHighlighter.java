@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
   private final SqlLine sqlLine;
   private final Set<String> defaultSqlKeyWordsSet;
-  private final Map<DatabaseConnection, HighlightRule> connection2rules =
+  private final Map<Connection, HighlightRule> connection2rules =
       new HashMap<>();
 
   public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
@@ -214,8 +215,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (databaseConnection != null
           && databaseConnection.connection != null
           && !databaseConnection.connection.isClosed()) {
-        if (connection2rules.get(databaseConnection) != null) {
-          return connection2rules.get(databaseConnection);
+        if (connection2rules.get(databaseConnection.connection) != null) {
+          return connection2rules.get(databaseConnection.connection);
         }
         DatabaseMetaData meta = databaseConnection.meta;
         Set<String> connectionSQLKeyWords =
@@ -226,10 +227,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
             ? DEFAULT_SQL_IDENTIFIER_QUOTE : sqlIdentifier;
         HighlightRule rule =
             new HighlightRule(connectionSQLKeyWords, sqlIdentifier);
-        connection2rules.put(databaseConnection, rule);
+        connection2rules.put(databaseConnection.connection, rule);
         return rule;
-      } else {
-        connection2rules.remove(databaseConnection);
+      } else if (databaseConnection != null) {
+        connection2rules.remove(databaseConnection.connection);
       }
     } catch (SQLException sqle) {
       sqlLine.handleException(sqle);
@@ -360,10 +361,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   private boolean isSqlQuery(String trimmed, boolean isCommandPresent) {
-    return trimmed.startsWith("!all")
+    return !isCommandPresent
+        || trimmed.startsWith("!all")
         || trimmed.startsWith("!call")
-        || trimmed.startsWith("!sql")
-        || !isCommandPresent;
+        || trimmed.startsWith("!sql");
   }
 
   /**
@@ -420,31 +421,42 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return line.length() - 1;
   }
 
-  private int handleNumbers(String buffer, BitSet numberBitSet, int pos) {
-    int end = pos + 1;
-    while (end < buffer.length() && Character.isDigit(buffer.charAt(end))) {
+  /**
+   * The method marks numbers position based on input.
+   * ASSUMPTION: there is a number starts since
+   * the specified position,
+   * i.e. Character.isDigit(line.charAt(startingPoint)) == true
+   *
+   * @param line           line where to handle number string
+   * @param numberBitSet   BitSet to use for position of number
+   * @param startingPoint  start point
+   * @return position where number finished.
+   */
+  int handleNumbers(String line, BitSet numberBitSet, int startingPoint) {
+    int end = startingPoint + 1;
+    while (end < line.length() && Character.isDigit(line.charAt(end))) {
       end++;
     }
-    if (end == buffer.length()) {
-      if (Character.isDigit(buffer.charAt(buffer.length() - 1))) {
-        numberBitSet.set(pos, end);
+    if (end == line.length()) {
+      if (Character.isDigit(line.charAt(line.length() - 1))) {
+        numberBitSet.set(startingPoint, end);
       }
-    } else if (Character.isWhitespace(buffer.charAt(end))
-        || buffer.charAt(end) == ';'
-        || buffer.charAt(end) == ','
-        || buffer.charAt(end) == '='
-        || buffer.charAt(end) == '<'
-        || buffer.charAt(end) == '>'
-        || buffer.charAt(end) == '-'
-        || buffer.charAt(end) == '+'
-        || buffer.charAt(end) == '/'
-        || buffer.charAt(end) == ')'
-        || buffer.charAt(end) == '%'
-        || buffer.charAt(end) == '*') {
-      numberBitSet.set(pos, end);
+    } else if (Character.isWhitespace(line.charAt(end))
+        || line.charAt(end) == ';'
+        || line.charAt(end) == ','
+        || line.charAt(end) == '='
+        || line.charAt(end) == '<'
+        || line.charAt(end) == '>'
+        || line.charAt(end) == '-'
+        || line.charAt(end) == '+'
+        || line.charAt(end) == '/'
+        || line.charAt(end) == ')'
+        || line.charAt(end) == '%'
+        || line.charAt(end) == '*') {
+      numberBitSet.set(startingPoint, end);
     }
-    pos = end - 1;
-    return pos;
+    startingPoint = end - 1;
+    return startingPoint;
   }
 
   /**
@@ -527,7 +539,17 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return startingPoint;
   }
 
-  public void removeConnection(DatabaseConnection connection) {
+  /**
+   * Check if the connection is present in connection2rules map.
+   * The only purpose of this method is testing.
+   * @param connection connection to check
+   * @return if connection is present or no
+   */
+  boolean checkIfConnectionPresent(Connection connection) {
+    return connection2rules.containsKey(connection);
+  }
+
+  public void removeConnection(Connection connection) {
     connection2rules.remove(connection);
   }
 

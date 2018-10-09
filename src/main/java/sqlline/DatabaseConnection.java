@@ -197,7 +197,7 @@ class DatabaseConnection {
           sqlLine.output(
               sqlLine.loc("closing", connection.getClass().getName()));
           connection.close();
-          highlighter.removeConnection(this);
+          highlighter.removeConnection(connection);
         }
       } catch (Exception e) {
         sqlLine.handleException(e);
