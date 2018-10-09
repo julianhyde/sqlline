@@ -21,6 +21,11 @@ import org.jline.utils.AttributedStyle;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.integration.junit4.JMockit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,13 +38,14 @@ import static sqlline.SqlLineHighlighterLowLevelTest.getSqlLine;
 /**
  * Tests for sql and command syntax highlighting in sqlline.
  */
+@RunWith(JMockit.class)
 public class SqlLineHighlighterTest {
 
   private Map<SqlLine, SqlLineHighlighter> sqlLine2HighLighter = null;
 
   /**
    * To add your color scheme to tests just put sqlline object
-   * with corresponding highlighter into the map like below
+   * with corresponding highlighter into the map like below.
    * @throws Exception if error while sqlline initialization happens
    */
   @Before
@@ -312,13 +318,13 @@ public class SqlLineHighlighterTest {
   /**
    * The test checks additional highlighting while having connection to db.
    * 1) if keywords from getSQLKeywords are highlighted
-   * 2) if a connection is cleared from sqllighter
+   * 2) if a connection is cleared from sqlhighlighter
    * in case the connection is closing
    */
   @Test
   public void testH2SqlKeywordsFromDatabase() {
     // The list is taken from H2 1.4.197 getSQLKeywords output
-    String[] linesRequiredToBeNumbers = {
+    String[] linesRequiredToBeConnectionSpecificKeyWords = {
         "LIMIT",
         "MINUS",
         "OFFSET",
@@ -329,7 +335,7 @@ public class SqlLineHighlighterTest {
         "TODAY",
     };
 
-    for (String line : linesRequiredToBeNumbers) {
+    for (String line : linesRequiredToBeConnectionSpecificKeyWords) {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.defaults.set(0, line.length());
@@ -348,7 +354,7 @@ public class SqlLineHighlighterTest {
               + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
           dc);
 
-      for (String line : linesRequiredToBeNumbers) {
+      for (String line : linesRequiredToBeConnectionSpecificKeyWords) {
         ExpectedHighlightStyle expectedStyle =
             new ExpectedHighlightStyle(line.length());
         expectedStyle.keywords.set(0, line.length());
@@ -356,6 +362,94 @@ public class SqlLineHighlighterTest {
             line, expectedStyle, sqlLine, sqlLine2HighLighterEntry.getValue());
       }
 
+      // in case of default there is no SQLKeyWords
+      // or sqlIdentifierQuote retrieval and as a result no connection usage
+      if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
+        assertFalse(
+            sqlLineHighlighter.checkIfConnectionPresent(
+                sqlLine.getDatabaseConnection().connection));
+      } else {
+        assertTrue(
+            sqlLineHighlighter.checkIfConnectionPresent(
+                sqlLine.getDatabaseConnection().connection));
+      }
+      sqlLine.getDatabaseConnection().close();
+
+      assertFalse("Check colorScheme " + sqlLine.getOpts().getColorScheme(),
+          sqlLineHighlighter.checkIfConnectionPresent(
+              sqlLine.getDatabaseConnection().connection));
+    }
+  }
+
+  /**
+   * The test mocks default sql identifier to back tick
+   * and then checks that after connection done sql
+   * identifier quote will be taken from driver
+   */
+  @Test
+  public void testH2SqlIdentifierFromDatabase() {
+    new MockUp<SqlLineHighlighter>() {
+      @Mock
+      String getDefaultSqlIdentifierQuote() {
+        return "`";
+      }
+    };
+
+    String[] linesWithBackTickSqlIdentifiers = {
+        "select 1 as `one` from dual",
+        "select 1 as `on\\`e` from dual",
+        "select 1 as `on\\`\ne` from dual",
+    };
+
+    String[] linesWithDoubleQuoteSqlIdentifiers = {
+        "select 1 as \"one\" from dual",
+        "select 1 as \"on\\\"e\" from dual",
+        "select 1 as \"on\\\"\ne\" from dual",
+    };
+
+    ExpectedHighlightStyle[] expectedStyle =
+        new ExpectedHighlightStyle[linesWithBackTickSqlIdentifiers.length];
+    for (int i = 0; i < expectedStyle.length; i++) {
+      String line = linesWithBackTickSqlIdentifiers[i];
+      expectedStyle[i] = new ExpectedHighlightStyle(line.length());
+      expectedStyle[i].keywords.set(0, "select".length());
+      expectedStyle[i].defaults.set(line.indexOf(" 1"));
+      expectedStyle[i].numbers.set(line.indexOf("1 as"));
+      expectedStyle[i].defaults.set(line.indexOf(" as"));
+      expectedStyle[i].keywords.set(line.indexOf("as"), line.indexOf(" `on"));
+      expectedStyle[i].defaults.set(line.indexOf(" `on"));
+      expectedStyle[i].sqlIdentifierQuotes.
+          set(line.indexOf("`on"), line.indexOf(" from"));
+      expectedStyle[i].defaults.set(line.indexOf(" from"));
+      expectedStyle[i].keywords
+          .set(line.indexOf("from"), line.indexOf(" dual"));
+      expectedStyle[i].defaults.set(line.indexOf(" dual"), line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle[i]);
+    }
+
+    DispatchCallback dc = new DispatchCallback();
+
+    for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
+        : sqlLine2HighLighter.entrySet()) {
+      SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
+      SqlLineHighlighter sqlLineHighlighter =
+          sqlLine2HighLighterEntry.getValue();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
+
+      for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
+        checkLineAgainstHighlighter(
+            linesWithDoubleQuoteSqlIdentifiers[i],
+            expectedStyle[i],
+            sqlLine,
+            sqlLine2HighLighterEntry.getValue());
+      }
+
+      // in case of default there is no SQLKeyWords
+      // or sqlIdentifierQuote retrieval and as a result no connection usage
       if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
         assertFalse(
             sqlLineHighlighter.checkIfConnectionPresent(
@@ -384,7 +478,7 @@ public class SqlLineHighlighterTest {
     int commandsStyle = highlightStyle.getCommandStyle().getStyle();
     int keyWordStyle = highlightStyle.getSqlKeywordStyle().getStyle();
     int singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
-    int doubleQuoteStyle = highlightStyle.getSqlIdentifierStyle().getStyle();
+    int sqlIdentifierStyle = highlightStyle.getSqlIdentifierStyle().getStyle();
     int commentsStyle = highlightStyle.getCommentedStyle().getStyle();
     int numbersStyle = highlightStyle.getNumbersStyle().getStyle();
     int defaultStyle = highlightStyle.getDefaultStyle().getStyle();
@@ -400,7 +494,7 @@ public class SqlLineHighlighterTest {
           attributedString, singleQuoteStyle, "single quote");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.sqlIdentifierQuotes,
-          attributedString, doubleQuoteStyle, "double quote");
+          attributedString, sqlIdentifierStyle, "sql identifier quote");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.numbers,
           attributedString, numbersStyle, "number");

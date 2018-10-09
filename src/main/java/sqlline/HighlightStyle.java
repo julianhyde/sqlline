@@ -108,7 +108,7 @@ public class HighlightStyle {
   private final AttributedStyle keyWordsStyle;
   private final AttributedStyle commandsStyle;
   private final AttributedStyle quotedStyle;
-  private final AttributedStyle doubleQuotedStyle;
+  private final AttributedStyle sqlIdentifierStyle;
   private final AttributedStyle commentedStyle;
   private final AttributedStyle numberStyle;
   private final AttributedStyle defaultStyle;
@@ -116,14 +116,14 @@ public class HighlightStyle {
   public HighlightStyle(AttributedStyle keyWordsStyle,
                         AttributedStyle commandsStyle,
                         AttributedStyle quotedStyle,
-                        AttributedStyle doubleQuotedStyle,
+                        AttributedStyle sqlIdentifierStyle,
                         AttributedStyle commentedStyle,
                         AttributedStyle numberStyle,
                         AttributedStyle defaultStyle) {
     this.keyWordsStyle = keyWordsStyle;
     this.commandsStyle = commandsStyle;
     this.quotedStyle = quotedStyle;
-    this.doubleQuotedStyle = doubleQuotedStyle;
+    this.sqlIdentifierStyle = sqlIdentifierStyle;
     this.commentedStyle = commentedStyle;
     this.numberStyle = numberStyle;
     this.defaultStyle = defaultStyle;
@@ -142,7 +142,7 @@ public class HighlightStyle {
   }
 
   public AttributedStyle getSqlIdentifierStyle() {
-    return doubleQuotedStyle;
+    return sqlIdentifierStyle;
   }
 
   public AttributedStyle getCommentedStyle() {

@@ -81,7 +81,8 @@ public class SqlLineHighlighterLowLevelTest {
    * {@link SqlLineHighlighterTest#testSqlIdentifierQuotes()}}
    * <p>
    * This is a low level test of
-   * {@link SqlLineHighlighter#handleSqlSingleQuotes(String, BitSet, int)}.
+   * {@link SqlLineHighlighter
+   * #handleSqlIdentifierQuotes(String, String, BitSet, int)}.
    */
   @Test
   public void testLowLevelHandleSqlIdentifierQuotes() {
