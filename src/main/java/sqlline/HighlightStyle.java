@@ -141,7 +141,7 @@ public class HighlightStyle {
     return quotedStyle;
   }
 
-  public AttributedStyle getDoubleQuotedStyle() {
+  public AttributedStyle getSqlIdentifierStyle() {
     return doubleQuotedStyle;
   }
 

@@ -313,7 +313,7 @@ public class SqlLineHighlighterTest {
     int commandsStyle = highlightStyle.getCommandStyle().getStyle();
     int keyWordStyle = highlightStyle.getSqlKeywordStyle().getStyle();
     int singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
-    int doubleQuoteStyle = highlightStyle.getDoubleQuotedStyle().getStyle();
+    int doubleQuoteStyle = highlightStyle.getSqlIdentifierStyle().getStyle();
     int commentsStyle = highlightStyle.getCommentedStyle().getStyle();
     int numbersStyle = highlightStyle.getNumbersStyle().getStyle();
     int defaultStyle = highlightStyle.getDefaultStyle().getStyle();
