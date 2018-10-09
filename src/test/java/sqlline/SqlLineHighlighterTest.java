@@ -41,7 +41,8 @@ public class SqlLineHighlighterTest {
   private SqlLineHighlighter defaultHighlighter;
   private SqlLineHighlighter lightHighlighter;
 
-  @Before public void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     darkSqlLine = getSqlLine(SqlLineOpts.DARK_SCHEME);
     defaultSqlline = getSqlLine(SqlLineOpts.DEFAULT);
     lightSqlLine = getSqlLine(SqlLineOpts.LIGHT_SCHEME);
@@ -50,7 +51,8 @@ public class SqlLineHighlighterTest {
     lightHighlighter = new SqlLineHighlighter(lightSqlLine);
   }
 
-  @After public void tearDown() {
+  @After
+  public void tearDown() {
     darkSqlLine = null;
     defaultSqlline = null;
     lightSqlLine = null;
@@ -59,7 +61,173 @@ public class SqlLineHighlighterTest {
     lightHighlighter = null;
   }
 
-  @Test public void testCommands() {
+  /**
+   * WARNING: Change it only if you know what you are doing.
+   * Otherwise put your test into {@link #testSingleQuotedStrings()}
+   * <p>
+   * This is a low level test of
+   * {@link SqlLineHighlighter#handleSqlSingleQuotes(String, BitSet, int)}.
+   */
+  @Test
+  public void testLowLevelHandleSqlSingleQuotes() {
+    String[] linesRequiredToBeQuoted = {
+        "'from'",
+        "''''",
+        "''",
+        "'",
+        "'test '' \n''select'",
+        "'/* \n'",
+        "'-- \n--'",
+        "'\"'"
+    };
+
+    for (String line : linesRequiredToBeQuoted) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.singleQuotes.set(0, line.length());
+      BitSet actual = new BitSet(line.length());
+      defaultHighlighter.handleSqlSingleQuotes(line, actual, 0);
+      assertEquals("Line [" + line + "]", expectedStyle.singleQuotes, actual);
+    }
+  }
+
+  /**
+   * WARNING: Change it only if you know what you are doing.
+   * Otherwise put your test into {@link #testSqlIdentifierQuotes()} ()}
+   * <p>
+   * This is a low level test of
+   * {@link SqlLineHighlighter#handleSqlSingleQuotes(String, BitSet, int)}.
+   */
+  @Test
+  public void testLowLevelHandleSqlIdentifierQuotes() {
+    String[] linesRequiredToBeDoubleQuoted = {
+        "\"",
+        "\"\"",
+        "\"from\"",
+        "\"''\"",
+        "\"test '' \n''select\"",
+        "\"/* \\\"kjh\"",
+        "\"/* \\\" \\\" \\\"  \"",
+        "\"--   \"",
+        "\"\n  \n\""
+    };
+
+    String[] linesRequiredToBeBackQuoted = {
+        "`",
+        "``",
+        "`from`",
+        "`''`",
+        "`test \\` \n\\`select`",
+        "`/* \\`kjh`",
+        "`/* \\` \\` \\`  `",
+        "`--   `",
+        "`\n  \n`"
+    };
+
+    for (String line : linesRequiredToBeDoubleQuoted) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.sqlIdentifierQuotes.set(0, line.length());
+      BitSet actual = new BitSet(line.length());
+      defaultHighlighter.handleSqlIdentifierQuotes(line, "\"", actual, 0);
+      assertEquals(
+          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+    }
+
+    for (String line : linesRequiredToBeBackQuoted) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.sqlIdentifierQuotes.set(0, line.length());
+      BitSet actual = new BitSet(line.length());
+      defaultHighlighter.handleSqlIdentifierQuotes(line, "`", actual, 0);
+      assertEquals(
+          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+    }
+  }
+
+  /**
+   * WARNING: Change it only if you know what you are doing.
+   * Otherwise put your test into {@link #testCommentedStrings()}
+   * <p>
+   * This is a low level test of
+   * {@link SqlLineHighlighter#handleComments(String, BitSet, int)}.
+   */
+  @Test
+  public void testLowLevelHandleComments() {
+    String[] linesRequiredToBeComments = {
+        "-- 'asdasd'asd",
+        "--select",
+        "/* \"''\"",
+        "/*",
+        "--",
+        "/* kh\n'asd'ad*/",
+        "/*\"-- \"values*/"
+    };
+
+    for (String line : linesRequiredToBeComments) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.comments.set(0, line.length());
+      BitSet actual = new BitSet(line.length());
+      defaultHighlighter.handleComments(line, actual, 0);
+      assertEquals("Line [" + line + "]", expectedStyle.comments, actual);
+    }
+  }
+
+  /**
+   * WARNING: Change it only if you know what you are doing.
+   * Otherwise put your test into {@link #testCommands()}
+   * or {@link #testComplexStrings()}
+   * <p>
+   * This is a low level test of
+   * {@link SqlLineHighlighter#handleQuotesInCommands(String, BitSet, BitSet)}.
+   */
+  @Test
+  public void testLowLevelQuotesInCommands() {
+    String[] commandsWithSingleQuotedInput = {
+        "!set csvdelimiter '\"'",
+        "!set csvdelimiter '\"\"'",
+        "!set csvdelimiter '\"\"\"'",
+    };
+    String[] commandsWithDoubleQuotedInput = {
+        "!set csvdelimiter \"'\"",
+        "!set csvdelimiter \"''\"",
+        "!set csvdelimiter \"'''\"",
+    };
+
+    for (String line : commandsWithSingleQuotedInput) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.singleQuotes
+          .set(line.indexOf("'"), line.length());
+      BitSet actualSingleQuotes = new BitSet(line.length());
+      BitSet actualDoubleQuotes = new BitSet(line.length());
+      defaultHighlighter
+          .handleQuotesInCommands(line, actualSingleQuotes, actualDoubleQuotes);
+      assertEquals("Line [" + line + "]",
+          expectedStyle.singleQuotes, actualSingleQuotes);
+      assertEquals("Line [" + line + "]",
+          expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes);
+    }
+
+    for (String line : commandsWithDoubleQuotedInput) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.sqlIdentifierQuotes
+          .set(line.indexOf("\""), line.length());
+      BitSet actualSingleQuotes = new BitSet(line.length());
+      BitSet actualDoubleQuotes = new BitSet(line.length());
+      defaultHighlighter
+          .handleQuotesInCommands(line, actualSingleQuotes, actualDoubleQuotes);
+      assertEquals("Line [" + line + "]",
+          expectedStyle.singleQuotes, actualSingleQuotes);
+      assertEquals("Line [" + line + "]",
+          expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes);
+    }
+  }
+
+  @Test
+  public void testCommands() {
     String[] linesRequiredToBeCommands = {
         "!set",
         "!commandhandler",
@@ -78,7 +246,8 @@ public class SqlLineHighlighterTest {
     }
   }
 
-  @Test public void testKeywords() {
+  @Test
+  public void testKeywords() {
     String[] linesRequiredToBeKeywords = {
         "from",
         "outer",
@@ -97,7 +266,8 @@ public class SqlLineHighlighterTest {
     }
   }
 
-  @Test public void testSingleQuotedStrings() {
+  @Test
+  public void testSingleQuotedStrings() {
     String[] linesRequiredToBeSingleQuoted = {
         "'from'",
         "''''",
@@ -117,7 +287,10 @@ public class SqlLineHighlighterTest {
     }
   }
 
-  @Test public void testDoubleQuotedStrings() {
+  @Test
+  public void testSqlIdentifierQuotes() {
+    // default sql identifier is a double quote
+    // {@code SqlLineHighlighter#DEFAULT_SQL_IDENTIFIER_QUOTE}.
     String[] linesRequiredToBeDoubleQuoted = {
         "\"",
         "\"\"",
@@ -133,18 +306,20 @@ public class SqlLineHighlighterTest {
     for (String line : linesRequiredToBeDoubleQuoted) {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
-      expectedStyle.doubleQuotes.set(0, line.length());
+      expectedStyle.sqlIdentifierQuotes.set(0, line.length());
       checkLine(line, expectedStyle);
     }
   }
 
-  @Test public void testCommentedStrings() {
+  @Test
+  public void testCommentedStrings() {
     String[] linesRequiredToBeComments = {
         "-- 'asdasd'asd",
         "--select",
         "/* \"''\"",
         "/*",
         "--",
+        "--\n/*",
         "/* kh\n'asd'ad*/",
         "/*\"-- \"values*/"
     };
@@ -157,7 +332,8 @@ public class SqlLineHighlighterTest {
     }
   }
 
-  @Test public void testNumberStrings() {
+  @Test
+  public void testNumberStrings() {
     String[] linesRequiredToBeNumbers = {
         "123456789",
         "0123",
@@ -172,7 +348,8 @@ public class SqlLineHighlighterTest {
     }
   }
 
-  @Test public void testComplexStrings() {
+  @Test
+  public void testComplexStrings() {
     // command with argument
     String line = "!set version";
     ExpectedHighlightStyle expectedStyle =
@@ -194,7 +371,7 @@ public class SqlLineHighlighterTest {
     expectedStyle = new ExpectedHighlightStyle(line.length());
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.indexOf("\"'\""));
-    expectedStyle.doubleQuotes.set(line.indexOf("\"'\""), line.length());
+    expectedStyle.sqlIdentifierQuotes.set(line.indexOf("\"'\""), line.length());
     checkLine(line, expectedStyle);
 
     // command with double quoted argument and \n
@@ -202,7 +379,8 @@ public class SqlLineHighlighterTest {
     expectedStyle = new ExpectedHighlightStyle(line.length());
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.indexOf("\"'\n\""));
-    expectedStyle.doubleQuotes.set(line.indexOf("\"'\n\""), line.length());
+    expectedStyle
+        .sqlIdentifierQuotes.set(line.indexOf("\"'\n\""), line.length());
     checkLine(line, expectedStyle);
 
     line = "select '1'";
@@ -219,7 +397,8 @@ public class SqlLineHighlighterTest {
     expectedStyle.defaults.set("select".length(), line.indexOf('\''));
     expectedStyle.singleQuotes.set(line.indexOf('\''), line.indexOf("as"));
     expectedStyle.keywords.set(line.indexOf("as"), line.indexOf("\"21\""));
-    expectedStyle.doubleQuotes.set(line.indexOf("\"21\""), line.length());
+    expectedStyle
+        .sqlIdentifierQuotes.set(line.indexOf("\"21\""), line.length());
     checkLine(line, expectedStyle);
 
     //not valid sql with comments /**/ and not ended quoted line
@@ -251,7 +430,7 @@ public class SqlLineHighlighterTest {
     expectedStyle.keywords
         .set(line.indexOf("as \"0\","), line.indexOf(" \"0\","));
     expectedStyle.defaults.set(line.indexOf(" \"0\","));
-    expectedStyle.doubleQuotes
+    expectedStyle.sqlIdentifierQuotes
         .set(line.indexOf("\"0\","), line.indexOf(",'qwe"));
     expectedStyle.defaults.set(line.indexOf(",'qwe"));
     expectedStyle.singleQuotes
@@ -261,7 +440,7 @@ public class SqlLineHighlighterTest {
         .set(line.indexOf("--comment\n"), line.indexOf("as\"21\""));
     expectedStyle.keywords
         .set(line.indexOf("as\"21\""), line.indexOf("\"21\"from"));
-    expectedStyle.doubleQuotes
+    expectedStyle.sqlIdentifierQuotes
         .set(line.indexOf("\"21\""), line.indexOf("from"));
     expectedStyle.keywords.set(line.indexOf("from"), line.indexOf(" t\n"));
     expectedStyle.defaults.set(line.indexOf(" t\n"), line.indexOf("where"));
@@ -273,7 +452,8 @@ public class SqlLineHighlighterTest {
     checkLine(line, expectedStyle);
   }
 
-  @Test public void testSqlKeywordsFromDatabase() {
+  @Test
+  public void testSqlKeywordsFromDatabase() {
     String[] linesRequiredToBeNumbers = {
         "minus",
         "today",
@@ -328,7 +508,7 @@ public class SqlLineHighlighterTest {
       checkSymbolStyle(line, i, expectedHighlightStyle.singleQuotes,
           attributedString, singleQuoteStyle, "single quote");
 
-      checkSymbolStyle(line, i, expectedHighlightStyle.doubleQuotes,
+      checkSymbolStyle(line, i, expectedHighlightStyle.sqlIdentifierQuotes,
           attributedString, doubleQuoteStyle, "double quote");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.numbers,
@@ -418,13 +598,13 @@ public class SqlLineHighlighterTest {
   }
 
   /**
-   *  Class to test highlight styles.
+   * Class to test highlight styles.
    */
   private class ExpectedHighlightStyle {
     private final BitSet commands;
     private final BitSet keywords;
     private final BitSet singleQuotes;
-    private final BitSet doubleQuotes;
+    private final BitSet sqlIdentifierQuotes;
     private final BitSet defaults;
     private final BitSet numbers;
     private final BitSet comments;
@@ -433,7 +613,7 @@ public class SqlLineHighlighterTest {
       commands = new BitSet(length);
       keywords = new BitSet(length);
       singleQuotes = new BitSet(length);
-      doubleQuotes = new BitSet(length);
+      sqlIdentifierQuotes = new BitSet(length);
       numbers = new BitSet(length);
       comments = new BitSet(length);
       defaults = new BitSet(length);
