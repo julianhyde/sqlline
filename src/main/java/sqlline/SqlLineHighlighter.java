@@ -281,14 +281,14 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (ch == sqlIdentifier.charAt(0) && (sqlIdentifier.length() == 1
           || sqlIdentifier
           .regionMatches(0, buffer, pos, sqlIdentifier.length()))) {
-        pos = sqlIdentifiers(
+        pos = handleSqlIdentifierQuotes(
             buffer, sqlIdentifier, sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
         pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
       }
       if (pos < buffer.length() - 1) {
-        pos = handleComments(buffer, commentBitSet, pos, ch);
+        pos = handleComments(buffer, commentBitSet, pos);
       }
       if (wordStart == -1
           && (Character.isLetter(ch)
@@ -307,16 +307,33 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     }
   }
 
-  private void handleQuotesInCommands(
-      String buffer, BitSet quoteBitSet, BitSet doubleQuoteStart) {
-    int doubleQuoteBitSet = -1;
+  /**
+   * The method marks single/double quoted string position
+   * in sqlline command based on input.
+   * ASSUMPTION: the input is sqlline command but not sql itself.
+   *
+   * @param line              line with sqlline command where to handle
+   *                          single/double quoted string
+   * @param quoteBitSet       BitSet to use for positions of single quoted lines
+   * @param doubleQuoteBitSet BitSet to use for positions of double quoted lines
+   * <p>
+   * Example
+   * String line = "!set csvDelimiter '"'";
+   * <p>
+   * handleQuotesInCommands(line, quoteBitSet, doubleQuoteBitSet);
+   * should mark single quoted string only as
+   * a double quote is inside the quoted line.
+   */
+  void handleQuotesInCommands(
+      String line, BitSet quoteBitSet, BitSet doubleQuoteBitSet) {
+    int doubleQuoteStart = -1;
     int quoteStart = -1;
-    for (int pos = 0; pos < buffer.length(); pos++) {
-      char ch = buffer.charAt(pos);
-      if (doubleQuoteBitSet > -1) {
-        doubleQuoteStart.set(pos);
+    for (int pos = 0; pos < line.length(); pos++) {
+      char ch = line.charAt(pos);
+      if (doubleQuoteStart > -1) {
+        doubleQuoteBitSet.set(pos);
         if (ch == '"') {
-          doubleQuoteBitSet = -1;
+          doubleQuoteStart = -1;
         }
         continue;
       } else if (quoteStart > -1) {
@@ -328,12 +345,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
       // so far doubleQuoteBitSet MUST BE -1 and quoteStart MUST BE -1
       if (ch == '"') {
-        doubleQuoteStart.set(pos);
-        doubleQuoteBitSet = pos;
+        doubleQuoteBitSet.set(pos);
+        doubleQuoteStart = pos;
       }
 
       // so far quoteStart MUST BE -1
-      if (doubleQuoteBitSet == -1 && ch == '\'') {
+      if (doubleQuoteStart == -1 && ch == '\'') {
         quoteBitSet.set(pos);
         quoteStart = pos;
       }
@@ -347,15 +364,58 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         || !isCommandPresent;
   }
 
-  private int sqlIdentifiers(String buffer,
-                             String sqlIdentifier,
-                             BitSet sqlIdentifierQuotesBitSet,
-                             int pos) {
-    int end = buffer.indexOf(sqlIdentifier, pos + 1);
-    end = end == -1 ? buffer.length() - 1 : end;
-    sqlIdentifierQuotesBitSet.set(pos, end + 1);
-    pos = end;
-    return pos;
+  /**
+   * The method marks quoted (with {@code sqlIdentifier}) string
+   * position based on input.
+   * ASSUMPTION: there is a {@code sqlIdentifier} quote starts since
+   * the specified position,
+   * i.e. sqlIdentifier.charAt(0) == line.charAt(startingPoint)
+   *
+   * @param line                        line where to handle
+   *                                    sql identifier quoted string
+   * @param sqlIdentifier               Quote to use to
+   *                                    quote sql identifiers
+   * @param sqlIdentifierQuotesBitSet   BitSet to use for positions
+   *                                    of sql identifiers quoted lines
+   * @param startingPoint               start point
+   * @return position of closing (non-escaped) sql identifier quote.
+   * <p>
+   * Example (for the case sql identifier quote is a double quote ("))
+   * "Quoted \" line quoted" "another\"'' quoted''\" line"
+   * <p>
+   * handleSqlIdentifierQuotes(
+   * line, sqlIdentifier, sqlIdentifierQuotesBitSet, startingPoint);
+   * should return the position of the sql identifier quote closing
+   * the first quoted string and mark sql identifier quoted line
+   * inside sqlIdentifierQuotesBitSet.
+   */
+  int handleSqlIdentifierQuotes(String line,
+                                String sqlIdentifier,
+                                BitSet sqlIdentifierQuotesBitSet,
+                                int startingPoint) {
+    if (!sqlIdentifier.regionMatches(
+        0, line, startingPoint, sqlIdentifier.length())) {
+      return startingPoint;
+    }
+    int backslashCounter = 0;
+    for (int i = startingPoint + sqlIdentifier.length();
+         i < line.length();
+         i++) {
+      if (line.charAt(i) == '\\') {
+        backslashCounter++;
+      } else if (
+          sqlIdentifier.regionMatches(0, line, i, sqlIdentifier.length())) {
+        if (backslashCounter % 2 == 0) {
+          sqlIdentifierQuotesBitSet
+              .set(startingPoint, i + sqlIdentifier.length());
+          return i + sqlIdentifier.length() - 1;
+        }
+      } else {
+        backslashCounter = 0;
+      }
+    }
+    sqlIdentifierQuotesBitSet.set(startingPoint, line.length());
+    return line.length() - 1;
   }
 
   private int handleNumbers(String buffer, BitSet numberBitSet, int pos) {
@@ -385,20 +445,44 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return pos;
   }
 
-  private int handleComments(
-      String buffer, BitSet commentBitSet, int pos, char ch) {
-    if (ch == '-' && buffer.charAt(pos + 1) == '-') {
-      int end = buffer.indexOf('\n', pos);
-      end = end == -1 ? buffer.length() : end;
-      commentBitSet.set(pos, end + 1);
-      pos = end;
-    } else if (ch == '/' && buffer.charAt(pos + 1) == '*') {
-      int end = buffer.indexOf("*/", pos);
-      end = end == -1 ? buffer.length() : end + 1;
-      commentBitSet.set(pos, end + 1);
-      pos = end;
+  /**
+   * The method marks commented string position based on input.
+   * ASSUMPTION: there is a comment start since the specified position,
+   * i.e. line.charAt(startingPoint) == '-'
+   * && line.charAt(startingPoint + 1) == '-'
+   * or
+   * i.e. line.charAt(startingPoint) == '/'
+   * && line.charAt(startingPoint + 1) == '*'
+   *
+   * @param line          line where to handle commented string
+   * @param commentBitSet BitSet to use for positions of single quoted lines
+   * @param startingPoint start point
+   * @return position of closing comment (multiline comment)
+   * or a new line position (one line comment).
+   * <p>
+   * Example
+   * String line = "test /*Single --'' line commented'*\/
+   * '/*another-- commented'' line*\/";
+   * <p>
+   * handleComments(line, commentBitSet, line.indexOf("/*Single"));
+   * should return position of first closing comment *\/
+   * and mark comment position inside commentBitSet.
+   */
+  int handleComments(
+      String line, BitSet commentBitSet, int startingPoint) {
+    final char ch = line.charAt(startingPoint);
+    if (ch == '-' && line.charAt(startingPoint + 1) == '-') {
+      int end = line.indexOf('\n', startingPoint);
+      end = end == -1 ? line.length() - 1 : end;
+      commentBitSet.set(startingPoint, end + 1);
+      startingPoint = end;
+    } else if (ch == '/' && line.charAt(startingPoint + 1) == '*') {
+      int end = line.indexOf("*/", startingPoint);
+      end = end == -1 ? line.length() - 1 : end + 1;
+      commentBitSet.set(startingPoint, end + 1);
+      startingPoint = end;
     }
-    return pos;
+    return startingPoint;
   }
 
   /**
@@ -415,9 +499,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * String line = "test 'Single '' line quoted''' 'another'' quoted'' line'";
    * <p>
    * handleSqlSingleQuotes(line, quoteBitSet, line.indexOf("'Single"));
-   * should return position of last
+   * should return position of the quote (') closing the first quoted string
+   * and mark single quoted line inside quoteBitSet.
    */
-  private int handleSqlSingleQuotes(
+  int handleSqlSingleQuotes(
       String line, BitSet quoteBitSet, int startingPoint) {
     int end;
     int quoteCounter = 1;
@@ -433,7 +518,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       } else if (line.charAt(end + 1) != '\'' && quoteCounter % 2 == 0) {
         quotationEnded = true;
       }
-      end = end == -1 ? line.length() : end;
+      end = end == -1 ? line.length() - 1 : end;
       quoteBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } while (!quotationEnded && end < line.length());
