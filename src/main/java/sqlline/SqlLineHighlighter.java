@@ -15,8 +15,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -36,6 +41,8 @@ import org.jline.utils.WCWidth;
 public class SqlLineHighlighter extends DefaultHighlighter {
   private final SqlLine sqlLine;
   private final Set<String> sqlKeyWords;
+  private final Map<DatabaseConnection, Set<String>> connection2sqlKeyWords =
+      new HashMap<>();
 
   public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
     this.sqlLine = sqlLine;
@@ -60,6 +67,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       return super.highlight(reader, buffer);
     }
 
+    initConnectionSpecificKeyWords();
     int underlineStart = -1;
     int underlineEnd = -1;
     int negativeStart = -1;
@@ -147,9 +155,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           sb.style(highlightStyle.getCommentedStyle());
         } else if (numberBitSet.get(i)) {
           sb.style(highlightStyle.getNumbersStyle());
-        } else if (i > commandEnd
+        } else if (i == 0 || (i > commandEnd
             && (i < underlineStart || i > underlineEnd)
-            && (i < negativeStart || i > negativeEnd)) {
+            && (i < negativeStart || i > negativeEnd))) {
+
           sb.style(highlightStyle.getDefaultStyle());
         }
       } else {
@@ -172,7 +181,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (i >= negativeStart && i <= negativeEnd) {
         sb.style(sb.style().inverse());
       }
-
       char c = buffer.charAt(i);
       if (c == '\t' || c == '\n') {
         sb.append(c);
@@ -182,7 +190,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
             .append((char) (c + '@'))
             .style(AttributedStyle::inverseNeg);
       } else {
-
         int w = WCWidth.wcwidth(c);
         if (w > 0) {
           sb.append(c);
@@ -196,6 +203,26 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
     }
     return sb.toAttributedString();
+  }
+
+  private void initConnectionSpecificKeyWords() {
+    try {
+      DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
+      if (databaseConnection != null
+          && databaseConnection.connection != null
+          && !databaseConnection.connection.isClosed()
+          && connection2sqlKeyWords.get(databaseConnection) == null) {
+        Set<String> connectionSQLKeyWords =
+            new HashSet<>(
+                Arrays.asList(
+                    databaseConnection.meta.getSQLKeywords().split(",")));
+        connection2sqlKeyWords.put(databaseConnection, connectionSQLKeyWords);
+      } else {
+        connection2sqlKeyWords.remove(databaseConnection);
+      }
+    } catch (SQLException sqle) {
+      sqlLine.handleException(sqle);
+    }
   }
 
   private void handleSqlSyntax(
@@ -216,6 +243,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
+    Set<String> connectionSpecificSqlKeyWords =
+        connection2sqlKeyWords.get(sqlLine.getDatabaseConnection());
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -224,7 +253,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           String word = !Character.isLetterOrDigit(ch)
               ? buffer.substring(wordStart, pos)
               : buffer.substring(wordStart);
-          if (sqlKeyWords.contains(word.toUpperCase(Locale.ROOT))) {
+          String upperWord = word.toUpperCase(Locale.ROOT);
+          if (sqlKeyWords.contains(upperWord)
+              || (connectionSpecificSqlKeyWords != null
+                  && connectionSpecificSqlKeyWords.contains(upperWord))) {
             sqlKeyWordsBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
@@ -373,6 +405,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return pos;
   }
 
+  public void removeConnection(DatabaseConnection connection)  {
+    connection2sqlKeyWords.remove(connection);
+  }
 }
 
 // End SqlLineHighlighter.java

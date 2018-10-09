@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
+import java.util.Collections;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
@@ -123,7 +124,7 @@ public class SqlLineHighlighterTest {
         "\"from\"",
         "\"''\"",
         "\"test '' \n''select\"",
-        "\"/* \"",
+        "\"/* \\\"kjh\"",
         "\"/*   \"",
         "\"--   \"",
         "\"\n  \n\""
@@ -270,6 +271,35 @@ public class SqlLineHighlighterTest {
     expectedStyle.defaults.set(line.indexOf("=1"));
     expectedStyle.numbers.set(line.indexOf("=1") + 1);
     checkLine(line, expectedStyle);
+  }
+
+  @Test public void testSqlKeywordsFromDatabase() {
+    String[] linesRequiredToBeNumbers = {
+        "minus",
+        "today",
+    };
+
+    for (String line : linesRequiredToBeNumbers) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.defaults.set(0, line.length());
+      checkLine(line, expectedStyle);
+    }
+
+    DispatchCallback dc = new DispatchCallback();
+    darkSqlLine.runCommands(
+        Collections.singletonList("!connect "
+            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+        dc);
+
+    for (String line : linesRequiredToBeNumbers) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.keywords.set(0, line.length());
+      checkHighlightedLine(
+          darkSqlLine, line, expectedStyle, darkHighlighter);
+    }
   }
 
   private void checkHighlightedLine(
