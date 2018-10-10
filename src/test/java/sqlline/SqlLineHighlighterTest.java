@@ -28,7 +28,6 @@ import mockit.MockUp;
 import mockit.integration.junit4.JMockit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -365,19 +364,16 @@ public class SqlLineHighlighterTest {
       // in case of default there is no SQLKeyWords
       // or sqlIdentifierQuote retrieval and as a result no connection usage
       if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
-        assertFalse(
-            sqlLineHighlighter.checkIfConnectionPresent(
-                sqlLine.getDatabaseConnection().connection));
-      } else {
         assertTrue(
-            sqlLineHighlighter.checkIfConnectionPresent(
-                sqlLine.getDatabaseConnection().connection));
+            sqlLineHighlighter.getConnection2rules().isEmpty());
+      } else {
+        assertEquals("Only one connection should be",
+            1, sqlLineHighlighter.getConnection2rules().size());
       }
       sqlLine.getDatabaseConnection().close();
 
-      assertFalse("Check colorScheme " + sqlLine.getOpts().getColorScheme(),
-          sqlLineHighlighter.checkIfConnectionPresent(
-              sqlLine.getDatabaseConnection().connection));
+      assertTrue("Check colorScheme " + sqlLine.getOpts().getColorScheme(),
+          sqlLineHighlighter.getConnection2rules().isEmpty());
     }
   }
 
@@ -451,19 +447,16 @@ public class SqlLineHighlighterTest {
       // in case of default there is no SQLKeyWords
       // or sqlIdentifierQuote retrieval and as a result no connection usage
       if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
-        assertFalse(
-            sqlLineHighlighter.checkIfConnectionPresent(
-                sqlLine.getDatabaseConnection().connection));
-      } else {
         assertTrue(
-            sqlLineHighlighter.checkIfConnectionPresent(
-                sqlLine.getDatabaseConnection().connection));
+            sqlLineHighlighter.getConnection2rules().isEmpty());
+      } else {
+        assertEquals(1,
+            sqlLineHighlighter.getConnection2rules().size());
       }
       sqlLine.getDatabaseConnection().close();
 
-      assertFalse("Check colorScheme " + sqlLine.getOpts().getColorScheme(),
-          sqlLineHighlighter.checkIfConnectionPresent(
-              sqlLine.getDatabaseConnection().connection));
+      assertTrue("Check colorScheme " + sqlLine.getOpts().getColorScheme(),
+          sqlLineHighlighter.getConnection2rules().isEmpty());
     }
   }
 

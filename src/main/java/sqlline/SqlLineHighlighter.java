@@ -20,6 +20,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -227,6 +228,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
             ? getDefaultSqlIdentifierQuote() : sqlIdentifier;
         HighlightRule rule =
             new HighlightRule(connectionSQLKeyWords, sqlIdentifier);
+        databaseConnection.setHighlighter(this);
         connection2rules.put(databaseConnection.connection, rule);
         return rule;
       } else if (databaseConnection != null) {
@@ -544,13 +546,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * Check if the connection is present in connection2rules map.
+   * Returns the copy of map.
    * The only purpose of this method is testing.
-   * @param connection connection to check
-   * @return if connection is present or no
+   * @return copy of map
    */
-  boolean checkIfConnectionPresent(Connection connection) {
-    return connection2rules.containsKey(connection);
+  Map<Connection, HighlightRule> getConnection2rules() {
+    return Collections.unmodifiableMap(connection2rules);
   }
 
   public void removeConnection(Connection connection) {

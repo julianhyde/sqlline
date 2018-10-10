@@ -171,7 +171,7 @@ class DatabaseConnection {
     return true;
   }
 
-  public void addHighlighter(SqlLineHighlighter highlighter) {
+  public void setHighlighter(SqlLineHighlighter highlighter) {
     this.highlighter = highlighter;
   }
 
@@ -197,7 +197,9 @@ class DatabaseConnection {
           sqlLine.output(
               sqlLine.loc("closing", connection.getClass().getName()));
           connection.close();
-          highlighter.removeConnection(connection);
+          if (highlighter != null) {
+            highlighter.removeConnection(connection);
+          }
         }
       } catch (Exception e) {
         sqlLine.handleException(e);
