@@ -31,7 +31,7 @@ class TableOutputFormat implements OutputFormat {
         : sqlLine.getOpts().getMaxWidth()) - 4;
 
     // normalize the columns sizes
-    rows.normalizeWidths();
+    rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
 
     for (; rows.hasNext();) {
       Rows.Row row = rows.next();

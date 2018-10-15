@@ -49,7 +49,7 @@ class BufferedRows extends Rows {
     return iterator.next();
   }
 
-  void normalizeWidths() {
+  void normalizeWidths(int maxColumnWidth) {
     int[] max = null;
     for (Row row : list) {
       if (max == null) {
@@ -57,7 +57,12 @@ class BufferedRows extends Rows {
       }
 
       for (int j = 0; j < max.length; j++) {
-        max[j] = Math.max(max[j], row.sizes[j] + 1);
+        int currentMaxWidth = Math.max(max[j], row.sizes[j] + 1);
+        // ensure that calculated column width
+        // does not exceed max column width
+        max[j] = maxColumnWidth > 0
+                ? Math.min(currentMaxWidth, maxColumnWidth)
+                : currentMaxWidth;
       }
     }
 
