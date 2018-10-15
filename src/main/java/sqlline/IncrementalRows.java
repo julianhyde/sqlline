@@ -90,7 +90,16 @@ class IncrementalRows extends Rows {
     return ret;
   }
 
-  void normalizeWidths() {
+  void normalizeWidths(int maxColumnWidth) {
+    // ensure that calculated column width
+    // does not exceed max column width
+    if (maxColumnWidth > 0) {
+      for (int i = 0; i < maxRow.sizes.length; i++) {
+        maxRow.sizes[i] = Math.min(maxRow.sizes[i],
+                maxColumnWidth);
+      }
+    }
+
     // normalize label row
     labelRow.sizes = maxRow.sizes;
 

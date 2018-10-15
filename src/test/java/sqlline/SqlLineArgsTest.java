@@ -1598,6 +1598,108 @@ public class SqlLineArgsTest {
     assertTrue(beeLine.isExit());
   }
 
+  @Test
+  public void testMaxColumnWidthIncremental() throws Throwable {
+    final String script1 = "!set maxcolumnwidth -1\n"
+            + "!set incremental true\n"
+            + "values (100, 200)";
+    final String line1 = ""
+            + "+-------------+-------------+\n"
+            + "|     C1      |     C2      |\n"
+            + "+-------------+-------------+\n"
+            + "| 100         | 200         |\n"
+            + "+-------------+-------------+";
+    checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
+            containsString(line1));
+
+    final String script2 = "!set maxcolumnwidth 0\n"
+            + "!set incremental true\n"
+            + "values (100, 200)";
+    final String line2 = ""
+            + "+-------------+-------------+\n"
+            + "|     C1      |     C2      |\n"
+            + "+-------------+-------------+\n"
+            + "| 100         | 200         |\n"
+            + "+-------------+-------------+";
+    checkScriptFile(script2, true, equalTo(SqlLine.Status.OK),
+            containsString(line2));
+
+    final String script3 = "!set maxcolumnwidth 5000\n"
+            + "!set incremental true\n"
+            + "values (100, 200)";
+    final String line3 = ""
+            + "+-------------+-------------+\n"
+            + "|     C1      |     C2      |\n"
+            + "+-------------+-------------+\n"
+            + "| 100         | 200         |\n"
+            + "+-------------+-------------+";
+    checkScriptFile(script3, true, equalTo(SqlLine.Status.OK),
+            containsString(line3));
+
+    final String script4 = "!set maxcolumnwidth 2\n"
+            + "!set incremental true\n"
+            + "values (100, 200)";
+    final String line4 = ""
+            + "+----+----+\n"
+            + "| C1 | C2 |\n"
+            + "+----+----+\n"
+            + "| 100 | 200 |\n"
+            + "+----+----+";
+    checkScriptFile(script4, true, equalTo(SqlLine.Status.OK),
+            containsString(line4));
+  }
+
+  @Test
+  public void testMaxColumnWidthBuffered() throws Throwable {
+    final String script1 = "!set maxcolumnwidth -1\n"
+            + "!set incremental false\n"
+            + "values (100, 200)";
+    final String line1 = ""
+            + "+------+------+\n"
+            + "|  C1  |  C2  |\n"
+            + "+------+------+\n"
+            + "| 100  | 200  |\n"
+            + "+------+------+";
+    checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
+            containsString(line1));
+
+    final String script2 = "!set maxcolumnwidth 0\n"
+            + "!set incremental false\n"
+            + "values (100, 200)";
+    final String line2 = ""
+            + "+------+------+\n"
+            + "|  C1  |  C2  |\n"
+            + "+------+------+\n"
+            + "| 100  | 200  |\n"
+            + "+------+------+";
+    checkScriptFile(script2, true, equalTo(SqlLine.Status.OK),
+            containsString(line2));
+
+    final String script3 = "!set maxcolumnwidth 5000\n"
+            + "!set incremental false\n"
+            + "values (100, 200)";
+    final String line3 = ""
+            + "+------+------+\n"
+            + "|  C1  |  C2  |\n"
+            + "+------+------+\n"
+            + "| 100  | 200  |\n"
+            + "+------+------+";
+    checkScriptFile(script3, true, equalTo(SqlLine.Status.OK),
+            containsString(line3));
+
+    final String script4 = "!set maxcolumnwidth 2\n"
+            + "!set incremental false\n"
+            + "values (100, 200)";
+    final String line4 = ""
+            + "+----+----+\n"
+            + "| C1 | C2 |\n"
+            + "+----+----+\n"
+            + "| 100 | 200 |\n"
+            + "+----+----+";
+    checkScriptFile(script4, true, equalTo(SqlLine.Status.OK),
+            containsString(line4));
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {

@@ -64,7 +64,7 @@ public class SqlLineOpts implements Completer {
   private String timestampFormat = DEFAULT;
   private int maxWidth = DEFAULT_MAX_WIDTH;
   private int maxHeight = DEFAULT_MAX_HEIGHT;
-  private int maxColumnWidth = 15;
+  private int maxColumnWidth = -1;
   int rowLimit = 0;
   int timeout = -1;
   private String isolation = DEFAULT_TRANSACTION_ISOLATION;

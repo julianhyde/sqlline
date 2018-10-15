@@ -87,8 +87,10 @@ abstract class Rows implements Iterator<Rows.Row> {
   /**
    * Update all of the rows to have the same size, set to the
    * maximum length of each column in the Rows.
+   *
+   * @param maxColumnWidth max allowed column width
    */
-  abstract void normalizeWidths();
+  abstract void normalizeWidths(int maxColumnWidth);
 
   /**
    * Return whether the specified column (0-based index) is
