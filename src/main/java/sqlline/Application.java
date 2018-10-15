@@ -224,7 +224,11 @@ public class Application {
     outputFormats.put("table", new TableOutputFormat(sqlLine));
     outputFormats.put("csv", new SeparatedValuesOutputFormat(sqlLine, ","));
     outputFormats.put("tsv", new SeparatedValuesOutputFormat(sqlLine, "\t"));
-    outputFormats.put("xmlattr", new XmlAttributeOutputFormat(sqlLine));
+    XmlAttributeOutputFormat xmlAttrs = new XmlAttributeOutputFormat(sqlLine);
+    // leave "xmlattr" name for backward compatibility,
+    // "xmlattrs" should be used instead
+    outputFormats.put("xmlattr", xmlAttrs);
+    outputFormats.put("xmlattrs", xmlAttrs);
     outputFormats.put("xmlelements", new XmlElementOutputFormat(sqlLine));
     outputFormats.put("json", new JsonOutputFormat(sqlLine));
     return Collections.unmodifiableMap(outputFormats);
