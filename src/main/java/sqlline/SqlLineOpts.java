@@ -36,6 +36,7 @@ import static sqlline.BuiltInProperty.CSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
 import static sqlline.BuiltInProperty.DEFAULT;
+import static sqlline.BuiltInProperty.ESCAPE_OUTPUT;
 import static sqlline.BuiltInProperty.FAST_CONNECT;
 import static sqlline.BuiltInProperty.FORCE;
 import static sqlline.BuiltInProperty.HEADER_INTERVAL;
@@ -368,6 +369,10 @@ public class SqlLineOpts implements Completer {
 
   public String getNumberFormat() {
     return get(NUMBER_FORMAT);
+  }
+
+  public boolean getEscapeOutput() {
+    return getBoolean(ESCAPE_OUTPUT);
   }
 
   public void setNumberFormat(String numberFormat) {

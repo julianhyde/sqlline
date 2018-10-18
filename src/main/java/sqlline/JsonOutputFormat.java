@@ -13,61 +13,11 @@ package sqlline;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Implementation of {@link OutputFormat} that formats rows as JSON.
  */
 public class JsonOutputFormat extends AbstractOutputFormat {
-  private static final Map<Character, String> ESCAPING_MAP = new HashMap<>();
-  static {
-    ESCAPING_MAP.put('\\', "\\\\");
-    ESCAPING_MAP.put('\"', "\\\"");
-    ESCAPING_MAP.put('\b', "\\b");
-    ESCAPING_MAP.put('\f', "\\f");
-    ESCAPING_MAP.put('\n', "\\n");
-    ESCAPING_MAP.put('\r', "\\r");
-    ESCAPING_MAP.put('\t', "\\t");
-    ESCAPING_MAP.put('/', "\\/");
-    ESCAPING_MAP.put('\u0000', "\\u0000");
-    ESCAPING_MAP.put('\u0001', "\\u0001");
-    ESCAPING_MAP.put('\u0002', "\\u0002");
-    ESCAPING_MAP.put('\u0003', "\\u0003");
-    ESCAPING_MAP.put('\u0004', "\\u0004");
-    ESCAPING_MAP.put('\u0005', "\\u0005");
-    ESCAPING_MAP.put('\u0006', "\\u0006");
-    ESCAPING_MAP.put('\u0007', "\\u0007");
-    // ESCAPING_MAP.put('\u0008', "\\u0008");
-    // covered by ESCAPING_MAP.put('\b', "\\b");
-    // ESCAPING_MAP.put('\u0009', "\\u0009");
-    // covered by ESCAPING_MAP.put('\t', "\\t");
-    // ESCAPING_MAP.put((char) 10, "\\u000A");
-    // covered by ESCAPING_MAP.put('\n', "\\n");
-    ESCAPING_MAP.put('\u000B', "\\u000B");
-    // ESCAPING_MAP.put('\u000C', "\\u000C");
-    // covered by ESCAPING_MAP.put('\f', "\\f");
-    // ESCAPING_MAP.put((char) 13, "\\u000D");
-    // covered by ESCAPING_MAP.put('\r', "\\r");
-    ESCAPING_MAP.put('\u000E', "\\u000E");
-    ESCAPING_MAP.put('\u000F', "\\u000F");
-    ESCAPING_MAP.put('\u0010', "\\u0010");
-    ESCAPING_MAP.put('\u0011', "\\u0011");
-    ESCAPING_MAP.put('\u0012', "\\u0012");
-    ESCAPING_MAP.put('\u0013', "\\u0013");
-    ESCAPING_MAP.put('\u0014', "\\u0014");
-    ESCAPING_MAP.put('\u0015', "\\u0015");
-    ESCAPING_MAP.put('\u0016', "\\u0016");
-    ESCAPING_MAP.put('\u0017', "\\u0017");
-    ESCAPING_MAP.put('\u0018', "\\u0018");
-    ESCAPING_MAP.put('\u0019', "\\u0019");
-    ESCAPING_MAP.put('\u001A', "\\u001A");
-    ESCAPING_MAP.put('\u001B', "\\u001B");
-    ESCAPING_MAP.put('\u001C', "\\u001C");
-    ESCAPING_MAP.put('\u001D', "\\u001D");
-    ESCAPING_MAP.put('\u001E', "\\u001E");
-    ESCAPING_MAP.put('\u001F', "\\u001F");
-  }
   private int[] columnTypes;
   public JsonOutputFormat(SqlLine sqlLine) {
     super(sqlLine);
@@ -122,8 +72,8 @@ public class JsonOutputFormat extends AbstractOutputFormat {
     }
     sb.append("\"");
     for (int i = 0; i < value.length(); i++) {
-      if (ESCAPING_MAP.get(value.charAt(i)) != null) {
-        sb.append(ESCAPING_MAP.get(value.charAt(i)));
+      if (Rows.ESCAPING_MAP.get(value.charAt(i)) != null) {
+        sb.append(Rows.ESCAPING_MAP.get(value.charAt(i)));
       } else {
         sb.append(value.charAt(i));
       }

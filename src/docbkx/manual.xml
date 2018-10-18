@@ -2777,6 +2777,14 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           the setting "YYYY_MM_dd" yields values like "1970_01_01".
         </para>
       </sect1>
+      <sect1 id="setting_escapeOutput">
+        <title>escapeOutput</title>
+        <para>
+            When set to true, control symbols
+            in output will be escaped.
+            Otherwise they will be printed as is. Default is false..
+        </para>
+      </sect1>
       <sect1 id="setting_fastconnect">
         <title>fastconnect</title>
         <para>

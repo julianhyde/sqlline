@@ -29,6 +29,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   CSV_QUOTE_CHARACTER("csvQuoteCharacter", Type.CHAR, '\''),
 
   DATE_FORMAT("dateFormat", Type.STRING, DEFAULT),
+  ESCAPE_OUTPUT("escapeOutput", Type.BOOLEAN, false),
 
   FAST_CONNECT("fastConnect", Type.BOOLEAN, true),
   FORCE("force", Type.BOOLEAN, false),
