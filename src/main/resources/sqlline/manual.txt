@@ -103,6 +103,7 @@ color
 csvDelimiter
 csvQuoteCharacter
 dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -229,6 +230,7 @@ color
 csvDelimiter
 csvQuoteCharacter
 dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -1076,7 +1078,7 @@ sqlline> !help
 !rehash             Fetch table and column names for command completion
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
-!save               Save the current variabes and aliases
+!save               Save the current variables and aliases
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
 !set                Set a sqlline variable
@@ -1096,6 +1098,7 @@ color           true/false Control whether color is used for display
 csvDelimiter    String     Delimiter in csv outputFormat
 csvQuoteCharacter char     Quote character in csv outputFormat
 dateFormat      pattern    Format dates using SimpleDateFormat pattern
+escapeOutput    true/false Escape control symbols in output
 fastConnect     true/false Skip building table/column list for tab-completion
 force           true/false Continue running script even after errors
 headerInterval  integer    The interval between which headers are displayed
@@ -2021,6 +2024,7 @@ color
 csvDelimiter
 csvQuoteCharacter
 dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -2067,6 +2071,10 @@ Sets the quote character in csv outputFormat. Setting to default causes usage of
 dateformat
 
 The format for how date values are displayed. Setting to default causes date values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "YYYY_MM_dd" yields values like "1970_01_01".
+
+escapeOutput
+
+When set to true, control symbols in output will be escaped. Otherwise they will be printed as is. Default is false.
 
 fastconnect
 

@@ -1401,6 +1401,26 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testEscapeSqlMultiline() {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set escapeOutput yes\n"
+        + "values \n"
+        + "('\n"
+        + "multiline\n"
+        + "value') \n"
+        + ";\n";
+    final String line1 = ""
+        + "+-----------------+\n"
+        + "|       C1        |\n"
+        + "+-----------------+\n"
+        + "|  \\nmultiline \\nvalue |\n"
+        + "+-----------------+\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
   public void testSqlMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"

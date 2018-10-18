@@ -22,6 +22,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,8 @@ import java.util.Set;
  * Abstract base class representing a set of rows to be displayed.
  */
 abstract class Rows implements Iterator<Rows.Row> {
+  static final Map<Character, String> ESCAPING_MAP = createEscapeMap();
+
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
@@ -43,6 +46,7 @@ abstract class Rows implements Iterator<Rows.Row> {
   final DateFormat timeFormat;
   final DateFormat timestampFormat;
   final String nullValue;
+  final boolean escapeOutput;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     this.sqlLine = sqlLine;
@@ -93,6 +97,7 @@ abstract class Rows implements Iterator<Rows.Row> {
     } else {
       nullValue = String.valueOf(nullPropertyValue);
     }
+    escapeOutput = sqlLine.getOpts().getEscapeOutput();
   }
 
   public void remove() {
@@ -159,6 +164,56 @@ abstract class Rows implements Iterator<Rows.Row> {
     }
   }
 
+  private static Map<Character, String> createEscapeMap() {
+    final Map<Character, String> map = new HashMap<>();
+    map.put('\\', "\\\\");
+    map.put('\"', "\\\"");
+    map.put('\b', "\\b");
+    map.put('\f', "\\f");
+    map.put('\n', "\\n");
+    map.put('\r', "\\r");
+    map.put('\t', "\\t");
+    map.put('/', "\\/");
+    map.put('\u0000', "\\u0000");
+    map.put('\u0001', "\\u0001");
+    map.put('\u0002', "\\u0002");
+    map.put('\u0003', "\\u0003");
+    map.put('\u0004', "\\u0004");
+    map.put('\u0005', "\\u0005");
+    map.put('\u0006', "\\u0006");
+    map.put('\u0007', "\\u0007");
+    // ESCAPING_MAP.put('\u0008', "\\u0008");
+    // covered by ESCAPING_MAP.put('\b', "\\b");
+    // ESCAPING_MAP.put('\u0009', "\\u0009");
+    // covered by ESCAPING_MAP.put('\t', "\\t");
+    // ESCAPING_MAP.put((char) 10, "\\u000A");
+    // covered by ESCAPING_MAP.put('\n', "\\n");
+    map.put('\u000B', "\\u000B");
+    // ESCAPING_MAP.put('\u000C', "\\u000C");
+    // covered by ESCAPING_MAP.put('\f', "\\f");
+    // ESCAPING_MAP.put((char) 13, "\\u000D");
+    // covered by ESCAPING_MAP.put('\r', "\\r");
+    map.put('\u000E', "\\u000E");
+    map.put('\u000F', "\\u000F");
+    map.put('\u0010', "\\u0010");
+    map.put('\u0011', "\\u0011");
+    map.put('\u0012', "\\u0012");
+    map.put('\u0013', "\\u0013");
+    map.put('\u0014', "\\u0014");
+    map.put('\u0015', "\\u0015");
+    map.put('\u0016', "\\u0016");
+    map.put('\u0017', "\\u0017");
+    map.put('\u0018', "\\u0018");
+    map.put('\u0019', "\\u0019");
+    map.put('\u001A', "\\u001A");
+    map.put('\u001B', "\\u001B");
+    map.put('\u001C', "\\u001C");
+    map.put('\u001D', "\\u001D");
+    map.put('\u001E', "\\u001E");
+    map.put('\u001F', "\\u001F");
+    return Collections.unmodifiableMap(map);
+  }
+
   /** Row from a result set. */
   class Row {
     final String[] values;
@@ -204,7 +259,6 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
 
       for (int i = 0; i < size; i++) {
-        final Object o;
         switch (rs.getMetaData().getColumnType(i + 1)) {
         case Types.TINYINT:
         case Types.SMALLINT:
@@ -241,7 +295,11 @@ abstract class Rows implements Iterator<Rows.Row> {
           values[i] = rs.getString(i + 1);
           break;
         }
-        values[i] = values[i] == null ? nullValue : values[i];
+        values[i] = values[i] == null
+            ? nullValue
+            : escapeOutput
+                ? escapeControlSymbols(values[i])
+                : values[i];
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
     }
@@ -255,6 +313,36 @@ abstract class Rows implements Iterator<Rows.Row> {
         values[i] = o.toString();
       }
     }
+  }
+
+  /**
+   * Escapes control symbols (Character.getType(ch) == Character.CONTROL).
+   *
+   * @param value String to be escaped
+   *
+   * @return escaped string if input value contains control symbols
+   * otherwise returns the input value
+   */
+  static String escapeControlSymbols(String value) {
+    if (value == null || value.isEmpty()) {
+      return value;
+    }
+    StringBuilder result = null;
+    for (int i = 0; i < value.length(); i++) {
+      char ch = value.charAt(i);
+      if (Character.getType(ch) == Character.CONTROL) {
+        if (result == null) {
+          result = new StringBuilder();
+          if (i != 0) {
+            result.append(value, 0, i);
+          }
+        }
+        result.append(ESCAPING_MAP.get(ch));
+      } else if (result != null) {
+        result.append(ch);
+      }
+    }
+    return result == null ? value : result.toString();
   }
 
   /**
