@@ -149,7 +149,8 @@ class DatabaseConnection {
     }
 
     try {
-      connection.setAutoCommit(sqlLine.getOpts().getAutoCommit());
+      connection.setAutoCommit(
+          sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.AUTO_COMMIT));
       sqlLine.autocommitStatus(connection);
     } catch (Exception e) {
       sqlLine.handleException(e);
@@ -159,7 +160,7 @@ class DatabaseConnection {
       // nothing is done off of this command beyond the handle so no
       // need to use the callback.
       sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
-          .getIsolation(),
+          .get(SqlLinePropertiesEnum.ISOLATION),
           new DispatchCallback());
     } catch (Exception e) {
       sqlLine.handleException(e);

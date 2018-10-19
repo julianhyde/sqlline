@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -48,35 +49,49 @@ abstract class Rows implements Iterator<Rows.Row> {
     rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNumberFormat())) {
+    final String numberFormatPropertyValue =
+        sqlLine.getOpts().get(SqlLinePropertiesEnum.NUMBER_FORMAT);
+    if (Objects.equals(numberFormatPropertyValue,
+        SqlLinePropertiesEnum.NUMBER_FORMAT.defaultValue())) {
       numberFormat = null;
     } else {
-      numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat(),
+      numberFormat = new DecimalFormat(numberFormatPropertyValue,
           DecimalFormatSymbols.getInstance(Locale.ROOT));
     }
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getDateFormat())) {
+    final String dateFormatPropertyValue =
+        sqlLine.getOpts().get(SqlLinePropertiesEnum.DATE_FORMAT);
+    if (Objects.equals(dateFormatPropertyValue,
+        SqlLinePropertiesEnum.DATE_FORMAT.defaultValue())) {
       dateFormat = null;
     } else {
       dateFormat =
-          new SimpleDateFormat(sqlLine.getOpts().getDateFormat(), Locale.ROOT);
+          new SimpleDateFormat(dateFormatPropertyValue, Locale.ROOT);
     }
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimeFormat())) {
+    final String timeFormatPropertyValue =
+        sqlLine.getOpts().get(SqlLinePropertiesEnum.TIME_FORMAT);
+    if (Objects.equals(timeFormatPropertyValue,
+        SqlLinePropertiesEnum.TIME_FORMAT.defaultValue())) {
       timeFormat = null;
     } else {
       timeFormat =
-          new SimpleDateFormat(sqlLine.getOpts().getTimeFormat(), Locale.ROOT);
+          new SimpleDateFormat(timeFormatPropertyValue, Locale.ROOT);
     }
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getTimestampFormat())) {
+    final String timestampFormatPropertyValue =
+        sqlLine.getOpts().get(SqlLinePropertiesEnum.TIMESTAMP_FORMAT);
+    if (Objects.equals(timestampFormatPropertyValue,
+        SqlLinePropertiesEnum.TIMESTAMP_FORMAT.defaultValue())) {
       timestampFormat = null;
     } else {
       timestampFormat =
-          new SimpleDateFormat(
-              sqlLine.getOpts().getTimestampFormat(), Locale.ROOT);
+          new SimpleDateFormat(timestampFormatPropertyValue, Locale.ROOT);
     }
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getNullValue())) {
+    final String nullPropertyValue =
+        sqlLine.getOpts().get(SqlLinePropertiesEnum.NULL_VALUE);
+    if (Objects.equals(nullPropertyValue,
+        SqlLinePropertiesEnum.NULL_VALUE.defaultValue())) {
       nullValue = null;
     } else {
-      nullValue = String.valueOf(sqlLine.getOpts().getNullValue());
+      nullValue = String.valueOf(nullPropertyValue);
     }
   }
 

@@ -655,7 +655,7 @@ public class Commands {
       DispatchCallback callback) {
     boolean success = sqlLine.getOpts().set(key, value, false);
     if (success) {
-      if (sqlLine.getOpts().getAutoSave()) {
+      if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.AUTO_SAVE)) {
         try {
           sqlLine.getOpts().save();
         } catch (Exception saveException) {
@@ -672,7 +672,7 @@ public class Commands {
   }
 
   private void reportResult(String action, long start, long end) {
-    if (sqlLine.getOpts().getShowElapsedTime()) {
+    if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_ELAPSED_TIME)) {
       sqlLine.info(action + " " + sqlLine.locElapsedTime(end - start));
     } else {
       sqlLine.info(action);
@@ -791,7 +791,7 @@ public class Commands {
 
     final int i;
     line = line.toUpperCase(Locale.ROOT);
-    if (line.endsWith(SqlLineOpts.DEFAULT.toUpperCase(Locale.ROOT))) {
+    if (line.endsWith(SqlLineProperty.DEFAULT.toUpperCase(Locale.ROOT))) {
       i = sqlLine.getDatabaseMetaData().getDefaultTransactionIsolation();
     } else if (line.endsWith("TRANSACTION_NONE")) {
       i = Connection.TRANSACTION_NONE;
@@ -1433,7 +1433,8 @@ public class Commands {
           }
 
           String trimmedLine = scriptLine.trim();
-          if (sqlLine.getOpts().getTrimScripts()) {
+          if (sqlLine.getOpts()
+              .getBoolean(SqlLinePropertiesEnum.TRIM_SCRIPTS)) {
             scriptLine = trimmedLine;
           }
 
@@ -1707,7 +1708,8 @@ public class Commands {
       sqlLine.output(man);
 
       // silly little pager
-      if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
+      if (index % (sqlLine.getOpts()
+          .getInt(SqlLinePropertiesEnum.MAX_HEIGHT) - 1) == 0) {
         String prompt = sqlLine.loc("enter-for-more");
         sqlLine.getLineReader().getTerminal().writer().write(prompt);
         int c;

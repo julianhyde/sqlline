@@ -295,18 +295,21 @@ public class SqlLine {
 
   /**
    * Entry point to creating a {@link ColorBuffer} with color
-   * enabled or disabled depending on the value of {@link SqlLineOpts#getColor}.
+   * enabled or disabled depending on the value of
+   * {@link SqlLineOpts#getBoolean(SqlLinePropertiesEnum.COLOR)}.
    */
   ColorBuffer getColorBuffer() {
-    return new ColorBuffer(getOpts().getColor());
+    return new ColorBuffer(getOpts().getBoolean(SqlLinePropertiesEnum.COLOR));
   }
 
   /**
    * Entry point to creating a {@link ColorBuffer} with color enabled or
-   * disabled depending on the value of {@link SqlLineOpts#getColor}.
+   * disabled depending on the value of
+   * {@link SqlLineOpts#getBoolean(SqlLinePropertiesEnum.COLOR)}.
    */
   ColorBuffer getColorBuffer(String msg) {
-    return new ColorBuffer(msg, getOpts().getColor());
+    return new ColorBuffer(msg,
+        getOpts().getBoolean(SqlLinePropertiesEnum.COLOR));
   }
 
   /**
@@ -438,8 +441,8 @@ public class SqlLine {
 
     if (commands.size() > 0) {
       // for single command execute, disable color
-      getOpts().setColor(false);
-      getOpts().setHeaderInterval(-1);
+      getOpts().set(SqlLinePropertiesEnum.COLOR, false);
+      getOpts().set(SqlLinePropertiesEnum.HEADER_INTERVAL, -1);
 
       for (String command : commands) {
         debug(loc("executing-command", command));
@@ -583,8 +586,8 @@ public class SqlLine {
     } else {
       terminalBuilder = terminalBuilder.system(true);
       terminal = terminalBuilder.build();
-      getOpts().setMaxWidth(terminal.getWidth());
-      getOpts().setMaxHeight(terminal.getHeight());
+      getOpts().set(SqlLinePropertiesEnum.MAX_WIDTH, terminal.getWidth());
+      getOpts().set(SqlLinePropertiesEnum.MAX_HEIGHT, terminal.getHeight());
     }
 
     final LineReader lineReader = LineReaderBuilder.builder()
@@ -594,7 +597,8 @@ public class SqlLine {
         .parser(new SqlLineParser(this)
             .eofOnEscapedNewLine(true)
             .eofOnUnclosedQuote(true))
-        .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
+        .variable(LineReader.HISTORY_FILE,
+            getOpts().get(SqlLinePropertiesEnum.HISTORY_FILE))
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
         .build();
     fileHistory.attach(lineReader);
@@ -744,13 +748,13 @@ public class SqlLine {
   }
 
   public void info(String msg) {
-    if (!getOpts().getSilent()) {
+    if (!getOpts().getBoolean(SqlLinePropertiesEnum.SILENT)) {
       output(msg, true, getErrorStream());
     }
   }
 
   public void info(ColorBuffer msg) {
-    if (!getOpts().getSilent()) {
+    if (!getOpts().getBoolean(SqlLinePropertiesEnum.SILENT)) {
       output(msg, true, getErrorStream());
     }
   }
@@ -772,7 +776,7 @@ public class SqlLine {
   }
 
   public void debug(String msg) {
-    if (getOpts().getVerbose()) {
+    if (getOpts().getBoolean(SqlLinePropertiesEnum.VERBOSE)) {
       output(getColorBuffer().blue(msg), true, errorStream);
     }
   }
@@ -873,7 +877,7 @@ public class SqlLine {
       return;
     }
 
-    if (!getOpts().getShowWarnings()) {
+    if (!getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_WARNINGS)) {
       return;
     }
 
@@ -1473,7 +1477,8 @@ public class SqlLine {
       handleSQLException((SQLException) e);
     } else if (e instanceof WrappedSqlException) {
       handleSQLException((SQLException) e.getCause());
-    } else if (!initComplete && !getOpts().getVerbose()) {
+    } else if (!initComplete
+        && !getOpts().getBoolean(SqlLinePropertiesEnum.VERBOSE)) {
       // all init errors must be verbose
       if (e.getMessage() == null) {
         error(e.getClass().getName());
@@ -1487,9 +1492,12 @@ public class SqlLine {
 
   void handleSQLException(SQLException e) {
     // all init errors must be verbose
-    final boolean showWarnings = !initComplete || getOpts().getShowWarnings();
-    final boolean verbose = !initComplete || getOpts().getVerbose();
-    final boolean showNested = !initComplete || getOpts().getShowNestedErrs();
+    final boolean showWarnings = !initComplete
+        || getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_WARNINGS);
+    final boolean verbose = !initComplete
+        || getOpts().getBoolean(SqlLinePropertiesEnum.VERBOSE);
+    final boolean showNested = !initComplete
+        || getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_NESTED_ERRS);
 
     if (e instanceof SQLWarning && !showWarnings) {
       return;
@@ -1616,18 +1624,22 @@ public class SqlLine {
   ///////////////////////////////////////
 
   int print(ResultSet rs, DispatchCallback callback) throws SQLException {
-    String format = getOpts().getOutputFormat();
+    String format = getOpts().get(SqlLinePropertiesEnum.OUTPUT_FORMAT);
     OutputFormat f = getOutputFormats().get(format);
     if ("csv".equals(format)) {
       final SeparatedValuesOutputFormat csvOutput =
           (SeparatedValuesOutputFormat) f;
-      if ((csvOutput.separator == null && getOpts().getCsvDelimiter() != null)
+      if ((csvOutput.separator == null
+              && getOpts().get(SqlLinePropertiesEnum.CSV_DELIMITER) != null)
           || (csvOutput.separator != null
-              && !csvOutput.separator.equals(getOpts().getCsvDelimiter())
+              && !csvOutput.separator.equals(
+                  getOpts().get(SqlLinePropertiesEnum.CSV_DELIMITER))
               || csvOutput.quoteCharacter
-                  != getOpts().getCsvQuoteCharacter())) {
+                  != getOpts().getChar(
+                      SqlLinePropertiesEnum.CSV_QUOTE_CHARACTER))) {
         f = new SeparatedValuesOutputFormat(this,
-            getOpts().getCsvDelimiter(), getOpts().getCsvQuoteCharacter());
+            getOpts().get(SqlLinePropertiesEnum.CSV_DELIMITER),
+            getOpts().getChar(SqlLinePropertiesEnum.CSV_QUOTE_CHARACTER));
         Map<String, OutputFormat> updFormats =
             new HashMap<>(getOutputFormats());
         updFormats.put("csv", f);
@@ -1641,7 +1653,7 @@ public class SqlLine {
     }
 
     Rows rows;
-    if (getOpts().getIncremental()) {
+    if (getOpts().getBoolean(SqlLinePropertiesEnum.INCREMENTAL)) {
       rows = new IncrementalRows(this, rs, callback);
     } else {
       rows = new BufferedRows(this, rs);
@@ -1652,11 +1664,13 @@ public class SqlLine {
 
   Statement createStatement() throws SQLException {
     Statement stmnt = getDatabaseConnection().connection.createStatement();
-    if (getOpts().timeout > -1) {
-      stmnt.setQueryTimeout(getOpts().timeout);
+    final int timeout = getOpts().getInt(SqlLinePropertiesEnum.TIMEOUT);
+    if (timeout > -1) {
+      stmnt.setQueryTimeout(timeout);
     }
-    if (getOpts().rowLimit != 0) {
-      stmnt.setMaxRows(getOpts().rowLimit);
+    final int rowLimit = getOpts().getInt(SqlLinePropertiesEnum.ROW_LIMIT);
+    if (rowLimit != 0) {
+      stmnt.setMaxRows(rowLimit);
     }
 
     return stmnt;
@@ -1709,7 +1723,7 @@ public class SqlLine {
         boolean success = callback.isSuccess();
         // if we do not force script execution, abort
         // when a failure occurs.
-        if (!success && !getOpts().getForce()) {
+        if (!success && !getOpts().getBoolean(SqlLinePropertiesEnum.FORCE)) {
           error(loc("abort-on-error", cmd));
           return successCount;
         }
@@ -1724,7 +1738,8 @@ public class SqlLine {
 
   void setCompletions() throws SQLException, IOException {
     if (getDatabaseConnection() != null) {
-      getDatabaseConnection().setCompletions(getOpts().getFastConnect());
+      getDatabaseConnection().setCompletions(
+          getOpts().getBoolean(SqlLinePropertiesEnum.FAST_CONNECT));
     }
   }
 

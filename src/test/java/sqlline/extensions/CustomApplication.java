@@ -27,6 +27,7 @@ import sqlline.OutputFormat;
 import sqlline.ReflectiveCommandHandler;
 import sqlline.SqlLine;
 import sqlline.SqlLineOpts;
+import sqlline.SqlLinePropertiesEnum;
 
 /**
  * Sub-class of {@link Application} that is used to test custom
@@ -85,7 +86,7 @@ public class CustomApplication extends Application {
 
   @Override public SqlLineOpts getOpts(SqlLine sqlLine) {
     SqlLineOpts opts = sqlLine.getOpts();
-    opts.setNullValue("custom_null");
+    opts.set(SqlLinePropertiesEnum.NULL_VALUE, "custom_null");
     return opts;
   }
 }

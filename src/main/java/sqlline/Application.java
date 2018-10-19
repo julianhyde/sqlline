@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
@@ -164,16 +165,13 @@ public class Application {
    * <p>Override this method to return a custom information message.
    *
    * @return custom information message
-   * @throws Exception in case of errors during
-   *         obtaining application info message
-   *
    * @see #DEFAULT_APP_INFO_MESSAGE
    */
-  public String getInfoMessage() throws Exception {
+  public String getInfoMessage() {
     return getVersion();
   }
 
-  public String getVersion() throws Exception {
+  public String getVersion() {
     final String path = "/META-INF/maven/sqlline/sqlline/pom.properties";
     InputStream inputStream = getClass().getResourceAsStream(path);
     Properties properties = new Properties();
@@ -182,7 +180,11 @@ public class Application {
     if (inputStream != null) {
       // If not running from a .jar, pom.properties will not exist, and
       // inputStream is null.
-      properties.load(inputStream);
+      try {
+        properties.load(inputStream);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
     return String.format(Locale.ROOT, "%s version %s",
         properties.getProperty("artifactId"),

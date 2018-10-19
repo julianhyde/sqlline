@@ -25,7 +25,7 @@ public abstract class AbstractOutputFormat implements OutputFormat {
     int count = 0;
     Rows.Row header = rows.next();
 
-    if (sqlLine.getOpts().getShowHeader()) {
+    if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_HEADER)) {
       printHeader(header);
     }
     while (rows.hasNext()) {

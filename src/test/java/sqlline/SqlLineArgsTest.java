@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -381,14 +383,19 @@ public class SqlLineArgsTest {
     final SqlLine sqlLine = new SqlLine();
     String help = sqlLine.loc("help-set")
         + sqlLine.loc("variables");
-    for (String p : sqlLine.getOpts().propertyNamesMixed()) {
+
+    final TreeSet<String> propertyNamesMixed =
+        Arrays.stream(SqlLinePropertiesEnum.values())
+            .map(SqlLinePropertiesEnum::propertyName)
+            .collect(Collectors.toCollection(TreeSet::new));
+    for (String p : propertyNamesMixed) {
       assertThat(help, containsString("\n" + p + " "));
     }
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autoCommit"),
+    assertThat(propertyNamesMixed.contains("autoCommit"),
         is(true));
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
+    assertThat(propertyNamesMixed.contains("autocommit"),
         is(false));
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
+    assertThat(propertyNamesMixed.contains("trimScripts"),
         is(true));
 
     while (help.length() > 0) {
@@ -985,7 +992,7 @@ public class SqlLineArgsTest {
     final String script = "!set numberFormat null\n"
         + "!set\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        containsString("numberformat        null"));
+        containsString("numberFormat        null"));
   }
 
   @Test
