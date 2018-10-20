@@ -655,7 +655,7 @@ public class Commands {
       DispatchCallback callback) {
     boolean success = sqlLine.getOpts().set(key, value, false);
     if (success) {
-      if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.AUTO_SAVE)) {
+      if (sqlLine.getOpts().getAutoSave()) {
         try {
           sqlLine.getOpts().save();
         } catch (Exception saveException) {
@@ -672,7 +672,7 @@ public class Commands {
   }
 
   private void reportResult(String action, long start, long end) {
-    if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_ELAPSED_TIME)) {
+    if (sqlLine.getOpts().getShowElapsedTime()) {
       sqlLine.info(action + " " + sqlLine.locElapsedTime(end - start));
     } else {
       sqlLine.info(action);
@@ -1433,8 +1433,7 @@ public class Commands {
           }
 
           String trimmedLine = scriptLine.trim();
-          if (sqlLine.getOpts()
-              .getBoolean(SqlLinePropertiesEnum.TRIM_SCRIPTS)) {
+          if (sqlLine.getOpts().getTrimScripts()) {
             scriptLine = trimmedLine;
           }
 
@@ -1708,8 +1707,7 @@ public class Commands {
       sqlLine.output(man);
 
       // silly little pager
-      if (index % (sqlLine.getOpts()
-          .getInt(SqlLinePropertiesEnum.MAX_HEIGHT) - 1) == 0) {
+      if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
         String prompt = sqlLine.loc("enter-for-more");
         sqlLine.getLineReader().getTerminal().writer().write(prompt);
         int c;

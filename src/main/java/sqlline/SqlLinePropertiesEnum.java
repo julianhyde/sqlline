@@ -59,8 +59,8 @@ public enum SqlLinePropertiesEnum implements SqlLineProperty {
   private final String propertyName;
   private final Type type;
   private final Object defaultValue;
-  private final boolean isReadOnly;
   private final boolean couldBeStored;
+  private final boolean isReadOnly;
 
   SqlLinePropertiesEnum(String propertyName, Type type, Object defaultValue) {
     this(propertyName, type, defaultValue, true, false);

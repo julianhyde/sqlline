@@ -27,7 +27,37 @@ import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.reader.impl.history.DefaultHistory;
 
-import static sqlline.SqlLinePropertiesEnum.*;
+import sqlline.SqlLineProperty.SqlLinePropertyWrite;
+import sqlline.SqlLineProperty.Type;
+
+import static sqlline.SqlLinePropertiesEnum.AUTO_COMMIT;
+import static sqlline.SqlLinePropertiesEnum.AUTO_SAVE;
+import static sqlline.SqlLinePropertiesEnum.COLOR;
+import static sqlline.SqlLinePropertiesEnum.CSV_DELIMITER;
+import static sqlline.SqlLinePropertiesEnum.CSV_QUOTE_CHARACTER;
+import static sqlline.SqlLinePropertiesEnum.DATE_FORMAT;
+import static sqlline.SqlLinePropertiesEnum.DEFAULT;
+import static sqlline.SqlLinePropertiesEnum.FAST_CONNECT;
+import static sqlline.SqlLinePropertiesEnum.FORCE;
+import static sqlline.SqlLinePropertiesEnum.HEADER_INTERVAL;
+import static sqlline.SqlLinePropertiesEnum.HISTORY_FILE;
+import static sqlline.SqlLinePropertiesEnum.INCREMENTAL;
+import static sqlline.SqlLinePropertiesEnum.ISOLATION;
+import static sqlline.SqlLinePropertiesEnum.MAX_HEIGHT;
+import static sqlline.SqlLinePropertiesEnum.NULL_VALUE;
+import static sqlline.SqlLinePropertiesEnum.NUMBER_FORMAT;
+import static sqlline.SqlLinePropertiesEnum.OUTPUT_FORMAT;
+import static sqlline.SqlLinePropertiesEnum.ROW_LIMIT;
+import static sqlline.SqlLinePropertiesEnum.SHOW_ELAPSED_TIME;
+import static sqlline.SqlLinePropertiesEnum.SHOW_HEADER;
+import static sqlline.SqlLinePropertiesEnum.SHOW_NESTED_ERRS;
+import static sqlline.SqlLinePropertiesEnum.SHOW_WARNINGS;
+import static sqlline.SqlLinePropertiesEnum.SILENT;
+import static sqlline.SqlLinePropertiesEnum.TIMEOUT;
+import static sqlline.SqlLinePropertiesEnum.TIMESTAMP_FORMAT;
+import static sqlline.SqlLinePropertiesEnum.TIME_FORMAT;
+import static sqlline.SqlLinePropertiesEnum.TRIM_SCRIPTS;
+import static sqlline.SqlLinePropertiesEnum.VERBOSE;
 
 /**
  * Session options.
@@ -43,16 +73,16 @@ public class SqlLineOpts implements Completer {
   private Set<String> propertyNames;
 
   private final Map<SqlLineProperty, Object> propertiesMap = new HashMap<>();
-  // Map to specify how to set specific properties
+  // Map to setters which are aware of how to set specific properties
   // if a default way
   // @{code sqlline.SqlLineOpts.set(sqlline.SqlLineProperty, java.lang.Object)}
   // is not suitable
   private final Map<SqlLineProperty, SqlLinePropertyWrite> propertiesConfig =
       Collections.unmodifiableMap(
           new HashMap<SqlLineProperty, SqlLinePropertyWrite>() {{
-            put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
             put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
             put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
+            put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
             put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
             put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
             put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
@@ -302,7 +332,6 @@ public class SqlLineOpts implements Completer {
       } else {
         strValue = String.valueOf(value);
         valueToSet = "true".equalsIgnoreCase(strValue)
-            || (true + "").equalsIgnoreCase(strValue)
             || "1".equalsIgnoreCase(strValue)
             || "on".equalsIgnoreCase(strValue)
             || "yes".equalsIgnoreCase(strValue);
@@ -310,6 +339,34 @@ public class SqlLineOpts implements Completer {
       break;
     }
     propertiesMap.put(key, valueToSet);
+  }
+
+  public boolean getFastConnect() {
+    return getBoolean(FAST_CONNECT);
+  }
+
+  public boolean getAutoCommit() {
+    return getBoolean(AUTO_COMMIT);
+  }
+
+  public boolean getVerbose() {
+    return getBoolean(VERBOSE);
+  }
+
+  public boolean getShowElapsedTime() {
+    return getBoolean(SHOW_ELAPSED_TIME);
+  }
+
+  public boolean getShowWarnings() {
+    return getBoolean(SHOW_WARNINGS);
+  }
+
+  public boolean getShowNestedErrs() {
+    return getBoolean(SHOW_NESTED_ERRS);
+  }
+
+  public String getNumberFormat() {
+    return get(NUMBER_FORMAT);
   }
 
   public void setNumberFormat(String numberFormat) {
@@ -327,12 +384,24 @@ public class SqlLineOpts implements Completer {
     propertiesMap.put(NUMBER_FORMAT, numberFormat);
   }
 
+  public String getDateFormat() {
+    return get(DATE_FORMAT);
+  }
+
   public void setDateFormat(String dateFormat) {
     set(DATE_FORMAT, getValidDateTimePatternOrThrow(dateFormat));
   }
 
+  public String getTimeFormat() {
+    return get(TIME_FORMAT);
+  }
+
   public void setTimeFormat(String timeFormat) {
     set(TIME_FORMAT, getValidDateTimePatternOrThrow(timeFormat));
+  }
+
+  public String getTimestampFormat() {
+    return get(TIMESTAMP_FORMAT);
   }
 
   public void setTimestampFormat(String timestampFormat) {
@@ -340,8 +409,28 @@ public class SqlLineOpts implements Completer {
         getValidDateTimePatternOrThrow(timestampFormat));
   }
 
+  public String getNullValue() {
+    return get(NULL_VALUE);
+  }
+
+  public int getRowLimit() {
+    return getInt(ROW_LIMIT);
+  }
+
+  public int getTimeout() {
+    return getInt(TIMEOUT);
+  }
+
+  public String getIsolation() {
+    return get(ISOLATION);
+  }
+
   public void setIsolation(String isolation) {
     set(ISOLATION, isolation.toUpperCase(Locale.ROOT));
+  }
+
+  public String getHistoryFile() {
+    return get(HISTORY_FILE);
   }
 
   public void setHistoryFile(String historyFile) {
@@ -350,10 +439,10 @@ public class SqlLineOpts implements Completer {
         || Objects.equals(currentValue, Commands.expand(historyFile))) {
       return;
     }
-    if (!DEFAULT.equalsIgnoreCase(historyFile)) {
-      propertiesMap.put(HISTORY_FILE, Commands.expand(historyFile));
-    } else {
+    if (DEFAULT.equalsIgnoreCase(historyFile)) {
       set(HISTORY_FILE, DEFAULT);
+    } else {
+      propertiesMap.put(HISTORY_FILE, Commands.expand(historyFile));
     }
     if (sqlLine != null && sqlLine.getLineReader() != null) {
       final History history = sqlLine.getLineReader().getHistory();
@@ -368,6 +457,18 @@ public class SqlLineOpts implements Completer {
           .setVariable(LineReader.HISTORY_FILE, get(HISTORY_FILE));
       new DefaultHistory().attach(sqlLine.getLineReader());
     }
+  }
+
+  public boolean getColor() {
+    return getBoolean(COLOR);
+  }
+
+  public String getCsvDelimiter() {
+    return get(CSV_DELIMITER);
+  }
+
+  public char getCsvQuoteCharacter() {
+    return getChar(CSV_QUOTE_CHARACTER);
   }
 
   public void setCsvQuoteCharacter(String csvQuoteCharacter) {
@@ -386,6 +487,52 @@ public class SqlLineOpts implements Completer {
     }
     throw new IllegalArgumentException("CsvQuoteCharacter is '"
         + csvQuoteCharacter + "'; it must be a character of default");
+  }
+
+  public boolean getShowHeader() {
+    return getBoolean(SHOW_HEADER);
+  }
+
+  public int getHeaderInterval() {
+    return getInt(HEADER_INTERVAL);
+  }
+
+  public boolean getForce() {
+    return getBoolean(FORCE);
+  }
+
+  public boolean getIncremental() {
+    return getBoolean(INCREMENTAL);
+  }
+
+  public boolean getSilent() {
+    return getBoolean(SILENT);
+  }
+
+  /**
+   * @deprecated Use {@link #getAutoSave()}
+   *
+   * @return true if auto save is on, false otherwise
+   */
+  @Deprecated
+  public boolean getAutosave() {
+    return getAutoSave();
+  }
+
+  public boolean getAutoSave() {
+    return getBoolean(AUTO_SAVE);
+  }
+
+  public String getOutputFormat() {
+    return get(OUTPUT_FORMAT);
+  }
+
+  public boolean getTrimScripts() {
+    return getBoolean(TRIM_SCRIPTS);
+  }
+
+  public int getMaxHeight() {
+    return getInt(MAX_HEIGHT);
   }
 
   public File getPropertiesFile() {

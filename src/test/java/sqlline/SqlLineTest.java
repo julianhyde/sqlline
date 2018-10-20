@@ -106,8 +106,7 @@ public class SqlLineTest extends TestCase {
     System.setProperty("sqlline.Isolation", "TRANSACTION_NONE");
     SqlLine line = new SqlLine();
     try {
-      assertEquals("TRANSACTION_NONE",
-          line.getOpts().get(SqlLinePropertiesEnum.ISOLATION));
+      assertEquals("TRANSACTION_NONE", line.getOpts().getIsolation());
     } finally {
       // set back to the default for tests running in the same JVM.
       System.setProperty("sqlline.Isolation", "TRANSACTION_REPEATABLE_READ");

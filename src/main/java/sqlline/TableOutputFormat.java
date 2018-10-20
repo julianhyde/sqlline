@@ -55,9 +55,9 @@ class TableOutputFormat implements OutputFormat {
                 headerCols.getVisibleLength());
       }
 
-      if (sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_HEADER)) {
+      if (sqlLine.getOpts().getShowHeader()) {
         final int headerInterval =
-            sqlLine.getOpts().getInt(SqlLinePropertiesEnum.HEADER_INTERVAL);
+            sqlLine.getOpts().getHeaderInterval();
         if (index == 0
             || headerInterval > 0 && index % headerInterval == 0) {
           printRow(header, true);
@@ -73,8 +73,7 @@ class TableOutputFormat implements OutputFormat {
       index++;
     }
 
-    if (header != null
-        && sqlLine.getOpts().getBoolean(SqlLinePropertiesEnum.SHOW_HEADER)) {
+    if (header != null && sqlLine.getOpts().getShowHeader()) {
       printRow(header, true);
     }
 

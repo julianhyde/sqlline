@@ -50,7 +50,7 @@ abstract class Rows implements Iterator<Rows.Row> {
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
     final String numberFormatPropertyValue =
-        sqlLine.getOpts().get(SqlLinePropertiesEnum.NUMBER_FORMAT);
+        sqlLine.getOpts().getNumberFormat();
     if (Objects.equals(numberFormatPropertyValue,
         SqlLinePropertiesEnum.NUMBER_FORMAT.defaultValue())) {
       numberFormat = null;
@@ -59,7 +59,7 @@ abstract class Rows implements Iterator<Rows.Row> {
           DecimalFormatSymbols.getInstance(Locale.ROOT));
     }
     final String dateFormatPropertyValue =
-        sqlLine.getOpts().get(SqlLinePropertiesEnum.DATE_FORMAT);
+        sqlLine.getOpts().getDateFormat();
     if (Objects.equals(dateFormatPropertyValue,
         SqlLinePropertiesEnum.DATE_FORMAT.defaultValue())) {
       dateFormat = null;
@@ -68,7 +68,7 @@ abstract class Rows implements Iterator<Rows.Row> {
           new SimpleDateFormat(dateFormatPropertyValue, Locale.ROOT);
     }
     final String timeFormatPropertyValue =
-        sqlLine.getOpts().get(SqlLinePropertiesEnum.TIME_FORMAT);
+        sqlLine.getOpts().getTimeFormat();
     if (Objects.equals(timeFormatPropertyValue,
         SqlLinePropertiesEnum.TIME_FORMAT.defaultValue())) {
       timeFormat = null;
@@ -77,7 +77,7 @@ abstract class Rows implements Iterator<Rows.Row> {
           new SimpleDateFormat(timeFormatPropertyValue, Locale.ROOT);
     }
     final String timestampFormatPropertyValue =
-        sqlLine.getOpts().get(SqlLinePropertiesEnum.TIMESTAMP_FORMAT);
+        sqlLine.getOpts().getTimestampFormat();
     if (Objects.equals(timestampFormatPropertyValue,
         SqlLinePropertiesEnum.TIMESTAMP_FORMAT.defaultValue())) {
       timestampFormat = null;
@@ -86,7 +86,7 @@ abstract class Rows implements Iterator<Rows.Row> {
           new SimpleDateFormat(timestampFormatPropertyValue, Locale.ROOT);
     }
     final String nullPropertyValue =
-        sqlLine.getOpts().get(SqlLinePropertiesEnum.NULL_VALUE);
+        sqlLine.getOpts().getNullValue();
     if (Objects.equals(nullPropertyValue,
         SqlLinePropertiesEnum.NULL_VALUE.defaultValue())) {
       nullValue = null;
