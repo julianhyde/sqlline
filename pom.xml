@@ -41,6 +41,7 @@
     <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
     <maven-jar-plugin.version>3.0.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.additionalOptions>-html5</maven-javadoc-plugin.additionalOptions>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
@@ -212,6 +213,7 @@
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
           <stylesheetfile>${basedir}/doc/styles.css</stylesheetfile>
+          <additionalOptions>${maven-javadoc-plugin.additionalOptions}</additionalOptions>
           <show>public</show>
         </configuration>
         <executions>
@@ -403,6 +405,17 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <profile>
+      <id>java8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <properties>
+        <!-- Javadoc only has a "-html5" flag in JDK 9 and higher. -->
+        <maven-javadoc-plugin.additionalOptions/>
+      </properties>
     </profile>
   </profiles>
 </project>
