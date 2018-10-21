@@ -43,6 +43,7 @@ import static sqlline.SqlLinePropertiesEnum.HEADER_INTERVAL;
 import static sqlline.SqlLinePropertiesEnum.HISTORY_FILE;
 import static sqlline.SqlLinePropertiesEnum.INCREMENTAL;
 import static sqlline.SqlLinePropertiesEnum.ISOLATION;
+import static sqlline.SqlLinePropertiesEnum.MAX_COLUMN_WIDTH;
 import static sqlline.SqlLinePropertiesEnum.MAX_HEIGHT;
 import static sqlline.SqlLinePropertiesEnum.NULL_VALUE;
 import static sqlline.SqlLinePropertiesEnum.NUMBER_FORMAT;
@@ -533,6 +534,10 @@ public class SqlLineOpts implements Completer {
 
   public int getMaxHeight() {
     return getInt(MAX_HEIGHT);
+  }
+
+  public int getMaxColumnWidth() {
+    return getInt(MAX_COLUMN_WIDTH);
   }
 
   public File getPropertiesFile() {
