@@ -12,10 +12,12 @@
 package sqlline;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
@@ -25,6 +27,38 @@ import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.reader.impl.history.DefaultHistory;
 
+import sqlline.SqlLineProperty.Type;
+
+import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.AUTO_SAVE;
+import static sqlline.BuiltInProperty.COLOR;
+import static sqlline.BuiltInProperty.CSV_DELIMITER;
+import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
+import static sqlline.BuiltInProperty.DATE_FORMAT;
+import static sqlline.BuiltInProperty.DEFAULT;
+import static sqlline.BuiltInProperty.FAST_CONNECT;
+import static sqlline.BuiltInProperty.FORCE;
+import static sqlline.BuiltInProperty.HEADER_INTERVAL;
+import static sqlline.BuiltInProperty.HISTORY_FILE;
+import static sqlline.BuiltInProperty.INCREMENTAL;
+import static sqlline.BuiltInProperty.ISOLATION;
+import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
+import static sqlline.BuiltInProperty.MAX_HEIGHT;
+import static sqlline.BuiltInProperty.NULL_VALUE;
+import static sqlline.BuiltInProperty.NUMBER_FORMAT;
+import static sqlline.BuiltInProperty.OUTPUT_FORMAT;
+import static sqlline.BuiltInProperty.ROW_LIMIT;
+import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
+import static sqlline.BuiltInProperty.SHOW_HEADER;
+import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
+import static sqlline.BuiltInProperty.SHOW_WARNINGS;
+import static sqlline.BuiltInProperty.SILENT;
+import static sqlline.BuiltInProperty.TIMEOUT;
+import static sqlline.BuiltInProperty.TIMESTAMP_FORMAT;
+import static sqlline.BuiltInProperty.TIME_FORMAT;
+import static sqlline.BuiltInProperty.TRIM_SCRIPTS;
+import static sqlline.BuiltInProperty.VERBOSE;
+
 /**
  * Session options.
  */
@@ -32,52 +66,32 @@ public class SqlLineOpts implements Completer {
   public static final String PROPERTY_PREFIX = "sqlline.";
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
-  public static final String DEFAULT = "default";
-  private static final int DEFAULT_MAX_WIDTH = 80;
-  private static final int DEFAULT_MAX_HEIGHT = 80;
-  public static final Date TEST_DATE = new Date();
-  public static final String DEFAULT_TRANSACTION_ISOLATION =
-      "TRANSACTION_REPEATABLE_READ";
-  private static final String DEFAULT_HISTORY_FILE =
-      new File(saveDir(), "history").getAbsolutePath();
+  private static final Date TEST_DATE = new Date();
   private SqlLine sqlLine;
-  private final String version;
-  private boolean autoSave = false;
-  private boolean silent = false;
-  private boolean color = false;
-  private String csvDelimiter = ",";
-  private char csvQuoteCharacter = '\'';
-  private boolean showHeader = true;
-  private int headerInterval = 100;
-  private boolean fastConnect = true;
-  private boolean autoCommit = true;
-  private boolean verbose = false;
-  private boolean force = false;
-  private boolean incremental = true;
-  private boolean showElapsedTime = true;
-  private boolean showWarnings = true;
-  private boolean showNestedErrs = false;
-  private String numberFormat = DEFAULT;
-  private String dateFormat = DEFAULT;
-  private String timeFormat = DEFAULT;
-  private String nullValue = DEFAULT;
-  private String timestampFormat = DEFAULT;
-  private int maxWidth = DEFAULT_MAX_WIDTH;
-  private int maxHeight = DEFAULT_MAX_HEIGHT;
-  private int maxColumnWidth = -1;
-  int rowLimit = 0;
-  int timeout = -1;
-  private String isolation = DEFAULT_TRANSACTION_ISOLATION;
-  private String outputFormat = "table";
-  private boolean trimScripts = true;
   private File rcFile = new File(saveDir(), "sqlline.properties");
-  private String historyFile = DEFAULT_HISTORY_FILE;
   private String runFile;
   private Set<String> propertyNames;
 
+  private final Map<SqlLineProperty, Object> propertiesMap = new HashMap<>();
+  /** Map to setters that are aware of how to set specific properties
+   * if a default way
+   * {@code sqlline.SqlLineOpts.set(sqlline.SqlLineProperty, java.lang.Object)}
+   * is not suitable. */
+  private final Map<SqlLineProperty, SqlLineProperty.Writer> propertiesConfig =
+      Collections.unmodifiableMap(
+          new HashMap<SqlLineProperty, SqlLineProperty.Writer>() {
+            {
+              put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
+              put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
+              put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
+              put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
+              put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
+              put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
+            }
+          });
+
   public SqlLineOpts(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    this.version = sqlLine.getVersion();
   }
 
   public SqlLineOpts(SqlLine sqlLine, Properties props) {
@@ -87,10 +101,6 @@ public class SqlLineOpts implements Completer {
 
   public List<Completer> optionCompleters() {
     return Collections.singletonList(this);
-  }
-
-  public List<String> possibleSettingValues() {
-    return Arrays.asList("yes", "no");
   }
 
   /**
@@ -115,8 +125,9 @@ public class SqlLineOpts implements Completer {
     File f =
         new File(
             System.getProperty("user.home"),
-            ((System.getProperty("os.name").toLowerCase(Locale.ROOT)
-                .indexOf("windows") != -1) ? "" : ".") + "sqlline")
+            ((System.getProperty("os.name")
+                .toLowerCase(Locale.ROOT).contains("windows"))
+                ? "" : ".") + "sqlline")
             .getAbsoluteFile();
     try {
       f.mkdirs();
@@ -132,8 +143,7 @@ public class SqlLineOpts implements Completer {
     try {
       new StringsCompleter(propertyNames())
           .complete(lineReader, parsedLine, list);
-    } catch (Throwable t) {
-      return;
+    } catch (Throwable ignored) {
     }
   }
 
@@ -145,79 +155,39 @@ public class SqlLineOpts implements Completer {
 
   public void save(OutputStream out) {
     try {
-      Properties props = toProperties();
-
-      // don't save maxwidth: it is automatically set based on
-      // the terminal configuration
-      props.remove(PROPERTY_PREFIX + "maxwidth");
-
-      // don't save version: it is automatically set based on
-      // Application#getVersion
-      props.remove("version");
-
+      Properties props = toProperties(true);
       props.store(out, sqlLine.getApplicationTitle());
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
   }
 
-  public Set<String> propertyNames()
-      throws IllegalAccessException, InvocationTargetException {
+  public Set<String> propertyNames() {
     if (propertyNames != null) {
       return propertyNames;
     }
-    final TreeSet<String> set = new TreeSet<>();
-    for (String s : propertyNamesMixed()) {
-      set.add(s.toLowerCase(Locale.ROOT));
-    }
     // properties names do not change at runtime
     // cache for further re-use
+    Set<String> set = Arrays.stream(BuiltInProperty.values())
+        .map(t -> t.propertyName().toLowerCase(Locale.ROOT))
+        .collect(Collectors.toCollection(TreeSet::new));
     propertyNames = Collections.unmodifiableSet(set);
     return propertyNames;
   }
 
-  Set<String> propertyNamesMixed() {
-    TreeSet<String> names = new TreeSet<>();
-
-    // get all the values from getXXX methods
-    for (Method method : getClass().getDeclaredMethods()) {
-      if (!method.getName().startsWith("get")) {
-        continue;
-      }
-
-      if (method.getParameterTypes().length != 0) {
-        continue;
-      }
-
-      String propName = deCamel(method.getName().substring(3));
-      if (propName.equals("run")) {
-        // Not a real property
-        continue;
-      }
-      if (propName.equals("autosave")) {
-        // Deprecated; property is now "autoSave"
-        continue;
-      }
-      names.add(propName);
-    }
-
-    return names;
+  public Properties toProperties() {
+    return toProperties(false);
   }
 
-  /** Converts "CamelCase" to "camelCase". */
-  private static String deCamel(String s) {
-    return s.substring(0, 1).toLowerCase(Locale.ROOT)
-        + s.substring(1);
-  }
-
-  public Properties toProperties()
-      throws IllegalAccessException,
-      InvocationTargetException,
-      ClassNotFoundException {
+  public Properties toProperties(boolean toSave) {
     Properties props = new Properties();
 
-    for (String name : propertyNames()) {
-      props.setProperty(PROPERTY_PREFIX + name, get(name));
+    for (BuiltInProperty property : BuiltInProperty.values()) {
+      if (!toSave || property.couldBeStored()) {
+        props.setProperty(PROPERTY_PREFIX + property.propertyName(),
+            String.valueOf(
+                propertiesMap.getOrDefault(property, property.defaultValue())));
+      }
     }
 
     sqlLine.debug("properties: " + props.toString());
@@ -255,27 +225,35 @@ public class SqlLineOpts implements Completer {
   }
 
   public boolean set(String key, String value, boolean quiet) {
-    try {
-      sqlLine.getReflector().invoke(this, "set" + key, value);
+    if ("run".equals(key)) {
+      setRun(value);
       return true;
-    } catch (Exception e) {
+    }
+    final SqlLineProperty property = BuiltInProperty.valueOf(key, true);
+    if (property == null) {
       if (!quiet) {
-        if ("version".equals(key)) {
-          sqlLine.error(sqlLine.loc("property-readonly", key));
-        } else {
-          // need to use System.err here because when bad command args
-          // are passed this is called before init is done, meaning
-          // that sqlline's error() output chokes because it depends
-          // on properties like text coloring that can get set in
-          // arbitrary order.
-          System.err.println(
-              sqlLine.loc(
-                  "error-setting",
-                  key,
-                  e.getCause() == null ? e : e.getCause()));
-        }
+        // need to use System.err here because when bad command args
+        // are passed this is called before init is done, meaning
+        // that sqlline's error() output chokes because it depends
+        // on properties like text coloring that can get set in
+        // arbitrary order.
+        System.err.println(sqlLine.loc("unknown-prop", key));
       }
       return false;
+    }
+    if (property.isReadOnly()) {
+      if (!quiet) {
+        sqlLine.error(sqlLine.loc("property-readonly", key));
+      }
+      return false;
+    } else {
+      SqlLineProperty.Writer propertyWriter = propertiesConfig.get(property);
+      if (propertyWriter != null) {
+        propertyWriter.write(value);
+      } else {
+        set(property, value);
+      }
+      return true;
     }
   }
 
@@ -291,153 +269,181 @@ public class SqlLineOpts implements Completer {
     }
   }
 
-  public String get(String key) throws IllegalAccessException,
-      InvocationTargetException, ClassNotFoundException {
-    return String.valueOf(
-        sqlLine.getReflector().invoke(this, "get" + key));
+  public String get(SqlLineProperty key) {
+    return String.valueOf(propertiesMap.getOrDefault(key, key.defaultValue()));
   }
 
-  public void setFastConnect(boolean fastConnect) {
-    this.fastConnect = fastConnect;
+  public char getChar(SqlLineProperty key) {
+    if (key.type() == Type.CHAR) {
+      return (char) propertiesMap.getOrDefault(key, key.defaultValue());
+    } else {
+      throw new IllegalArgumentException(
+          sqlLine.loc("wrong-prop-type", key.propertyName(), key.type()));
+    }
+  }
+
+  public int getInt(SqlLineProperty key) {
+    if (key.type() == Type.INTEGER) {
+      return (int) propertiesMap.getOrDefault(key, key.defaultValue());
+    } else {
+      throw new IllegalArgumentException(
+          sqlLine.loc("wrong-prop-type", key.propertyName(), key.type()));
+    }
+  }
+
+  public boolean getBoolean(SqlLineProperty key) {
+    if (key.type() == Type.BOOLEAN) {
+      return (boolean) propertiesMap.getOrDefault(key, key.defaultValue());
+    } else {
+      throw new IllegalArgumentException(
+          sqlLine.loc("wrong-prop-type", key.propertyName(), key.type()));
+    }
+  }
+
+  public String get(String key) {
+    SqlLineProperty property = BuiltInProperty.valueOf(key, true);
+    if (property == null) {
+      return null; // unknown property
+    }
+    final Object o =
+        propertiesMap.getOrDefault(property, property.defaultValue());
+    return String.valueOf(o);
+  }
+
+  public void set(SqlLineProperty key, Object value) {
+    Object valueToSet = value;
+    String strValue;
+    switch (key.type()) {
+    case STRING:
+      strValue = value instanceof String
+          ? (String) value : String.valueOf(value);
+      valueToSet = DEFAULT.equalsIgnoreCase(strValue)
+          ? key.defaultValue() : value;
+      break;
+    case INTEGER:
+      try {
+        valueToSet = value instanceof Integer || value.getClass() == int.class
+          ? value : Integer.parseInt(String.valueOf(value));
+      } catch (Exception ignored) {
+      }
+      break;
+    case BOOLEAN:
+      if (value instanceof Boolean || value.getClass() == boolean.class) {
+        valueToSet = value;
+      } else {
+        strValue = String.valueOf(value);
+        valueToSet = "true".equalsIgnoreCase(strValue)
+            || "1".equalsIgnoreCase(strValue)
+            || "on".equalsIgnoreCase(strValue)
+            || "yes".equalsIgnoreCase(strValue);
+      }
+      break;
+    }
+    propertiesMap.put(key, valueToSet);
   }
 
   public boolean getFastConnect() {
-    return this.fastConnect;
-  }
-
-  public void setAutoCommit(boolean autoCommit) {
-    this.autoCommit = autoCommit;
+    return getBoolean(FAST_CONNECT);
   }
 
   public boolean getAutoCommit() {
-    return this.autoCommit;
-  }
-
-  public void setVerbose(boolean verbose) {
-    this.verbose = verbose;
+    return getBoolean(AUTO_COMMIT);
   }
 
   public boolean getVerbose() {
-    return this.verbose;
-  }
-
-  public void setShowElapsedTime(boolean showElapsedTime) {
-    this.showElapsedTime = showElapsedTime;
+    return getBoolean(VERBOSE);
   }
 
   public boolean getShowElapsedTime() {
-    return this.showElapsedTime;
-  }
-
-  public void setShowWarnings(boolean showWarnings) {
-    this.showWarnings = showWarnings;
+    return getBoolean(SHOW_ELAPSED_TIME);
   }
 
   public boolean getShowWarnings() {
-    return this.showWarnings;
-  }
-
-  public void setShowNestedErrs(boolean showNestedErrs) {
-    this.showNestedErrs = showNestedErrs;
+    return getBoolean(SHOW_WARNINGS);
   }
 
   public boolean getShowNestedErrs() {
-    return this.showNestedErrs;
-  }
-
-  public void setNumberFormat(String numberFormat) {
-    this.numberFormat = numberFormat;
+    return getBoolean(SHOW_NESTED_ERRS);
   }
 
   public String getNumberFormat() {
-    return this.numberFormat;
+    return get(NUMBER_FORMAT);
+  }
+
+  public void setNumberFormat(String numberFormat) {
+    if (DEFAULT.equalsIgnoreCase(numberFormat)) {
+      propertiesMap.put(NUMBER_FORMAT, NUMBER_FORMAT.defaultValue());
+      return;
+    }
+    try {
+      NumberFormat nf = new DecimalFormat(numberFormat,
+          DecimalFormatSymbols.getInstance(Locale.ROOT));
+      nf.format(Integer.MAX_VALUE);
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e.getMessage());
+    }
+    propertiesMap.put(NUMBER_FORMAT, numberFormat);
   }
 
   public String getDateFormat() {
-    return this.dateFormat;
+    return get(DATE_FORMAT);
   }
 
   public void setDateFormat(String dateFormat) {
-    this.dateFormat = getValidDateTimePatternOrThrow(dateFormat);
+    set(DATE_FORMAT, getValidDateTimePatternOrThrow(dateFormat));
   }
 
   public String getTimeFormat() {
-    return this.timeFormat;
+    return get(TIME_FORMAT);
   }
 
   public void setTimeFormat(String timeFormat) {
-    this.timeFormat = getValidDateTimePatternOrThrow(timeFormat);
-  }
-
-  public String getNullValue() {
-    return this.nullValue;
-  }
-
-  public void setNullValue(String nullValue) {
-    this.nullValue = nullValue;
+    set(TIME_FORMAT, getValidDateTimePatternOrThrow(timeFormat));
   }
 
   public String getTimestampFormat() {
-    return this.timestampFormat;
+    return get(TIMESTAMP_FORMAT);
   }
 
   public void setTimestampFormat(String timestampFormat) {
-    this.timestampFormat = getValidDateTimePatternOrThrow(timestampFormat);
+    set(TIMESTAMP_FORMAT,
+        getValidDateTimePatternOrThrow(timestampFormat));
   }
 
-  public void setMaxWidth(int maxWidth) {
-    this.maxWidth = maxWidth;
-  }
-
-  public int getMaxWidth() {
-    return this.maxWidth;
-  }
-
-  public void setMaxColumnWidth(int maxColumnWidth) {
-    this.maxColumnWidth = maxColumnWidth;
-  }
-
-  public int getMaxColumnWidth() {
-    return this.maxColumnWidth;
-  }
-
-  public void setRowLimit(int rowLimit) {
-    this.rowLimit = rowLimit;
+  public String getNullValue() {
+    return get(NULL_VALUE);
   }
 
   public int getRowLimit() {
-    return this.rowLimit;
-  }
-
-  public void setTimeout(int timeout) {
-    this.timeout = timeout;
+    return getInt(ROW_LIMIT);
   }
 
   public int getTimeout() {
-    return this.timeout;
-  }
-
-  public void setIsolation(String isolation) {
-    if (DEFAULT.equalsIgnoreCase(isolation)) {
-      this.isolation = DEFAULT_TRANSACTION_ISOLATION;
-    } else {
-      this.isolation = isolation.toUpperCase(Locale.ROOT);
-    }
+    return getInt(TIMEOUT);
   }
 
   public String getIsolation() {
-    return this.isolation;
+    return get(ISOLATION);
+  }
+
+  public void setIsolation(String isolation) {
+    set(ISOLATION, isolation.toUpperCase(Locale.ROOT));
+  }
+
+  public String getHistoryFile() {
+    return get(HISTORY_FILE);
   }
 
   public void setHistoryFile(String historyFile) {
-    if (Objects.equals(this.historyFile, historyFile)
-        || Objects.equals(this.historyFile, Commands.expand(historyFile))) {
+    final String currentValue = get(HISTORY_FILE);
+    if (Objects.equals(currentValue, historyFile)
+        || Objects.equals(currentValue, Commands.expand(historyFile))) {
       return;
     }
-    if (DEFAULT.equals(historyFile)) {
-      this.historyFile = DEFAULT_HISTORY_FILE;
+    if (DEFAULT.equalsIgnoreCase(historyFile)) {
+      set(HISTORY_FILE, DEFAULT);
     } else {
-      this.historyFile = Commands.expand(historyFile);
+      propertiesMap.put(HISTORY_FILE, Commands.expand(historyFile));
     }
     if (sqlLine != null && sqlLine.getLineReader() != null) {
       final History history = sqlLine.getLineReader().getHistory();
@@ -449,42 +455,34 @@ public class SqlLineOpts implements Completer {
         }
       }
       sqlLine.getLineReader()
-          .setVariable(LineReader.HISTORY_FILE, this.historyFile);
+          .setVariable(LineReader.HISTORY_FILE, get(HISTORY_FILE));
       new DefaultHistory().attach(sqlLine.getLineReader());
     }
   }
 
-  public String getHistoryFile() {
-    return this.historyFile;
-  }
-
-  public void setColor(boolean color) {
-    this.color = color;
-  }
-
   public boolean getColor() {
-    return this.color;
-  }
-
-  public void setCsvDelimiter(String csvDelimiter) {
-    this.csvDelimiter = csvDelimiter;
+    return getBoolean(COLOR);
   }
 
   public String getCsvDelimiter() {
-    return this.csvDelimiter;
+    return get(CSV_DELIMITER);
+  }
+
+  public char getCsvQuoteCharacter() {
+    return getChar(CSV_QUOTE_CHARACTER);
   }
 
   public void setCsvQuoteCharacter(String csvQuoteCharacter) {
     if (DEFAULT.equals(csvQuoteCharacter)) {
-      this.csvQuoteCharacter = '\'';
+      propertiesMap.put(CSV_QUOTE_CHARACTER, CSV_DELIMITER.defaultValue());
       return;
     } else if (csvQuoteCharacter != null) {
       if (csvQuoteCharacter.length() == 1) {
-        this.csvQuoteCharacter = csvQuoteCharacter.charAt(0);
+        propertiesMap.put(CSV_QUOTE_CHARACTER, csvQuoteCharacter.charAt(0));
         return;
       } else if (csvQuoteCharacter.length() == 2
           && csvQuoteCharacter.charAt(0) == '\\') {
-        this.csvQuoteCharacter = csvQuoteCharacter.charAt(1);
+        propertiesMap.put(CSV_QUOTE_CHARACTER, csvQuoteCharacter.charAt(1));
         return;
       }
     }
@@ -492,58 +490,24 @@ public class SqlLineOpts implements Completer {
         + csvQuoteCharacter + "'; it must be a character of default");
   }
 
-  public char getCsvQuoteCharacter() {
-    return this.csvQuoteCharacter;
-  }
-
-  public void setShowHeader(boolean showHeader) {
-    this.showHeader = showHeader;
-  }
-
   public boolean getShowHeader() {
-    return this.showHeader;
-  }
-
-  public void setHeaderInterval(int headerInterval) {
-    this.headerInterval = headerInterval;
+    return getBoolean(SHOW_HEADER);
   }
 
   public int getHeaderInterval() {
-    return this.headerInterval;
-  }
-
-  public void setForce(boolean force) {
-    this.force = force;
+    return getInt(HEADER_INTERVAL);
   }
 
   public boolean getForce() {
-    return this.force;
-  }
-
-  public void setIncremental(boolean incremental) {
-    this.incremental = incremental;
+    return getBoolean(FORCE);
   }
 
   public boolean getIncremental() {
-    return this.incremental;
-  }
-
-  public void setSilent(boolean silent) {
-    this.silent = silent;
+    return getBoolean(INCREMENTAL);
   }
 
   public boolean getSilent() {
-    return this.silent;
-  }
-
-  /**
-   * @deprecated Use {@link #setAutoSave(boolean)}
-   *
-   * @param autoSave auto save flag
-   */
-  @Deprecated
-  public void setAutosave(boolean autoSave) {
-    setAutoSave(autoSave);
+    return getBoolean(SILENT);
   }
 
   /**
@@ -556,44 +520,28 @@ public class SqlLineOpts implements Completer {
     return getAutoSave();
   }
 
-  public void setAutoSave(boolean autoSave) {
-    this.autoSave = autoSave;
-  }
-
   public boolean getAutoSave() {
-    return this.autoSave;
-  }
-
-  public void setOutputFormat(String outputFormat) {
-    this.outputFormat = outputFormat;
+    return getBoolean(AUTO_SAVE);
   }
 
   public String getOutputFormat() {
-    return this.outputFormat;
-  }
-
-  public void setTrimScripts(boolean trimScripts) {
-    this.trimScripts = trimScripts;
+    return get(OUTPUT_FORMAT);
   }
 
   public boolean getTrimScripts() {
-    return this.trimScripts;
-  }
-
-  public void setMaxHeight(int maxHeight) {
-    this.maxHeight = maxHeight;
+    return getBoolean(TRIM_SCRIPTS);
   }
 
   public int getMaxHeight() {
-    return this.maxHeight;
+    return getInt(MAX_HEIGHT);
+  }
+
+  public int getMaxColumnWidth() {
+    return getInt(MAX_COLUMN_WIDTH);
   }
 
   public File getPropertiesFile() {
     return rcFile;
-  }
-
-  public String getVersion() {
-    return version;
   }
 
   public void setRun(String runFile) {
@@ -605,7 +553,7 @@ public class SqlLineOpts implements Completer {
   }
 
   private String getValidDateTimePatternOrThrow(String dateTimePattern) {
-    if (DEFAULT.equals(dateTimePattern)) {
+    if (DEFAULT.equalsIgnoreCase(dateTimePattern)) {
       return dateTimePattern;
     }
     try {

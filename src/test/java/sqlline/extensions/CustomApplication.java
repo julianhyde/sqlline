@@ -22,6 +22,7 @@ import java.util.Map;
 import org.jline.reader.impl.completer.StringsCompleter;
 
 import sqlline.Application;
+import sqlline.BuiltInProperty;
 import sqlline.CommandHandler;
 import sqlline.OutputFormat;
 import sqlline.ReflectiveCommandHandler;
@@ -85,7 +86,7 @@ public class CustomApplication extends Application {
 
   @Override public SqlLineOpts getOpts(SqlLine sqlLine) {
     SqlLineOpts opts = sqlLine.getOpts();
-    opts.setNullValue("custom_null");
+    opts.set(BuiltInProperty.NULL_VALUE, "custom_null");
     return opts;
   }
 }

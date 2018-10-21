@@ -438,8 +438,8 @@ public class SqlLine {
 
     if (commands.size() > 0) {
       // for single command execute, disable color
-      getOpts().setColor(false);
-      getOpts().setHeaderInterval(-1);
+      getOpts().set(BuiltInProperty.COLOR, false);
+      getOpts().set(BuiltInProperty.HEADER_INTERVAL, -1);
 
       for (String command : commands) {
         debug(loc("executing-command", command));
@@ -583,8 +583,8 @@ public class SqlLine {
     } else {
       terminalBuilder = terminalBuilder.system(true);
       terminal = terminalBuilder.build();
-      getOpts().setMaxWidth(terminal.getWidth());
-      getOpts().setMaxHeight(terminal.getHeight());
+      getOpts().set(BuiltInProperty.MAX_WIDTH, terminal.getWidth());
+      getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
     }
 
     final LineReader lineReader = LineReaderBuilder.builder()
@@ -984,7 +984,7 @@ public class SqlLine {
         new String[] {"TABLE"});
   }
 
-  Set<String> getColumnNames(DatabaseMetaData meta) throws SQLException {
+  Set<String> getColumnNames(DatabaseMetaData meta) {
     Set<String> names = new HashSet<>();
     info(loc("building-tables"));
 
@@ -1294,7 +1294,7 @@ public class SqlLine {
     if ((lastProcessedIndex != line.length() - 1
             && (limit == 0 || limit > tokens.size()))
         || (lastProcessedIndex == 0 && line.length() == 1)) {
-      tokens.add(line.substring(tokenStart, line.length()));
+      tokens.add(line.substring(tokenStart));
     }
     String[] ret = new String[tokens.size()];
     for (int i = 0; i < tokens.size(); i++) {
@@ -1499,10 +1499,9 @@ public class SqlLine {
 
     error(
         loc(e instanceof SQLWarning ? "Warning" : "Error",
-            new Object[] {
-                e.getMessage() == null ? "" : e.getMessage().trim(),
-                e.getSQLState() == null ? "" : e.getSQLState().trim(),
-                e.getErrorCode()}));
+            e.getMessage() == null ? "" : e.getMessage().trim(),
+            e.getSQLState() == null ? "" : e.getSQLState().trim(),
+            e.getErrorCode()));
 
     if (verbose) {
       e.printStackTrace();
@@ -1652,11 +1651,13 @@ public class SqlLine {
 
   Statement createStatement() throws SQLException {
     Statement stmnt = getDatabaseConnection().connection.createStatement();
-    if (getOpts().timeout > -1) {
-      stmnt.setQueryTimeout(getOpts().timeout);
+    int timeout = getOpts().getTimeout();
+    if (timeout > -1) {
+      stmnt.setQueryTimeout(timeout);
     }
-    if (getOpts().rowLimit != 0) {
-      stmnt.setMaxRows(getOpts().rowLimit);
+    int rowLimit = getOpts().getRowLimit();
+    if (rowLimit != 0) {
+      stmnt.setMaxRows(rowLimit);
     }
 
     return stmnt;

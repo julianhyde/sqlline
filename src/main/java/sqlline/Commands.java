@@ -791,7 +791,7 @@ public class Commands {
 
     final int i;
     line = line.toUpperCase(Locale.ROOT);
-    if (line.endsWith(SqlLineOpts.DEFAULT.toUpperCase(Locale.ROOT))) {
+    if (line.endsWith(SqlLineProperty.DEFAULT.toUpperCase(Locale.ROOT))) {
       i = sqlLine.getDatabaseMetaData().getDefaultTransactionIsolation();
     } else if (line.endsWith("TRANSACTION_NONE")) {
       i = Connection.TRANSACTION_NONE;

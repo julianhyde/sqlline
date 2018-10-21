@@ -25,10 +25,12 @@ class TableOutputFormat implements OutputFormat {
     int index = 0;
     ColorBuffer header = null;
     ColorBuffer headerCols = null;
-    final int width = (sqlLine.getOpts().getMaxWidth() == 0
+    final int maxWidth =
+        sqlLine.getOpts().getInt(BuiltInProperty.MAX_WIDTH);
+    final int width = (maxWidth == 0
             && sqlLine.getLineReader() != null
         ? sqlLine.getLineReader().getTerminal().getWidth()
-        : sqlLine.getOpts().getMaxWidth()) - 4;
+        : maxWidth) - 4;
 
     // normalize the columns sizes
     rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
@@ -54,9 +56,10 @@ class TableOutputFormat implements OutputFormat {
       }
 
       if (sqlLine.getOpts().getShowHeader()) {
+        final int headerInterval =
+            sqlLine.getOpts().getHeaderInterval();
         if (index == 0
-            || sqlLine.getOpts().getHeaderInterval() > 0
-                && index % sqlLine.getOpts().getHeaderInterval() == 0) {
+            || headerInterval > 0 && index % headerInterval == 0) {
           printRow(header, true);
           printRow(headerCols, false);
           printRow(header, true);

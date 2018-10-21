@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -267,7 +269,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScriptWithOutput() {
-    final String scriptText = "values 100 + 123;\n"
+    final String scriptText = "!set maxcolumnwidth 20\n"
+        + "values 100 + 123;\n"
         + "-- a comment\n"
         + "values 100 + 253;\n";
 
@@ -380,14 +383,19 @@ public class SqlLineArgsTest {
     final SqlLine sqlLine = new SqlLine();
     String help = sqlLine.loc("help-set")
         + sqlLine.loc("variables");
-    for (String p : sqlLine.getOpts().propertyNamesMixed()) {
+
+    final TreeSet<String> propertyNamesMixed =
+        Arrays.stream(BuiltInProperty.values())
+            .map(BuiltInProperty::propertyName)
+            .collect(Collectors.toCollection(TreeSet::new));
+    for (String p : propertyNamesMixed) {
       assertThat(help, containsString("\n" + p + " "));
     }
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autoCommit"),
+    assertThat(propertyNamesMixed.contains("autoCommit"),
         is(true));
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("autocommit"),
+    assertThat(propertyNamesMixed.contains("autocommit"),
         is(false));
-    assertThat(sqlLine.getOpts().propertyNamesMixed().contains("trimScripts"),
+    assertThat(propertyNamesMixed.contains("trimScripts"),
         is(true));
 
     while (help.length() > 0) {
@@ -984,7 +992,7 @@ public class SqlLineArgsTest {
     final String script = "!set numberFormat null\n"
         + "!set\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        containsString("numberformat        null"));
+        containsString("numberFormat        null"));
   }
 
   @Test
@@ -1304,11 +1312,12 @@ public class SqlLineArgsTest {
   public void testTables() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set maxcolumnwidth 15\n"
         + "!tables\n";
     final String line0 =
-        "|                                                            TABLE_CAT         |";
+        "|    TABLE_CAT    |   TABLE_SCHEM   |   TABLE_NAME    |   TABLE_TYPE    |      |";
     final String line1 =
-        "| PUBLIC                                                                       |";
+        "| PUBLIC          | SYSTEM_LOBS     | BLOCKS          | SYSTEM TABLE    |      |";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1597,6 +1606,8 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
       beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(
+          Collections.singletonList("!set maxcolumnwidth 30"), dc);
       beeLine.runCommands(
           Collections.singletonList("!connect "
               + ConnectionSpec.H2.url + " "
