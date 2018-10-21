@@ -267,7 +267,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScriptWithOutput() {
-    final String scriptText = "values 100 + 123;\n"
+    final String scriptText = "!set maxcolumnwidth 20\n"
+        + "values 100 + 123;\n"
         + "-- a comment\n"
         + "values 100 + 253;\n";
 
@@ -1304,11 +1305,12 @@ public class SqlLineArgsTest {
   public void testTables() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set maxcolumnwidth 15\n"
         + "!tables\n";
     final String line0 =
-        "|                                                            TABLE_CAT         |";
+        "|    TABLE_CAT    |   TABLE_SCHEM   |   TABLE_NAME    |   TABLE_TYPE    |      |";
     final String line1 =
-        "| PUBLIC                                                                       |";
+        "| PUBLIC          | SYSTEM_LOBS     | BLOCKS          | SYSTEM TABLE    |      |";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1597,6 +1599,8 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
       beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(
+          Collections.singletonList("!set maxcolumnwidth 30"), dc);
       beeLine.runCommands(
           Collections.singletonList("!connect "
               + ConnectionSpec.H2.url + " "
