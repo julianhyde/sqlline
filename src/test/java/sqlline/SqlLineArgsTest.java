@@ -175,16 +175,29 @@ public class SqlLineArgsTest {
 
   @Test
   public void testMultilineScriptWithComments() {
-    final String scriptText =
+    final String script1Text =
         "-- a comment  \n values\n--comment\n (\n1\n, ' ab'\n--comment\n)\n;\n";
 
-    checkScriptFile(scriptText, true,
+    checkScriptFile(script1Text, true,
         equalTo(SqlLine.Status.OK),
         containsString("+-------------+-----+\n"
             + "|     C1      | C2  |\n"
             + "+-------------+-----+\n"
             + "| 1           |  ab |\n"
             + "+-------------+-----+"));
+
+    final String script2Text =
+        "--comment \n values (';\n' /* comment */, '\"'"
+        + "/*multiline;\n ;\n comment*/)\n -- ; \n; -- comment";
+
+    checkScriptFile(script2Text, true,
+        equalTo(SqlLine.Status.OK),
+        containsString("+-----+----+\n"
+            + "| C1  | C2 |\n"
+            + "+-----+----+\n"
+            + "| ; \n"
+            + " | \"  |\n"
+            + "+-----+----+"));
   }
 
   /**

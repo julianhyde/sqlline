@@ -28,6 +28,7 @@ public class SqlLineParserTest {
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
     String[] successfulLinesToCheck = {
+        //commands
         "!set",
         " !history",
         "   !scan",
@@ -35,6 +36,26 @@ public class SqlLineParserTest {
         " \n test;",
         " \n test';\n;\n';",
         "select \n 1\n, '\na\n ';",
+        //sql
+        "select 1;",
+        "select '1';",
+        "select '1' as \"asd\";",
+        "select '1' as \"a's'd\";",
+        "select '1' as \"'a's'd\n\" from t;",
+        "select '1' as \"'a'\\\ns'd\\\n\n\" from t;",
+        "select ' ''1'', ''2''' as \"'a'\\\ns'd\\\n\n\" from t;",
+        "select ' ''1'', ''2''' as \"'a'\\\"\n s'd \\\" \n \\\"\n\" from t;",
+        // not a valid sql but from sqlline parser's point of view it is ok
+        // as there are no non-closed brackets, quotes, comments
+        // and it ends with a semicolon
+        " \n test;",
+        " \n test';\n;\n';",
+
+        "select sum(my_function(x.[qwe], x.qwe)) as \"asd\" from t;",
+        "select \n 1\n, '\na\n ';",
+        "select /*\njust a comment\n*/\n'1';",
+        "--comment \n values (';\n' /* comment */, '\"'"
+            + "/*multiline;\n ;\n comment*/)\n -- ; \n;",
     };
     for (String line : successfulLinesToCheck) {
       parser.parse(line, line.length(), acceptLine);
@@ -52,8 +73,19 @@ public class SqlLineParserTest {
         "   !all",
         " \n select",
         " \n test ",
+        // not ended quoted line
         "  test ';",
         " \n test ';'\";",
+        // not ended with ; (existing ; is commented)
+        "select --\n\n--\n--;",
+        "select /*--\n\n--\n--;",
+        "select /* \n ;",
+        "select --\n/*\n--\n--;",
+        "select ' ''\n '' '\n /* ;",
+        // not closed quotes
+        "select ''' from t;",
+        "select ''' \n'' \n'' from t;",
+        "select \"\\\" \n\\\" \n\\\" from t;",
     };
     for (String line : successfulLinesToCheck) {
       try {
