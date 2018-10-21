@@ -678,38 +678,81 @@ public class SqlLine {
   }
 
   /**
-   * Test whether a line requires a continuation.
+   * Return waiting pattern or null depending on
+   * whether a line requires a continuation or not.
    *
-   * @param line the line to be tested
-   * @return true if continuation required
+   * @param line            the line to be tested
+   * @param waitingPattern  the waiting pattern before processing {@code line}
+   * @return waitingPattern if continuation is required, null otherwise
    */
-  boolean needsContinuation(String line) {
+  String getWaitingPattern(String line, String waitingPattern) {
+    if (waitingPattern == null) {
+
+      if (isHelpRequest(line)) {
+        return null;
+      }
+
+      if (line.startsWith(COMMAND_PREFIX)
+          && !line.regionMatches(1, "sql", 0, "sql".length())
+          && !line.regionMatches(1, "all", 0, "all".length())) {
+        return null;
+      }
+      if (!line.trim().startsWith("--") && !line.trim().startsWith("#")) {
+        waitingPattern = ";";
+      }
+    }
+
     if (null == line) {
       // happens when CTRL-C used to exit a malformed.
-      return false;
+      return waitingPattern;
     }
 
-    if (isHelpRequest(line)) {
-      return false;
+    int startPosition = -1;
+    if ("'".equals(waitingPattern)
+        || "\"".equals(waitingPattern)
+        || "*/".equals(waitingPattern)) {
+      startPosition = line.indexOf(waitingPattern);
+      waitingPattern = ";";
+      if (startPosition == -1) {
+        return waitingPattern;
+      }
+    }
+    boolean commented = false;
+    for (int i = startPosition + 1; i < line.length(); i++) {
+      final char ch = line.charAt(i);
+      if (waitingPattern == null || ";".equals(waitingPattern)) {
+        if (ch == '\'' || ch == '"') {
+          waitingPattern = String.valueOf(ch);
+        } else if (ch == '/'
+            && i < line.length() - 1
+            && line.charAt(i + 1) == '*') {
+          waitingPattern = "*/";
+        } else if (ch == '#'
+            || (ch == '-'
+                && i < line.length() - 1
+                && line.charAt(i + 1) == '-')) {
+          commented = true;
+          break;
+        } else if (ch == ';') {
+          waitingPattern = null;
+        }
+      } else if ("'".equals(waitingPattern) || "\"".equals(waitingPattern)) {
+        if (ch == waitingPattern.charAt(0)) {
+          waitingPattern = ";";
+        }
+      } else if ("*/".equals(waitingPattern)) {
+        if (ch == '*' && i < line.length() - 1 && line.charAt(i + 1) == '/') {
+          waitingPattern = ";";
+        }
+      }
+
     }
 
-    if (line.startsWith(COMMAND_PREFIX)
-        && !line.regionMatches(1, "sql", 0, "sql".length())
-        && !line.regionMatches(1, "all", 0, "all".length())) {
-      return false;
+    if (!commented && ";".equals(waitingPattern) && line.trim().endsWith(";")) {
+      return null;
     }
 
-    if (isComment(line)) {
-      return false;
-    }
-
-    String trimmed = line.trim();
-
-    if (trimmed.length() == 0) {
-      return false;
-    }
-
-    return !trimmed.endsWith(";");
+    return waitingPattern;
   }
 
   /**
