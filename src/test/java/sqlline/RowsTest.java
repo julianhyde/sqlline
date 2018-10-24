@@ -40,6 +40,10 @@ public class RowsTest {
 
     // including spaces
     assertEquals("  \\n  ", Rows.escapeControlSymbols("  \n  "));
+    assertEquals("    \\n", Rows.escapeControlSymbols("    \n"));
+    assertEquals("\\b text  \\n", Rows.escapeControlSymbols("\b text  \n"));
+    assertEquals("\\t text", Rows.escapeControlSymbols("\t text"));
+    assertEquals("  text  \\t", Rows.escapeControlSymbols("  text  \t"));
     assertEquals("str \\tstr2 \\nstr3\\b str4\\f str5\\r str6 ",
         Rows.escapeControlSymbols("str \tstr2 \nstr3\b str4\f str5\r str6 "));
 
