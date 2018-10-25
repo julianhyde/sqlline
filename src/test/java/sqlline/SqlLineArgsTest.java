@@ -1660,7 +1660,7 @@ public class SqlLineArgsTest {
   }
 
   @Test
-  public void testMaxColumnWidthIncremental() throws Throwable {
+  public void testMaxColumnWidthIncremental() {
     final String script1 = "!set maxcolumnwidth -1\n"
             + "!set incremental true\n"
             + "values (100, 200)";
@@ -1711,7 +1711,7 @@ public class SqlLineArgsTest {
   }
 
   @Test
-  public void testMaxColumnWidthBuffered() throws Throwable {
+  public void testMaxColumnWidthBuffered() {
     final String script1 = "!set maxcolumnwidth -1\n"
             + "!set incremental false\n"
             + "values (100, 200)";
@@ -1759,6 +1759,51 @@ public class SqlLineArgsTest {
             + "+----+----+";
     checkScriptFile(script4, true, equalTo(SqlLine.Status.OK),
             containsString(line4));
+  }
+
+  @Test
+  public void testMaxHistoryFileRows() {
+    final SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    final File tmpHistoryFile = createTempFile("tmpHistory", "temp");
+    try (BufferedWriter bw =
+             new BufferedWriter(
+                 new OutputStreamWriter(
+                     new FileOutputStream(tmpHistoryFile),
+                     StandardCharsets.UTF_8))) {
+      bw.write("1536743099591:SELECT \\n CURRENT_TIMESTAMP \\n as \\n c1;\n"
+          + "1536743104551:SELECT \\n 'asd' as \"sdf\", 4 \\n \\n as \\n c2;\\n\n"
+          + "1536743104551:SELECT \\n 'asd' \\n as \\n c2;\\n\n"
+          + "1536743104551:!/ 2\n"
+          + "1536743104551:SELECT \\n 2123 \\n as \\n c2 from dual;\\n\n"
+          + "1536743107526:!history\n"
+          + "1536743115431:SELECT \\n 2 \\n as \\n c2;\n"
+          + "1536743115431:SELECT \\n '213' \\n as \\n c1;\n"
+          + "1536743115431:!/ 8\n");
+      bw.flush();
+      bw.close();
+
+      SqlLine.Status status = begin(beeLine, os, true,
+          "--historyfile=" + tmpHistoryFile.getAbsolutePath());
+      // Here the status is SqlLine.Status.OTHER
+      // because of EOF as the result of InputStream which
+      // is not used in the current test so it is ok
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      DispatchCallback dc = new DispatchCallback();
+
+      final int maxLines = 3;
+      beeLine.runCommands(
+          Collections.singletonList("!set maxHistoryFileRows " + maxLines), dc);
+      os.reset();
+      beeLine.runCommands(
+          Collections.singletonList("!history"), dc);
+      assertEquals(maxLines + 1,
+          os.toString("UTF8").split("\\s+\\d{2}:\\d{2}:\\d{2}\\s+").length);
+      os.reset();
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
   }
 
   /** Information necessary to create a JDBC connection. Specify one to run

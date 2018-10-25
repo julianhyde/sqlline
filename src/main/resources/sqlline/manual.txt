@@ -110,6 +110,8 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
 nullValue
 numberformat
@@ -234,6 +236,8 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
 nullValue
 numberformat
@@ -1106,6 +1110,10 @@ isolation       LEVEL      Set transaction isolation level
 maxColumnWidth  integer    The maximum width to use when displaying columns
 maxHeight       integer    The maximum height of the terminal
 maxWidth        integer    The maximum width of the terminal
+maxHistoryFileRows integer The maximum number of history rows
+                           to store in history file
+maxHistoryRows  integer    The maximum number of history rows
+                           to store in memory
 nullValue       String     Use String in place of  NULL values
 numberFormat    pattern    Format numbers using DecimalFormat pattern
 outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json
@@ -2020,6 +2028,8 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
 nullValue
 numberformat
@@ -2084,7 +2094,15 @@ The default transaction isolation that will be used for new connections. To chan
 
 maxcolumnwidth
 
-The maximum column width to display for each colummn before truncating data when using the "table" outputformat. Defaults to 15.
+The maximum column width to display for each column before truncating data when using the "table" outputformat. Defaults to 15.
+
+maxHistoryFileRows
+
+The maximum number of history rows to store in history file. Defaults to 10000 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_FILE_SIZE).
+
+maxHistoryRows
+
+The maximum number of history rows to store in memory. Defaults to 500 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_SIZE).
 
 maxwidth
 

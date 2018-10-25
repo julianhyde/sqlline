@@ -44,6 +44,8 @@ import static sqlline.BuiltInProperty.INCREMENTAL;
 import static sqlline.BuiltInProperty.ISOLATION;
 import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
+import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
+import static sqlline.BuiltInProperty.MAX_HISTORY_ROWS;
 import static sqlline.BuiltInProperty.NULL_VALUE;
 import static sqlline.BuiltInProperty.NUMBER_FORMAT;
 import static sqlline.BuiltInProperty.OUTPUT_FORMAT;
@@ -84,6 +86,9 @@ public class SqlLineOpts implements Completer {
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
+              put(MAX_HISTORY_FILE_ROWS,
+                  SqlLineOpts.this::setMaxHistoryFileRows);
+              put(MAX_HISTORY_ROWS, SqlLineOpts.this::setMaxHistoryRows);
               put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
               put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
@@ -470,6 +475,52 @@ public class SqlLineOpts implements Completer {
 
   public char getCsvQuoteCharacter() {
     return getChar(CSV_QUOTE_CHARACTER);
+  }
+
+  public void setMaxHistoryRows(String maxHistoryRows) {
+    setLineReaderHistoryIntVariable(
+        LineReader.HISTORY_SIZE,
+        maxHistoryRows,
+        BuiltInProperty.MAX_HISTORY_ROWS);
+  }
+
+  public void setMaxHistoryFileRows(String maxHistoryFileRows) {
+    setLineReaderHistoryIntVariable(
+        LineReader.HISTORY_FILE_SIZE,
+        maxHistoryFileRows,
+        MAX_HISTORY_FILE_ROWS);
+  }
+
+  private void setLineReaderHistoryIntVariable(
+      String variableName, String value, SqlLineProperty property) {
+    LineReader lineReader = sqlLine.getLineReader();
+    if (lineReader == null) {
+      return;
+    }
+    int currentValue = getInt(property);
+    try {
+      if (DEFAULT.equals(value)) {
+        if (currentValue == (Integer) property.defaultValue()) {
+          return;
+        } else {
+          lineReader.setVariable(variableName, property.defaultValue());
+          lineReader.getHistory().save();
+          propertiesMap.put(property, property.defaultValue());
+          return;
+        }
+      }
+
+      int parsedValue = Integer.parseInt(value);
+      if (parsedValue == currentValue) {
+        return;
+      } else {
+        lineReader.setVariable(variableName, parsedValue);
+        lineReader.getHistory().save();
+        propertiesMap.put(property, parsedValue);
+      }
+    } catch (Exception e) {
+      sqlLine.handleException(e);
+    }
   }
 
   public void setCsvQuoteCharacter(String csvQuoteCharacter) {

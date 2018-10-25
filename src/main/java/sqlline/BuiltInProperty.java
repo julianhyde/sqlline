@@ -13,6 +13,8 @@ package sqlline;
 
 import java.io.File;
 
+import org.jline.reader.impl.history.DefaultHistory;
+
 /**
  * Built-in properties of SqlLine.
  *
@@ -42,6 +44,11 @@ public enum BuiltInProperty implements SqlLineProperty {
   // the terminal configuration
   MAX_HEIGHT("maxHeight", Type.INTEGER, 80, false, false),
   MAX_WIDTH("maxWidth", Type.INTEGER, 80, false, false),
+
+  MAX_HISTORY_ROWS("maxHistoryRows",
+      Type.INTEGER, DefaultHistory.DEFAULT_HISTORY_SIZE),
+  MAX_HISTORY_FILE_ROWS("maxHistoryFileRows",
+      Type.INTEGER, DefaultHistory.DEFAULT_HISTORY_FILE_SIZE),
 
   NUMBER_FORMAT("numberFormat", Type.STRING, DEFAULT),
   NULL_VALUE("nullValue", Type.STRING, DEFAULT),

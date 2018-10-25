@@ -2853,6 +2853,21 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Defaults to 15.
         </para>
       </sect1>
+      <sect1 id="setting_maxhistoryfilerows">
+        <title>maxhistoryfilerows</title>
+        <para>
+            The maximum number of history rows to store
+            in history file. Defaults to 10000
+            (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_FILE_SIZE).
+        </para>
+    </sect1>
+    <sect1 id="setting_maxhistoryrows">
+        <title>maxhistoryrows</title>
+        <para>
+            The maximum number of history rows to store in memory.
+            Defaults to 500 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_SIZE).
+        </para>
+    </sect1>
       <sect1 id="setting_maxwidth">
         <title>maxwidth</title>
         <para>
