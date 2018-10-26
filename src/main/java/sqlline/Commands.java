@@ -315,16 +315,15 @@ public class Commands {
   /**
    * Constructs a list of string parameters for a metadata call.
    *
-   * <p>The number of items is equal to the number of items in the
-   * <tt>strings</tt> parameter, typically three (catalog, schema, table
-   * name).
+   * <p>The number of items is equal to the number of arguments once
+   * the command line (the {@code line} parameter) has been parsed,
+   * typically three (catalog, schema, table name).
    *
    * <p>Parses the command line, and assumes that the the first word is
    * a compound identifier. If the compound identifier has fewer parts
    * than required, fills from the right.
    *
    * <p>The result is a mutable list of strings.
-   *
    *
    * @param line          Command line
    * @param paramName     Name of parameter being read from command line
