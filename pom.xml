@@ -261,6 +261,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <useManifestOnlyJar>false</useManifestOnlyJar>
           <systemPropertyVariables>
             <!-- Run tests in Turkish to make sure that they don't depend on
                  locale. Turkish is a notoriously tricky locale. -->
