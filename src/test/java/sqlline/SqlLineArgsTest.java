@@ -246,8 +246,8 @@ public class SqlLineArgsTest {
 
   /** Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/72">[SQLLINE-72]
-   * Allow quoted file names (including spaces) in <tt>!record</tt>,
-   * <tt>!run</tt> and <tt>!script</tt> commands</a>. */
+   * Allow quoted file names (including spaces) in <code>!record</code>,
+   * <code>!run</code> and <code>!script</code> commands</a>. */
   @Test
   public void testScriptFilenameWithSpace() {
     final String scriptText = "values 10 + 23;\n"
