@@ -50,9 +50,9 @@ public class SqlLineHighlighterTest {
   @Before
   public void setUp() throws Exception {
     sqlLine2HighLighter = new HashMap<>();
-    SqlLine defaultSqlline = getSqlLine(SqlLineOpts.DEFAULT);
-    SqlLine darkSqlLine = getSqlLine(SqlLineOpts.DARK_SCHEME);
-    SqlLine lightSqlLine = getSqlLine(SqlLineOpts.LIGHT_SCHEME);
+    SqlLine defaultSqlline = getSqlLine(SqlLineProperty.DEFAULT);
+    SqlLine darkSqlLine = getSqlLine("dark");
+    SqlLine lightSqlLine = getSqlLine("light");
     sqlLine2HighLighter
         .put(defaultSqlline, new SqlLineHighlighter(defaultSqlline));
     sqlLine2HighLighter.put(darkSqlLine, new SqlLineHighlighter(darkSqlLine));
@@ -363,7 +363,7 @@ public class SqlLineHighlighterTest {
 
       // in case of default there is no SQLKeyWords
       // or sqlIdentifierQuote retrieval and as a result no connection usage
-      if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
+      if (SqlLineProperty.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
         assertTrue(
             sqlLineHighlighter.getConnection2rules().isEmpty());
       } else {
@@ -446,7 +446,7 @@ public class SqlLineHighlighterTest {
 
       // in case of default there is no SQLKeyWords
       // or sqlIdentifierQuote retrieval and as a result no connection usage
-      if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
+      if (SqlLineProperty.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
         assertTrue(
             sqlLineHighlighter.getConnection2rules().isEmpty());
       } else {
@@ -532,7 +532,7 @@ public class SqlLineHighlighterTest {
       ExpectedHighlightStyle expectedHighlightStyle,
       SqlLine sqlLine,
       SqlLineHighlighter sqlLineHighlighter) {
-    if (SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
+    if (SqlLineProperty.DEFAULT.equals(sqlLine.getOpts().getColorScheme())) {
       checkDefaultLine(sqlLine, line, sqlLineHighlighter);
     } else {
       checkHighlightedLine(sqlLine,

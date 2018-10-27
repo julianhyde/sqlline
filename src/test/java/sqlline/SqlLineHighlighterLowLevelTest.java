@@ -34,7 +34,7 @@ public class SqlLineHighlighterLowLevelTest {
 
   @Before
   public void setUp() throws Exception {
-    defaultSqlline = getSqlLine(SqlLineOpts.DEFAULT);
+    defaultSqlline = getSqlLine(SqlLineProperty.DEFAULT);
     defaultHighlighter = new SqlLineHighlighter(defaultSqlline);
   }
 
