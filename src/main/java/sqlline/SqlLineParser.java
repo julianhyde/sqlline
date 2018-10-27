@@ -24,23 +24,35 @@ import org.jline.reader.impl.DefaultParser;
  * The following table shows each of the prompts you may see and
  * summarizes what they mean about the state that sqlline is in.
  *
- * +---------------+-----------------------------------------------------+
- * |    Prompt     |                    Meaning                          |
- * +---------------+-----------------------------------------------------+
- * | sqlline&gt;   |  Ready for a new query                              |
- * +---------------+-----------------------------------------------------+
- * | semicolon&gt; |  Waiting for next line of multiple-line query,      |
- * |               |  waiting for completion of query with semicolon (;) |
- * +---------------+-----------------------------------------------------+
- * | quote&gt;     |  Waiting for next line, waiting for completion of   |
- * |               |  a string that began with a single quote (')        |
- * +---------------+-----------------------------------------------------+
- * | dquote&gt;    |  Waiting for next line, waiting for completion of   |
- * |               |  a string that began with a double quote (")        |
- * +---------------+-----------------------------------------------------+
- * | *\/&gt;       |  Waiting for next line, waiting for completion of   |
- * |               |  a multiline comment that began with /*             |
- * +---------------+-----------------------------------------------------+
+ * +----------------+-----------------------------------------------------+
+ * |    Prompt      |                    Meaning                          |
+ * +----------------+-----------------------------------------------------+
+ * | sqlline&gt;    |  Ready for a new query                              |
+ * +----------------+-----------------------------------------------------+
+ * | semicolon&gt;  |  Waiting for next line of multiple-line query,      |
+ * |                |  waiting for completion of query with semicolon (;) |
+ * +----------------+-----------------------------------------------------+
+ * | quote&gt;      |  Waiting for next line, waiting for completion of   |
+ * |                |  a string that began with a single quote (')        |
+ * +----------------+-----------------------------------------------------+
+ * | dquote&gt;     |  Waiting for next line, waiting for completion of   |
+ * |                |  a string that began with a double quote (")        |
+ * +----------------+-----------------------------------------------------+
+ * | *\/&gt;        |  Waiting for next line, waiting for completion of   |
+ * |                |  a multiline comment that began with /*             |
+ * +----------------+-----------------------------------------------------+
+ * | )&gt;          |  Waiting for next line, waiting for completion of   |
+ * |                |  a string that began with a round bracket (         |
+ * +----------------+-----------------------------------------------------+
+ * | ]&gt;          |  Waiting for next line, waiting for completion of   |
+ * |                |  a string that began with a square bracket [        |
+ * +----------------+-----------------------------------------------------+
+ * | extra ')'&gt;  |  There is an extra round bracket ) which is         |
+ * |                |  not opened with (                                  |
+ * +----------------+-----------------------------------------------------+
+ * | extra ']'&gt;  |  There is an extra square bracket ] which is        |
+ * |                |  not opened with [                                  |
+ * +----------------+-----------------------------------------------------+
  */
 public class SqlLineParser extends DefaultParser {
   private final SqlLine sqlLine;
@@ -49,8 +61,8 @@ public class SqlLineParser extends DefaultParser {
     this.sqlLine = sqlLine;
   }
 
-  public ParsedLine parse(final String line, final int cursor,
-      ParseContext context) {
+  public ParsedLine parse(
+      final String line, final int cursor, ParseContext context) {
     List<String> words = new LinkedList<>();
     StringBuilder current = new StringBuilder();
 
@@ -60,6 +72,10 @@ public class SqlLineParser extends DefaultParser {
     int quoteStart = -1;
     int oneLineCommentStart = -1;
     int multiLineCommentStart = -1;
+    // if both elements of array are 0 then it is ok
+    // otherwise it should fail
+    int[] roundBracketsBalance = new int[2];
+    int[] squareBracketsBalance = new int[2];
     int rawWordCursor = -1;
     int rawWordLength = -1;
     int rawWordStart = 0;
@@ -81,62 +97,67 @@ public class SqlLineParser extends DefaultParser {
         // Start a quote block
         quoteStart = i;
         containsNonCommentData = true;
-      } else if (quoteStart >= 0) {
-        // In a quote block
-        if (line.charAt(quoteStart) == line.charAt(i) && !isEscaped(line, i)) {
-          // End the block; arg could be empty, but that's fine
-          words.add(current.toString());
-          current.setLength(0);
-          quoteStart = -1;
-          if (rawWordCursor >= 0 && rawWordLength < 0) {
-            rawWordLength = i - rawWordStart + 1;
-          }
-        } else {
-          if (!isEscapeChar(line, i)) {
-            // Take the next character
-            current.append(line.charAt(i));
-          }
-        }
-      } else if (oneLineCommentStart == -1 && isMultilineComment(line, i)) {
-        multiLineCommentStart = i;
-        rawWordLength = getRawWordLength(
-            words, current, rawWordCursor, rawWordLength, rawWordStart, i);
-        rawWordStart = i + 1;
-      } else if (multiLineCommentStart >= 0) {
-        if (line.charAt(i) == '/' && line.charAt(i - 1) == '*') {
-          // End the block; arg could be empty, but that's fine
-          words.add(current.toString());
-          current.setLength(0);
-          multiLineCommentStart = -1;
-          if (rawWordCursor >= 0 && rawWordLength < 0) {
-            rawWordLength = i - rawWordStart + 1;
-          }
-        }
-      } else if (oneLineCommentStart == -1 && isOneLineComment(line, i)) {
-        oneLineCommentStart = i;
-        rawWordLength = getRawWordLength(
-            words, current, rawWordCursor, rawWordLength, rawWordStart, i);
-        rawWordStart = i + 1;
-      } else if (oneLineCommentStart >= 0) {
-        if (line.charAt(i) == 13) {
-          // End the block; arg could be empty, but that's fine
-          oneLineCommentStart = -1;
-          rawWordLength = getRawWordLength(
-              words, current, rawWordCursor, rawWordLength, rawWordStart, i);
-          rawWordStart = i + 1;
-        } else {
-          current.append(line.charAt(i));
-        }
       } else {
-        // Not in a quote or comment block
-        containsNonCommentData = true;
-        if (isDelimiter(line, i)) {
+        char currentChar = line.charAt(i);
+        if (quoteStart >= 0) {
+          // In a quote block
+          if (line.charAt(quoteStart) == currentChar && !isEscaped(line, i)) {
+            // End the block; arg could be empty, but that's fine
+            words.add(current.toString());
+            current.setLength(0);
+            quoteStart = -1;
+            if (rawWordCursor >= 0 && rawWordLength < 0) {
+              rawWordLength = i - rawWordStart + 1;
+            }
+          } else {
+            if (!isEscapeChar(line, i)) {
+              // Take the next character
+              current.append(currentChar);
+            }
+          }
+        } else if (oneLineCommentStart == -1 && isMultilineComment(line, i)) {
+          multiLineCommentStart = i;
           rawWordLength = getRawWordLength(
               words, current, rawWordCursor, rawWordLength, rawWordStart, i);
           rawWordStart = i + 1;
+        } else if (multiLineCommentStart >= 0) {
+          if (currentChar == '/' && line.charAt(i - 1) == '*') {
+            // End the block; arg could be empty, but that's fine
+            words.add(current.toString());
+            current.setLength(0);
+            multiLineCommentStart = -1;
+            if (rawWordCursor >= 0 && rawWordLength < 0) {
+              rawWordLength = i - rawWordStart + 1;
+            }
+          }
+        } else if (oneLineCommentStart == -1 && isOneLineComment(line, i)) {
+          oneLineCommentStart = i;
+          rawWordLength = getRawWordLength(
+              words, current, rawWordCursor, rawWordLength, rawWordStart, i);
+          rawWordStart = i + 1;
+        } else if (oneLineCommentStart >= 0) {
+          if (currentChar == '\n') {
+            // End the block; arg could be empty, but that's fine
+            oneLineCommentStart = -1;
+            rawWordLength = getRawWordLength(
+                words, current, rawWordCursor, rawWordLength, rawWordStart, i);
+            rawWordStart = i + 1;
+          } else {
+            current.append(currentChar);
+          }
         } else {
-          if (!isEscapeChar(line, i)) {
-            current.append(line.charAt(i));
+          // Not in a quote or comment block
+          checkBracketBalance(roundBracketsBalance, currentChar, '(', ')');
+          checkBracketBalance(squareBracketsBalance, currentChar, '[', ']');
+          containsNonCommentData = true;
+          if (isDelimiter(line, i)) {
+            rawWordLength = getRawWordLength(
+                words, current, rawWordCursor, rawWordLength, rawWordStart, i);
+            rawWordStart = i + 1;
+          } else {
+            if (!isEscapeChar(line, i)) {
+              current.append(currentChar);
+            }
           }
         }
       }
@@ -161,29 +182,61 @@ public class SqlLineParser extends DefaultParser {
           -1, -1, "Escaped new line", getPaddedPrompt("newline"));
     }
 
-    if (isEofOnUnclosedQuote() && quoteStart >= 0
-        && context != ParseContext.COMPLETE) {
-      throw new EOFError(-1, -1, "Missing closing quote",
-          getPaddedPrompt(line.charAt(quoteStart) == '\''
-              ? "quote" : "dquote"));
-    }
+    if (context != ParseContext.COMPLETE) {
+      if (isEofOnUnclosedQuote() && quoteStart >= 0) {
+        throw new EOFError(-1, -1, "Missing closing quote",
+            getPaddedPrompt(line.charAt(quoteStart) == '\''
+                ? "quote" : "dquote"));
+      }
 
-    if (isSql && context != ParseContext.COMPLETE
-        && multiLineCommentStart != -1) {
-      throw new EOFError(-1, -1, "Missing end of comment",
-          getPaddedPrompt("*/"));
-    }
+      if (isSql) {
+        if (multiLineCommentStart != -1) {
+          throw new EOFError(-1, -1, "Missing end of comment",
+              getPaddedPrompt("*/"));
+        }
 
-    if (isSql && containsNonCommentData && context != ParseContext.COMPLETE
-        && !isLineFinishedWithSemicolon(line)) {
-      throw new EOFError(-1, -1, "Missing semicolon at the end",
-          getPaddedPrompt("semicolon"));
+        if (roundBracketsBalance[0] != 0 || roundBracketsBalance[1] != 0) {
+          throw new EOFError(-1, -1,
+              "Round brackets balance fails",
+              getPaddedPrompt(
+                  roundBracketsBalance[0] == 0 ? "extra ')'" : ")"));
+        }
+
+        if (squareBracketsBalance[0] != 0 || squareBracketsBalance[1] != 0) {
+          throw new EOFError(-1, -1,
+              "Square brackets balance fails",
+              getPaddedPrompt(
+                  squareBracketsBalance[0] == 0 ? "extra ']'" : "]"));
+        }
+
+        if (containsNonCommentData && !isLineFinishedWithSemicolon(line)) {
+          throw new EOFError(-1, -1, "Missing semicolon at the end",
+              getPaddedPrompt("semicolon"));
+        }
+      }
     }
 
     String openingQuote = quoteStart >= 0
         ? line.substring(quoteStart, quoteStart + 1) : null;
     return new ArgumentList(line, words, wordIndex, wordCursor,
         cursor, openingQuote, rawWordCursor, rawWordLength);
+  }
+
+  private void checkBracketBalance(
+      int[] roundBracketsBalance,
+      char actual,
+      char openBracket,
+      char closedBracket) {
+    if (actual == openBracket) {
+      roundBracketsBalance[0]++;
+    } else if (actual == closedBracket) {
+      if (roundBracketsBalance[0] > 0) {
+        roundBracketsBalance[0]--;
+      } else {
+        // closed bracket without open
+        roundBracketsBalance[1]++;
+      }
+    }
   }
 
   private int getRawWordLength(
@@ -205,7 +258,7 @@ public class SqlLineParser extends DefaultParser {
 
   private boolean isSql(String line, ParseContext context) {
     String trimmedLine = trimLeadingSpacesIfPossible(line, context);
-    return  !trimmedLine.isEmpty() && (trimmedLine.charAt(0) != '!'
+    return !trimmedLine.isEmpty() && (trimmedLine.charAt(0) != '!'
         || trimmedLine.regionMatches(0, "!sql", 0, "!sql".length())
         || trimmedLine.regionMatches(0, "!all", 0, "!all".length()));
   }

@@ -56,6 +56,17 @@ public class SqlLineParserTest {
         "select /*\njust a comment\n*/\n'1';",
         "--comment \n values (';\n' /* comment */, '\"'"
             + "/*multiline;\n ;\n comment*/)\n -- ; \n;",
+
+        // non-closed or extra brackets but commented or quoted
+        "select '1(' from dual;",
+        "select ')1' from dual;",
+        "select 1/*count(123 */ from dual;",
+        "select 2/* [qwe */ from dual;",
+        "select 2 \" [qwe \" from dual;",
+        "select 2 \" ]]][[[ \" from dual;",
+        "select 2 \" ]]]\n[[[ \" from dual;",
+        "select 2 \" \n]]]\n[[[ \n\" from dual;",
+        "select 2 \n --]]]\n --[[[ \n from dual;",
     };
     for (String line : successfulLinesToCheck) {
       parser.parse(line, line.length(), acceptLine);
@@ -86,6 +97,15 @@ public class SqlLineParserTest {
         "select ''' from t;",
         "select ''' \n'' \n'' from t;",
         "select \"\\\" \n\\\" \n\\\" from t;",
+        // not closed brackets
+        "select to_char(123  from dual;",
+        "select sum(count(1)  from dual;",
+        "select [field  from t;",
+        // extra brackets
+        "select to_char)123) from dual;",
+        "select count)123( from dual;",
+        "select sum)count)123(( from dual;",
+        "select sum(count)t.x)) from t;"
     };
     for (String line : successfulLinesToCheck) {
       try {
