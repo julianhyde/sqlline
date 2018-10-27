@@ -678,12 +678,12 @@ public class SqlLine {
   }
 
   /**
-   * Return waiting pattern or null depending on
-   * whether a line requires a continuation or not.
+   * Returns waiting pattern, or null if the
+   * line does not require a continuation.
    *
-   * @param line            the line to be tested
-   * @param waitingPattern  the waiting pattern before processing {@code line}
-   * @return waitingPattern if continuation is required, null otherwise
+   * @param line            Line to be tested
+   * @param waitingPattern  Waiting pattern before processing {@code line}
+   * @return waiting pattern if continuation is required, null otherwise
    */
   String getWaitingPattern(String line, String waitingPattern) {
     if (waitingPattern == null) {
@@ -702,7 +702,7 @@ public class SqlLine {
       }
     }
 
-    if (null == line) {
+    if (line == null) {
       // happens when CTRL-C used to exit a malformed.
       return waitingPattern;
     }

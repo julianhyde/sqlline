@@ -1441,8 +1441,7 @@ public class Commands {
                 sqlLine.getWaitingPattern(scriptLine, waitingPattern);
             if (waitingPattern == null) {
               // this command has terminated
-              cmds.add(sqlLine.getOpts().getTrimScripts()
-                  ? cmd.toString().trim() : cmd.toString());
+              cmds.add(maybeTrim(cmd.toString()));
               cmd = null;
             }
           } else {
@@ -1454,8 +1453,7 @@ public class Commands {
               cmd = new StringBuilder(scriptLine);
             } else {
               // single-line
-              cmds.add(sqlLine.getOpts().getTrimScripts()
-                  ? scriptLine.trim() : scriptLine);
+              cmds.add(maybeTrim(scriptLine));
             }
           }
         }
@@ -1481,6 +1479,12 @@ public class Commands {
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  /** Returns a line, trimmed if the
+   * {@link BuiltInProperty#TRIM_SCRIPTS options require trimming}. */
+  private String maybeTrim(String line) {
+    return sqlLine.getOpts().getTrimScripts() ? line.trim() : line;
   }
 
   /** Expands "~" to the home directory.

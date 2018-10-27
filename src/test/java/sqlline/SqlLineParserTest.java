@@ -23,12 +23,12 @@ import org.junit.Test;
 public class SqlLineParserTest {
   @Test
   public void testSqlLineParserForOkLines() {
-    DefaultParser parser = new SqlLineParser(new SqlLine())
+    final DefaultParser parser = new SqlLineParser(new SqlLine())
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = {
-        //commands
+    final String[] lines = {
+        // commands
         "!set",
         " !history",
         "   !scan",
@@ -36,7 +36,7 @@ public class SqlLineParserTest {
         " \n test;",
         " \n test';\n;\n';",
         "select \n 1\n, '\na\n ';",
-        //sql
+        // sql
         "select 1;",
         "select '1';",
         "select '1' as \"asd\";",
@@ -45,7 +45,7 @@ public class SqlLineParserTest {
         "select '1' as \"'a'\\\ns'd\\\n\n\" from t;",
         "select ' ''1'', ''2''' as \"'a'\\\ns'd\\\n\n\" from t;",
         "select ' ''1'', ''2''' as \"'a'\\\"\n s'd \\\" \n \\\"\n\" from t;",
-        // not a valid sql but from sqlline parser's point of view it is ok
+        // not a valid sql, but from sqlline parser's point of view it is ok
         // as there are no non-closed brackets, quotes, comments
         // and it ends with a semicolon
         " \n test;",
@@ -56,19 +56,30 @@ public class SqlLineParserTest {
         "select /*\njust a comment\n*/\n'1';",
         "--comment \n values (';\n' /* comment */, '\"'"
             + "/*multiline;\n ;\n comment*/)\n -- ; \n;",
+
+        // non-closed or extra brackets but commented or quoted
+        "select '1(' from dual;",
+        "select ')1' from dual;",
+        "select 1/*count(123 */ from dual;",
+        "select 2/* [qwe */ from dual;",
+        "select 2 \" [qwe \" from dual;",
+        "select 2 \" ]]][[[ \" from dual;",
+        "select 2 \" ]]]\n[[[ \" from dual;",
+        "select 2 \" \n]]]\n[[[ \n\" from dual;",
+        "select 2 \n --]]]\n --[[[ \n from dual;",
     };
-    for (String line : successfulLinesToCheck) {
+    for (String line : lines) {
       parser.parse(line, line.length(), acceptLine);
     }
   }
 
   @Test
   public void testSqlLineParserForWrongLines() {
-    DefaultParser parser = new SqlLineParser(new SqlLine())
+    final DefaultParser parser = new SqlLineParser(new SqlLine())
         .eofOnUnclosedQuote(true)
         .eofOnEscapedNewLine(true);
     Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    String[] successfulLinesToCheck = {
+    final String[] lines = {
         "!sql",
         "   !all",
         " \n select",
@@ -86,8 +97,17 @@ public class SqlLineParserTest {
         "select ''' from t;",
         "select ''' \n'' \n'' from t;",
         "select \"\\\" \n\\\" \n\\\" from t;",
+        // not closed brackets
+        "select to_char(123  from dual;",
+        "select sum(count(1)  from dual;",
+        "select [field  from t;",
+        // extra brackets
+        "select to_char)123) from dual;",
+        "select count)123( from dual;",
+        "select sum)count)123(( from dual;",
+        "select sum(count)t.x)) from t;"
     };
-    for (String line : successfulLinesToCheck) {
+    for (String line : lines) {
       try {
         parser.parse(line, line.length(), acceptLine);
         Assert.fail("Missing closing quote or semicolon for line " + line);
