@@ -67,7 +67,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   public AttributedString highlight(
       LineReader reader, String buffer) {
     boolean skipSyntaxHighlighter =
-        SqlLineOpts.DEFAULT.equals(sqlLine.getOpts().getColorScheme());
+        SqlLineProperty.DEFAULT.equals(sqlLine.getOpts().getColorScheme());
     if (skipSyntaxHighlighter) {
       return super.highlight(reader, buffer);
     }

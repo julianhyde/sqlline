@@ -370,38 +370,27 @@ public class SqlLine {
         if (i == args.length - 1) {
           return Status.ARGS;
         }
-        switch (args[i]) {
-        case "-d":
+        if (args[i].equals("-d")) {
           driver = args[++i];
-          break;
-        case "-ch":
+        } else if (args[i].equals("-ch")) {
           commandHandler = args[++i];
-          break;
-        case "-n":
+        } else if (args[i].equals("-n")) {
           user = args[++i];
-          break;
-        case "-p":
+        } else if (args[i].equals("-p")) {
           pass = args[++i];
-          break;
-        case "-u":
+        } else if (args[i].equals("-u")) {
           url = args[++i];
-          break;
-        case "-e":
+        } else if (args[i].equals("-e")) {
           commands.add(args[++i]);
-          break;
-        case "-f":
+        } else if (args[i].equals("-f")) {
           getOpts().setRun(args[++i]);
-          break;
-        case "-log":
+        } else if (args[i].equals("-log")) {
           logFile = args[++i];
-          break;
-        case "-nn":
+        } else if (args[i].equals("-nn")) {
           nickname = args[++i];
-          break;
-        case "-ac":
+        } else if (args[i].equals("-ac")) {
           appConfig = args[++i];
-          break;
-        default:
+        } else {
           return Status.ARGS;
         }
       } else {
