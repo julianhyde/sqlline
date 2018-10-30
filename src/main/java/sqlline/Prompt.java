@@ -11,7 +11,6 @@
 */
 package sqlline;
 
-import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -94,7 +93,7 @@ class Prompt {
     AttributedStringBuilder promptStringBuilder = new AttributedStringBuilder();
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
-    final DatabaseMetaData databaseMetaData = databaseConnection == null
+    final DatabaseMetaDataWrapper databaseMetaData = databaseConnection == null
         ? null : databaseConnection.meta;
     final SqlLineOpts opts = sqlLine.getOpts();
     for (int i = 0; i < prompt.length(); i++) {

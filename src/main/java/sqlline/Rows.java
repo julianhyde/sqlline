@@ -11,7 +11,6 @@
 */
 package sqlline;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -144,7 +143,7 @@ abstract class Rows implements Iterator<Rows.Row> {
 
       // Retrieve the catalog and schema name for this connection.
       // Either or both may be null.
-      DatabaseMetaData dbMeta = sqlLine.getDatabaseConnection().meta;
+      DatabaseMetaDataWrapper dbMeta = sqlLine.getDatabaseConnection().meta;
       String catalog = dbMeta.getConnection().getCatalog();
       String schema = rsMeta.getSchemaName(colNum);
 

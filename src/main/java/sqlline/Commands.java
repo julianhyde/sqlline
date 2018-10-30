@@ -201,13 +201,10 @@ public class Commands {
       }
 
       Object res = sqlLine.getReflector().invoke(sqlLine.getDatabaseMetaData(),
-          DatabaseMetaData.class, cmd, argList);
+          DatabaseMetaDataWrapper.class, cmd, argList);
       if (res instanceof ResultSet) {
-        ResultSet rs = (ResultSet) res;
-        try {
+        try (ResultSet rs = (ResultSet) res) {
           sqlLine.print(rs, callback);
-        } finally {
-          rs.close();
         }
       } else if (res != null) {
         sqlLine.output(res.toString());

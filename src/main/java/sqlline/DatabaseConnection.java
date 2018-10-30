@@ -25,7 +25,7 @@ import org.jline.reader.impl.completer.ArgumentCompleter;
 class DatabaseConnection {
   private final SqlLine sqlLine;
   Connection connection;
-  DatabaseMetaData meta;
+  DatabaseMetaDataWrapper meta;
   private final String driver;
   private final String url;
   private final Properties info;
@@ -128,7 +128,7 @@ class DatabaseConnection {
     // Instead, we use the driver instance to make the connection
 
     connection = theDriver.connect(url, info);
-    meta = connection.getMetaData();
+    meta = new DatabaseMetaDataWrapper(sqlLine, connection.getMetaData());
 
     try {
       sqlLine.debug(
@@ -219,7 +219,7 @@ class DatabaseConnection {
     return schema;
   }
 
-  DatabaseMetaData getDatabaseMetaData() {
+  DatabaseMetaDataWrapper getDatabaseMetaData() {
     return meta;
   }
 
