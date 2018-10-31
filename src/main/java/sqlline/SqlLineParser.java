@@ -19,7 +19,7 @@ import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.DefaultParser;
 
 /**
- * SqlLineParser implements multiline
+ * SqlLineParser implements multi-line
  * for sql, !sql, !all while it's not ended with a non-commented ';'.
  *
  * <p>The following table shows each of the prompts you may see and
@@ -53,7 +53,7 @@ import org.jline.reader.impl.DefaultParser;
  * <tr>
  *   <td>*\/&gt;</td>
  *   <td>Waiting for next line, waiting for completion of
- *       a multiline comment that began with "/*"</td>
+ *       a multi-line comment that began with "/*"</td>
  * </tr>
  * <tr>
  *   <td>)&gt;</td>
@@ -138,7 +138,7 @@ public class SqlLineParser extends DefaultParser {
               current.append(currentChar);
             }
           }
-        } else if (oneLineCommentStart == -1 && isMultilineComment(line, i)) {
+        } else if (oneLineCommentStart == -1 && isMultiLineComment(line, i)) {
           multiLineCommentStart = i;
           rawWordLength = getRawWordLength(words, current, rawWordCursor,
               rawWordLength, rawWordStart, i);
@@ -287,29 +287,54 @@ public class SqlLineParser extends DefaultParser {
    * is not commented with one line comment.
    *
    * <p>ASSUMPTION: to have correct behavior, this method must be
-   * called after quote and multiline check calls.
+   * called after quote and multi-line comments check calls, which implies that
+   * there are no non-finished quotations or multi-line comments.
    *
    * @param buffer Input line to check for ending with ';'
    * @return true if the ends with non-commented ';'
    */
   private boolean isLineFinishedWithSemicolon(final CharSequence buffer) {
     final String line = buffer.toString().trim();
-    boolean result = false;
-    for (int i = line.length() - 1; i >= 0; i--) {
+    boolean lineEmptyOrFinishedWithSemicolon = line.isEmpty();
+    boolean requiredSemicolon = false;
+    for (int i = 0; i < line.length(); i++) {
       switch (line.charAt(i)) {
-      case ';' :
-        result = true;
+      case ';':
+        lineEmptyOrFinishedWithSemicolon = true;
         break;
-      case '-' :
-        if (i > 0 && line.charAt(i - 1) == '-') {
-          return false;
+      case '/':
+      case '-':
+        if (i < line.length() - 1) {
+          if (line.regionMatches(i, "--", 0, 2)) {
+            int nextLine = line.indexOf('\n', i + 1);
+            if (nextLine != -1) {
+              i = nextLine;
+            } else {
+              return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
+            }
+            break;
+          } else if (line.regionMatches(i, "/*", 0, "/*".length())) {
+            int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
+            // nextNonCommentedChar should be non-negative as
+            // there is an assumption that multi-line comment is completed
+            // otherwise "Missing end of comment" should be thrown before
+            // this method called
+            i = nextNonCommentedChar + "*/".length();
+            break;
+          }
         }
-        break;
-      case '\n' :
-        return result;
+        // else
+        // fall through
+      default:
+        requiredSemicolon =
+            !lineEmptyOrFinishedWithSemicolon
+                || !Character.isWhitespace(line.charAt(i));
+        if (requiredSemicolon) {
+          lineEmptyOrFinishedWithSemicolon = false;
+        }
       }
     }
-    return result;
+    return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
   }
 
   private boolean isOneLineComment(final CharSequence buffer, final int pos) {
@@ -318,7 +343,7 @@ public class SqlLineParser extends DefaultParser {
         && buffer.charAt(pos + 1) == '-';
   }
 
-  private boolean isMultilineComment(final CharSequence buffer, final int pos) {
+  private boolean isMultiLineComment(final CharSequence buffer, final int pos) {
     return pos < buffer.length() - 1
         && buffer.charAt(pos) == '/'
         && buffer.charAt(pos + 1) == '*';

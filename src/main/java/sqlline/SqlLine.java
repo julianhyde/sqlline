@@ -1373,7 +1373,7 @@ public class SqlLine {
     for (int i = 0; i < str.length(); i++) {
       char ch = str.charAt(i);
       switch (ch) {
-      case '"' :
+      case '"':
         // could be skipped for xml attribute in case of single quotes
         // could be skipped for element text
         if (charsCouldBeNotEncoded.indexOf(ch) == -1) {
@@ -1382,13 +1382,13 @@ public class SqlLine {
           sb.append(ch);
         }
         break;
-      case '<' :
+      case '<':
         sb.append("&lt;");
         break;
-      case '&' :
+      case '&':
         sb.append("&amp;");
         break;
-      case '>' :
+      case '>':
         // could be skipped for xml attribute and there is no sequence ]]>
         // could be skipped for element text and there is no sequence ]]>
         if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 2) == ']')
@@ -1398,7 +1398,7 @@ public class SqlLine {
           sb.append(ch);
         }
         break;
-      case '\'' :
+      case '\'':
         // could be skipped for xml attribute in case of double quotes
         // could be skipped for element text
         if (charsCouldBeNotEncoded.indexOf(ch) == -1) {
