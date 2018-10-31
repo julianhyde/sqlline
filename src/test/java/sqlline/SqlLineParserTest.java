@@ -39,6 +39,25 @@ public class SqlLineParserTest {
         // sql
         "select 1;",
         "select '1';",
+        // one line comment right after semicolon
+        "select '1';--comment",
+        "select '1';-----comment",
+        "select '1';--comment\n",
+        "select '1';--comment\n\n",
+        "select '1'; --comment",
+        "select '1';\n--comment",
+        "select '1';\n\n--comment",
+        "select '1';\n \n--comment",
+        "select '1'\n;\n--comment",
+        "select '1'\n\n;--comment",
+        "select '1'\n\n;---comment",
+        "select '1'\n\n;-- --comment",
+        "select '1'\n\n;\n--comment",
+        "select '1';/*comment*/",
+        "select '1';/*---comment */",
+        "select '1';/*comment\n*/\n",
+        "select '1';/*comment*/\n\n",
+        "select '1'; /*--comment*/",
         "select '1' as \"asd\";",
         "select '1' as \"a's'd\";",
         "select '1' as \"'a's'd\n\" from t;",
@@ -69,7 +88,12 @@ public class SqlLineParserTest {
         "select 2 \n --]]]\n --[[[ \n from dual;",
     };
     for (String line : lines) {
-      parser.parse(line, line.length(), acceptLine);
+      try {
+        parser.parse(line, line.length(), acceptLine);
+      } catch (Throwable t) {
+        System.err.println("Problem line: [" + line + "]");
+        throw t;
+      }
     }
   }
 
@@ -84,11 +108,29 @@ public class SqlLineParserTest {
         "   !all",
         " \n select",
         " \n test ",
+        "select '1';-comment",
+        "\nselect\n '1';- -comment\n",
+        "select '1';comment\n\n",
+        "\nselect '1'; -comment",
+        " select '1';\ncomment",
+        "select '1';\n\n- -",
+        "select '1';\n\n- ",
+        "select '1';\n\n-",
+        "select '1';\n\n/",
+        "select '1';\n \n-/-comment",
+        "select '1'\n;\n-+-comment",
+        "select '1'\n\n;\ncomment",
+        "select '1';/ *comment*/",
+        "select '1';/--*---comment */",
+        "select '1';--/*comment\n*/\n",
+        "select '1';/ *comment*/\n\n",
+        "select '1'; /  *--comment*/",
         // not ended quoted line
         "  test ';",
         " \n test ';'\";",
         // not ended with ; (existing ; is commented)
         "select --\n\n--\n--;",
+        "select 1 --; --;",
         "select /*--\n\n--\n--;",
         "select /* \n ;",
         "select --\n/*\n--\n--;",

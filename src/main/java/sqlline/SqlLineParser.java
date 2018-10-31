@@ -287,29 +287,54 @@ public class SqlLineParser extends DefaultParser {
    * is not commented with one line comment.
    *
    * <p>ASSUMPTION: to have correct behavior, this method must be
-   * called after quote and multiline check calls.
+   * called after quote and multiline comments check calls which implies that
+   * there is no non-finished quotations or multiline comments.
    *
    * @param buffer Input line to check for ending with ';'
    * @return true if the ends with non-commented ';'
    */
   private boolean isLineFinishedWithSemicolon(final CharSequence buffer) {
     final String line = buffer.toString().trim();
-    boolean result = false;
-    for (int i = line.length() - 1; i >= 0; i--) {
+    boolean lineEmptyOrFinishedWithSemicolon = line.isEmpty();
+    boolean requiredSemicolon = false;
+    for (int i = 0; i < line.length(); i++) {
       switch (line.charAt(i)) {
       case ';' :
-        result = true;
+        lineEmptyOrFinishedWithSemicolon = true;
         break;
+      case '/' :
       case '-' :
-        if (i > 0 && line.charAt(i - 1) == '-') {
-          return false;
+        if (i < line.length() - 1) {
+          if (line.regionMatches(i, "--", 0, 2)) {
+            int nextLine = line.indexOf('\n', i + 1);
+            if (nextLine != -1) {
+              i = nextLine;
+            } else {
+              return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
+            }
+            break;
+          } else if (line.regionMatches(i, "/*", 0, "/*".length())) {
+            int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
+            // nextNonCommentedChar should be non-negative as
+            // there is an assumption that multiline comment is completed
+            // otherwise "Missing end of comment" should be thrown before
+            // this method called
+            i = nextNonCommentedChar + "*/".length();
+            break;
+          }
         }
-        break;
-      case '\n' :
-        return result;
+        // else
+        // fall through
+      default:
+        requiredSemicolon =
+            !lineEmptyOrFinishedWithSemicolon
+                || !Character.isWhitespace(line.charAt(i));
+        if (requiredSemicolon) {
+          lineEmptyOrFinishedWithSemicolon = false;
+        }
       }
     }
-    return result;
+    return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
   }
 
   private boolean isOneLineComment(final CharSequence buffer, final int pos) {
