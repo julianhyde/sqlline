@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.jline.builtins.Completers;
 import org.jline.keymap.KeyMap;
 import org.jline.reader.Binding;
 import org.jline.reader.Candidate;
@@ -116,8 +117,82 @@ public class SqlLineOpts implements Completer {
     loadProperties(props);
   }
 
-  public List<Completer> optionCompleters() {
+  public List<Completer> resetOptionCompleters() {
     return Collections.singletonList(this);
+  }
+
+  /**
+   * Builds and returns {@link org.jline.builtins.Completers.RegexCompleter} for
+   * <code>!set</code> command based on
+   * (in decreasing order of priority)
+   * <ul>
+   * <li>Customizations via {@code customCompletions}</li>
+   * <li>Available values defined in {@link BuiltInProperty}</li>
+   * <li>{@link Type} of property.
+   * Currently there is completion only for boolean type</li>
+   * </ul>
+   *
+   * @param customCompletions defines custom completions values per property
+   * @return a singleton list with a built RegexCompleter */
+  public List<Completer> setOptionCompleters(
+      Map<BuiltInProperty, Collection<String>> customCompletions) {
+    Map<String, Completer> comp = new HashMap<>();
+    final String start = "START";
+    comp.put(start, new StringsCompleter("!set"));
+    Collection<BuiltInProperty> booleanProperties = new ArrayList<>();
+    Collection<BuiltInProperty> withDefinedAvailableValues = new ArrayList<>();
+    StringBuilder sb = new StringBuilder(start + " (");
+    for (BuiltInProperty property : BuiltInProperty.values()) {
+      if (customCompletions.containsKey(property)) {
+        continue;
+      } else if (!property.getAvailableValues().isEmpty()) {
+        withDefinedAvailableValues.add(property);
+      } else if (property.type() == Type.BOOLEAN) {
+        booleanProperties.add(property);
+      } else {
+        sb.append(property.name()).append(" | ");
+        comp.put(property.name(),
+            new StringsCompleter(property.propertyName()));
+      }
+    }
+    // all boolean properties without defined available values and
+    // not customized via {@code customCompletions} have values
+    // for autocompletion specified in SqlLineProperty.BOOLEAN_VALUES
+    final String booleanTypeString = Type.BOOLEAN.toString();
+    sb.append(booleanTypeString);
+    comp.put(booleanTypeString,
+        new StringsCompleter(booleanProperties
+            .stream()
+            .map(BuiltInProperty::propertyName)
+            .toArray(String[]::new)));
+    final String booleanPropertyValueKey = booleanTypeString + "_value";
+    comp.put(booleanPropertyValueKey,
+        new StringsCompleter(BuiltInProperty.BOOLEAN_VALUES));
+    sb.append(" ").append(booleanPropertyValueKey);
+    // If a property has defined values they will be used for autocompletion
+    for (BuiltInProperty property : withDefinedAvailableValues) {
+      final String propertyName = property.propertyName();
+      sb.append(" | ").append(propertyName);
+      comp.put(propertyName, new StringsCompleter(propertyName));
+      final String propertyValueKey = propertyName + "_value";
+      comp.put(propertyValueKey,
+          new StringsCompleter(
+              property.getAvailableValues().toArray(new String[0])));
+      sb.append(" ").append(propertyValueKey);
+    }
+    for (Map.Entry<BuiltInProperty, Collection<String>> mapEntry
+        : customCompletions.entrySet()) {
+      final String propertyName = mapEntry.getKey().propertyName();
+      comp.put(propertyName, new StringsCompleter(propertyName));
+      final String propertyValueKey = propertyName + "_value";
+      comp.put(propertyValueKey,
+          new StringsCompleter(mapEntry.getValue().toArray(new String[0])));
+      sb.append("| ").append(propertyName).append(" ")
+          .append(propertyValueKey);
+    }
+    sb.append(") ");
+    return Collections.singletonList(
+        new Completers.RegexCompleter(sb.toString(), comp::get));
   }
 
   /**

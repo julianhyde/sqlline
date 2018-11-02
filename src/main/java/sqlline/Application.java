@@ -89,6 +89,17 @@ public class Application {
   private static final List<String> DEFAULT_CONNECTION_URL_EXAMPLES =
       Collections.unmodifiableList(Arrays.asList(CONNECTION_URLS));
 
+  private static final String[] ISOLATION_LEVELS = {
+      "TRANSACTION_NONE",
+      "TRANSACTION_READ_COMMITTED",
+      "TRANSACTION_READ_UNCOMMITTED",
+      "TRANSACTION_REPEATABLE_READ",
+      "TRANSACTION_SERIALIZABLE"
+  };
+
+  private static final List<String> ISOLATION_LEVEL_LIST =
+      Collections.unmodifiableList(Arrays.asList(ISOLATION_LEVELS));
+
   /** Creates an Application. */
   public Application() {
   }
@@ -211,6 +222,14 @@ public class Application {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
     final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
+    final Map<BuiltInProperty, Collection<String>> propertyValues =
+        new HashMap<BuiltInProperty, Collection<String>>() {{
+          put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
+        }};
+    final Map<BuiltInProperty, Collection<String>> customCompletions =
+        new HashMap<>();
+    customCompletions
+        .put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
     final CommandHandler[] handlers = {
         new ReflectiveCommandHandler(sqlLine, empty, "quit", "done", "exit"),
         new ReflectiveCommandHandler(sqlLine,
@@ -264,9 +283,9 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
         new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(), "set"),
+            getOpts(sqlLine).setOptionCompleters(customCompletions), "set"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(), "reset"),
+            getOpts(sqlLine).resetOptionCompleters(), "reset"),
         new ReflectiveCommandHandler(sqlLine, empty, "save"),
         new ReflectiveCommandHandler(sqlLine, empty, "scan"),
         new ReflectiveCommandHandler(sqlLine, empty, "sql"),
@@ -307,13 +326,8 @@ public class Application {
     }
   }
 
-  private List<String> getIsolationLevels() {
-    return Arrays.asList(
-        "TRANSACTION_NONE",
-        "TRANSACTION_READ_COMMITTED",
-        "TRANSACTION_READ_UNCOMMITTED",
-        "TRANSACTION_REPEATABLE_READ",
-        "TRANSACTION_SERIALIZABLE");
+  List<String> getIsolationLevels() {
+    return ISOLATION_LEVEL_LIST;
   }
 
   public Map<String, HighlightStyle> getName2HighlightStyle() {
