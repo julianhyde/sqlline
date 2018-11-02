@@ -265,6 +265,10 @@ public class Application {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
     final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
+    final Map<BuiltInProperty, Collection<String>> propertyValues =
+        new HashMap<BuiltInProperty, Collection<String>>() {{
+          put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
+        }};
     final CommandHandler[] handlers = {
         new ReflectiveCommandHandler(sqlLine, empty, "quit", "done", "exit"),
         new ReflectiveCommandHandler(sqlLine,
@@ -314,9 +318,9 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
         new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(), "set"),
+            getOpts(sqlLine).optionCompleters(propertyValues), "set"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(), "reset"),
+            getOpts(sqlLine).optionCompleters(propertyValues), "reset"),
         new ReflectiveCommandHandler(sqlLine, empty, "save"),
         new ReflectiveCommandHandler(sqlLine, empty, "scan"),
         new ReflectiveCommandHandler(sqlLine, empty, "sql"),

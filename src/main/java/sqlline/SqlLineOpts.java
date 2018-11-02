@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.jline.builtins.Completers;
 import org.jline.keymap.KeyMap;
 import org.jline.reader.Binding;
 import org.jline.reader.Candidate;
@@ -78,6 +79,7 @@ public class SqlLineOpts implements Completer {
   public static final String PROPERTY_NAME_EXIT =
       PROPERTY_PREFIX + "system.exit";
   private static final Date TEST_DATE = new Date();
+  public static final String REGEX = "_regex";
   private SqlLine sqlLine;
   private File rcFile = new File(saveDir(), "sqlline.properties");
   private String runFile;
@@ -115,8 +117,58 @@ public class SqlLineOpts implements Completer {
     loadProperties(props);
   }
 
-  public List<Completer> optionCompleters() {
-    return Collections.singletonList(this);
+  public List<Completer> optionCompleters(
+      Map<BuiltInProperty, Collection<String>> property2values) {
+    Map<String, Completer> comp = new HashMap<>();
+    final String start = "START";
+    comp.put(start, new StringsCompleter("!set", "!reset"));
+    Map<Type, Collection<BuiltInProperty>> type2Property = new HashMap<>();
+    for (BuiltInProperty property: BuiltInProperty.values()) {
+      if (property2values.containsKey(property)) {
+        continue;
+      }
+      type2Property.putIfAbsent(property.type(), new ArrayList<>());
+      type2Property.get(property.type()).add(property);
+    }
+
+    StringBuilder sb = new StringBuilder(start + " (");
+    boolean firstElement = true;
+    for (Type type: type2Property.keySet()) {
+      if (type2Property.get(type) == null
+          || type2Property.get(type).isEmpty()) {
+        continue;
+      }
+      if (firstElement) {
+        firstElement = false;
+      } else {
+        sb.append(" | ");
+      }
+      sb.append(type.toString());
+      comp.put(type.toString(), new StringsCompleter(type2Property.get(type)
+          .stream().map(BuiltInProperty::propertyName).toArray(String[]::new)));
+      if (type == Type.BOOLEAN) {
+        final String regexTypeString = type.toString() + REGEX;
+        comp.put(regexTypeString,
+            new StringsCompleter(BuiltInProperty.BOOLEAN_VALUES));
+        sb.append(" ").append(regexTypeString);
+        continue;
+      }
+    }
+
+    for (Map.Entry<BuiltInProperty, Collection<String>> mapEntry
+        : property2values.entrySet()) {
+      final String propertyName = mapEntry.getKey().propertyName();
+      comp.put(propertyName, new StringsCompleter(propertyName));
+      final String regexPropertyNameString = propertyName + REGEX;
+      comp.put(regexPropertyNameString,
+          new StringsCompleter(mapEntry.getValue().toArray(new String[0])));
+      sb.append("| ").append(propertyName).append(" ")
+          .append(regexPropertyNameString);
+    }
+
+    sb.append(") ");
+    return Collections.singletonList(
+        new Completers.RegexCompleter(sb.toString(), comp::get));
   }
 
   /**
