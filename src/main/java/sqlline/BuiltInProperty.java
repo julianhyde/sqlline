@@ -47,7 +47,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   INCREMENTAL("incremental", Type.BOOLEAN, true),
   ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ",
       true, false, new HashSet<>(new Application().getIsolationLevels())),
-  MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, 15),
+  MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, -1),
   // don't save maxheight, maxwidth: it is automatically set based on
   // the terminal configuration
   MAX_HEIGHT("maxHeight", Type.INTEGER, 80, false, false, null),
