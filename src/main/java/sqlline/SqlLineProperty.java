@@ -11,6 +11,8 @@
 */
 package sqlline;
 
+import java.util.Set;
+
 /**
  * Definition of property that may be specified for SqlLine.
  *
@@ -18,6 +20,9 @@ package sqlline;
  */
 public interface SqlLineProperty {
   String DEFAULT = "default";
+  String[] BOOLEAN_VALUES = {
+      Boolean.TRUE.toString(), Boolean.FALSE.toString()};
+
   String propertyName();
 
   Object defaultValue();
@@ -27,6 +32,8 @@ public interface SqlLineProperty {
   boolean couldBeStored();
 
   Type type();
+
+  Set<String> getAvailableValues();
 
   /** Property writer. */
   @FunctionalInterface
@@ -38,8 +45,8 @@ public interface SqlLineProperty {
   enum Type {
     BOOLEAN,
     CHAR,
-    STRING,
-    INTEGER;
+    INTEGER,
+    STRING;
   }
 
 }

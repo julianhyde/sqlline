@@ -39,9 +39,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
       this.parameterCompleters =
           Collections.singletonList(new NullCompleter());
     } else {
-      List<Completer> c = new ArrayList<>(completers);
-      c.add(new NullCompleter());
-      this.parameterCompleters = c;
+      this.parameterCompleters = new ArrayList<>(completers);
     }
   }
 
