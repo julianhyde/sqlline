@@ -32,6 +32,7 @@ class SqlLineCommandCompleter extends AggregateCompleter {
     for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       for (String cmd : commandHandler.getNames()) {
         List<Completer> compl = new LinkedList<>();
+<<<<<<< HEAD
         final List<Completer> parameterCompleters =
             commandHandler.getParameterCompleters();
         if (parameterCompleters.size() == 1
@@ -41,6 +42,16 @@ class SqlLineCommandCompleter extends AggregateCompleter {
         } else {
           compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
           compl.addAll(parameterCompleters);
+=======
+        if (!commandHandler.getParameterCompleters().isEmpty()
+            && commandHandler.getParameterCompleters().iterator().next()
+                instanceof Completers.RegexCompleter) {
+          completers.add(
+              commandHandler.getParameterCompleters().iterator().next());
+        } else {
+          compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
+          compl.addAll(commandHandler.getParameterCompleters());
+>>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
           compl.add(new NullCompleter()); // last param no complete
           completers.add(new ArgumentCompleter(compl));
         }
