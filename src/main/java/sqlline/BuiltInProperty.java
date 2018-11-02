@@ -12,6 +12,7 @@
 package sqlline;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,7 +59,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   MAX_HISTORY_FILE_ROWS("maxHistoryFileRows",
       Type.INTEGER, DefaultHistory.DEFAULT_HISTORY_FILE_SIZE),
 
-  MODE("mode", Type.STRING, LineReader.EMACS),
+  MODE("mode", Type.STRING, LineReader.EMACS, true,
+      false, new HashSet<>(Arrays.asList(LineReader.EMACS, "vi"))),
   NUMBER_FORMAT("numberFormat", Type.STRING, DEFAULT),
   NULL_VALUE("nullValue", Type.STRING, DEFAULT),
   SILENT("silent", Type.BOOLEAN, false),

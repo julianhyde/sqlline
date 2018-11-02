@@ -265,13 +265,9 @@ public class Application {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
     final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
-    final Map<BuiltInProperty, Collection<String>> propertyValues =
-        new HashMap<BuiltInProperty, Collection<String>>() {{
-          put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
-        }};
-    final Map<BuiltInProperty, Collection<String>> customCompletions =
+    final Map<BuiltInProperty, Collection<String>> customPropertyCompletions =
         new HashMap<>();
-    customCompletions
+    customPropertyCompletions
         .put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
     final CommandHandler[] handlers = {
         new ReflectiveCommandHandler(sqlLine, empty, "quit", "done", "exit"),
@@ -322,7 +318,8 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
         new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).setOptionCompleters(customCompletions), "set"),
+            getOpts(sqlLine).setOptionCompleters(customPropertyCompletions),
+            "set"),
         new ReflectiveCommandHandler(sqlLine,
             getOpts(sqlLine).resetOptionCompleters(), "reset"),
         new ReflectiveCommandHandler(sqlLine, empty, "save"),
