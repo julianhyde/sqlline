@@ -18,6 +18,9 @@ package sqlline;
  */
 public interface SqlLineProperty {
   String DEFAULT = "default";
+  String[] BOOLEAN_VALUES = {
+      Boolean.TRUE.toString(), Boolean.FALSE.toString()};
+
   String propertyName();
 
   Object defaultValue();
