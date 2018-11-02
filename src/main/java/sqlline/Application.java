@@ -265,7 +265,11 @@ public class Application {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
     final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
+<<<<<<< HEAD
     final Map<BuiltInProperty, Collection<String>> propertyValues =
+=======
+    final Map<BuiltInProperty, Collection<String>> property2possibleValues =
+>>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
         new HashMap<BuiltInProperty, Collection<String>>() {{
           put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
         }};
@@ -318,9 +322,16 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
         new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
         new ReflectiveCommandHandler(sqlLine,
+<<<<<<< HEAD
             getOpts(sqlLine).optionCompleters(propertyValues), "set"),
         new ReflectiveCommandHandler(sqlLine,
             getOpts(sqlLine).optionCompleters(propertyValues), "reset"),
+=======
+            getOpts(sqlLine).optionCompleters(property2possibleValues), "set"),
+        new ReflectiveCommandHandler(sqlLine,
+            getOpts(sqlLine).optionCompleters(property2possibleValues),
+            "reset"),
+>>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
         new ReflectiveCommandHandler(sqlLine, empty, "save"),
         new ReflectiveCommandHandler(sqlLine, empty, "scan"),
         new ReflectiveCommandHandler(sqlLine, empty, "sql"),
