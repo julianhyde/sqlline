@@ -71,6 +71,14 @@ public class CompletionTest {
       assertEquals("Completion for command !" + c, expectedSubSet, actual);
     }
 
+    // check completions of ! + one symbol
+    for (char c = 'a'; c <= 'z'; c++) {
+      final Set<String> expectedSubSet = filterSet(commandSet, "!" + c);
+      final Set<String> actual =
+          getLineReaderCompletedSet(lineReader, "  \t\t  !" + c);
+      assertEquals("Completion for command !" + c, expectedSubSet, actual);
+    }
+
     // check completions if the whole command is finished
     final Set<String> quitExpected = filterSet(commandSet, "!quit");
     final Set<String> quitActual =
@@ -100,6 +108,16 @@ public class CompletionTest {
     final Set<String> actual =
         getLineReaderCompletedSet(lineReader, "!set verbose tr");
     assertEquals("!set verbose true", actual.iterator().next());
+
+    final Set<String> viModeActual =
+        getLineReaderCompletedSet(lineReader, "!set mode v");
+    assertEquals(1, viModeActual.size());
+    assertEquals("!set mode vi", viModeActual.iterator().next());
+
+    final Set<String> emacsModeActual =
+        getLineReaderCompletedSet(lineReader, "!set mode e");
+    assertEquals(1, emacsModeActual.size());
+    assertEquals("!set mode emacs", emacsModeActual.iterator().next());
 
     final Set<String> jsonActual =
         getLineReaderCompletedSet(lineReader, "!set outputFormat js");
