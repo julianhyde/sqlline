@@ -40,3 +40,7 @@ clean:
 	@echo "Cleaning and purging project files and local repository artifacts..."
 	mvn clean
 	mvn build-helper:remove-project-artifact
+	rm -f /usr/local/bin/sqlline
+	rm -f /usr/lib64/nagios/plugins/sqlline-service-check
+	rm -f /usr/local/bin/sqlline-service-check
+
