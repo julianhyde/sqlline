@@ -1839,6 +1839,35 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testSave() {
+    final SqlLine beeLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      SqlLine.Status status = begin(beeLine, os, false);
+      // Here the status is SqlLine.Status.OTHER
+      // because of EOF as the result of InputStream which
+      // is not used in the current test so it is ok
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      DispatchCallback dc = new DispatchCallback();
+
+      beeLine.runCommands(
+          Collections.singletonList("!save"), dc);
+      assertThat(os.toString("UTF8"),
+          containsString("Saving preferences to"));
+      os.reset();
+      beeLine.runCommands(
+          Collections.singletonList("!set"), dc);
+      assertThat(os.toString("UTF8"),
+          allOf(containsString("autoCommit"),
+              not(containsString("Unknown property:"))));
+      os.reset();
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
