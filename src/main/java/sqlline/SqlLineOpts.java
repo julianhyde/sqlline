@@ -85,6 +85,7 @@ public class SqlLineOpts implements Completer {
       Collections.unmodifiableMap(
           new HashMap<SqlLineProperty, SqlLineProperty.Writer>() {
             {
+              put(COLOR_SCHEME, SqlLineOpts.this::setColorScheme);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
@@ -477,8 +478,9 @@ public class SqlLineOpts implements Completer {
       propertiesMap.put(COLOR_SCHEME, colorScheme);
       return;
     }
-    throw new IllegalArgumentException("Possible values are: "
-        + new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet()));
+    throw new IllegalArgumentException(
+        sqlLine.loc("unknown-colorscheme", colorScheme,
+            new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet())));
   }
 
   public String getColorScheme() {
