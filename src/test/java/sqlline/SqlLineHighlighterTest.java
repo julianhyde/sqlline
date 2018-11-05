@@ -468,32 +468,32 @@ public class SqlLineHighlighterTest {
     final AttributedString attributedString =
         highlighter.highlight(sqlLine.getLineReader(), line);
     final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
-    int commandsStyle = highlightStyle.getCommandStyle().getStyle();
-    int keyWordStyle = highlightStyle.getSqlKeywordStyle().getStyle();
+    int commandStyle = highlightStyle.getCommandStyle().getStyle();
+    int keywordStyle = highlightStyle.getKeywordStyle().getStyle();
     int singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
-    int sqlIdentifierStyle = highlightStyle.getSqlIdentifierStyle().getStyle();
-    int commentsStyle = highlightStyle.getCommentedStyle().getStyle();
-    int numbersStyle = highlightStyle.getNumbersStyle().getStyle();
+    int identifierStyle = highlightStyle.getIdentifierStyle().getStyle();
+    int commentStyle = highlightStyle.getCommentStyle().getStyle();
+    int numberStyle = highlightStyle.getNumberStyle().getStyle();
     int defaultStyle = highlightStyle.getDefaultStyle().getStyle();
 
     for (int i = 0; i < line.length(); i++) {
       checkSymbolStyle(line, i, expectedHighlightStyle.commands,
-          attributedString, commandsStyle, "command");
+          attributedString, commandStyle, "command");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.keywords,
-          attributedString, keyWordStyle, "key word");
+          attributedString, keywordStyle, "key word");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.singleQuotes,
           attributedString, singleQuoteStyle, "single quote");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.sqlIdentifierQuotes,
-          attributedString, sqlIdentifierStyle, "sql identifier quote");
+          attributedString, identifierStyle, "sql identifier quote");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.numbers,
-          attributedString, numbersStyle, "number");
+          attributedString, numberStyle, "number");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.comments,
-          attributedString, commentsStyle, "comment");
+          attributedString, commentStyle, "comment");
 
       checkSymbolStyle(line, i, expectedHighlightStyle.defaults,
           attributedString, defaultStyle, "default");

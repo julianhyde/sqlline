@@ -39,8 +39,8 @@ class SqlCompleter extends StringsCompleter {
         new BufferedReader(
             new InputStreamReader(
                 SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"), StandardCharsets.UTF_8)
-      ).readLine();
+                    "sql-keywords.properties"), StandardCharsets.UTF_8))
+            .readLine();
 
     // now add the keywords from the current connection
 

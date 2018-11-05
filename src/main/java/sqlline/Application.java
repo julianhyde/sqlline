@@ -367,7 +367,7 @@ public class Application {
   }
 
   public Map<String, HighlightStyle> getName2HighlightStyle() {
-    return HighlightStyle.getName2highlightStyle();
+    return BuiltInHighlightStyle.BY_NAME;
   }
 }
 

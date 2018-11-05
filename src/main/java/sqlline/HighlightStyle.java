@@ -11,154 +11,105 @@
 */
 package sqlline;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jline.utils.AttributedStyle;
 
 /**
  * Class to specify colors and styles while highlighting.
  */
 public class HighlightStyle {
-  private static final AttributedStyle GREEN =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN);
-  private static final AttributedStyle CYAN =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN);
-  private static final AttributedStyle BRIGHT =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT);
-  private static final AttributedStyle YELLOW =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW);
-  private static final AttributedStyle WHITE =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE);
-  private static final AttributedStyle BLACK =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.BLACK);
-  private static final AttributedStyle MAGENTA =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA);
-  private static final AttributedStyle RED =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.RED);
-  private static final AttributedStyle BLUE =
-      AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE);
-
-  private static final AttributedStyle BOLD_GREEN =
-      AttributedStyle.BOLD.foreground(AttributedStyle.GREEN);
-  private static final AttributedStyle BOLD_CYAN =
-      AttributedStyle.BOLD.foreground(AttributedStyle.CYAN);
-  private static final AttributedStyle BOLD_BRIGHT =
-      AttributedStyle.BOLD.foreground(AttributedStyle.BRIGHT);
-  private static final AttributedStyle BOLD_YELLOW =
-      AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);
-  private static final AttributedStyle BOLD_WHITE =
-      AttributedStyle.BOLD.foreground(AttributedStyle.WHITE);
-  private static final AttributedStyle BOLD_BLACK =
-      AttributedStyle.BOLD.foreground(AttributedStyle.BLACK);
-  private static final AttributedStyle BOLD_MAGENTA =
-      AttributedStyle.BOLD.foreground(AttributedStyle.MAGENTA);
-  private static final AttributedStyle BOLD_RED =
-      AttributedStyle.BOLD.foreground(AttributedStyle.RED);
-  private static final AttributedStyle BOLD_BLUE =
-      AttributedStyle.BOLD.foreground(AttributedStyle.BLUE);
-
-  private static final AttributedStyle ITALIC_GREEN =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.GREEN);
-  private static final AttributedStyle ITALIC_CYAN =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.CYAN);
-  private static final AttributedStyle ITALIC_BRIGHT =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.BRIGHT);
-  private static final AttributedStyle ITALIC_YELLOW =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.YELLOW);
-  private static final AttributedStyle ITALIC_WHITE =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.WHITE);
-  private static final AttributedStyle ITALIC_BLACK =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.BLACK);
-  private static final AttributedStyle ITALIC_MAGENTA =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.MAGENTA);
-  private static final AttributedStyle ITALIC_RED =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.RED);
-  private static final AttributedStyle ITALIC_BLUE =
-      AttributedStyle.DEFAULT.italic().foreground(AttributedStyle.BLUE);
-
-  static final Map<String, HighlightStyle> NAME2HIGHLIGHT_STYLE =
-      new HashMap<String, HighlightStyle>() {{
-          put("dark", new HighlightStyle(
-              BOLD_BLUE, BOLD_WHITE, GREEN, CYAN,
-              ITALIC_BRIGHT, YELLOW, WHITE));
-          put("light", new HighlightStyle(
-              BOLD_RED, BOLD_BLACK, GREEN, CYAN,
-              ITALIC_BRIGHT, YELLOW, BLACK));
-          // The next four schemes inspired by
-          // https://github.com/Gillisdc/sqldeveloper-syntax-highlighting
-          // not the same but more or less similar
-          put("chester", new HighlightStyle(
-              BOLD_BLUE, BOLD_WHITE, RED, CYAN, ITALIC_GREEN, YELLOW, WHITE));
-          put("dracula", new HighlightStyle(
-              BOLD_MAGENTA, BOLD_WHITE, GREEN,
-              RED, ITALIC_CYAN, YELLOW, WHITE));
-          put("solarized", new HighlightStyle(
-              BOLD_YELLOW, BOLD_BLUE, GREEN, RED, ITALIC_BRIGHT, CYAN, BLUE));
-          put("vs2010", new HighlightStyle(
-              BOLD_BLUE, BOLD_WHITE, RED, MAGENTA,
-              ITALIC_GREEN, BRIGHT, WHITE));
-          // inspired by https://github.com/ozmoroz/ozbsidian-sqldeveloper
-          // not the same but more or less similar
-          put("ozbsidian", new HighlightStyle(
-              BOLD_GREEN, BOLD_WHITE, RED, MAGENTA,
-              ITALIC_BRIGHT, YELLOW, WHITE));
-      }};
-
-  private final AttributedStyle keyWordsStyle;
-  private final AttributedStyle commandsStyle;
+  private final AttributedStyle keywordStyle;
+  private final AttributedStyle commandStyle;
   private final AttributedStyle quotedStyle;
-  private final AttributedStyle sqlIdentifierStyle;
-  private final AttributedStyle commentedStyle;
+  private final AttributedStyle identifierStyle;
+  private final AttributedStyle commentStyle;
   private final AttributedStyle numberStyle;
   private final AttributedStyle defaultStyle;
 
-  public HighlightStyle(AttributedStyle keyWordsStyle,
-                        AttributedStyle commandsStyle,
-                        AttributedStyle quotedStyle,
-                        AttributedStyle sqlIdentifierStyle,
-                        AttributedStyle commentedStyle,
-                        AttributedStyle numberStyle,
-                        AttributedStyle defaultStyle) {
-    this.keyWordsStyle = keyWordsStyle;
-    this.commandsStyle = commandsStyle;
+  /** Creates a HighlightStyle.
+   *
+   * @param keywordStyle Style for SQL keywords
+   * @param commandStyle Style for SQLLine commands
+   * @param quotedStyle Style for SQL character literals
+   * @param identifierStyle Style for SQL identifiers
+   * @param commentStyle Style for SQL comments
+   * @param numberStyle Style for numeric values
+   * @param defaultStyle Default style
+   */
+  public HighlightStyle(AttributedStyle keywordStyle,
+      AttributedStyle commandStyle,
+      AttributedStyle quotedStyle,
+      AttributedStyle identifierStyle,
+      AttributedStyle commentStyle,
+      AttributedStyle numberStyle,
+      AttributedStyle defaultStyle) {
+    this.keywordStyle = keywordStyle;
+    this.commandStyle = commandStyle;
     this.quotedStyle = quotedStyle;
-    this.sqlIdentifierStyle = sqlIdentifierStyle;
-    this.commentedStyle = commentedStyle;
+    this.identifierStyle = identifierStyle;
+    this.commentStyle = commentStyle;
     this.numberStyle = numberStyle;
     this.defaultStyle = defaultStyle;
   }
 
-  public static Map<String, HighlightStyle> getName2highlightStyle() {
-    return NAME2HIGHLIGHT_STYLE;
+  /** Returns the style for a SQL keyword such as {@code SELECT} or
+   * {@code ON}.
+   *
+   * @return Style for SQL keywords
+   */
+  public AttributedStyle getKeywordStyle() {
+    return keywordStyle;
   }
 
-  public AttributedStyle getSqlKeywordStyle() {
-    return keyWordsStyle;
-  }
-
+  /** Returns the style for a SQL character literal, such as
+   * {@code 'Hello, world!'}.
+   *
+   * @return Style for SQL character literals
+   */
   public AttributedStyle getQuotedStyle() {
     return quotedStyle;
   }
 
-  public AttributedStyle getSqlIdentifierStyle() {
-    return sqlIdentifierStyle;
+  /** Returns the style for a SQL identifier, such as
+   * {@code EMP} or {@code "Employee table"}.
+   *
+   * @return Style for SQL identifiers
+   */
+  public AttributedStyle getIdentifierStyle() {
+    return identifierStyle;
   }
 
-  public AttributedStyle getCommentedStyle() {
-    return commentedStyle;
+  /** Returns the style for a SQL comments, such as
+   * {@literal /* This is a comment *}{@literal /} or
+   * {@literal -- End of line comment}.
+   *
+   * @return Style for SQL comments
+   */
+  public AttributedStyle getCommentStyle() {
+    return commentStyle;
   }
 
-  public AttributedStyle getNumbersStyle() {
+  /** Returns the style for numeric literals.
+   *
+   * @return Style for numeric literals
+   */
+  public AttributedStyle getNumberStyle() {
     return numberStyle;
   }
 
+  /** Returns the style for text that does not match any other style.
+   *
+   * @return Default style
+   */
   public AttributedStyle getDefaultStyle() {
     return defaultStyle;
   }
 
+  /** Returns the style for SQLLine commands.
+   *
+   * @return Command style
+   */
   public AttributedStyle getCommandStyle() {
-    return commandsStyle;
+    return commandStyle;
   }
 }
 

@@ -473,13 +473,12 @@ public class SqlLineOpts implements Completer {
 
   public void setColorScheme(String colorScheme) {
     if (DEFAULT.equals(colorScheme)
-        || HighlightStyle.NAME2HIGHLIGHT_STYLE.containsKey(colorScheme)) {
+        || BuiltInHighlightStyle.BY_NAME.containsKey(colorScheme)) {
       propertiesMap.put(COLOR_SCHEME, colorScheme);
       return;
     }
-    throw new IllegalArgumentException(
-        "Possible values are: "
-            + new TreeSet<>(HighlightStyle.NAME2HIGHLIGHT_STYLE.keySet()));
+    throw new IllegalArgumentException("Possible values are: "
+        + new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet()));
   }
 
   public String getColorScheme() {

@@ -44,7 +44,7 @@ import org.jline.utils.WCWidth;
 public class SqlLineHighlighter extends DefaultHighlighter {
   private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
   private final SqlLine sqlLine;
-  private final Set<String> defaultSqlKeyWordsSet;
+  private final Set<String> defaultKeywordSet;
   private final Map<Connection, HighlightRule> connection2rules =
       new HashMap<>();
 
@@ -54,18 +54,17 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         new BufferedReader(
             new InputStreamReader(
                 SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"), StandardCharsets.UTF_8)
-        ).readLine();
-    defaultSqlKeyWordsSet = new TreeSet<>();
+                    "sql-keywords.properties"), StandardCharsets.UTF_8))
+            .readLine();
+    defaultKeywordSet = new TreeSet<>();
     for (StringTokenizer tok = new StringTokenizer(keywords, ",");
          tok.hasMoreTokens();) {
-      defaultSqlKeyWordsSet.add(tok.nextToken());
+      defaultKeywordSet.add(tok.nextToken());
     }
   }
 
-  @Override
-  public AttributedString highlight(
-      LineReader reader, String buffer) {
+  @Override public AttributedString highlight(LineReader reader,
+      String buffer) {
     boolean skipSyntaxHighlighter =
         SqlLineProperty.DEFAULT.equals(sqlLine.getOpts().getColorScheme());
     if (skipSyntaxHighlighter) {
@@ -77,7 +76,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     int negativeStart = -1;
     int negativeEnd = -1;
     boolean command = false;
-    final BitSet sqlKeyWordsBitSet = new BitSet(buffer.length());
+    final BitSet keywordBitSet = new BitSet(buffer.length());
     final BitSet quoteBitSet = new BitSet(buffer.length());
     final BitSet sqlIdentifierQuotesBitSet = new BitSet(buffer.length());
     final BitSet commentBitSet = new BitSet(buffer.length());
@@ -100,13 +99,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       }
     }
     if (isSql) {
-      handleSqlSyntax(
-          buffer,
-          sqlKeyWordsBitSet,
-          quoteBitSet,
-          sqlIdentifierQuotesBitSet,
-          commentBitSet,
-          numberBitSet,
+      handleSqlSyntax(buffer, keywordBitSet, quoteBitSet,
+          sqlIdentifierQuotesBitSet, commentBitSet, numberBitSet,
           isCommandPresent);
     } else {
       handleQuotesInCommands(buffer, quoteBitSet, sqlIdentifierQuotesBitSet);
@@ -149,16 +143,16 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
     for (int i = 0; i < buffer.length(); i++) {
       if (isSql) {
-        if (sqlKeyWordsBitSet.get(i)) {
-          sb.style(highlightStyle.getSqlKeywordStyle());
+        if (keywordBitSet.get(i)) {
+          sb.style(highlightStyle.getKeywordStyle());
         } else if (quoteBitSet.get(i)) {
           sb.style(highlightStyle.getQuotedStyle());
         } else if (sqlIdentifierQuotesBitSet.get(i)) {
-          sb.style(highlightStyle.getSqlIdentifierStyle());
+          sb.style(highlightStyle.getIdentifierStyle());
         } else if (commentBitSet.get(i)) {
-          sb.style(highlightStyle.getCommentedStyle());
+          sb.style(highlightStyle.getCommentStyle());
         } else if (numberBitSet.get(i)) {
-          sb.style(highlightStyle.getNumbersStyle());
+          sb.style(highlightStyle.getNumberStyle());
         } else if (i == 0 || (i > commandEnd
             && (i < underlineStart || i > underlineEnd)
             && (i < negativeStart || i > negativeEnd))) {
@@ -170,7 +164,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           sb.style(highlightStyle.getQuotedStyle());
         } else if (sqlIdentifierQuotesBitSet != null
             && sqlIdentifierQuotesBitSet.get(i)) {
-          sb.style(highlightStyle.getSqlIdentifierStyle());
+          sb.style(highlightStyle.getIdentifierStyle());
         }
       }
 
@@ -219,15 +213,15 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         if (connection2rules.get(databaseConnection.connection) != null) {
           return connection2rules.get(databaseConnection.connection);
         }
-        DatabaseMetaData meta = databaseConnection.meta;
-        Set<String> connectionSQLKeyWords =
+        final DatabaseMetaData meta = databaseConnection.meta;
+        final Set<String> connectionKeywords =
             new HashSet<>(
                 Arrays.asList(meta.getSQLKeywords().split(",")));
         String sqlIdentifier = meta.getIdentifierQuoteString();
         sqlIdentifier = " ".equals(sqlIdentifier)
             ? getDefaultSqlIdentifierQuote() : sqlIdentifier;
         HighlightRule rule =
-            new HighlightRule(connectionSQLKeyWords, sqlIdentifier);
+            new HighlightRule(connectionKeywords, sqlIdentifier);
         databaseConnection.setHighlighter(this);
         connection2rules.put(databaseConnection.connection, rule);
         return rule;
@@ -244,9 +238,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return DEFAULT_SQL_IDENTIFIER_QUOTE;
   }
 
-  private void handleSqlSyntax(
-      String buffer,
-      BitSet sqlKeyWordsBitSet,
+  private void handleSqlSyntax(String buffer,
+      BitSet keywordBitSet,
       BitSet quoteBitSet,
       BitSet sqlIdentifierQuotesBitSet,
       BitSet commentBitSet,
@@ -255,19 +248,23 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     int wordStart = -1;
     int start = 0;
     if (isCommandPresent) {
-      start = buffer.indexOf(
-          SqlLine.COMMAND_PREFIX) + SqlLine.COMMAND_PREFIX.length();
+      start = buffer.indexOf(SqlLine.COMMAND_PREFIX)
+          + SqlLine.COMMAND_PREFIX.length();
       int nextSpace =
           buffer.indexOf(' ', buffer.indexOf(SqlLine.COMMAND_PREFIX));
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
     final HighlightRule highlightRule = getConnectionSpecificRule();
-    final Set<String> connectionSpecificSqlKeyWords =
-        highlightRule == null
-            ? null : highlightRule.connectionBasedSqlKeyWordsSet;
-    final String sqlIdentifier = highlightRule == null
-        ? getDefaultSqlIdentifierQuote() : highlightRule.sqlIdentifierQuote;
+    final Set<String> connectionKeywords;
+    final String sqlIdentifier;
+    if (highlightRule == null) {
+      connectionKeywords = null;
+      sqlIdentifier = getDefaultSqlIdentifierQuote();
+    } else {
+      connectionKeywords = highlightRule.connectionKeywords;
+      sqlIdentifier = highlightRule.sqlIdentifierQuote;
+    }
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -277,21 +274,22 @@ public class SqlLineHighlighter extends DefaultHighlighter {
               ? buffer.substring(wordStart, pos)
               : buffer.substring(wordStart);
           String upperWord = word.toUpperCase(Locale.ROOT);
-          if (defaultSqlKeyWordsSet.contains(upperWord)
-              || (connectionSpecificSqlKeyWords != null
-              && connectionSpecificSqlKeyWords.contains(upperWord))) {
-            sqlKeyWordsBitSet.set(wordStart, wordStart + word.length());
+          if (defaultKeywordSet.contains(upperWord)
+              || (connectionKeywords != null
+                  && connectionKeywords.contains(upperWord))) {
+            keywordBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
         } else {
           continue;
         }
       }
-      if (ch == sqlIdentifier.charAt(0) && (sqlIdentifier.length() == 1
-          || sqlIdentifier
-          .regionMatches(0, buffer, pos, sqlIdentifier.length()))) {
-        pos = handleSqlIdentifierQuotes(
-            buffer, sqlIdentifier, sqlIdentifierQuotesBitSet, pos);
+      if (ch == sqlIdentifier.charAt(0)
+          && (sqlIdentifier.length() == 1
+              || sqlIdentifier.regionMatches(0, buffer, pos,
+                  sqlIdentifier.length()))) {
+        pos = handleSqlIdentifierQuotes(buffer, sqlIdentifier,
+            sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
         pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
@@ -300,16 +298,15 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         pos = handleComments(buffer, commentBitSet, pos);
       }
       if (wordStart == -1
-          && (Character.isLetter(ch)
-          || ch == '@' || ch == '#' || ch == '_')
+          && (Character.isLetter(ch) || ch == '@' || ch == '#' || ch == '_')
           && (pos == 0 || buffer.charAt(pos - 1) != '.')) {
         wordStart = pos;
         continue;
       }
       if (wordStart == -1 && Character.isDigit(ch)
           && (pos == 0
-          || (!Character.isLetterOrDigit(buffer.charAt(pos - 1))
-          && buffer.charAt(pos - 1) != '_'))) {
+              || (!Character.isLetterOrDigit(buffer.charAt(pos - 1))
+                  && buffer.charAt(pos - 1) != '_'))) {
         pos = handleNumbers(buffer, numberBitSet, pos);
         continue;
       }
@@ -317,24 +314,26 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * The method marks single/double quoted string position
+   * Marks single/double quoted string position
    * in sqlline command based on input.
-   * ASSUMPTION: the input is sqlline command but not sql itself.
+   *
+   * <p>Assumes that the input is a sqlline command but not SQL itself.
    *
    * @param line              line with sqlline command where to handle
    *                          single/double quoted string
-   * @param quoteBitSet       BitSet to use for positions of single quoted lines
-   * @param doubleQuoteBitSet BitSet to use for positions of double quoted lines
-   * <p>
-   * Example
-   * String line = "!set csvDelimiter '"'";
-   * <p>
-   * handleQuotesInCommands(line, quoteBitSet, doubleQuoteBitSet);
-   * should mark single quoted string only as
-   * a double quote is inside the quoted line.
+   * @param quoteBitSet       BitSet to use for positions of single-quoted lines
+   * @param doubleQuoteBitSet BitSet to use for positions of double-quoted lines
+   *
+   * <p>For example,
+   *
+   * <blockquote><code>handleQuotesInCommands("!set csvDelimiter '"'",
+   * quoteBitSet, doubleQuoteBitSet);</code></blockquote>
+   *
+   * <p>should mark a single-quoted string only. as a double-quote is
+   * inside the quoted line.
    */
-  void handleQuotesInCommands(
-      String line, BitSet quoteBitSet, BitSet doubleQuoteBitSet) {
+  void handleQuotesInCommands(String line, BitSet quoteBitSet,
+      BitSet doubleQuoteBitSet) {
     int doubleQuoteStart = -1;
     int quoteStart = -1;
     for (int pos = 0; pos < line.length(); pos++) {
@@ -388,22 +387,21 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    *                                    of sql identifiers quoted lines
    * @param startingPoint               start point
    * @return position of closing (non-escaped) sql identifier quote.
-   * <p>
-   * Example (for the case sql identifier quote is a double quote ("))
+   *
+   * <p>Example (for the case sql identifier quote is a double quote ("))
    * "Quoted \" line quoted" "another\"'' quoted''\" line"
-   * <p>
-   * handleSqlIdentifierQuotes(
-   * line, sqlIdentifier, sqlIdentifierQuotesBitSet, startingPoint);
-   * should return the position of the sql identifier quote closing
-   * the first quoted string and mark sql identifier quoted line
-   * inside sqlIdentifierQuotesBitSet.
+   *
+   * <blockquote><code>handleSqlIdentifierQuotes(line, sqlIdentifier,
+   * sqlIdentifierQuotesBitSet, startingPoint);</code></blockquote>
+   *
+   * <p>should return the position of the sql identifier quote closing the first
+   * quoted string and mark sql identifier quoted line inside
+   * {@code sqlIdentifierQuotesBitSet}.
    */
-  int handleSqlIdentifierQuotes(String line,
-                                String sqlIdentifier,
-                                BitSet sqlIdentifierQuotesBitSet,
-                                int startingPoint) {
-    if (!sqlIdentifier.regionMatches(
-        0, line, startingPoint, sqlIdentifier.length())) {
+  int handleSqlIdentifierQuotes(String line, String sqlIdentifier,
+      BitSet sqlIdentifierQuotesBitSet, int startingPoint) {
+    if (!sqlIdentifier.regionMatches(0, line, startingPoint,
+        sqlIdentifier.length())) {
       return startingPoint;
     }
     int backslashCounter = 0;
@@ -412,8 +410,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
          i++) {
       if (line.charAt(i) == '\\') {
         backslashCounter++;
-      } else if (
-          sqlIdentifier.regionMatches(0, line, i, sqlIdentifier.length())) {
+      } else if (sqlIdentifier.regionMatches(0, line, i,
+          sqlIdentifier.length())) {
         if (backslashCounter % 2 == 0) {
           sqlIdentifierQuotesBitSet
               .set(startingPoint, i + sqlIdentifier.length());
@@ -428,15 +426,16 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * The method marks numbers position based on input.
-   * ASSUMPTION: there is a number starts since
-   * the specified position,
-   * i.e. Character.isDigit(line.charAt(startingPoint)) == true
+   * Marks numbers position based on input.
    *
-   * @param line           line where to handle number string
+   * <p>Assumes that a number starts at the specified position,
+   * i.e. {@code Character.isDigit(line.charAt(startingPoint)) == true}
+   *
+   * @param line           Line where to handle number string
    * @param numberBitSet   BitSet to use for position of number
-   * @param startingPoint  start point
-   * @return position where number finished.
+   * @param startingPoint  Start point
+   *
+   * @return position where number finished
    */
   int handleNumbers(String line, BitSet numberBitSet, int startingPoint) {
     int end = startingPoint + 1;
@@ -466,30 +465,33 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * The method marks commented string position based on input.
-   * ASSUMPTION: there is a comment start since the specified position,
-   * i.e. line.charAt(startingPoint) == '-'
-   * && line.charAt(startingPoint + 1) == '-'
-   * or
-   * i.e. line.charAt(startingPoint) == '/'
-   * && line.charAt(startingPoint + 1) == '*'
+   * Marks commented string position based on input.
    *
-   * @param line          line where to handle commented string
+   * <p>Assumes that there is a comment start since the specified position,
+   * i.e. <code>line.charAt(startingPoint) == '-'
+   * && line.charAt(startingPoint + 1) == '-'</code>
+   * or
+   * i.e. <code>line.charAt(startingPoint) == '/'
+   * && line.charAt(startingPoint + 1) == '*'</code>
+   *
+   * @param line          Line where to handle commented string
    * @param commentBitSet BitSet to use for positions of single quoted lines
-   * @param startingPoint start point
-   * @return position of closing comment (multiline comment)
-   * or a new line position (one line comment).
-   * <p>
-   * Example
+   * @param startingPoint Start point
+   *
+   * @return position of closing comment (multi-line comment)
+   * or a new line position (one line comment)
+   *
+   * <p>Example
    * String line = "test /*Single --'' line commented'*\/
    * '/*another-- commented'' line*\/";
-   * <p>
-   * handleComments(line, commentBitSet, line.indexOf("/*Single"));
-   * should return position of first closing comment *\/
-   * and mark comment position inside commentBitSet.
+   *
+   * <p><code>handleComments(line, commentBitSet,
+   * line.indexOf("/*Single"));</code>
+   * should return the position of the first closing comment *\/
+   * and mark comment position inside {@code commentBitSet}.
    */
-  int handleComments(
-      String line, BitSet commentBitSet, int startingPoint) {
+  int handleComments(String line, BitSet commentBitSet,
+      int startingPoint) {
     final char ch = line.charAt(startingPoint);
     if (ch == '-' && line.charAt(startingPoint + 1) == '-') {
       int end = line.indexOf('\n', startingPoint);
@@ -506,24 +508,27 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * The method marks single quoted string position based on input.
-   * ASSUMPTION: there is a single quote in the specified position,
-   * i.e. line.charAt(startingPoint) == '\''
+   * Marks single-quoted string position based on input.
    *
-   * @param line          line where to handle single quoted string
+   * <p>Assumes that there is a single quote in the specified position,
+   * i.e. {@code line.charAt(startingPoint) == '\''}.
+   *
+   * @param line          Line where to handle single-quoted string
    * @param quoteBitSet   BitSet to use for positions of single quoted lines
-   * @param startingPoint start point
-   * @return position of closing (non-escaped) quote (').
-   * <p>
-   * Example
+   * @param startingPoint Start point
+   *
+   * @return position of closing (non-escaped) quote (')
+   *
+   * <p>Example
    * String line = "test 'Single '' line quoted''' 'another'' quoted'' line'";
-   * <p>
-   * handleSqlSingleQuotes(line, quoteBitSet, line.indexOf("'Single"));
+   *
+   * <p><code>handleSqlSingleQuotes(line, quoteBitSet,
+   * line.indexOf("'Single"));</code>
    * should return position of the quote (') closing the first quoted string
-   * and mark single quoted line inside quoteBitSet.
+   * and mark single quoted line inside {@code quoteBitSet}.
    */
-  int handleSqlSingleQuotes(
-      String line, BitSet quoteBitSet, int startingPoint) {
+  int handleSqlSingleQuotes(String line, BitSet quoteBitSet,
+      int startingPoint) {
     int end;
     int quoteCounter = 1;
     boolean quotationEnded = false;
@@ -547,7 +552,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
 
   /**
    * Returns the copy of map.
-   * The only purpose of this method is testing.
+   *
+   * <p>The only purpose of this method is testing.
+   *
    * @return copy of map
    */
   Map<Connection, HighlightRule> getConnection2rules() {
@@ -559,17 +566,17 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /**
-   * Class to provide rules for highlighting.
-   * Currently it provides an additional set of keywords
-   * and sql identifier quote to use.
+   * Rules for highlighting.
+   *
+   * <p>Provides an additional set of keywords,
+   * and the quotation character for SQL identifiers.
    */
-  private class HighlightRule {
-    private final Set<String> connectionBasedSqlKeyWordsSet;
+  private static class HighlightRule {
+    private final Set<String> connectionKeywords;
     private final String sqlIdentifierQuote;
 
-    HighlightRule(
-        Set<String> connectionBasedSqlKeyWordsSet, String sqlIdentifierQuote) {
-      this.connectionBasedSqlKeyWordsSet = connectionBasedSqlKeyWordsSet;
+    HighlightRule(Set<String> connectionKeywords, String sqlIdentifierQuote) {
+      this.connectionKeywords = connectionKeywords;
       this.sqlIdentifierQuote = sqlIdentifierQuote;
     }
   }

@@ -45,12 +45,12 @@ public class SqlLineHighlighterLowLevelTest {
   }
 
   /**
-   * WARNING: Change it only if you know what you are doing.
-   * Otherwise put your test into
-   * {@link SqlLineHighlighterTest#testSingleQuotedStrings()}
-   * <p>
    * This is a low level test of
    * {@link SqlLineHighlighter#handleSqlSingleQuotes(String, BitSet, int)}.
+   *
+   * <p>WARNING: Change this test only if you know what you are doing.
+   * Otherwise, put your test into
+   * {@link SqlLineHighlighterTest#testSingleQuotedStrings()},
    */
   @Test
   public void testLowLevelHandleSqlSingleQuotes() {
@@ -76,13 +76,12 @@ public class SqlLineHighlighterLowLevelTest {
   }
 
   /**
-   * WARNING: Change it only if you know what you are doing.
+   * Low level test of
+   * {@link SqlLineHighlighter#handleSqlIdentifierQuotes}.
+   *
+   * <p>WARNING: Change this test only if you know what you are doing.
    * Otherwise put your test into
-   * {@link SqlLineHighlighterTest#testSqlIdentifierQuotes()}}
-   * <p>
-   * This is a low level test of
-   * {@link SqlLineHighlighter
-   * #handleSqlIdentifierQuotes(String, String, BitSet, int)}.
+   * {@link SqlLineHighlighterTest#testSqlIdentifierQuotes()}.
    */
   @Test
   public void testLowLevelHandleSqlIdentifierQuotes() {
@@ -132,12 +131,12 @@ public class SqlLineHighlighterLowLevelTest {
   }
 
   /**
-   * WARNING: Change it only if you know what you are doing.
-   * Otherwise put your test into
-   * {@link SqlLineHighlighterTest#testCommentedStrings()}
-   * <p>
-   * This is a low level test of
+   * Low level test of
    * {@link SqlLineHighlighter#handleComments(String, BitSet, int)}.
+   *
+   * <p>WARNING: Change this test only if you know what you are doing.
+   * Otherwise put your test into
+   * {@link SqlLineHighlighterTest#testCommentedStrings()}.
    */
   @Test
   public void testLowLevelHandleComments() {
@@ -162,12 +161,12 @@ public class SqlLineHighlighterLowLevelTest {
   }
 
   /**
-   * WARNING: Change it only if you know what you are doing.
+   * Low level test of
+   * {@link SqlLineHighlighter#handleNumbers(String, BitSet, int)}.
+   *
+   * <p>WARNING: Change this test only if you know what you are doing.
    * Otherwise put your test into
    * {@link SqlLineHighlighterTest#testNumberStrings()}.
-   * <p>
-   * This is a low level test of
-   * {@link SqlLineHighlighter#handleNumbers(String, BitSet, int)}.
    */
   @Test
   public void testLowLevelHandleNumbers() {
@@ -188,12 +187,12 @@ public class SqlLineHighlighterLowLevelTest {
   }
 
   /**
-   * WARNING: Change it only if you know what you are doing.
-   * Otherwise put your test into {@link SqlLineHighlighterTest#testCommands()}
-   * or {@link SqlLineHighlighterTest#testComplexStrings()}
-   * <p>
-   * This is a low level test of
+   * Low level test of
    * {@link SqlLineHighlighter#handleQuotesInCommands(String, BitSet, BitSet)}.
+   *
+   * <p>WARNING: Change this test only if you know what you are doing.
+   * Otherwise put your test into {@link SqlLineHighlighterTest#testCommands()}
+   * or {@link SqlLineHighlighterTest#testComplexStrings()}.
    */
   @Test
   public void testLowLevelQuotesInCommands() {
