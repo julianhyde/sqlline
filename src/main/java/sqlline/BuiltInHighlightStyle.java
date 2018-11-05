@@ -29,7 +29,7 @@ import static sqlline.AttributedStyles.*;
  * Gillis's Colour schemes for Oracle SQL Developer</a> (not the same but more
  * or less similar).
  *
- * <p>Similarly, the {@link #OZBSIDIAN} style is inspired by
+ * <p>Similarly, the {@link #OBSIDIAN} style is inspired by
  * <a href="https://github.com/ozmoroz/ozbsidian-sqldeveloper">
  * ozmoroz's OzBsidian colour scheme for Oracle SQL Developer</a>.
  *
@@ -42,7 +42,7 @@ enum BuiltInHighlightStyle {
   DRACULA(BOLD_MAGENTA, BOLD_WHITE, GREEN, RED, ITALIC_CYAN, YELLOW, WHITE),
   SOLARIZED(BOLD_YELLOW, BOLD_BLUE, GREEN, RED, ITALIC_BRIGHT, CYAN, BLUE),
   VS2010(BOLD_BLUE, BOLD_WHITE, RED, MAGENTA, ITALIC_GREEN, BRIGHT, WHITE),
-  OZBSIDIAN(BOLD_GREEN, BOLD_WHITE, RED, MAGENTA, ITALIC_BRIGHT, YELLOW, WHITE);
+  OBSIDIAN(BOLD_GREEN, BOLD_WHITE, RED, MAGENTA, ITALIC_BRIGHT, YELLOW, WHITE);
 
   final HighlightStyle style;
 
