@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.DefaultHighlighter;
@@ -46,7 +46,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   private final SqlLine sqlLine;
   private final Set<String> defaultKeywordSet;
   private final Map<Connection, HighlightRule> connection2rules =
-      new HashMap<>();
+      new WeakHashMap<>();
 
   public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
     this.sqlLine = sqlLine;
