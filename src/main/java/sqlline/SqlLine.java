@@ -35,6 +35,8 @@ import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+import static org.jline.keymap.KeyMap.alt;
+
 /**
  * A console SQL shell with command completion.
  *
@@ -600,9 +602,45 @@ public class SqlLine {
           .build()
         : lineReaderBuilder.build();
 
+    addWidget(lineReader,
+        this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;
+  }
+
+  private void addWidget(
+      LineReader lineReader, Widget widget, String name, CharSequence keySeq) {
+    lineReader.getWidgets().put(name, widget);
+    lineReader.getKeyMaps().get(LineReader.EMACS).bind(widget, keySeq);
+  }
+
+  boolean nextColorSchemeWidget() {
+    String current = getOpts().getColorScheme();
+    Set<String> colorSchemes = application.getName2HighlightStyle().keySet();
+    if (BuiltInProperty.DEFAULT.equalsIgnoreCase(current)) {
+      if (!colorSchemes.isEmpty()) {
+        getOpts().setColorScheme(colorSchemes.iterator().next());
+      } else {
+        getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+      }
+      return true;
+    }
+
+    Iterator<String> colorSchemeIterator = colorSchemes.iterator();
+    while (colorSchemeIterator.hasNext()) {
+      String nextColorScheme = colorSchemeIterator.next();
+      if (Objects.equals(nextColorScheme, current)) {
+        if (colorSchemeIterator.hasNext()) {
+          getOpts().setColorScheme(colorSchemeIterator.next());
+        } else {
+          getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+        }
+        return true;
+      }
+    }
+    getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+    return true;
   }
 
   void usage() {

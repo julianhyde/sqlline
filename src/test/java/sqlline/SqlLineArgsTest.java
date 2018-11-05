@@ -1893,7 +1893,6 @@ public class SqlLineArgsTest {
     }
   }
 
-
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
