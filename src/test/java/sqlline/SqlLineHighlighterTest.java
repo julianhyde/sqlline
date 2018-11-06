@@ -371,7 +371,7 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<SqlLineHighlighter>() {
+    new MockUp<DatabaseConnection.SyntaxRule>() {
       @Mock
       String getDefaultSqlIdentifierQuote() {
         return "`";
@@ -415,8 +415,6 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2HighLighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      SqlLineHighlighter sqlLineHighlighter =
-          sqlLine2HighLighterEntry.getValue();
       sqlLine.runCommands(
           Collections.singletonList("!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "

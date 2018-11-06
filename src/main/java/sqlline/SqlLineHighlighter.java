@@ -38,7 +38,6 @@ import org.jline.utils.WCWidth;
  * and command syntax highlighting in sqlline.
  */
 public class SqlLineHighlighter extends DefaultHighlighter {
-  private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
   private final SqlLine sqlLine;
   private final Set<String> defaultKeywordSet;
 
@@ -199,11 +198,11 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /** Returns a highlight rule for the current connection. Never null. */
-  private HighlightRule getConnectionSpecificRule() {
+  DatabaseConnection.SyntaxRule getConnectionSpecificRule() {
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
     if (databaseConnection != null) {
-      return databaseConnection.deduceHighlighterRule(this);
+      return deduceSyntaxRule(databaseConnection);
     }
     return createRule(null);
   }
@@ -221,7 +220,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    *
    * @return Highlighter rule, never null
    */
-  HighlightRule createRule(DatabaseConnection databaseConnection) {
+  DatabaseConnection.SyntaxRule createRule(
+      DatabaseConnection databaseConnection) {
     try {
       if (databaseConnection != null
           && databaseConnection.connection != null
@@ -230,18 +230,36 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         final Set<String> connectionKeywords =
             new HashSet<>(Arrays.asList(meta.getSQLKeywords().split(",")));
         final String quoteString = meta.getIdentifierQuoteString();
-        final String quoteString2 = " ".equals(quoteString)
-            ? getDefaultSqlIdentifierQuote() : quoteString;
-        return new HighlightRule(connectionKeywords, quoteString2);
+        final String productName = meta.getDatabaseProductName();
+        return new DatabaseConnection.SyntaxRule(
+            connectionKeywords, quoteString, productName);
       }
     } catch (SQLException e) {
       sqlLine.handleException(e);
     }
-    return new HighlightRule(null, getDefaultSqlIdentifierQuote());
+    return new DatabaseConnection.SyntaxRule(null, null, null);
   }
 
-  String getDefaultSqlIdentifierQuote() {
-    return DEFAULT_SQL_IDENTIFIER_QUOTE;
+  /** Gets or creates the rule for highlighting in the current connection.
+   *
+   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
+   * not tied to the highlighter, only to the connection.
+   *
+   * <p>In future, this method may also deduce rules for other
+   * connection-specific behaviors, say completion and line-continuation. */
+  DatabaseConnection.SyntaxRule deduceSyntaxRule(
+      DatabaseConnection connection) {
+    DatabaseConnection.SyntaxRule syntaxRule;
+    if (connection == null) {
+      syntaxRule = Objects.requireNonNull(createRule(connection));
+    } else {
+      syntaxRule = connection.getSyntaxRule();
+    }
+    if (syntaxRule == null) {
+      // It's OK to use a rule created by a previous highlighter.
+      syntaxRule = Objects.requireNonNull(createRule(connection));
+    }
+    return syntaxRule;
   }
 
   private void handleSqlSyntax(String buffer,
@@ -261,7 +279,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final HighlightRule rule = getConnectionSpecificRule();
+    final DatabaseConnection.SyntaxRule rule = getConnectionSpecificRule();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -272,8 +290,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
               : buffer.substring(wordStart);
           String upperWord = word.toUpperCase(Locale.ROOT);
           if (defaultKeywordSet.contains(upperWord)
-              || (rule.keywords != null
-                  && rule.keywords.contains(upperWord))) {
+              || rule.containsKeyword(upperWord)) {
             keywordBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
@@ -281,11 +298,11 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           continue;
         }
       }
-      if (ch == rule.identifierQuote.charAt(0)
-          && (rule.identifierQuote.length() == 1
-              || rule.identifierQuote.regionMatches(0, buffer, pos,
-          rule.identifierQuote.length()))) {
-        pos = handleSqlIdentifierQuotes(buffer, rule.identifierQuote,
+      if (ch == rule.getIdentifierQuote().charAt(0)
+          && (rule.getIdentifierQuote().length() == 1
+              || rule.getIdentifierQuote().regionMatches(0, buffer, pos,
+          rule.getIdentifierQuote().length()))) {
+        pos = handleSqlIdentifierQuotes(buffer, rule.getIdentifierQuote(),
             sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
@@ -490,16 +507,23 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   int handleComments(String line, BitSet commentBitSet,
       int startingPoint) {
     final char ch = line.charAt(startingPoint);
-    if (ch == '-' && line.charAt(startingPoint + 1) == '-') {
-      int end = line.indexOf('\n', startingPoint);
-      end = end == -1 ? line.length() - 1 : end;
-      commentBitSet.set(startingPoint, end + 1);
-      startingPoint = end;
-    } else if (ch == '/' && line.charAt(startingPoint + 1) == '*') {
+    if (ch == '/' && line.charAt(startingPoint + 1) == '*') {
       int end = line.indexOf("*/", startingPoint);
       end = end == -1 ? line.length() - 1 : end + 1;
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
+    } else {
+      for (String oneLineComment: deduceSyntaxRule(
+          sqlLine.getDatabaseConnection()).getOneLineComments()) {
+        if (startingPoint <= line.length() - oneLineComment.length()
+            && oneLineComment
+            .regionMatches(0, line, startingPoint, oneLineComment.length())) {
+          int end = line.indexOf('\n', startingPoint);
+          end = end == -1 ? line.length() - 1 : end;
+          commentBitSet.set(startingPoint, end + 1);
+          startingPoint = end;
+        }
+      }
     }
     return startingPoint;
   }
@@ -545,22 +569,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       startingPoint = end;
     } while (!quotationEnded && end < line.length());
     return startingPoint;
-  }
-
-  /**
-   * Rules for highlighting.
-   *
-   * <p>Provides an additional set of keywords,
-   * and the quotation character for SQL identifiers.
-   */
-  static class HighlightRule {
-    private final Set<String> keywords;
-    private final String identifierQuote;
-
-    HighlightRule(Set<String> keywords, String identifierQuote) {
-      this.keywords = keywords;
-      this.identifierQuote = identifierQuote;
-    }
   }
 }
 

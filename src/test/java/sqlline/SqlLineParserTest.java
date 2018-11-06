@@ -109,6 +109,10 @@ public class SqlLineParserTest {
         "select '1';/*comment\n*/\n",
         "select '1';/*comment*/\n\n",
         "select '1'; /*--comment*/",
+        // /* inside a quoted line
+        "select '1/*' as \"asd\";",
+        "select '/*' as \"asd*/\";",
+        // quoted line
         "select '1' as \"asd\";",
         "select '1' as \"a's'd\";",
         "select '1' as \"'a's'd\n\" from t;",

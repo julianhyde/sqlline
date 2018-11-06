@@ -18,6 +18,9 @@ import java.util.*;
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 
+import static sqlline.BuiltInCommentsDefinition.BY_NAME;
+import static sqlline.BuiltInCommentsDefinition.DEFAULT;
+
 /**
  * Holds a database connection, credentials, and other associated state.
  */
@@ -32,7 +35,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
-  private SqlLineHighlighter.HighlightRule highlighterRule;
+  private SyntaxRule syntaxRule;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -171,23 +174,6 @@ class DatabaseConnection {
     return true;
   }
 
-  /** Gets or creates the rule for highlighting in the current connection.
-   *
-   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
-   * not tied to the highlighter, only to the connection.
-   *
-   * <p>In future, this method may also deduce rules for other
-   * connection-specific behaviors, say completion and line-continuation. */
-  SqlLineHighlighter.HighlightRule deduceHighlighterRule(
-      SqlLineHighlighter highlighter) {
-    Objects.requireNonNull(highlighter);
-    if (highlighterRule == null) {
-      // It's OK to use a rule created by a previous highlighter.
-      highlighterRule = Objects.requireNonNull(highlighter.createRule(this));
-    }
-    return highlighterRule;
-  }
-
   public Connection getConnection() throws SQLException {
     if (connection != null) {
       return connection;
@@ -254,6 +240,55 @@ class DatabaseConnection {
 
   Completer getSqlCompleter() {
     return sqlCompleter;
+  }
+
+  SyntaxRule getSyntaxRule() {
+    return syntaxRule;
+  }
+
+  /**
+   * Rules for highlighting.
+   *
+   * <p>Provides an additional set of keywords,
+   * and the quotation character for SQL identifiers.
+   */
+  static class SyntaxRule {
+    private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
+    private final Set<String> keywords;
+    private final String identifierQuote;
+    private final Set<String> oneLineComments;
+
+    SyntaxRule(Set<String> keywords,
+        String identifierQuote, String productName) {
+      this.keywords = keywords == null ? Collections.emptySet() : keywords;
+      this.identifierQuote =
+          identifierQuote == null || "".equals(identifierQuote.trim())
+          ? getDefaultSqlIdentifierQuote() : identifierQuote;
+      oneLineComments =
+          BY_NAME.get(productName) == null
+              ? getDefaultOneLineComments()
+              : BY_NAME.get(productName).getCommentDefinition();
+    }
+
+    protected boolean containsKeyword(String keyword) {
+      return keywords.contains(keyword);
+    }
+
+    protected Set<String> getDefaultOneLineComments() {
+      return DEFAULT.getCommentDefinition();
+    }
+
+    public Set<String> getOneLineComments() {
+      return oneLineComments;
+    }
+
+    protected String getDefaultSqlIdentifierQuote() {
+      return DEFAULT_SQL_IDENTIFIER_QUOTE;
+    }
+
+    protected String getIdentifierQuote() {
+      return identifierQuote;
+    }
   }
 
   /** Schema. */

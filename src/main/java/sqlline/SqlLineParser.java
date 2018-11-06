@@ -11,8 +11,14 @@
 */
 package sqlline;
 
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import org.jline.reader.EOFError;
 import org.jline.reader.ParsedLine;
@@ -109,6 +115,7 @@ public class SqlLineParser extends DefaultParser {
     int rawWordCursor = -1;
     int rawWordLength = -1;
     int rawWordStart = 0;
+    int lastNonQuoteCommentIndex = 0;
     boolean isSql = isSql(line, context);
 
     for (int i = 0; i < line.length(); i++) {
@@ -180,6 +187,9 @@ public class SqlLineParser extends DefaultParser {
           checkBracketBalance(roundBracketsBalance, currentChar, '(', ')');
           checkBracketBalance(squareBracketsBalance, currentChar, '[', ']');
           containsNonCommentData = true;
+          if (!Character.isWhitespace(currentChar)) {
+            lastNonQuoteCommentIndex = i;
+          }
           if (isDelimiter(line, i)) {
             rawWordLength = getRawWordLength(words, current, rawWordCursor,
                 rawWordLength, rawWordStart, i);
@@ -237,7 +247,11 @@ public class SqlLineParser extends DefaultParser {
                   squareBracketsBalance[0] == 0 ? "extra ']'" : "]"));
         }
 
-        if (containsNonCommentData && !isLineFinishedWithSemicolon(line)) {
+        final int lastNonQuoteCommentIndex1 =
+            lastNonQuoteCommentIndex == line.length() - 1
+                ? lastNonQuoteCommentIndex - 1 : lastNonQuoteCommentIndex;
+        if (containsNonCommentData
+            && !isLineFinishedWithSemicolon(lastNonQuoteCommentIndex1, line)) {
           throw new EOFError(-1, -1, "Missing semicolon at the end",
               getPaddedPrompt("semicolon"));
         }
@@ -300,54 +314,62 @@ public class SqlLineParser extends DefaultParser {
    * @param buffer Input line to check for ending with ';'
    * @return true if the ends with non-commented ';'
    */
-  private boolean isLineFinishedWithSemicolon(final CharSequence buffer) {
-    final String line = buffer.toString().trim();
+  private boolean isLineFinishedWithSemicolon(
+      final int lastNonQuoteCommentIndex, final CharSequence buffer) {
+    final String line = buffer.toString();
     boolean lineEmptyOrFinishedWithSemicolon = line.isEmpty();
     boolean requiredSemicolon = false;
-    for (int i = 0; i < line.length(); i++) {
-      switch (line.charAt(i)) {
-      case ';':
+    for (int i = lastNonQuoteCommentIndex; i < line.length(); i++) {
+      if (';' == line.charAt(i)) {
         lineEmptyOrFinishedWithSemicolon = true;
-        break;
-      case '/':
-      case '-':
-        if (i < line.length() - 1) {
-          if (line.regionMatches(i, "--", 0, 2)) {
+        continue;
+      } else if (i < line.length() - 1
+          && line.regionMatches(i, "/*", 0, "/*".length())) {
+        int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
+        // From one side there is an assumption that multi-line comment
+        // is completed, from the other side nextNonCommentedChar
+        // could be negative or less than lastNonQuoteCommentIndex
+        // in case '/*' is a part of quoting string.
+        if (nextNonCommentedChar > lastNonQuoteCommentIndex) {
+          i = nextNonCommentedChar + "*/".length();
+        }
+      } else {
+        for (String oneLineCommentString
+            : deduceSyntaxRule(
+                sqlLine.getDatabaseConnection()).getOneLineComments()) {
+          if (i <= buffer.length() - oneLineCommentString.length()
+              && oneLineCommentString
+              .regionMatches(0, line, i, oneLineCommentString.length())) {
             int nextLine = line.indexOf('\n', i + 1);
-            if (nextLine != -1) {
+            if (nextLine > lastNonQuoteCommentIndex) {
               i = nextLine;
             } else {
               return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
             }
-            break;
-          } else if (line.regionMatches(i, "/*", 0, "/*".length())) {
-            int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
-            // nextNonCommentedChar should be non-negative as
-            // there is an assumption that multi-line comment is completed
-            // otherwise "Missing end of comment" should be thrown before
-            // this method called
-            i = nextNonCommentedChar + "*/".length();
-            break;
           }
         }
-        // else
-        // fall through
-      default:
-        requiredSemicolon =
-            !lineEmptyOrFinishedWithSemicolon
-                || !Character.isWhitespace(line.charAt(i));
-        if (requiredSemicolon) {
-          lineEmptyOrFinishedWithSemicolon = false;
-        }
+      }
+      requiredSemicolon = i == line.length()
+          ? requiredSemicolon
+          : !lineEmptyOrFinishedWithSemicolon
+          || !Character.isWhitespace(line.charAt(i));
+      if (requiredSemicolon) {
+        lineEmptyOrFinishedWithSemicolon = false;
       }
     }
     return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
   }
 
-  private boolean isOneLineComment(final CharSequence buffer, final int pos) {
-    return pos < buffer.length() - 1
-        && buffer.charAt(pos) == '-'
-        && buffer.charAt(pos + 1) == '-';
+  private boolean isOneLineComment(final String buffer, final int pos) {
+    for (String oneLineCommentString : deduceSyntaxRule(
+        sqlLine.getDatabaseConnection()).getOneLineComments()) {
+      if (pos <= buffer.length() - oneLineCommentString.length()
+          && oneLineCommentString
+              .regionMatches(0, buffer, pos, oneLineCommentString.length())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean isMultiLineComment(final CharSequence buffer, final int pos) {
@@ -378,6 +400,73 @@ public class SqlLineParser extends DefaultParser {
     prompt.append(waitingPattern);
     return prompt.toString();
   }
+
+  /** Returns a highlight rule for the current connection. Never null. */
+  DatabaseConnection.SyntaxRule getConnectionSpecificRule() {
+    final DatabaseConnection databaseConnection =
+        sqlLine.getDatabaseConnection();
+    if (databaseConnection != null) {
+      return deduceSyntaxRule(databaseConnection);
+    }
+    return createRule(null);
+  }
+
+  /** Returns a highlighter rule for a given database connection.
+   *
+   * <p>The rule is good for other highlighter instances, but not necessarily
+   * for other database connections (because it depends on the set of keywords
+   * and identifier quote string).
+   *
+   * <p>If {@code databaseConnection} is null, or if its underlying
+   * connection is null or closed, returns the default rule.
+   *
+   * @param databaseConnection Database connection, or null
+   *
+   * @return Highlighter rule, never null
+   */
+  DatabaseConnection.SyntaxRule createRule(
+      DatabaseConnection databaseConnection) {
+    try {
+      if (databaseConnection != null
+          && databaseConnection.connection != null
+          && !databaseConnection.connection.isClosed()) {
+        final DatabaseMetaData meta = databaseConnection.meta;
+        final Set<String> connectionKeywords =
+            new HashSet<>(Arrays.asList(meta.getSQLKeywords().split(",")));
+        final String quoteString = meta.getIdentifierQuoteString();
+        final String productName = meta.getDatabaseProductName();
+        return new DatabaseConnection.SyntaxRule(
+            connectionKeywords, quoteString, productName);
+      }
+    } catch (SQLException e) {
+      sqlLine.handleException(e);
+    }
+    return new DatabaseConnection.SyntaxRule(null, null, null);
+  }
+
+  /** Gets or creates the rule for highlighting in the current connection.
+   *
+   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
+   * not tied to the highlighter, only to the connection.
+   *
+   * <p>In future, this method may also deduce rules for other
+   * connection-specific behaviors, say completion and line-continuation. */
+  DatabaseConnection.SyntaxRule deduceSyntaxRule(
+      DatabaseConnection connection) {
+    DatabaseConnection.SyntaxRule syntaxRule;
+    if (connection == null) {
+      syntaxRule = Objects.requireNonNull(createRule(connection));
+    } else {
+      syntaxRule = connection.getSyntaxRule();
+    }
+    if (syntaxRule == null) {
+      // It's OK to use a rule created by a previous highlighter.
+      syntaxRule = Objects.requireNonNull(createRule(connection));
+    }
+    return syntaxRule;
+  }
+
+
 }
 
 // End SqlLineParser.java
