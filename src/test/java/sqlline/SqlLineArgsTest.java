@@ -753,6 +753,9 @@ public class SqlLineArgsTest {
           meta.getDatabaseProductName();
           result = "hsqldb";
           // prevent calls to functions that also call resultSet.next
+          meta.getSQLKeywords();
+          result = "";
+          // prevent calls to functions that also call resultSet.next
           meta.getDatabaseProductVersion();
           result = "1.0";
           // Generate an exception on a call to resultSet.next

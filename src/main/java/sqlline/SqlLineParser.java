@@ -51,6 +51,11 @@ import org.jline.reader.impl.DefaultParser;
  *       a string that began with a double quote (")</td>
  * </tr>
  * <tr>
+ *   <td>`&gt;</td>
+ *   <td>Waiting for next line, waiting for completion of
+ *       a string that began with (`)</td>
+ * </tr>
+ * <tr>
  *   <td>*\/&gt;</td>
  *   <td>Waiting for next line, waiting for completion of
  *       a multi-line comment that began with "/*"</td>
@@ -78,16 +83,33 @@ import org.jline.reader.impl.DefaultParser;
  * </table>
  */
 public class SqlLineParser extends DefaultParser {
+  private static final String DEFAULT_QUOTES = "'\"`";
+
   private final SqlLine sqlLine;
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    eofOnUnclosedQuote(true);
-    eofOnEscapedNewLine(true);
+    String quotes = DEFAULT_QUOTES;
+    final char openQuote = sqlLine.getDialect().getOpenQuote();
+    if ('[' != openQuote
+        && '(' != openQuote
+        && DEFAULT_QUOTES.indexOf(openQuote) == -1) {
+      quotes += openQuote;
+    }
+    quoteChars(quotes.toCharArray());
   }
 
   public ParsedLine parse(final String line, final int cursor,
       ParseContext context) {
+    if (sqlLine.getOpts().getUseLineContinuation()) {
+      eofOnUnclosedQuote(true);
+      eofOnEscapedNewLine(true);
+    } else {
+      eofOnUnclosedQuote(false);
+      eofOnEscapedNewLine(false);
+      return super.parse(line, cursor, context);
+    }
+
     final List<String> words = new LinkedList<>();
     final StringBuilder current = new StringBuilder();
 
@@ -104,6 +126,7 @@ public class SqlLineParser extends DefaultParser {
     int rawWordCursor = -1;
     int rawWordLength = -1;
     int rawWordStart = 0;
+    int lastNonQuoteCommentIndex = 0;
     boolean isSql = isSql(line, context);
 
     for (int i = 0; i < line.length(); i++) {
@@ -175,6 +198,9 @@ public class SqlLineParser extends DefaultParser {
           checkBracketBalance(roundBracketsBalance, currentChar, '(', ')');
           checkBracketBalance(squareBracketsBalance, currentChar, '[', ']');
           containsNonCommentData = true;
+          if (!Character.isWhitespace(currentChar)) {
+            lastNonQuoteCommentIndex = i;
+          }
           if (isDelimiter(line, i)) {
             rawWordLength = getRawWordLength(words, current, rawWordCursor,
                 rawWordLength, rawWordStart, i);
@@ -210,8 +236,7 @@ public class SqlLineParser extends DefaultParser {
     if (context != ParseContext.COMPLETE) {
       if (isEofOnUnclosedQuote() && quoteStart >= 0) {
         throw new EOFError(-1, -1, "Missing closing quote",
-            getPaddedPrompt(line.charAt(quoteStart) == '\''
-                ? "quote" : "dquote"));
+            getPaddedPrompt(getQuoteWaitingPattern(line, quoteStart)));
       }
 
       if (isSql) {
@@ -232,7 +257,11 @@ public class SqlLineParser extends DefaultParser {
                   squareBracketsBalance[0] == 0 ? "extra ']'" : "]"));
         }
 
-        if (containsNonCommentData && !isLineFinishedWithSemicolon(line)) {
+        final int lastNonQuoteCommentIndex1 =
+            lastNonQuoteCommentIndex == line.length() - 1
+                ? lastNonQuoteCommentIndex - 1 : lastNonQuoteCommentIndex;
+        if (containsNonCommentData
+            && !isLineFinishedWithSemicolon(lastNonQuoteCommentIndex1, line)) {
           throw new EOFError(-1, -1, "Missing semicolon at the end",
               getPaddedPrompt("semicolon"));
         }
@@ -243,6 +272,19 @@ public class SqlLineParser extends DefaultParser {
         ? line.substring(quoteStart, quoteStart + 1) : null;
     return new ArgumentList(line, words, wordIndex, wordCursor,
         cursor, openingQuote, rawWordCursor, rawWordLength);
+  }
+
+  public String getQuoteWaitingPattern(String line, int quoteStart) {
+    switch (line.charAt(quoteStart)) {
+    case '\'':
+      return "quote";
+    case '"':
+      return "dquote";
+    case '`':
+      return "`";
+    default:
+      return String.valueOf(line.charAt(quoteStart));
+    }
   }
 
   private void checkBracketBalance(int[] balance, char actual,
@@ -295,54 +337,61 @@ public class SqlLineParser extends DefaultParser {
    * @param buffer Input line to check for ending with ';'
    * @return true if the ends with non-commented ';'
    */
-  private boolean isLineFinishedWithSemicolon(final CharSequence buffer) {
-    final String line = buffer.toString().trim();
+  private boolean isLineFinishedWithSemicolon(
+      final int lastNonQuoteCommentIndex, final CharSequence buffer) {
+    final String line = buffer.toString();
     boolean lineEmptyOrFinishedWithSemicolon = line.isEmpty();
     boolean requiredSemicolon = false;
-    for (int i = 0; i < line.length(); i++) {
-      switch (line.charAt(i)) {
-      case ';':
+    for (int i = lastNonQuoteCommentIndex; i < line.length(); i++) {
+      if (';' == line.charAt(i)) {
         lineEmptyOrFinishedWithSemicolon = true;
-        break;
-      case '/':
-      case '-':
-        if (i < line.length() - 1) {
-          if (line.regionMatches(i, "--", 0, 2)) {
+        continue;
+      } else if (i < line.length() - 1
+          && line.regionMatches(i, "/*", 0, "/*".length())) {
+        int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
+        // From one side there is an assumption that multi-line comment
+        // is completed, from the other side nextNonCommentedChar
+        // could be negative or less than lastNonQuoteCommentIndex
+        // in case '/*' is a part of quoting string.
+        if (nextNonCommentedChar > lastNonQuoteCommentIndex) {
+          i = nextNonCommentedChar + "*/".length();
+        }
+      } else {
+        final Dialect dialect = sqlLine.getDialect();
+        for (String oneLineCommentString : dialect.getOneLineComments()) {
+          if (i <= buffer.length() - oneLineCommentString.length()
+              && oneLineCommentString
+                  .regionMatches(0, line, i, oneLineCommentString.length())) {
             int nextLine = line.indexOf('\n', i + 1);
-            if (nextLine != -1) {
+            if (nextLine > lastNonQuoteCommentIndex) {
               i = nextLine;
             } else {
               return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
             }
-            break;
-          } else if (line.regionMatches(i, "/*", 0, "/*".length())) {
-            int nextNonCommentedChar = line.indexOf("*/", i + "/*".length());
-            // nextNonCommentedChar should be non-negative as
-            // there is an assumption that multi-line comment is completed
-            // otherwise "Missing end of comment" should be thrown before
-            // this method called
-            i = nextNonCommentedChar + "*/".length();
-            break;
           }
         }
-        // else
-        // fall through
-      default:
-        requiredSemicolon =
-            !lineEmptyOrFinishedWithSemicolon
-                || !Character.isWhitespace(line.charAt(i));
-        if (requiredSemicolon) {
-          lineEmptyOrFinishedWithSemicolon = false;
-        }
+      }
+      requiredSemicolon = i == line.length()
+          ? requiredSemicolon
+          : !lineEmptyOrFinishedWithSemicolon
+              || !Character.isWhitespace(line.charAt(i));
+      if (requiredSemicolon) {
+        lineEmptyOrFinishedWithSemicolon = false;
       }
     }
     return !requiredSemicolon || lineEmptyOrFinishedWithSemicolon;
   }
 
-  private boolean isOneLineComment(final CharSequence buffer, final int pos) {
-    return pos < buffer.length() - 1
-        && buffer.charAt(pos) == '-'
-        && buffer.charAt(pos + 1) == '-';
+  private boolean isOneLineComment(final String buffer, final int pos) {
+    final Dialect dialect = sqlLine.getDialect();
+    for (String oneLineCommentString : dialect.getOneLineComments()) {
+      if (pos <= buffer.length() - oneLineCommentString.length()
+          && oneLineCommentString
+              .regionMatches(0, buffer, pos, oneLineCommentString.length())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean isMultiLineComment(final CharSequence buffer, final int pos) {

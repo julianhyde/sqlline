@@ -61,6 +61,7 @@ import static sqlline.BuiltInProperty.TIMEOUT;
 import static sqlline.BuiltInProperty.TIMESTAMP_FORMAT;
 import static sqlline.BuiltInProperty.TIME_FORMAT;
 import static sqlline.BuiltInProperty.TRIM_SCRIPTS;
+import static sqlline.BuiltInProperty.USE_LINE_CONTINUATION;
 import static sqlline.BuiltInProperty.VERBOSE;
 
 /**
@@ -611,6 +612,10 @@ public class SqlLineOpts implements Completer {
 
   public int getMaxColumnWidth() {
     return getInt(MAX_COLUMN_WIDTH);
+  }
+
+  public boolean getUseLineContinuation() {
+    return getBoolean(USE_LINE_CONTINUATION);
   }
 
   public File getPropertiesFile() {

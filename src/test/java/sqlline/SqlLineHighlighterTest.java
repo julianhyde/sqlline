@@ -170,6 +170,73 @@ public class SqlLineHighlighterTest {
   }
 
   @Test
+  public void testMySqlCommentedStrings() {
+    checkMySqlCommentedStrings(DialectImpl.create(null, null, "MySQL"));
+    checkMySqlCommentedStrings(BuiltInDialect.MYSQL);
+  }
+
+  private void checkMySqlCommentedStrings(final Dialect dialect) {
+    new MockUp<DialectImpl>() {
+      @Mock
+      Dialect getDefault() {
+        return dialect;
+      }
+    };
+
+    String[] linesRequiredToBeComments = {
+        "-- 'asdasd'asd",
+        "--\n",
+        "/* \"''\"",
+        "/*",
+        "--\t",
+        "#",
+        "--\n/*",
+        "/* kh\n'asd'ad*/",
+        "/*\"-- \"values*/"
+    };
+
+    for (String line : linesRequiredToBeComments) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.comments.set(0, line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle);
+    }
+  }
+
+  @Test
+  public void testPhoenixCommentedStrings() {
+    checkPhoenixCommentedStrings(DialectImpl.create(null, null, "Phoenix"));
+    checkPhoenixCommentedStrings(BuiltInDialect.PHOENIX);
+  }
+
+  private void checkPhoenixCommentedStrings(final Dialect dialect) {
+    new MockUp<DialectImpl>() {
+      @Mock
+      Dialect getDefault() {
+        return dialect;
+      }
+    };
+
+    String[] linesRequiredToBeComments = {
+        "--'asdasd'asd",
+        "--\tselect",
+        "// \"''\"",
+        "//",
+        "--",
+        "--\n/*",
+        "/* kh\n'asd'ad*/",
+        "/*\"-- \"values*/"
+    };
+
+    for (String line : linesRequiredToBeComments) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.comments.set(0, line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle);
+    }
+  }
+
+  @Test
   public void testNumberStrings() {
     String[] linesRequiredToBeNumbers = {
         "123456789",
@@ -370,11 +437,79 @@ public class SqlLineHighlighterTest {
    * identifier quote will be taken from driver
    */
   @Test
-  public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<SqlLineHighlighter>() {
+  public void testBracketsAsSqlIdentifier() {
+    new MockUp<DialectImpl>() {
       @Mock
-      String getDefaultSqlIdentifierQuote() {
-        return "`";
+      Dialect getDefault() {
+        return DialectImpl.create(null, "[", null);
+      }
+    };
+
+    String[] linesWithSquareBracketsSqlIdentifiers = {
+        "select 1 as [one] from dual",
+        "select 1 as [one two one] from dual",
+    };
+
+    String[] linesWithDoubleQuoteSqlIdentifiers = {
+        "select 1 as \"one\" from dual",
+        "select 1 as \"one two one\" from dual",
+    };
+
+    ExpectedHighlightStyle[] expectedStyle =
+        new ExpectedHighlightStyle[
+            linesWithSquareBracketsSqlIdentifiers.length];
+    for (int i = 0; i < expectedStyle.length; i++) {
+      String line = linesWithSquareBracketsSqlIdentifiers[i];
+      expectedStyle[i] = new ExpectedHighlightStyle(line.length());
+      expectedStyle[i].keywords.set(0, "select".length());
+      expectedStyle[i].defaults.set(line.indexOf(" 1"));
+      expectedStyle[i].numbers.set(line.indexOf("1 as"));
+      expectedStyle[i].defaults.set(line.indexOf(" as"));
+      expectedStyle[i].keywords.set(line.indexOf("as"), line.indexOf(" [one"));
+      expectedStyle[i].defaults.set(line.indexOf(" [one"));
+      expectedStyle[i].sqlIdentifierQuotes.
+          set(line.indexOf("[one"), line.indexOf(" from"));
+      expectedStyle[i].defaults.set(line.indexOf(" from"));
+      expectedStyle[i].keywords
+          .set(line.indexOf("from"), line.indexOf(" dual"));
+      expectedStyle[i].defaults.set(line.indexOf(" dual"), line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle[i]);
+    }
+
+    DispatchCallback dc = new DispatchCallback();
+
+    for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
+        : sqlLine2HighLighter.entrySet()) {
+      SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
+
+      for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
+        checkLineAgainstHighlighter(
+            linesWithDoubleQuoteSqlIdentifiers[i],
+            expectedStyle[i],
+            sqlLine,
+            sqlLine2HighLighterEntry.getValue());
+      }
+
+      sqlLine.getDatabaseConnection().close();
+    }
+  }
+
+  /**
+   * The test mocks default sql identifier to back tick
+   * and then checks that after connection done sql
+   * identifier quote will be taken from driver
+   */
+  @Test
+  public void testH2SqlIdentifierFromDatabase() {
+    new MockUp<DialectImpl>() {
+      @Mock
+      Dialect getDefault() {
+        return DialectImpl.create(null, "`", null);
       }
     };
 
@@ -415,8 +550,6 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2HighLighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      SqlLineHighlighter sqlLineHighlighter =
-          sqlLine2HighLighterEntry.getValue();
       sqlLine.runCommands(
           Collections.singletonList("!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "

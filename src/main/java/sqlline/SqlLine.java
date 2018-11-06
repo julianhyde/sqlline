@@ -1147,13 +1147,7 @@ public class SqlLine {
    * @return an array of compound words
    */
   public String[][] splitCompound(String line) {
-    final DatabaseConnection databaseConnection = getDatabaseConnection();
-    final Quoting quoting;
-    if (databaseConnection == null) {
-      quoting = Quoting.DEFAULT;
-    } else {
-      quoting = databaseConnection.quoting;
-    }
+    final Dialect dialect = getDialect();
 
     int state = SPACE;
     int idStart = -1;
@@ -1179,7 +1173,7 @@ public class SqlLine {
           // nothing
         } else if (c == '.') {
           state = DOT_SPACE;
-        } else if (c == quoting.start) {
+        } else if (c == dialect.getOpenQuote()) {
           if (state == SPACE) {
             if (current.size() > 0) {
               words.add(
@@ -1203,9 +1197,9 @@ public class SqlLine {
         break;
       case QUOTED:
         ++i;
-        if (c == quoting.end) {
+        if (c == dialect.getCloseQuote()) {
           if (i < n
-              && chars[i] == quoting.end) {
+              && chars[i] == dialect.getCloseQuote()) {
             // Repeated quote character inside a quoted identifier.
             // Eliminate one of the repeats, and we remain inside a
             // quoted identifier.
@@ -1227,7 +1221,7 @@ public class SqlLine {
           String word = String.copyValueOf(chars, idStart, i - idStart - 1);
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
-          } else if (quoting.upper) {
+          } else if (dialect.isUpper()) {
             word = word.toUpperCase(Locale.ROOT);
           }
           current.add(word);
@@ -1251,7 +1245,7 @@ public class SqlLine {
       if (state == UNQUOTED) {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
-        } else if (quoting.upper) {
+        } else if (dialect.isUpper()) {
           word = word.toUpperCase(Locale.ROOT);
         }
       }
@@ -1262,10 +1256,17 @@ public class SqlLine {
     }
 
     if (current.size() > 0) {
-      words.add(current.toArray(new String[current.size()]));
+      words.add(current.toArray(new String[0]));
     }
 
-    return words.toArray(new String[words.size()][]);
+    return words.toArray(new String[0][]);
+  }
+
+  Dialect getDialect() {
+    final DatabaseConnection databaseConnection = getDatabaseConnection();
+    return databaseConnection == null
+        ? DialectImpl.getDefault()
+        : databaseConnection.getDialect();
   }
 
   /**
@@ -1807,7 +1808,7 @@ public class SqlLine {
     return successCount;
   }
 
-  void setCompletions() throws SQLException, IOException {
+  void setCompletions() {
     if (getDatabaseConnection() != null) {
       getDatabaseConnection().setCompletions(getOpts().getFastConnect());
     }

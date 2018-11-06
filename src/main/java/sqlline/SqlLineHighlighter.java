@@ -11,20 +11,9 @@
 */
 package sqlline;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.DefaultHighlighter;
@@ -38,23 +27,10 @@ import org.jline.utils.WCWidth;
  * and command syntax highlighting in sqlline.
  */
 public class SqlLineHighlighter extends DefaultHighlighter {
-  private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
   private final SqlLine sqlLine;
-  private final Set<String> defaultKeywordSet;
 
-  public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
+  public SqlLineHighlighter(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    String keywords =
-        new BufferedReader(
-            new InputStreamReader(
-                SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"), StandardCharsets.UTF_8))
-            .readLine();
-    defaultKeywordSet = new TreeSet<>();
-    for (StringTokenizer tok = new StringTokenizer(keywords, ",");
-         tok.hasMoreTokens();) {
-      defaultKeywordSet.add(tok.nextToken());
-    }
   }
 
   @Override public AttributedString highlight(LineReader reader,
@@ -198,52 +174,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return sb.toAttributedString();
   }
 
-  /** Returns a highlight rule for the current connection. Never null. */
-  private HighlightRule getConnectionSpecificRule() {
-    final DatabaseConnection databaseConnection =
-        sqlLine.getDatabaseConnection();
-    if (databaseConnection != null) {
-      return databaseConnection.deduceHighlighterRule(this);
-    }
-    return createRule(null);
-  }
-
-  /** Returns a highlighter rule for a given database connection.
-   *
-   * <p>The rule is good for other highlighter instances, but not necessarily
-   * for other database connections (because it depends on the set of keywords
-   * and identifier quote string).
-   *
-   * <p>If {@code databaseConnection} is null, or if its underlying
-   * connection is null or closed, returns the default rule.
-   *
-   * @param databaseConnection Database connection, or null
-   *
-   * @return Highlighter rule, never null
-   */
-  HighlightRule createRule(DatabaseConnection databaseConnection) {
-    try {
-      if (databaseConnection != null
-          && databaseConnection.connection != null
-          && !databaseConnection.connection.isClosed()) {
-        final DatabaseMetaData meta = databaseConnection.meta;
-        final Set<String> connectionKeywords =
-            new HashSet<>(Arrays.asList(meta.getSQLKeywords().split(",")));
-        final String quoteString = meta.getIdentifierQuoteString();
-        final String quoteString2 = " ".equals(quoteString)
-            ? getDefaultSqlIdentifierQuote() : quoteString;
-        return new HighlightRule(connectionKeywords, quoteString2);
-      }
-    } catch (SQLException e) {
-      sqlLine.handleException(e);
-    }
-    return new HighlightRule(null, getDefaultSqlIdentifierQuote());
-  }
-
-  String getDefaultSqlIdentifierQuote() {
-    return DEFAULT_SQL_IDENTIFIER_QUOTE;
-  }
-
   private void handleSqlSyntax(String buffer,
       BitSet keywordBitSet,
       BitSet quoteBitSet,
@@ -261,7 +191,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final HighlightRule rule = getConnectionSpecificRule();
+    final Dialect dialect = sqlLine.getDialect();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -271,9 +201,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
               ? buffer.substring(wordStart, pos)
               : buffer.substring(wordStart);
           String upperWord = word.toUpperCase(Locale.ROOT);
-          if (defaultKeywordSet.contains(upperWord)
-              || (rule.keywords != null
-                  && rule.keywords.contains(upperWord))) {
+          if (dialect.containsKeyword(upperWord)) {
             keywordBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
@@ -281,17 +209,16 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           continue;
         }
       }
-      if (ch == rule.identifierQuote.charAt(0)
-          && (rule.identifierQuote.length() == 1
-              || rule.identifierQuote.regionMatches(0, buffer, pos,
-          rule.identifierQuote.length()))) {
-        pos = handleSqlIdentifierQuotes(buffer, rule.identifierQuote,
+      if (ch == dialect.getOpenQuote()) {
+        pos = handleSqlIdentifierQuotes(buffer,
+            String.valueOf(dialect.getOpenQuote()),
+            String.valueOf(dialect.getCloseQuote()),
             sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
         pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
       }
-      if (pos < buffer.length() - 1) {
+      if (pos <= buffer.length() - 1) {
         pos = handleComments(buffer, commentBitSet, pos);
       }
       if (wordStart == -1
@@ -378,8 +305,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    *
    * @param line                        line where to handle
    *                                    sql identifier quoted string
-   * @param sqlIdentifier               Quote to use to
-   *                                    quote sql identifiers
+   * @param openSqlIdentifier           Start quote for SQL identifiers
+   * @param closeSqlIdentifier          End quote for SQL identifiers
    * @param sqlIdentifierQuotesBitSet   BitSet to use for positions
    *                                    of sql identifiers quoted lines
    * @param startingPoint               start point
@@ -395,24 +322,25 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * quoted string and mark sql identifier quoted line inside
    * {@code sqlIdentifierQuotesBitSet}.
    */
-  int handleSqlIdentifierQuotes(String line, String sqlIdentifier,
-      BitSet sqlIdentifierQuotesBitSet, int startingPoint) {
-    if (!sqlIdentifier.regionMatches(0, line, startingPoint,
-        sqlIdentifier.length())) {
+  int handleSqlIdentifierQuotes(String line, String openSqlIdentifier,
+      String closeSqlIdentifier, BitSet sqlIdentifierQuotesBitSet,
+      int startingPoint) {
+    if (!openSqlIdentifier.regionMatches(0, line, startingPoint,
+        openSqlIdentifier.length())) {
       return startingPoint;
     }
     int backslashCounter = 0;
-    for (int i = startingPoint + sqlIdentifier.length();
+    for (int i = startingPoint + openSqlIdentifier.length();
          i < line.length();
          i++) {
       if (line.charAt(i) == '\\') {
         backslashCounter++;
-      } else if (sqlIdentifier.regionMatches(0, line, i,
-          sqlIdentifier.length())) {
+      } else if (closeSqlIdentifier.regionMatches(0, line, i,
+          closeSqlIdentifier.length())) {
         if (backslashCounter % 2 == 0) {
           sqlIdentifierQuotesBitSet
-              .set(startingPoint, i + sqlIdentifier.length());
-          return i + sqlIdentifier.length() - 1;
+              .set(startingPoint, i + closeSqlIdentifier.length());
+          return i + closeSqlIdentifier.length() - 1;
         }
       } else {
         backslashCounter = 0;
@@ -490,16 +418,23 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   int handleComments(String line, BitSet commentBitSet,
       int startingPoint) {
     final char ch = line.charAt(startingPoint);
-    if (ch == '-' && line.charAt(startingPoint + 1) == '-') {
-      int end = line.indexOf('\n', startingPoint);
-      end = end == -1 ? line.length() - 1 : end;
-      commentBitSet.set(startingPoint, end + 1);
-      startingPoint = end;
-    } else if (ch == '/' && line.charAt(startingPoint + 1) == '*') {
+    if (ch == '/' && line.charAt(startingPoint + 1) == '*') {
       int end = line.indexOf("*/", startingPoint);
       end = end == -1 ? line.length() - 1 : end + 1;
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
+    } else {
+      final Dialect dialect = sqlLine.getDialect();
+      for (String oneLineComment : dialect.getOneLineComments()) {
+        if (startingPoint <= line.length() - oneLineComment.length()
+            && oneLineComment
+            .regionMatches(0, line, startingPoint, oneLineComment.length())) {
+          int end = line.indexOf('\n', startingPoint);
+          end = end == -1 ? line.length() - 1 : end;
+          commentBitSet.set(startingPoint, end + 1);
+          startingPoint = end;
+        }
+      }
     }
     return startingPoint;
   }
@@ -545,22 +480,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       startingPoint = end;
     } while (!quotationEnded && end < line.length());
     return startingPoint;
-  }
-
-  /**
-   * Rules for highlighting.
-   *
-   * <p>Provides an additional set of keywords,
-   * and the quotation character for SQL identifiers.
-   */
-  static class HighlightRule {
-    private final Set<String> keywords;
-    private final String identifierQuote;
-
-    HighlightRule(Set<String> keywords, String identifierQuote) {
-      this.keywords = keywords;
-      this.identifierQuote = identifierQuote;
-    }
   }
 }
 

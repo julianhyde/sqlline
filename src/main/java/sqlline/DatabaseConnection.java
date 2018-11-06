@@ -11,9 +11,10 @@
 */
 package sqlline;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.ArgumentCompleter;
@@ -25,14 +26,13 @@ class DatabaseConnection {
   private final SqlLine sqlLine;
   Connection connection;
   DatabaseMetaData meta;
-  Quoting quoting;
   private final String driver;
   private final String url;
   private final Properties info;
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
-  private SqlLineHighlighter.HighlightRule highlighterRule;
+  private Dialect dialect;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -48,38 +48,37 @@ class DatabaseConnection {
     return getUrl() + "";
   }
 
-  void setCompletions(boolean skipmeta) throws SQLException, IOException {
-    // Deduce the string used to quote identifiers. For example, Oracle
-    // uses double-quotes:
-    //   SELECT * FROM "My Schema"."My Table"
-    String startQuote = meta.getIdentifierQuoteString();
-    final boolean upper = meta.storesUpperCaseIdentifiers();
-    if (startQuote == null
-        || startQuote.equals("")
-        || startQuote.equals(" ")) {
-      if (meta.getDatabaseProductName().startsWith("MySQL")) {
-        // Some version of the MySQL JDBC driver lie.
-        quoting = new Quoting('`', '`', upper);
-      } else {
-        quoting = new Quoting((char) 0, (char) 0, false);
-      }
-    } else if (startQuote.equals("[")) {
-      quoting = new Quoting('[', ']', upper);
-    } else if (startQuote.length() > 1) {
-      sqlLine.error(
-          "Identifier quote string is '" + startQuote
-              + "'; quote strings longer than 1 char are not supported");
-      quoting = Quoting.DEFAULT;
-    } else {
-      quoting =
-          new Quoting(startQuote.charAt(0), startQuote.charAt(0), upper);
-    }
-
+  void setCompletions(boolean skipmeta) {
     // setup the completer for the database
     sqlCompleter = new ArgumentCompleter(
         new SqlCompleter(sqlLine, skipmeta));
     // not all argument elements need to hold true
     ((ArgumentCompleter) sqlCompleter).setStrict(false);
+  }
+
+  /**
+   * Initializes a syntax rule for a given database connection.
+   *
+   * <p>The rule is good for different highlighter and completer instances,
+   * but not necessarily for other database connections (because it
+   * depends on the set of keywords and identifier quote string).
+   */
+  private void initSyntaxRule() throws SQLException {
+    // Deduce the string used to quote identifiers. For example, Oracle
+    // uses double-quotes:
+    //   SELECT * FROM "My Schema"."My Table"
+    String identifierQuoteString = meta.getIdentifierQuoteString();
+    if (identifierQuoteString.length() > 1) {
+      sqlLine.error("Identifier quote string is '" + identifierQuoteString
+          + "'; quote strings longer than 1 char are not supported");
+      identifierQuoteString = null;
+    }
+    final String productName = meta.getDatabaseProductName();
+    final Set<String> keywords =
+        Stream.of(meta.getSQLKeywords().split(","))
+            .collect(Collectors.toSet());
+    dialect = DialectImpl.create(keywords, identifierQuoteString,
+        productName, meta.storesUpperCaseIdentifiers());
   }
 
   /**
@@ -162,6 +161,7 @@ class DatabaseConnection {
       sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
           .getIsolation(),
           new DispatchCallback());
+      initSyntaxRule();
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
@@ -169,23 +169,6 @@ class DatabaseConnection {
     sqlLine.showWarnings();
 
     return true;
-  }
-
-  /** Gets or creates the rule for highlighting in the current connection.
-   *
-   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
-   * not tied to the highlighter, only to the connection.
-   *
-   * <p>In future, this method may also deduce rules for other
-   * connection-specific behaviors, say completion and line-continuation. */
-  SqlLineHighlighter.HighlightRule deduceHighlighterRule(
-      SqlLineHighlighter highlighter) {
-    Objects.requireNonNull(highlighter);
-    if (highlighterRule == null) {
-      // It's OK to use a rule created by a previous highlighter.
-      highlighterRule = Objects.requireNonNull(highlighter.createRule(this));
-    }
-    return highlighterRule;
   }
 
   public Connection getConnection() throws SQLException {
@@ -254,6 +237,10 @@ class DatabaseConnection {
 
   Completer getSqlCompleter() {
     return sqlCompleter;
+  }
+
+  Dialect getDialect() {
+    return dialect;
   }
 
   /** Schema. */

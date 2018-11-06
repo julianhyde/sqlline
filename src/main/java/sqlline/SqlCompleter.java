@@ -11,12 +11,7 @@
 */
 package sqlline;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.*;
 
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -25,56 +20,46 @@ import org.jline.reader.impl.completer.StringsCompleter;
  * Suggests completions for SQL statements.
  */
 class SqlCompleter extends StringsCompleter {
-  SqlCompleter(SqlLine sqlLine, boolean skipMeta)
-      throws IOException, SQLException {
+  SqlCompleter(SqlLine sqlLine, boolean skipMeta) {
     super(getCompletions(sqlLine, skipMeta));
   }
 
   private static Iterable<String> getCompletions(
-      SqlLine sqlLine, boolean skipMeta) throws IOException, SQLException {
+      SqlLine sqlLine, boolean skipMeta) {
     Set<String> completions = new TreeSet<>();
 
-    // add the default SQL completions
-    String keywords =
-        new BufferedReader(
-            new InputStreamReader(
-                SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"), StandardCharsets.UTF_8))
-            .readLine();
+    StringBuilder keywords = new StringBuilder();
 
     // now add the keywords from the current connection
 
     DatabaseMetaData meta = sqlLine.getDatabaseConnection().meta;
     try {
-      keywords += "," + meta.getSQLKeywords();
+      keywords.append(",").append(meta.getSQLKeywords());
     } catch (Throwable t) {
       // ignore
     }
     try {
-      keywords += "," + meta.getStringFunctions();
+      keywords.append(",").append(meta.getStringFunctions());
     } catch (Throwable t) {
       // ignore
     }
     try {
-      keywords += "," + meta.getNumericFunctions();
+      keywords.append(",").append(meta.getNumericFunctions());
     } catch (Throwable t) {
       // ignore
     }
     try {
-      keywords += "," + meta.getSystemFunctions();
+      keywords.append(",").append(meta.getSystemFunctions());
     } catch (Throwable t) {
       // ignore
     }
     try {
-      keywords += "," + meta.getTimeDateFunctions();
+      keywords.append(",").append(meta.getTimeDateFunctions());
     } catch (Throwable t) {
       // ignore
     }
 
-    // also allow lower-case versions of all the keywords
-    keywords += "," + keywords.toLowerCase(Locale.ROOT);
-
-    for (StringTokenizer tok = new StringTokenizer(keywords, ", ");
+    for (StringTokenizer tok = new StringTokenizer(keywords.toString(), ", ");
         tok.hasMoreTokens();) {
       completions.add(tok.nextToken());
     }
@@ -84,6 +69,7 @@ class SqlCompleter extends StringsCompleter {
       completions.addAll(sqlLine.getColumnNames(meta));
     }
 
+    completions.addAll(Dialect.DEFAULT_KEYWORD_SET);
     // set the Strings that will be completed
     return completions;
   }
