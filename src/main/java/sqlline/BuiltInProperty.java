@@ -65,6 +65,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   TIMEOUT("timeout", Type.INTEGER, -1),
   TIMESTAMP_FORMAT("timestampFormat", Type.STRING, DEFAULT),
   TRIM_SCRIPTS("trimScripts", Type.BOOLEAN, true),
+  USE_LINE_CONTINUATION("useLineContinuation", Type.BOOLEAN, true),
   VERBOSE("verbose", Type.BOOLEAN, false),
   VERSION("version", Type.STRING, new Application().getVersion(), false, true);
 

@@ -127,6 +127,7 @@ silent
 timeformat
 timestampformat
 trimscripts
+uselinecontinuation
 verbose
 JDBC Driver Support
 Project Information
@@ -255,6 +256,7 @@ silent
 timeformat
 timestampformat
 trimscripts
+uselinecontinuation
 verbose
 JDBC Driver Support
 Introduction
@@ -1142,6 +1144,7 @@ timeout         integer    Query timeout in seconds; less than zero means no
 timestampFormat pattern    Format timestamps using SimpleDateFormat pattern
 trimScripts     true/false Remove trailing spaces from lines read from script
                            files
+useLineContinuation true/false Use line continuation
 verbose         true/false Show verbose error messages and debug info
 
 Comments, bug reports, and patches go to ???
@@ -2052,6 +2055,7 @@ silent
 timeformat
 timestampformat
 trimscripts
+uselinecontinuation
 verbose
 autocommit
 
@@ -2172,6 +2176,10 @@ The format for how timestamp values are displayed. Setting to default causes tim
 trimscripts
 
 If true, then trim leading and trailing whitespace from lines as they are processed in scripts; otherwise, preserve whitespace. Defaults to true.
+
+uselinecontinuation
+
+Use line continuation if true. Defaults to true.
 
 verbose
 

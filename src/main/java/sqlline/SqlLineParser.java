@@ -88,6 +88,11 @@ public class SqlLineParser extends DefaultParser {
 
   public ParsedLine parse(final String line, final int cursor,
       ParseContext context) {
+    if (!sqlLine.getOpts().getUseLineContinuation()) {
+      eofOnUnclosedQuote(false);
+      eofOnEscapedNewLine(false);
+      return super.parse(line, cursor, context);
+    }
     final List<String> words = new LinkedList<>();
     final StringBuilder current = new StringBuilder();
 

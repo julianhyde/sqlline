@@ -21,6 +21,59 @@ import org.junit.Test;
  * Test cases for SqlLineParser.
  */
 public class SqlLineParserTest {
+
+  // not ended quoted line
+// not ended with ; (existing ; is commented)
+// not closed quotes
+// not closed brackets
+// extra brackets
+  public static final String[] WRONG_LINES = new String[]{
+      "!sql",
+      "   !all",
+      " \n select",
+      " \n test ",
+      "select '1';-comment",
+      "\nselect\n '1';- -comment\n",
+      "select '1';comment\n\n",
+      "\nselect '1'; -comment",
+      " select '1';\ncomment",
+      "select '1';\n\n- -",
+      "select '1';\n\n- ",
+      "select '1';\n\n-",
+      "select '1';\n\n/",
+      "select '1';\n \n-/-comment",
+      "select '1'\n;\n-+-comment",
+      "select '1'\n\n;\ncomment",
+      "select '1';/ *comment*/",
+      "select '1';/--*---comment */",
+      "select '1';--/*comment\n*/\n",
+      "select '1';/ *comment*/\n\n",
+      "select '1'; /  *--comment*/",
+      // not ended quoted line
+      "  test ';",
+      " \n test ';'\";",
+      // not ended with ; (existing ; is commented)
+      "select --\n\n--\n--;",
+      "select 1 --; --;",
+      "select /*--\n\n--\n--;",
+      "select /* \n ;",
+      "select --\n/*\n--\n--;",
+      "select ' ''\n '' '\n /* ;",
+      // not closed quotes
+      "select ''' from t;",
+      "select ''' \n'' \n'' from t;",
+      "select \"\\\" \n\\\" \n\\\" from t;",
+      // not closed brackets
+      "select to_char(123  from dual;",
+      "select sum(count(1)  from dual;",
+      "select [field  from t;",
+      // extra brackets
+      "select to_char)123) from dual;",
+      "select count)123( from dual;",
+      "select sum)count)123(( from dual;",
+      "select sum(count)t.x)) from t;"
+  };
+
   @Test
   public void testSqlLineParserForOkLines() {
     final DefaultParser parser = new SqlLineParser(new SqlLine());
@@ -99,58 +152,28 @@ public class SqlLineParserTest {
   public void testSqlLineParserForWrongLines() {
     final DefaultParser parser = new SqlLineParser(new SqlLine());
     final Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
-    final String[] lines = {
-        "!sql",
-        "   !all",
-        " \n select",
-        " \n test ",
-        "select '1';-comment",
-        "\nselect\n '1';- -comment\n",
-        "select '1';comment\n\n",
-        "\nselect '1'; -comment",
-        " select '1';\ncomment",
-        "select '1';\n\n- -",
-        "select '1';\n\n- ",
-        "select '1';\n\n-",
-        "select '1';\n\n/",
-        "select '1';\n \n-/-comment",
-        "select '1'\n;\n-+-comment",
-        "select '1'\n\n;\ncomment",
-        "select '1';/ *comment*/",
-        "select '1';/--*---comment */",
-        "select '1';--/*comment\n*/\n",
-        "select '1';/ *comment*/\n\n",
-        "select '1'; /  *--comment*/",
-        // not ended quoted line
-        "  test ';",
-        " \n test ';'\";",
-        // not ended with ; (existing ; is commented)
-        "select --\n\n--\n--;",
-        "select 1 --; --;",
-        "select /*--\n\n--\n--;",
-        "select /* \n ;",
-        "select --\n/*\n--\n--;",
-        "select ' ''\n '' '\n /* ;",
-        // not closed quotes
-        "select ''' from t;",
-        "select ''' \n'' \n'' from t;",
-        "select \"\\\" \n\\\" \n\\\" from t;",
-        // not closed brackets
-        "select to_char(123  from dual;",
-        "select sum(count(1)  from dual;",
-        "select [field  from t;",
-        // extra brackets
-        "select to_char)123) from dual;",
-        "select count)123( from dual;",
-        "select sum)count)123(( from dual;",
-        "select sum(count)t.x)) from t;"
-    };
-    for (String line : lines) {
+    for (String line : WRONG_LINES) {
       try {
         parser.parse(line, line.length(), acceptLine);
         Assert.fail("Missing closing quote or semicolon for line " + line);
       } catch (EOFError eofError) {
         //ok
+      }
+    }
+  }
+
+  @Test
+  public void testSqlLineParserOfWrongLinesForSwitchedOfflineContinuation() {
+    final SqlLine sqlLine = new SqlLine();
+    sqlLine.getOpts().set(BuiltInProperty.USE_LINE_CONTINUATION, false);
+    final DefaultParser parser = new SqlLineParser(sqlLine);
+    final Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
+    for (String line : WRONG_LINES) {
+      try {
+        parser.parse(line, line.length(), acceptLine);
+      } catch (Throwable t) {
+        System.err.println("Problem line: [" + line + "]");
+        throw t;
       }
     }
   }
