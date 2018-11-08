@@ -12,6 +12,9 @@
 package sqlline;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.history.DefaultHistory;
@@ -26,7 +29,8 @@ public enum BuiltInProperty implements SqlLineProperty {
 
   AUTO_COMMIT("autoCommit", Type.BOOLEAN, true),
   AUTO_SAVE("autoSave", Type.BOOLEAN, false),
-  COLOR_SCHEME("colorScheme", Type.STRING, DEFAULT),
+  COLOR_SCHEME("colorScheme", Type.STRING,
+      DEFAULT, true, false, BuiltInHighlightStyle.BY_NAME.keySet()),
   COLOR("color", Type.BOOLEAN, false),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
@@ -41,12 +45,13 @@ public enum BuiltInProperty implements SqlLineProperty {
   HISTORY_FILE("historyFile", Type.STRING,
       new File(SqlLineOpts.saveDir(), "history").getAbsolutePath()),
   INCREMENTAL("incremental", Type.BOOLEAN, true),
-  ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ"),
-  MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, 15),
+  ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ",
+      true, false, new HashSet<>(new Application().getIsolationLevels())),
+  MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, -1),
   // don't save maxheight, maxwidth: it is automatically set based on
   // the terminal configuration
-  MAX_HEIGHT("maxHeight", Type.INTEGER, 80, false, false),
-  MAX_WIDTH("maxWidth", Type.INTEGER, 80, false, false),
+  MAX_HEIGHT("maxHeight", Type.INTEGER, 80, false, false, null),
+  MAX_WIDTH("maxWidth", Type.INTEGER, 80, false, false, null),
 
   MAX_HISTORY_ROWS("maxHistoryRows",
       Type.INTEGER, DefaultHistory.DEFAULT_HISTORY_SIZE),
@@ -71,16 +76,18 @@ public enum BuiltInProperty implements SqlLineProperty {
   TRIM_SCRIPTS("trimScripts", Type.BOOLEAN, true),
   USE_LINE_CONTINUATION("useLineContinuation", Type.BOOLEAN, true),
   VERBOSE("verbose", Type.BOOLEAN, false),
-  VERSION("version", Type.STRING, new Application().getVersion(), false, true);
+  VERSION("version",
+      Type.STRING, new Application().getVersion(), false, true, null);
 
   private final String propertyName;
   private final Type type;
   private final Object defaultValue;
   private final boolean couldBeStored;
   private final boolean isReadOnly;
+  private final Set<String> availableValues;
 
   BuiltInProperty(String propertyName, Type type, Object defaultValue) {
-    this(propertyName, type, defaultValue, true, false);
+    this(propertyName, type, defaultValue, true, false, null);
   }
 
   BuiltInProperty(
@@ -88,12 +95,15 @@ public enum BuiltInProperty implements SqlLineProperty {
       Type type,
       Object defaultValue,
       boolean couldBeStored,
-      boolean isReadOnly) {
+      boolean isReadOnly,
+      Set availableValues) {
     this.propertyName = propertyName;
     this.type = type;
     this.defaultValue = defaultValue;
     this.isReadOnly = isReadOnly;
     this.couldBeStored = couldBeStored;
+    this.availableValues = availableValues == null
+        ? Collections.emptySet() : Collections.unmodifiableSet(availableValues);
   }
 
   @Override public String propertyName() {
@@ -114,6 +124,10 @@ public enum BuiltInProperty implements SqlLineProperty {
 
   @Override public Type type() {
     return type;
+  }
+
+  @Override public Set<String> getAvailableValues() {
+    return availableValues;
   }
 
   /** Returns the built-in property with the given name, or null if not found.

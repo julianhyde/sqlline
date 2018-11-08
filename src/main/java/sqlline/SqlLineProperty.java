@@ -11,6 +11,8 @@
 */
 package sqlline;
 
+import java.util.Set;
+
 /**
  * Definition of property that may be specified for SqlLine.
  *
@@ -31,6 +33,8 @@ public interface SqlLineProperty {
 
   Type type();
 
+  Set<String> getAvailableValues();
+
   /** Property writer. */
   @FunctionalInterface
   interface Writer {
@@ -41,8 +45,8 @@ public interface SqlLineProperty {
   enum Type {
     BOOLEAN,
     CHAR,
-    STRING,
-    INTEGER;
+    INTEGER,
+    STRING;
   }
 
 }
