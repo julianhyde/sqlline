@@ -29,8 +29,8 @@ public enum BuiltInProperty implements SqlLineProperty {
 
   AUTO_COMMIT("autoCommit", Type.BOOLEAN, true),
   AUTO_SAVE("autoSave", Type.BOOLEAN, false),
-  COLOR_SCHEME("colorScheme", Type.STRING,
-      DEFAULT, true, false, BuiltInHighlightStyle.BY_NAME.keySet()),
+  COLOR_SCHEME("colorScheme", Type.STRING, DEFAULT,
+      true, false, new Application().getName2HighlightStyle().keySet()),
   COLOR("color", Type.BOOLEAN, false),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
