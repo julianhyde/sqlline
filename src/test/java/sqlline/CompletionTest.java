@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
@@ -45,7 +46,7 @@ public class CompletionTest {
   private final SqlLine sqlLine = new SqlLine();
 
   @Test
-  public void testCommandCompletions() throws IOException {
+  public void testCommandCompletions() {
     final LineReaderCompletionImpl lineReader = getDummyLineReader();
 
     TreeSet<String> commandSet = getCommandSet(sqlLine);
@@ -58,10 +59,6 @@ public class CompletionTest {
     }
 
     // check completions if the whole command is finished
-    final Set<String> expectedQuit = filterSet(commandSet, "!quit");
-    final Set<String> actualQuit =
-        getLineReaderCompletedSet(lineReader, "!quit");
-    assertEquals(expectedQuit, actualQuit);
     final Set<String> quitExpected = filterSet(commandSet, "!quit");
     final Set<String> quitActual =
         getLineReaderCompletedSet(lineReader, "!quit");
@@ -69,24 +66,24 @@ public class CompletionTest {
   }
 
   @Test
-  public void testPropertyCompletions() throws IOException {
+  public void testResetPropertyCompletions() {
     final LineReaderCompletionImpl lineReader = getDummyLineReader();
-    final Set<String> actualVerbose =
-        getLineReaderCompletedSet(lineReader, "!set verbose tr");
-    assertEquals(1, actualVerbose.size());
-    assertEquals("!set verbose true", actualVerbose.iterator().next());
+    final String resetCommand = "!reset ";
 
-    final Set<String> actualJsonFormat =
-        getLineReaderCompletedSet(lineReader, "!set outputFormat js");
-    assertEquals(1, actualJsonFormat.size());
-    assertEquals("!set outputFormat json", actualJsonFormat.iterator().next());
+    for (BuiltInProperty property: BuiltInProperty.values()) {
+      final String command = resetCommand
+          + property.propertyName().toLowerCase(Locale.ROOT);
+      final Set<String> actual =
+          getLineReaderCompletedSet(lineReader, command + " ");
+      assertEquals("Completion for command '"
+              + resetCommand + property.propertyName() + "'",
+          Collections.singleton(command), actual);
+    }
+  }
 
-    final Set<String> actualXmlElementFormat =
-        getLineReaderCompletedSet(lineReader, "!set outputFormat xmlel");
-    assertEquals(1, actualXmlElementFormat.size());
-    assertEquals("!set outputFormat xmlelements",
-        actualXmlElementFormat.iterator().next());
-
+  @Test
+  public void testSetPropertyCompletions() {
+    final LineReaderCompletionImpl lineReader = getDummyLineReader();
     final Set<String> actual =
         getLineReaderCompletedSet(lineReader, "!set verbose tr");
     assertEquals("!set verbose true", actual.iterator().next());
@@ -115,60 +112,58 @@ public class CompletionTest {
   }
 
   @Test
-  public void testSqlCompletions() throws IOException {
-    SqlLine sqlLine = new SqlLine();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    SqlLine.Status status = begin(sqlLine, os, false);
-    // Here the status is SqlLine.Status.OTHER
-    // because of EOF as the result of InputStream which
-    // is not used in the current test so it is ok
-    assertThat(status, equalTo(SqlLine.Status.OTHER));
-    DispatchCallback dc = new DispatchCallback();
-    sqlLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
-    sqlLine.runCommands(
-        Collections.singletonList("!connect "
-            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-            + SqlLineArgsTest.ConnectionSpec.H2.username + " "
-            + "\"\""), dc);
-    os.reset();
+  public void testSqlCompletions() {
+    try {
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      SqlLine.Status status = begin(sqlLine, os, false);
+      // Here the status is SqlLine.Status.OTHER
+      // because of EOF as the result of InputStream which
+      // is not used in the current test so it is ok
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      DispatchCallback dc = new DispatchCallback();
+      sqlLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " "
+              + "\"\""), dc);
+      os.reset();
 
-    LineReader lineReader = sqlLine.getLineReader();
+      LineReader lineReader = sqlLine.getLineReader();
 
-    LineReaderCompletionImpl lineReaderCompletion =
-        new LineReaderCompletionImpl(lineReader.getTerminal());
-    lineReaderCompletion
-        .setCompleter(((LineReaderImpl) lineReader).getCompleter());
-    final Set<String> actualSqlLowerCase =
-        getLineReaderCompletedSet(lineReaderCompletion, "sel");
-    assertEquals(1, actualSqlLowerCase.size());
-    assertEquals("select", actualSqlLowerCase.iterator().next());
+      LineReaderCompletionImpl lineReaderCompletion =
+          new LineReaderCompletionImpl(lineReader.getTerminal());
+      lineReaderCompletion.setCompleter(new SqlLineCompleter(sqlLine));
+      final Set<String> lowCaseActual =
+          getLineReaderCompletedSet(lineReaderCompletion, "sel");
+      assertEquals(1, lowCaseActual.size());
+      assertEquals("select", lowCaseActual.iterator().next());
 
-    final Set<String> actualSqlUpperCase =
-        getLineReaderCompletedSet(lineReaderCompletion, "SEL");
-    assertEquals(1, actualSqlUpperCase.size());
-    assertEquals("SELECT", actualSqlUpperCase.iterator().next());
-
-    lineReaderCompletion.setCompleter(new SqlLineCompleter(sqlLine));
-    final Set<String> lowCaseActual =
-        getLineReaderCompletedSet(lineReaderCompletion, "sel");
-    assertEquals(1, lowCaseActual.size());
-    assertEquals("select", lowCaseActual.iterator().next());
-
-    final Set<String> upperCaseActual =
-        getLineReaderCompletedSet(lineReaderCompletion, "SEL");
-    assertEquals(1, upperCaseActual.size());
-    assertEquals("SELECT", upperCaseActual.iterator().next());
+      final Set<String> upperCaseActual =
+          getLineReaderCompletedSet(lineReaderCompletion, "SEL");
+      assertEquals(1, upperCaseActual.size());
+      assertEquals("SELECT", upperCaseActual.iterator().next());
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
   }
 
-  private LineReaderCompletionImpl getDummyLineReader() throws IOException {
-    TerminalBuilder terminalBuilder = TerminalBuilder.builder();
-    final Terminal terminal = terminalBuilder.build();
+  private LineReaderCompletionImpl getDummyLineReader() {
+    try {
+      TerminalBuilder terminalBuilder = TerminalBuilder.builder();
+      final Terminal terminal = terminalBuilder.build();
 
-    final LineReaderCompletionImpl lineReader =
-        new LineReaderCompletionImpl(terminal);
-    lineReader.setCompleter(sqlLine.getCommandCompleter());
-    lineReader.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
-    return lineReader;
+      final LineReaderCompletionImpl lineReader =
+          new LineReaderCompletionImpl(terminal);
+      lineReader.setCompleter(sqlLine.getCommandCompleter());
+      lineReader.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
+      return lineReader;
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
   }
 
   private TreeSet<String> getCommandSet(SqlLine sqlLine) {
@@ -188,13 +183,13 @@ public class CompletionTest {
         .map(Candidate::value).collect(Collectors.toCollection(TreeSet::new));
   }
 
-  private Set<String> filterSet(TreeSet<String> commandSet, String filter) {
+  private Set<String> filterSet(TreeSet<String> commandSet, String s2) {
     Set<String> subset = commandSet.stream()
-        .filter(s -> s.startsWith(filter))
+        .filter(s -> s.startsWith(s2))
         .collect(Collectors.toCollection(TreeSet::new));
     if (subset.isEmpty()) {
       Set<String> result = new TreeSet<>(commandSet);
-      result.add(filter);
+      result.add(s2);
       return result;
     } else {
       return subset;
