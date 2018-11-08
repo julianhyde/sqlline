@@ -29,7 +29,40 @@ import org.jline.reader.impl.history.DefaultHistory;
 
 import sqlline.SqlLineProperty.Type;
 
-import static sqlline.BuiltInProperty.*;
+import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.AUTO_SAVE;
+import static sqlline.BuiltInProperty.COLOR;
+import static sqlline.BuiltInProperty.COLOR_SCHEME;
+import static sqlline.BuiltInProperty.CSV_DELIMITER;
+import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
+import static sqlline.BuiltInProperty.DATE_FORMAT;
+import static sqlline.BuiltInProperty.DEFAULT;
+import static sqlline.BuiltInProperty.ESCAPE_OUTPUT;
+import static sqlline.BuiltInProperty.FAST_CONNECT;
+import static sqlline.BuiltInProperty.FORCE;
+import static sqlline.BuiltInProperty.HEADER_INTERVAL;
+import static sqlline.BuiltInProperty.HISTORY_FILE;
+import static sqlline.BuiltInProperty.INCREMENTAL;
+import static sqlline.BuiltInProperty.ISOLATION;
+import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
+import static sqlline.BuiltInProperty.MAX_HEIGHT;
+import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
+import static sqlline.BuiltInProperty.MAX_HISTORY_ROWS;
+import static sqlline.BuiltInProperty.NULL_VALUE;
+import static sqlline.BuiltInProperty.NUMBER_FORMAT;
+import static sqlline.BuiltInProperty.OUTPUT_FORMAT;
+import static sqlline.BuiltInProperty.ROW_LIMIT;
+import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
+import static sqlline.BuiltInProperty.SHOW_HEADER;
+import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
+import static sqlline.BuiltInProperty.SHOW_WARNINGS;
+import static sqlline.BuiltInProperty.SILENT;
+import static sqlline.BuiltInProperty.TIMEOUT;
+import static sqlline.BuiltInProperty.TIMESTAMP_FORMAT;
+import static sqlline.BuiltInProperty.TIME_FORMAT;
+import static sqlline.BuiltInProperty.TRIM_SCRIPTS;
+import static sqlline.BuiltInProperty.USE_LINE_CONTINUATION;
+import static sqlline.BuiltInProperty.VERBOSE;
 
 /**
  * Session options.

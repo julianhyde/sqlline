@@ -1148,12 +1148,8 @@ public class SqlLine {
    */
   public String[][] splitCompound(String line) {
     final DatabaseConnection databaseConnection = getDatabaseConnection();
-    final Quoting quoting;
-    if (databaseConnection == null) {
-      quoting = Quoting.DEFAULT;
-    } else {
-      quoting = databaseConnection.quoting;
-    }
+    final SyntaxRule rule = databaseConnection == null
+        ? SyntaxRule.getDefaultRule() : databaseConnection.getSyntaxRule();
 
     int state = SPACE;
     int idStart = -1;
@@ -1179,7 +1175,7 @@ public class SqlLine {
           // nothing
         } else if (c == '.') {
           state = DOT_SPACE;
-        } else if (c == quoting.start) {
+        } else if (c == rule.getOpenQuote()) {
           if (state == SPACE) {
             if (current.size() > 0) {
               words.add(
@@ -1203,9 +1199,9 @@ public class SqlLine {
         break;
       case QUOTED:
         ++i;
-        if (c == quoting.end) {
+        if (c == rule.getCloseQuote()) {
           if (i < n
-              && chars[i] == quoting.end) {
+              && chars[i] == rule.getCloseQuote()) {
             // Repeated quote character inside a quoted identifier.
             // Eliminate one of the repeats, and we remain inside a
             // quoted identifier.
@@ -1227,7 +1223,7 @@ public class SqlLine {
           String word = String.copyValueOf(chars, idStart, i - idStart - 1);
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
-          } else if (quoting.upper) {
+          } else if (rule.isUpper()) {
             word = word.toUpperCase(Locale.ROOT);
           }
           current.add(word);
@@ -1251,7 +1247,7 @@ public class SqlLine {
       if (state == UNQUOTED) {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
-        } else if (quoting.upper) {
+        } else if (rule.isUpper()) {
           word = word.toUpperCase(Locale.ROOT);
         }
       }
@@ -1807,7 +1803,7 @@ public class SqlLine {
     return successCount;
   }
 
-  void setCompletions() throws SQLException, IOException {
+  void setCompletions() {
     if (getDatabaseConnection() != null) {
       getDatabaseConnection().setCompletions(getOpts().getFastConnect());
     }

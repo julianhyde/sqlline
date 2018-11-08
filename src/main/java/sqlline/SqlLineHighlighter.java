@@ -11,20 +11,9 @@
 */
 package sqlline;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.DefaultHighlighter;
@@ -39,21 +28,9 @@ import org.jline.utils.WCWidth;
  */
 public class SqlLineHighlighter extends DefaultHighlighter {
   private final SqlLine sqlLine;
-  private final Set<String> defaultKeywordSet;
 
-  public SqlLineHighlighter(SqlLine sqlLine) throws IOException {
+  public SqlLineHighlighter(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    String keywords =
-        new BufferedReader(
-            new InputStreamReader(
-                SqlCompleter.class.getResourceAsStream(
-                    "sql-keywords.properties"), StandardCharsets.UTF_8))
-            .readLine();
-    defaultKeywordSet = new TreeSet<>();
-    for (StringTokenizer tok = new StringTokenizer(keywords, ",");
-         tok.hasMoreTokens();) {
-      defaultKeywordSet.add(tok.nextToken());
-    }
   }
 
   @Override public AttributedString highlight(LineReader reader,
@@ -198,68 +175,11 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /** Returns a highlight rule for the current connection. Never null. */
-  DatabaseConnection.SyntaxRule getConnectionSpecificRule() {
+  SyntaxRule getConnectionSpecificRule() {
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
-    if (databaseConnection != null) {
-      return deduceSyntaxRule(databaseConnection);
-    }
-    return createRule(null);
-  }
-
-  /** Returns a highlighter rule for a given database connection.
-   *
-   * <p>The rule is good for other highlighter instances, but not necessarily
-   * for other database connections (because it depends on the set of keywords
-   * and identifier quote string).
-   *
-   * <p>If {@code databaseConnection} is null, or if its underlying
-   * connection is null or closed, returns the default rule.
-   *
-   * @param databaseConnection Database connection, or null
-   *
-   * @return Highlighter rule, never null
-   */
-  DatabaseConnection.SyntaxRule createRule(
-      DatabaseConnection databaseConnection) {
-    try {
-      if (databaseConnection != null
-          && databaseConnection.connection != null
-          && !databaseConnection.connection.isClosed()) {
-        final DatabaseMetaData meta = databaseConnection.meta;
-        final Set<String> connectionKeywords =
-            new HashSet<>(Arrays.asList(meta.getSQLKeywords().split(",")));
-        final String quoteString = meta.getIdentifierQuoteString();
-        final String productName = meta.getDatabaseProductName();
-        return new DatabaseConnection.SyntaxRule(
-            connectionKeywords, quoteString, productName);
-      }
-    } catch (SQLException e) {
-      sqlLine.handleException(e);
-    }
-    return new DatabaseConnection.SyntaxRule(null, null, null);
-  }
-
-  /** Gets or creates the rule for highlighting in the current connection.
-   *
-   * <p>This method uses a {@link SqlLineHighlighter} but the resulting rule is
-   * not tied to the highlighter, only to the connection.
-   *
-   * <p>In future, this method may also deduce rules for other
-   * connection-specific behaviors, say completion and line-continuation. */
-  DatabaseConnection.SyntaxRule deduceSyntaxRule(
-      DatabaseConnection connection) {
-    DatabaseConnection.SyntaxRule syntaxRule;
-    if (connection == null) {
-      syntaxRule = Objects.requireNonNull(createRule(connection));
-    } else {
-      syntaxRule = connection.getSyntaxRule();
-    }
-    if (syntaxRule == null) {
-      // It's OK to use a rule created by a previous highlighter.
-      syntaxRule = Objects.requireNonNull(createRule(connection));
-    }
-    return syntaxRule;
+    return databaseConnection == null
+        ? SyntaxRule.getDefaultRule() : databaseConnection.getSyntaxRule();
   }
 
   private void handleSqlSyntax(String buffer,
@@ -279,7 +199,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final DatabaseConnection.SyntaxRule rule = getConnectionSpecificRule();
+    final SyntaxRule rule = getConnectionSpecificRule();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -289,8 +209,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
               ? buffer.substring(wordStart, pos)
               : buffer.substring(wordStart);
           String upperWord = word.toUpperCase(Locale.ROOT);
-          if (defaultKeywordSet.contains(upperWord)
-              || rule.containsKeyword(upperWord)) {
+          if (rule.containsKeyword(upperWord)) {
             keywordBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
@@ -298,11 +217,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           continue;
         }
       }
-      if (ch == rule.getIdentifierQuote().charAt(0)
-          && (rule.getIdentifierQuote().length() == 1
-              || rule.getIdentifierQuote().regionMatches(0, buffer, pos,
-          rule.getIdentifierQuote().length()))) {
-        pos = handleSqlIdentifierQuotes(buffer, rule.getIdentifierQuote(),
+      if (ch == rule.getOpenQuote()) {
+        pos = handleSqlIdentifierQuotes(buffer,
+            String.valueOf(rule.getOpenQuote()),
             sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
@@ -513,8 +430,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } else {
-      for (String oneLineComment: deduceSyntaxRule(
-          sqlLine.getDatabaseConnection()).getOneLineComments()) {
+      final SyntaxRule rule = sqlLine.getDatabaseConnection() == null
+          ? SyntaxRule.getDefaultRule()
+          : sqlLine.getDatabaseConnection().getSyntaxRule();
+      for (String oneLineComment: rule.getOneLineComments()) {
         if (startingPoint <= line.length() - oneLineComment.length()
             && oneLineComment
             .regionMatches(0, line, startingPoint, oneLineComment.length())) {

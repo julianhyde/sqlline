@@ -11,15 +11,13 @@
 */
 package sqlline;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.ArgumentCompleter;
-
-import static sqlline.BuiltInCommentsDefinition.BY_NAME;
-import static sqlline.BuiltInCommentsDefinition.DEFAULT;
 
 /**
  * Holds a database connection, credentials, and other associated state.
@@ -28,7 +26,6 @@ class DatabaseConnection {
   private final SqlLine sqlLine;
   Connection connection;
   DatabaseMetaData meta;
-  Quoting quoting;
   private final String driver;
   private final String url;
   private final Properties info;
@@ -51,38 +48,36 @@ class DatabaseConnection {
     return getUrl() + "";
   }
 
-  void setCompletions(boolean skipmeta) throws SQLException, IOException {
-    // Deduce the string used to quote identifiers. For example, Oracle
-    // uses double-quotes:
-    //   SELECT * FROM "My Schema"."My Table"
-    String startQuote = meta.getIdentifierQuoteString();
-    final boolean upper = meta.storesUpperCaseIdentifiers();
-    if (startQuote == null
-        || startQuote.equals("")
-        || startQuote.equals(" ")) {
-      if (meta.getDatabaseProductName().startsWith("MySQL")) {
-        // Some version of the MySQL JDBC driver lie.
-        quoting = new Quoting('`', '`', upper);
-      } else {
-        quoting = new Quoting((char) 0, (char) 0, false);
-      }
-    } else if (startQuote.equals("[")) {
-      quoting = new Quoting('[', ']', upper);
-    } else if (startQuote.length() > 1) {
-      sqlLine.error(
-          "Identifier quote string is '" + startQuote
-              + "'; quote strings longer than 1 char are not supported");
-      quoting = Quoting.DEFAULT;
-    } else {
-      quoting =
-          new Quoting(startQuote.charAt(0), startQuote.charAt(0), upper);
-    }
-
+  void setCompletions(boolean skipmeta) {
     // setup the completer for the database
     sqlCompleter = new ArgumentCompleter(
         new SqlCompleter(sqlLine, skipmeta));
     // not all argument elements need to hold true
     ((ArgumentCompleter) sqlCompleter).setStrict(false);
+  }
+
+  private void initSyntaxRule() throws SQLException {
+    // Deduce the string used to quote identifiers. For example, Oracle
+    // uses double-quotes:
+    //   SELECT * FROM "My Schema"."My Table"
+    String startQuote = meta.getIdentifierQuoteString();
+    final String productName = meta.getDatabaseProductName();
+    final Set<String> keywords =
+        Stream.of(meta.getSQLKeywords().split(","))
+            .collect(Collectors.toSet());
+    final boolean upper;
+
+    if (startQuote.length() > 1) {
+      sqlLine.error(
+          "Identifier quote string is '" + startQuote
+              + "'; quote strings longer than 1 char are not supported");
+      startQuote = null;
+      upper = true;
+    } else {
+      upper = meta.storesUpperCaseIdentifiers();
+    }
+
+    syntaxRule = new SyntaxRule(keywords, startQuote, productName, upper);
   }
 
   /**
@@ -165,6 +160,7 @@ class DatabaseConnection {
       sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
           .getIsolation(),
           new DispatchCallback());
+      initSyntaxRule();
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
@@ -244,51 +240,6 @@ class DatabaseConnection {
 
   SyntaxRule getSyntaxRule() {
     return syntaxRule;
-  }
-
-  /**
-   * Rules for highlighting.
-   *
-   * <p>Provides an additional set of keywords,
-   * and the quotation character for SQL identifiers.
-   */
-  static class SyntaxRule {
-    private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
-    private final Set<String> keywords;
-    private final String identifierQuote;
-    private final Set<String> oneLineComments;
-
-    SyntaxRule(Set<String> keywords,
-        String identifierQuote, String productName) {
-      this.keywords = keywords == null ? Collections.emptySet() : keywords;
-      this.identifierQuote =
-          identifierQuote == null || "".equals(identifierQuote.trim())
-          ? getDefaultSqlIdentifierQuote() : identifierQuote;
-      oneLineComments =
-          BY_NAME.get(productName) == null
-              ? getDefaultOneLineComments()
-              : BY_NAME.get(productName).getCommentDefinition();
-    }
-
-    protected boolean containsKeyword(String keyword) {
-      return keywords.contains(keyword);
-    }
-
-    protected Set<String> getDefaultOneLineComments() {
-      return DEFAULT.getCommentDefinition();
-    }
-
-    public Set<String> getOneLineComments() {
-      return oneLineComments;
-    }
-
-    protected String getDefaultSqlIdentifierQuote() {
-      return DEFAULT_SQL_IDENTIFIER_QUOTE;
-    }
-
-    protected String getIdentifierQuote() {
-      return identifierQuote;
-    }
   }
 
   /** Schema. */

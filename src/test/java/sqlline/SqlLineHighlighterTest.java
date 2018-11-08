@@ -371,10 +371,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<DatabaseConnection.SyntaxRule>() {
+    new MockUp<SyntaxRule>() {
       @Mock
-      String getDefaultSqlIdentifierQuote() {
-        return "`";
+      SyntaxRule getDefaultRule() {
+        return new SyntaxRule(null, "`", null);
       }
     };
 
