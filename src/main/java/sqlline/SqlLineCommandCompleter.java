@@ -32,14 +32,15 @@ class SqlLineCommandCompleter extends AggregateCompleter {
     for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       for (String cmd : commandHandler.getNames()) {
         List<Completer> compl = new LinkedList<>();
-        if (!commandHandler.getParameterCompleters().isEmpty()
-            && commandHandler.getParameterCompleters().iterator().next()
+        final List<Completer> parameterCompleters =
+            commandHandler.getParameterCompleters();
+        if (parameterCompleters.size() == 1
+            && parameterCompleters.iterator().next()
                 instanceof Completers.RegexCompleter) {
-          completers.add(
-              commandHandler.getParameterCompleters().iterator().next());
+          completers.add(parameterCompleters.iterator().next());
         } else {
           compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
-          compl.addAll(commandHandler.getParameterCompleters());
+          compl.addAll(parameterCompleters);
           compl.add(new NullCompleter()); // last param no complete
           completers.add(new ArgumentCompleter(compl));
         }
