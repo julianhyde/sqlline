@@ -58,22 +58,19 @@ public class CompletionTest {
     }
 
     // check completions if the whole command is finished
-<<<<<<< HEAD
     final Set<String> expectedQuit = filterSet(commandSet, "!quit");
     final Set<String> actualQuit =
         getLineReaderCompletedSet(lineReader, "!quit");
     assertEquals(expectedQuit, actualQuit);
-=======
-    final Set<String> expected2 = filterSet(commandSet, "!quit");
-    final Set<String> actual2 = getLineReaderCompletedSet(lineReader, "!quit");
-    assertEquals(expected2, actual2);
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
+    final Set<String> quitExpected = filterSet(commandSet, "!quit");
+    final Set<String> quitActual =
+        getLineReaderCompletedSet(lineReader, "!quit");
+    assertEquals(quitExpected, quitActual);
   }
 
   @Test
   public void testPropertyCompletions() throws IOException {
     final LineReaderCompletionImpl lineReader = getDummyLineReader();
-<<<<<<< HEAD
     final Set<String> actualVerbose =
         getLineReaderCompletedSet(lineReader, "!set verbose tr");
     assertEquals(1, actualVerbose.size());
@@ -89,19 +86,32 @@ public class CompletionTest {
     assertEquals(1, actualXmlElementFormat.size());
     assertEquals("!set outputFormat xmlelements",
         actualXmlElementFormat.iterator().next());
-=======
+
     final Set<String> actual =
         getLineReaderCompletedSet(lineReader, "!set verbose tr");
     assertEquals("!set verbose true", actual.iterator().next());
 
-    final Set<String> actual1 =
+    final Set<String> jsonActual =
         getLineReaderCompletedSet(lineReader, "!set outputFormat js");
-    assertEquals("!set outputFormat json", actual1.iterator().next());
+    assertEquals(1, jsonActual.size());
+    assertEquals("!set outputFormat json", jsonActual.iterator().next());
 
-    final Set<String> actual2 =
+    final Set<String> xmlelActual =
         getLineReaderCompletedSet(lineReader, "!set outputFormat xmlel");
-    assertEquals("!set outputFormat xmlelements", actual2.iterator().next());
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
+    assertEquals(1, xmlelActual.size());
+    assertEquals("!set outputFormat xmlelements",
+        xmlelActual.iterator().next());
+
+    final Set<String> chesterActual =
+        getLineReaderCompletedSet(lineReader, "!set colorScheme che");
+    assertEquals(1, chesterActual.size());
+    assertEquals("!set colorScheme chester", chesterActual.iterator().next());
+
+    final Set<String> solarizedActual =
+        getLineReaderCompletedSet(lineReader, "!set colorScheme sol");
+    assertEquals(1, solarizedActual.size());
+    assertEquals("!set colorScheme solarized",
+        solarizedActual.iterator().next());
   }
 
   @Test
@@ -128,7 +138,6 @@ public class CompletionTest {
         new LineReaderCompletionImpl(lineReader.getTerminal());
     lineReaderCompletion
         .setCompleter(((LineReaderImpl) lineReader).getCompleter());
-<<<<<<< HEAD
     final Set<String> actualSqlLowerCase =
         getLineReaderCompletedSet(lineReaderCompletion, "sel");
     assertEquals(1, actualSqlLowerCase.size());
@@ -138,15 +147,17 @@ public class CompletionTest {
         getLineReaderCompletedSet(lineReaderCompletion, "SEL");
     assertEquals(1, actualSqlUpperCase.size());
     assertEquals("SELECT", actualSqlUpperCase.iterator().next());
-=======
-    final Set<String> actual =
-        getLineReaderCompletedSet(lineReaderCompletion, "sel");
-    assertEquals("select", actual.iterator().next());
 
-    final Set<String> actual2 =
+    lineReaderCompletion.setCompleter(new SqlLineCompleter(sqlLine));
+    final Set<String> lowCaseActual =
+        getLineReaderCompletedSet(lineReaderCompletion, "sel");
+    assertEquals(1, lowCaseActual.size());
+    assertEquals("select", lowCaseActual.iterator().next());
+
+    final Set<String> upperCaseActual =
         getLineReaderCompletedSet(lineReaderCompletion, "SEL");
-    assertEquals("SELECT", actual2.iterator().next());
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
+    assertEquals(1, upperCaseActual.size());
+    assertEquals("SELECT", upperCaseActual.iterator().next());
   }
 
   private LineReaderCompletionImpl getDummyLineReader() throws IOException {
@@ -177,7 +188,6 @@ public class CompletionTest {
         .map(Candidate::value).collect(Collectors.toCollection(TreeSet::new));
   }
 
-<<<<<<< HEAD
   private Set<String> filterSet(TreeSet<String> commandSet, String filter) {
     Set<String> subset = commandSet.stream()
         .filter(s -> s.startsWith(filter))
@@ -189,17 +199,6 @@ public class CompletionTest {
     } else {
       return subset;
     }
-=======
-  private Set<String> filterSet(TreeSet<String> commandSet, String s2) {
-    Set<String> subset = commandSet.stream()
-        .filter(s -> s.startsWith(s2))
-        .collect(Collectors.toCollection(TreeSet::new));
-    return subset.isEmpty()
-        ? new TreeSet<String>(commandSet) {{
-            add(s2);
-          }}
-        : subset;
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
   }
 
   /** LineReaderImpl extension to test completion*/

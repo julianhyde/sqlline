@@ -265,14 +265,14 @@ public class Application {
     TableNameCompleter tableCompleter = new TableNameCompleter(sqlLine);
     List<Completer> empty = Collections.emptyList();
     final Map<String, OutputFormat> outputFormats = getOutputFormats(sqlLine);
-<<<<<<< HEAD
     final Map<BuiltInProperty, Collection<String>> propertyValues =
-=======
-    final Map<BuiltInProperty, Collection<String>> property2possibleValues =
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
         new HashMap<BuiltInProperty, Collection<String>>() {{
           put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
         }};
+    final Map<BuiltInProperty, Collection<String>> customCompletions =
+        new HashMap<>();
+    customCompletions
+        .put(BuiltInProperty.OUTPUT_FORMAT, outputFormats.keySet());
     final CommandHandler[] handlers = {
         new ReflectiveCommandHandler(sqlLine, empty, "quit", "done", "exit"),
         new ReflectiveCommandHandler(sqlLine,
@@ -322,16 +322,9 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "rollback"),
         new ReflectiveCommandHandler(sqlLine, empty, "help", "?"),
         new ReflectiveCommandHandler(sqlLine,
-<<<<<<< HEAD
-            getOpts(sqlLine).optionCompleters(propertyValues), "set"),
+            getOpts(sqlLine).setOptionCompleters(customCompletions), "set"),
         new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(propertyValues), "reset"),
-=======
-            getOpts(sqlLine).optionCompleters(property2possibleValues), "set"),
-        new ReflectiveCommandHandler(sqlLine,
-            getOpts(sqlLine).optionCompleters(property2possibleValues),
-            "reset"),
->>>>>>> [SQLLINE-186] Added tests for completions. Added possibility to do compmletion for properties values like outputformat or boolean properties
+            getOpts(sqlLine).resetOptionCompleters(), "reset"),
         new ReflectiveCommandHandler(sqlLine, empty, "save"),
         new ReflectiveCommandHandler(sqlLine, empty, "scan"),
         new ReflectiveCommandHandler(sqlLine, empty, "sql"),
@@ -372,7 +365,7 @@ public class Application {
     }
   }
 
-  private List<String> getIsolationLevels() {
+  List<String> getIsolationLevels() {
     return Arrays.asList(
         "TRANSACTION_NONE",
         "TRANSACTION_READ_COMMITTED",
