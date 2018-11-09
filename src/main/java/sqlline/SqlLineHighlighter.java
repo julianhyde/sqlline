@@ -175,11 +175,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /** Returns a highlight rule for the current connection. Never null. */
-  private SyntaxRule getConnectionSpecificRule() {
+  private DBSpecificRule getConnectionSpecificRule() {
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
     return databaseConnection == null
-        ? SyntaxRule.getDefaultRule() : databaseConnection.getSyntaxRule();
+        ? DBSpecificRule.getDefaultRule()
+        : databaseConnection.getDbSpecificRule();
   }
 
   private void handleSqlSyntax(String buffer,
@@ -199,7 +200,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final SyntaxRule rule = getConnectionSpecificRule();
+    final DBSpecificRule rule = getConnectionSpecificRule();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -226,7 +227,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (ch == '\'') {
         pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
       }
-      if (pos < buffer.length() - 1) {
+      if (pos <= buffer.length() - 1) {
         pos = handleComments(buffer, commentBitSet, pos);
       }
       if (wordStart == -1
@@ -432,9 +433,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } else {
-      final SyntaxRule rule = sqlLine.getDatabaseConnection() == null
-          ? SyntaxRule.getDefaultRule()
-          : sqlLine.getDatabaseConnection().getSyntaxRule();
+      final DBSpecificRule rule = sqlLine.getDatabaseConnection() == null
+          ? DBSpecificRule.getDefaultRule()
+          : sqlLine.getDatabaseConnection().getDbSpecificRule();
       for (String oneLineComment: rule.getOneLineComments()) {
         if (startingPoint <= line.length() - oneLineComment.length()
             && oneLineComment

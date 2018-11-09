@@ -32,7 +32,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
-  private SyntaxRule syntaxRule;
+  private DBSpecificRule dbSpecificRule;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -56,6 +56,13 @@ class DatabaseConnection {
     ((ArgumentCompleter) sqlCompleter).setStrict(false);
   }
 
+  /**
+   * Initializes a syntax rule for a given database connection.
+   *
+   * <p>The rule is good for different highlighter and completer instances,
+   * but not necessarily for other database connections (because it
+   * depends on the set of keywords and identifier quote string).
+   */
   private void initSyntaxRule() throws SQLException {
     // Deduce the string used to quote identifiers. For example, Oracle
     // uses double-quotes:
@@ -77,7 +84,8 @@ class DatabaseConnection {
       upper = meta.storesUpperCaseIdentifiers();
     }
 
-    syntaxRule = new SyntaxRule(keywords, startQuote, productName, upper);
+    dbSpecificRule =
+        new DBSpecificRule(keywords, startQuote, productName, upper);
   }
 
   /**
@@ -238,8 +246,8 @@ class DatabaseConnection {
     return sqlCompleter;
   }
 
-  SyntaxRule getSyntaxRule() {
-    return syntaxRule;
+  DBSpecificRule getDbSpecificRule() {
+    return dbSpecificRule;
   }
 
   /** Schema. */

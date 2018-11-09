@@ -170,6 +170,63 @@ public class SqlLineHighlighterTest {
   }
 
   @Test
+  public void testMySqlCommentedStrings() {
+    new MockUp<DBSpecificRule>() {
+      @Mock
+      DBSpecificRule getDefaultRule() {
+        return new DBSpecificRule(null, null, "MySQL");
+      }
+    };
+
+    String[] linesRequiredToBeComments = {
+        "-- 'asdasd'asd",
+        "--\n",
+        "/* \"''\"",
+        "/*",
+        "--\t",
+        "#",
+        "--\n/*",
+        "/* kh\n'asd'ad*/",
+        "/*\"-- \"values*/"
+    };
+
+    for (String line : linesRequiredToBeComments) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.comments.set(0, line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle);
+    }
+  }
+
+  @Test
+  public void testPhoenixCommentedStrings() {
+    new MockUp<DBSpecificRule>() {
+      @Mock
+      DBSpecificRule getDefaultRule() {
+        return new DBSpecificRule(null, null, "Phoenix");
+      }
+    };
+
+    String[] linesRequiredToBeComments = {
+        "--'asdasd'asd",
+        "--\tselect",
+        "// \"''\"",
+        "//",
+        "--",
+        "--\n/*",
+        "/* kh\n'asd'ad*/",
+        "/*\"-- \"values*/"
+    };
+
+    for (String line : linesRequiredToBeComments) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.comments.set(0, line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle);
+    }
+  }
+
+  @Test
   public void testNumberStrings() {
     String[] linesRequiredToBeNumbers = {
         "123456789",
@@ -371,10 +428,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testBracketsAsSqlIdentifier() {
-    new MockUp<SyntaxRule>() {
+    new MockUp<DBSpecificRule>() {
       @Mock
-      SyntaxRule getDefaultRule() {
-        return new SyntaxRule(null, "[", null);
+      DBSpecificRule getDefaultRule() {
+        return new DBSpecificRule(null, "[", null);
       }
     };
 
@@ -439,10 +496,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<SyntaxRule>() {
+    new MockUp<DBSpecificRule>() {
       @Mock
-      SyntaxRule getDefaultRule() {
-        return new SyntaxRule(null, "`", null);
+      DBSpecificRule getDefaultRule() {
+        return new DBSpecificRule(null, "`", null);
       }
     };
 

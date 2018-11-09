@@ -11,37 +11,41 @@
 */
 package sqlline;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Pre-defined one-line comments for different databases.
  */
-public enum BuiltInCommentsDefinition {
+public enum BuiltInDBSpecifics {
   DEFAULT(null, '"', "--"),
-  MYSQL("MySQL", '`', "-- ", "--\n", "#"),
-  MARIADB("MySQL", "-- ", "--\n", "#"),
-  CASSANDRA("Cassandra", "--", "//"),
+  // http://www.h2database.com/html/grammar.html#comment
+  H2("H2", "--", "//"),
+  // https://dev.mysql.com/doc/refman/8.0/en/comments.html
+  // https://mariadb.com/kb/en/library/comment-syntax/
+  MYSQL("MySQL", '`', "-- ", "--\t", "--\n", "#"),
+  // https://phoenix.apache.org/language/index.html#comments
   PHOENIX("Phoenix", "--", "//");
 
   private final String databaseName;
   private final char sqlIdentifierQuote;
   private final Set<String> commentDefinition;
 
-  BuiltInCommentsDefinition(String dbName, String... comments) {
+  BuiltInDBSpecifics(String dbName, String... comments) {
     this(dbName, DEFAULT_SQL_IDENTIFIER_QUOTE, comments);
   }
 
-  BuiltInCommentsDefinition(
+  BuiltInDBSpecifics(
       String dbName, char sqlIdentifierQuote, String... comments) {
     this.databaseName = dbName;
     this.sqlIdentifierQuote = sqlIdentifierQuote;
-    commentDefinition = new HashSet<>(Arrays.asList(comments));
+    commentDefinition = Collections.unmodifiableSet(
+        Stream.of(comments).collect(Collectors.toSet()));
   }
 
   public Set<String> getCommentDefinition() {
@@ -52,29 +56,29 @@ public enum BuiltInCommentsDefinition {
     return sqlIdentifierQuote;
   }
 
-  static BuiltInCommentsDefinition valueOf(String dbName, boolean ignoreCase) {
+  static BuiltInDBSpecifics valueOf(String dbName, boolean ignoreCase) {
     if (dbName == null) {
       return DEFAULT;
     }
-    for (BuiltInCommentsDefinition builtInCommentsDefinition: values()) {
-      if (builtInCommentsDefinition == DEFAULT) {
+    for (BuiltInDBSpecifics builtInDBSpecifics : values()) {
+      if (builtInDBSpecifics == DEFAULT) {
         continue;
       }
-      if (dbName.length() >= builtInCommentsDefinition.databaseName.length()
+      if (dbName.length() >= builtInDBSpecifics.databaseName.length()
           && dbName.regionMatches(ignoreCase, 0,
-          builtInCommentsDefinition.databaseName, 0,
-          builtInCommentsDefinition.databaseName.length())) {
-        return builtInCommentsDefinition;
+          builtInDBSpecifics.databaseName, 0,
+          builtInDBSpecifics.databaseName.length())) {
+        return builtInDBSpecifics;
       }
     }
     return DEFAULT;
   }
 
-  static final Map<String, BuiltInCommentsDefinition> BY_NAME;
+  static final Map<String, BuiltInDBSpecifics> BY_NAME;
 
   static {
-    final Map<String, BuiltInCommentsDefinition> map = new HashMap<>();
-    for (BuiltInCommentsDefinition value : values()) {
+    final Map<String, BuiltInDBSpecifics> map = new HashMap<>();
+    for (BuiltInDBSpecifics value : values()) {
       String dbName = value.databaseName;
       map.put(dbName == null ? null : dbName.toLowerCase(Locale.ROOT), value);
     }
@@ -84,5 +88,5 @@ public enum BuiltInCommentsDefinition {
   private static final char DEFAULT_SQL_IDENTIFIER_QUOTE = '"';
 }
 
-// End BuiltInCommentsDefinition.java
+// End BuiltInDBSpecifics.java
 

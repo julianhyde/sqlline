@@ -21,15 +21,15 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
- * Rules for highlighting.
+ * DB specific rule which is used for highlighting,
+ * completion and line continuation.
  *
  * <p>Provides an additional set of keywords,
  * and the quotation character for SQL identifiers.
  */
-public class SyntaxRule {
-  private static final String DEFAULT_SQL_IDENTIFIER_QUOTE = "\"";
-  private static final SyntaxRule DEFAULT_RULE =
-      new SyntaxRule(null, null, null);
+class DBSpecificRule {
+  private static final DBSpecificRule DEFAULT_RULE =
+      new DBSpecificRule(null, null, null);
   private static final Set<String> DEFAULT_KEY_WORD_SET;
   static {
     DEFAULT_KEY_WORD_SET = initDefaultKeywordSet();
@@ -40,44 +40,38 @@ public class SyntaxRule {
   private final char closeQuote;
   private final boolean upper;
 
-  SyntaxRule(
+  DBSpecificRule(
       Set<String> keywords, String identifierQuote, String productName) {
     this(keywords, identifierQuote, productName, true);
   }
 
-  SyntaxRule(Set<String> keywords, String identifierQuote,
-             String productName, boolean storesUpperCaseIdentifier) {
-    this.keywords = keywords == null ? Collections.emptySet() : keywords;
-
-    if (identifierQuote == null
-        || identifierQuote.equals("")
-        || identifierQuote.equals(" ")) {
-      if (productName != null && productName.startsWith("MySQL")) {
-        // Some version of the MySQL JDBC driver lie.
-        openQuote = '`';
-        closeQuote = '`';
-        upper = storesUpperCaseIdentifier;
+  DBSpecificRule(Set<String> keywords, String identifierQuote,
+                 String productName, boolean storesUpperCaseIdentifier) {
+    this.keywords = keywords == null
+        ? Collections.emptySet()
+        : Collections.unmodifiableSet(keywords);
+    BuiltInDBSpecifics builtInDBSpecifics =
+        BuiltInDBSpecifics.valueOf(productName, true);
+    upper = storesUpperCaseIdentifier;
+    if (builtInDBSpecifics != BuiltInDBSpecifics.MYSQL) {
+      if ("[".equals(identifierQuote)) {
+        openQuote = '[';
+        closeQuote = ']';
       } else {
-        openQuote = DEFAULT_SQL_IDENTIFIER_QUOTE.charAt(0);
-        closeQuote = DEFAULT_SQL_IDENTIFIER_QUOTE.charAt(0);
-        upper = storesUpperCaseIdentifier;
+        String quote = identifierQuote == null
+            ? String.valueOf(builtInDBSpecifics.getSqlIdentifierQuote())
+            : identifierQuote;
+        openQuote = quote.charAt(0);
+        closeQuote = quote.charAt(0);
       }
-    } else if (identifierQuote.equals("[")) {
-      openQuote = '[';
-      closeQuote = ']';
-      upper = storesUpperCaseIdentifier;
     } else {
-      openQuote = identifierQuote.charAt(0);
-      closeQuote = identifierQuote.charAt(0);
-      upper = storesUpperCaseIdentifier;
+      openQuote = builtInDBSpecifics.getSqlIdentifierQuote();
+      closeQuote = builtInDBSpecifics.getSqlIdentifierQuote();
     }
-
-    BuiltInCommentsDefinition builtInCommentsDefinition =
-        BuiltInCommentsDefinition.valueOf(productName, false);
-    oneLineComments = builtInCommentsDefinition.getCommentDefinition();
+    oneLineComments = builtInDBSpecifics.getCommentDefinition();
   }
 
-  public static SyntaxRule getDefaultRule() {
+  public static DBSpecificRule getDefaultRule() {
     return DEFAULT_RULE;
   }
 
@@ -127,4 +121,4 @@ public class SyntaxRule {
   }
 }
 
-// End SyntaxRule.java
+// End DBSpecificRule.java

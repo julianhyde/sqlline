@@ -21,13 +21,7 @@ import org.junit.Test;
  * Test cases for SqlLineParser.
  */
 public class SqlLineParserTest {
-
-  // not ended quoted line
-// not ended with ; (existing ; is commented)
-// not closed quotes
-// not closed brackets
-// extra brackets
-  public static final String[] WRONG_LINES = new String[]{
+  private static final String[] WRONG_LINES = new String[]{
       "!sql",
       "   !all",
       " \n select",

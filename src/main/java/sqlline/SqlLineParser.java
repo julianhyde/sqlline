@@ -82,17 +82,19 @@ public class SqlLineParser extends DefaultParser {
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    eofOnUnclosedQuote(true);
-    eofOnEscapedNewLine(true);
   }
 
   public ParsedLine parse(final String line, final int cursor,
       ParseContext context) {
-    if (!sqlLine.getOpts().getUseLineContinuation()) {
+    if (sqlLine.getOpts().getUseLineContinuation()) {
+      eofOnUnclosedQuote(true);
+      eofOnEscapedNewLine(true);
+    } else {
       eofOnUnclosedQuote(false);
       eofOnEscapedNewLine(false);
       return super.parse(line, cursor, context);
     }
+
     final List<String> words = new LinkedList<>();
     final StringBuilder current = new StringBuilder();
 
@@ -328,7 +330,7 @@ public class SqlLineParser extends DefaultParser {
           i = nextNonCommentedChar + "*/".length();
         }
       } else {
-        final SyntaxRule rule = getConnectionSpecificSyntaxRule();
+        final DBSpecificRule rule = getConnectionSpecificSyntaxRule();
         for (String oneLineCommentString: rule.getOneLineComments()) {
           if (i <= buffer.length() - oneLineCommentString.length()
               && oneLineCommentString
@@ -354,7 +356,7 @@ public class SqlLineParser extends DefaultParser {
   }
 
   private boolean isOneLineComment(final String buffer, final int pos) {
-    final SyntaxRule rule = getConnectionSpecificSyntaxRule();
+    final DBSpecificRule rule = getConnectionSpecificSyntaxRule();
     for (String oneLineCommentString : rule.getOneLineComments()) {
       if (pos <= buffer.length() - oneLineCommentString.length()
           && oneLineCommentString
@@ -394,10 +396,10 @@ public class SqlLineParser extends DefaultParser {
     return prompt.toString();
   }
 
-  private SyntaxRule getConnectionSpecificSyntaxRule() {
+  private DBSpecificRule getConnectionSpecificSyntaxRule() {
     return sqlLine.getDatabaseConnection() == null
-        ? SyntaxRule.getDefaultRule()
-        : sqlLine.getDatabaseConnection().getSyntaxRule();
+        ? DBSpecificRule.getDefaultRule()
+        : sqlLine.getDatabaseConnection().getDbSpecificRule();
   }
 }
 
