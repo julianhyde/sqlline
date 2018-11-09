@@ -51,6 +51,11 @@ import org.jline.reader.impl.DefaultParser;
  *       a string that began with a double quote (")</td>
  * </tr>
  * <tr>
+ *   <td>`&gt;</td>
+ *   <td>Waiting for next line, waiting for completion of
+ *       a string that began with (`)</td>
+ * </tr>
+ * <tr>
  *   <td>*\/&gt;</td>
  *   <td>Waiting for next line, waiting for completion of
  *       a multi-line comment that began with "/*"</td>
@@ -78,10 +83,23 @@ import org.jline.reader.impl.DefaultParser;
  * </table>
  */
 public class SqlLineParser extends DefaultParser {
+  private static final char[] DEFAULT_QUOTE_SET = new char[]{'\'', '"', '`'};
   private final SqlLine sqlLine;
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+    DBSpecificRule rule = getConnectionSpecificSyntaxRule();
+    if ('[' == rule.getOpenQuote() || '(' == rule.getOpenQuote()
+        || String.valueOf(DEFAULT_QUOTE_SET)
+            .indexOf(rule.getOpenQuote()) != -1) {
+      quoteChars(DEFAULT_QUOTE_SET);
+    } else {
+      final char[] quoteSet = new char[DEFAULT_QUOTE_SET.length + 1];
+      System.arraycopy(
+          DEFAULT_QUOTE_SET, 0, quoteSet, 0, DEFAULT_QUOTE_SET.length);
+      quoteSet[DEFAULT_QUOTE_SET.length] = rule.getOpenQuote();
+      quoteChars(quoteSet);
+    }
   }
 
   public ParsedLine parse(final String line, final int cursor,
@@ -221,8 +239,7 @@ public class SqlLineParser extends DefaultParser {
     if (context != ParseContext.COMPLETE) {
       if (isEofOnUnclosedQuote() && quoteStart >= 0) {
         throw new EOFError(-1, -1, "Missing closing quote",
-            getPaddedPrompt(line.charAt(quoteStart) == '\''
-                ? "quote" : "dquote"));
+            getPaddedPrompt(getQuoteWaitingPattern(line, quoteStart)));
       }
 
       if (isSql) {
@@ -258,6 +275,15 @@ public class SqlLineParser extends DefaultParser {
         ? line.substring(quoteStart, quoteStart + 1) : null;
     return new ArgumentList(line, words, wordIndex, wordCursor,
         cursor, openingQuote, rawWordCursor, rawWordLength);
+  }
+
+  public String getQuoteWaitingPattern(String line, int quoteStart) {
+    switch (line.charAt(quoteStart)) {
+    case '\'' : return "quote";
+    case '"' : return "dquote";
+    case '`' : return "`";
+    }
+    return String.valueOf(line.charAt(quoteStart));
   }
 
   private void checkBracketBalance(int[] balance, char actual,

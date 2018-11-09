@@ -53,8 +53,10 @@ public class SqlLineParserTest {
       "select /* \n ;",
       "select --\n/*\n--\n--;",
       "select ' ''\n '' '\n /* ;",
+      "select ` ``\n `` `\n /* ;",
       // not closed quotes
       "select ''' from t;",
+      "select ``` from t;",
       "select ''' \n'' \n'' from t;",
       "select \"\\\" \n\\\" \n\\\" from t;",
       // not closed brackets
@@ -107,6 +109,8 @@ public class SqlLineParserTest {
         "select '1/*' as \"asd\";",
         "select '/*' as \"asd*/\";",
         // quoted line
+        "select '1' as `asd`;",
+        "select '1' as `\\`asd\\``;",
         "select '1' as \"asd\";",
         "select '1' as \"a's'd\";",
         "select '1' as \"'a's'd\n\" from t;",

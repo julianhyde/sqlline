@@ -72,20 +72,16 @@ class DatabaseConnection {
     final Set<String> keywords =
         Stream.of(meta.getSQLKeywords().split(","))
             .collect(Collectors.toSet());
-    final boolean upper;
 
     if (startQuote.length() > 1) {
       sqlLine.error(
           "Identifier quote string is '" + startQuote
               + "'; quote strings longer than 1 char are not supported");
-      startQuote = null;
-      upper = true;
+      dbSpecificRule = new DBSpecificRule(keywords, null, productName);
     } else {
-      upper = meta.storesUpperCaseIdentifiers();
+      dbSpecificRule = new DBSpecificRule(
+          keywords, startQuote, productName, meta.storesUpperCaseIdentifiers());
     }
-
-    dbSpecificRule =
-        new DBSpecificRule(keywords, startQuote, productName, upper);
   }
 
   /**
