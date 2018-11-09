@@ -32,7 +32,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
-  private DBSpecificRule dbSpecificRule;
+  private DialectRule dialectRule;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -77,9 +77,9 @@ class DatabaseConnection {
       sqlLine.error(
           "Identifier quote string is '" + startQuote
               + "'; quote strings longer than 1 char are not supported");
-      dbSpecificRule = new DBSpecificRule(keywords, null, productName);
+      dialectRule = new DialectRule(keywords, null, productName);
     } else {
-      dbSpecificRule = new DBSpecificRule(
+      dialectRule = new DialectRule(
           keywords, startQuote, productName, meta.storesUpperCaseIdentifiers());
     }
   }
@@ -242,8 +242,8 @@ class DatabaseConnection {
     return sqlCompleter;
   }
 
-  DBSpecificRule getDbSpecificRule() {
-    return dbSpecificRule;
+  DialectRule getDialectRule() {
+    return dialectRule;
   }
 
   /** Schema. */

@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Pre-defined one-line comments for different databases.
+ * Pre-defined one-line comments, sql identifier quotes for different databases.
  */
-public enum BuiltInDBSpecifics {
+public enum Dialect {
   DEFAULT(null, '"', "--"),
   // http://www.h2database.com/html/grammar.html#comment
   H2("H2", "--", "//"),
@@ -36,12 +36,11 @@ public enum BuiltInDBSpecifics {
   private final char sqlIdentifierQuote;
   private final Set<String> commentDefinition;
 
-  BuiltInDBSpecifics(String dbName, String... comments) {
+  Dialect(String dbName, String... comments) {
     this(dbName, DEFAULT_SQL_IDENTIFIER_QUOTE, comments);
   }
 
-  BuiltInDBSpecifics(
-      String dbName, char sqlIdentifierQuote, String... comments) {
+  Dialect(String dbName, char sqlIdentifierQuote, String... comments) {
     this.databaseName = dbName;
     this.sqlIdentifierQuote = sqlIdentifierQuote;
     commentDefinition = Collections.unmodifiableSet(
@@ -56,29 +55,29 @@ public enum BuiltInDBSpecifics {
     return sqlIdentifierQuote;
   }
 
-  static BuiltInDBSpecifics valueOf(String dbName, boolean ignoreCase) {
+  static Dialect valueOf(String dbName, boolean ignoreCase) {
     if (dbName == null) {
       return DEFAULT;
     }
-    for (BuiltInDBSpecifics builtInDBSpecifics : values()) {
-      if (builtInDBSpecifics == DEFAULT) {
+    for (Dialect dialect : values()) {
+      if (dialect == DEFAULT) {
         continue;
       }
-      if (dbName.length() >= builtInDBSpecifics.databaseName.length()
+      if (dbName.length() >= dialect.databaseName.length()
           && dbName.regionMatches(ignoreCase, 0,
-          builtInDBSpecifics.databaseName, 0,
-          builtInDBSpecifics.databaseName.length())) {
-        return builtInDBSpecifics;
+          dialect.databaseName, 0,
+          dialect.databaseName.length())) {
+        return dialect;
       }
     }
     return DEFAULT;
   }
 
-  static final Map<String, BuiltInDBSpecifics> BY_NAME;
+  static final Map<String, Dialect> BY_NAME;
 
   static {
-    final Map<String, BuiltInDBSpecifics> map = new HashMap<>();
-    for (BuiltInDBSpecifics value : values()) {
+    final Map<String, Dialect> map = new HashMap<>();
+    for (Dialect value : values()) {
       String dbName = value.databaseName;
       map.put(dbName == null ? null : dbName.toLowerCase(Locale.ROOT), value);
     }
@@ -88,5 +87,5 @@ public enum BuiltInDBSpecifics {
   private static final char DEFAULT_SQL_IDENTIFIER_QUOTE = '"';
 }
 
-// End BuiltInDBSpecifics.java
+// End Dialect.java
 

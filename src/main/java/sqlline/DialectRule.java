@@ -27,9 +27,9 @@ import java.util.TreeSet;
  * <p>Provides an additional set of keywords,
  * and the quotation character for SQL identifiers.
  */
-class DBSpecificRule {
-  private static final DBSpecificRule DEFAULT_RULE =
-      new DBSpecificRule(null, null, null);
+class DialectRule {
+  private static final DialectRule DEFAULT_RULE =
+      new DialectRule(null, null, null);
   private static final Set<String> DEFAULT_KEY_WORD_SET;
   static {
     DEFAULT_KEY_WORD_SET = initDefaultKeywordSet();
@@ -40,38 +40,38 @@ class DBSpecificRule {
   private final char closeQuote;
   private final boolean upper;
 
-  DBSpecificRule(
+  DialectRule(
       Set<String> keywords, String identifierQuote, String productName) {
     this(keywords, identifierQuote, productName, true);
   }
 
-  DBSpecificRule(Set<String> keywords, String identifierQuote,
-                 String productName, boolean storesUpperCaseIdentifier) {
+  DialectRule(Set<String> keywords, String identifierQuote,
+      String productName, boolean storesUpperCaseIdentifier) {
     this.keywords = keywords == null
         ? Collections.emptySet()
         : Collections.unmodifiableSet(keywords);
-    BuiltInDBSpecifics builtInDBSpecifics =
-        BuiltInDBSpecifics.valueOf(productName, true);
+    Dialect dialect =
+        Dialect.valueOf(productName, true);
     upper = storesUpperCaseIdentifier;
-    if (builtInDBSpecifics != BuiltInDBSpecifics.MYSQL) {
+    if (dialect != Dialect.MYSQL) {
       if ("[".equals(identifierQuote)) {
         openQuote = '[';
         closeQuote = ']';
       } else {
         String quote = identifierQuote == null
-            ? String.valueOf(builtInDBSpecifics.getSqlIdentifierQuote())
+            ? String.valueOf(dialect.getSqlIdentifierQuote())
             : identifierQuote;
         openQuote = quote.charAt(0);
         closeQuote = quote.charAt(0);
       }
     } else {
-      openQuote = builtInDBSpecifics.getSqlIdentifierQuote();
-      closeQuote = builtInDBSpecifics.getSqlIdentifierQuote();
+      openQuote = dialect.getSqlIdentifierQuote();
+      closeQuote = dialect.getSqlIdentifierQuote();
     }
-    oneLineComments = builtInDBSpecifics.getCommentDefinition();
+    oneLineComments = dialect.getCommentDefinition();
   }
 
-  public static DBSpecificRule getDefaultRule() {
+  public static DialectRule getDefaultRule() {
     return DEFAULT_RULE;
   }
 
@@ -121,4 +121,4 @@ class DBSpecificRule {
   }
 }
 
-// End DBSpecificRule.java
+// End DialectRule.java

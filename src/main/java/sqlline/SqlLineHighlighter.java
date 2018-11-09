@@ -175,12 +175,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /** Returns a highlight rule for the current connection. Never null. */
-  private DBSpecificRule getConnectionSpecificRule() {
+  private DialectRule getDialectRule() {
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
     return databaseConnection == null
-        ? DBSpecificRule.getDefaultRule()
-        : databaseConnection.getDbSpecificRule();
+        ? DialectRule.getDefaultRule()
+        : databaseConnection.getDialectRule();
   }
 
   private void handleSqlSyntax(String buffer,
@@ -200,7 +200,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final DBSpecificRule rule = getConnectionSpecificRule();
+    final DialectRule rule = getDialectRule();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -433,9 +433,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } else {
-      final DBSpecificRule rule = sqlLine.getDatabaseConnection() == null
-          ? DBSpecificRule.getDefaultRule()
-          : sqlLine.getDatabaseConnection().getDbSpecificRule();
+      final DialectRule rule = sqlLine.getDatabaseConnection() == null
+          ? DialectRule.getDefaultRule()
+          : sqlLine.getDatabaseConnection().getDialectRule();
       for (String oneLineComment: rule.getOneLineComments()) {
         if (startingPoint <= line.length() - oneLineComment.length()
             && oneLineComment

@@ -88,7 +88,7 @@ public class SqlLineParser extends DefaultParser {
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    DBSpecificRule rule = getConnectionSpecificSyntaxRule();
+    DialectRule rule = getDialectRule();
     if ('[' == rule.getOpenQuote() || '(' == rule.getOpenQuote()
         || String.valueOf(DEFAULT_QUOTE_SET)
             .indexOf(rule.getOpenQuote()) != -1) {
@@ -356,7 +356,7 @@ public class SqlLineParser extends DefaultParser {
           i = nextNonCommentedChar + "*/".length();
         }
       } else {
-        final DBSpecificRule rule = getConnectionSpecificSyntaxRule();
+        final DialectRule rule = getDialectRule();
         for (String oneLineCommentString: rule.getOneLineComments()) {
           if (i <= buffer.length() - oneLineCommentString.length()
               && oneLineCommentString
@@ -382,7 +382,7 @@ public class SqlLineParser extends DefaultParser {
   }
 
   private boolean isOneLineComment(final String buffer, final int pos) {
-    final DBSpecificRule rule = getConnectionSpecificSyntaxRule();
+    final DialectRule rule = getDialectRule();
     for (String oneLineCommentString : rule.getOneLineComments()) {
       if (pos <= buffer.length() - oneLineCommentString.length()
           && oneLineCommentString
@@ -422,10 +422,10 @@ public class SqlLineParser extends DefaultParser {
     return prompt.toString();
   }
 
-  private DBSpecificRule getConnectionSpecificSyntaxRule() {
+  private DialectRule getDialectRule() {
     return sqlLine.getDatabaseConnection() == null
-        ? DBSpecificRule.getDefaultRule()
-        : sqlLine.getDatabaseConnection().getDbSpecificRule();
+        ? DialectRule.getDefaultRule()
+        : sqlLine.getDatabaseConnection().getDialectRule();
   }
 }
 

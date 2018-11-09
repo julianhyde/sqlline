@@ -69,7 +69,7 @@ class SqlCompleter extends StringsCompleter {
       completions.addAll(sqlLine.getColumnNames(meta));
     }
 
-    completions.addAll(DBSpecificRule.getDefaultRule().getDefaultKeyWordSet());
+    completions.addAll(DialectRule.getDefaultRule().getDefaultKeyWordSet());
     // set the Strings that will be completed
     return completions;
   }

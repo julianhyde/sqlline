@@ -171,10 +171,10 @@ public class SqlLineHighlighterTest {
 
   @Test
   public void testMySqlCommentedStrings() {
-    new MockUp<DBSpecificRule>() {
+    new MockUp<DialectRule>() {
       @Mock
-      DBSpecificRule getDefaultRule() {
-        return new DBSpecificRule(null, null, "MySQL");
+      DialectRule getDefaultRule() {
+        return new DialectRule(null, null, "MySQL");
       }
     };
 
@@ -200,10 +200,10 @@ public class SqlLineHighlighterTest {
 
   @Test
   public void testPhoenixCommentedStrings() {
-    new MockUp<DBSpecificRule>() {
+    new MockUp<DialectRule>() {
       @Mock
-      DBSpecificRule getDefaultRule() {
-        return new DBSpecificRule(null, null, "Phoenix");
+      DialectRule getDefaultRule() {
+        return new DialectRule(null, null, "Phoenix");
       }
     };
 
@@ -428,10 +428,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testBracketsAsSqlIdentifier() {
-    new MockUp<DBSpecificRule>() {
+    new MockUp<DialectRule>() {
       @Mock
-      DBSpecificRule getDefaultRule() {
-        return new DBSpecificRule(null, "[", null);
+      DialectRule getDefaultRule() {
+        return new DialectRule(null, "[", null);
       }
     };
 
@@ -496,10 +496,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<DBSpecificRule>() {
+    new MockUp<DialectRule>() {
       @Mock
-      DBSpecificRule getDefaultRule() {
-        return new DBSpecificRule(null, "`", null);
+      DialectRule getDefaultRule() {
+        return new DialectRule(null, "`", null);
       }
     };
 

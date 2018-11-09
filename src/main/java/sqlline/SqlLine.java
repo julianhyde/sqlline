@@ -1148,9 +1148,9 @@ public class SqlLine {
    */
   public String[][] splitCompound(String line) {
     final DatabaseConnection databaseConnection = getDatabaseConnection();
-    final DBSpecificRule rule = databaseConnection == null
-        ? DBSpecificRule.getDefaultRule()
-        : databaseConnection.getDbSpecificRule();
+    final DialectRule rule = databaseConnection == null
+        ? DialectRule.getDefaultRule()
+        : databaseConnection.getDialectRule();
 
     int state = SPACE;
     int idStart = -1;
