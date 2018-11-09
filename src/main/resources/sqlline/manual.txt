@@ -1147,8 +1147,37 @@ trimScripts     true/false Remove trailing spaces from lines read from script
 useLineContinuation true/false Use line continuation
 verbose         true/false Show verbose error messages and debug info
 
-Comments, bug reports, and patches go to ???
+Key-strokes:
+alt-b           Backward word
+alt-c           Capitalize word
+alt-d           Kill word
+alt-f           Forward word
+alt-h           Next color scheme
+alt-l           Lowercase word
+alt-n           History search forward
+alt-p           History search backward
+alt-t           Transpose words
+alt-u           Uppercase word
 
+ctrl-a          To the beginning of line
+ctrl-b          Backward char
+ctrl-d          Delete char
+ctrl-e          To the end of line
+ctrl-f          Forward char
+ctrl-h          Backward delete char
+ctrl-i          Complete
+ctrl-j          Enter
+ctrl-k          Kill the line
+ctrl-m          Enter
+ctrl-n          Down line or history
+ctrl-p          Up line or history
+ctrl-r          History incremental search backward
+ctrl-s          History incremental search forward
+ctrl-t          Transpose chars
+ctrl-u          Kill the whole line
+ctrl-w          Backward kill the line
+
+Comments, bug reports, and patches go to ???
 sqlline>
 
 
