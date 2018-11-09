@@ -246,7 +246,7 @@ public class SqlLineParser extends DefaultParser {
                 ? lastNonQuoteCommentIndex - 1 : lastNonQuoteCommentIndex;
         if (containsNonCommentData
             && !isLineFinishedWithSemicolon(lastNonQuoteCommentIndex1, line)) {
-          throw new EOFError(-1, -1, "Missing semicolon at the closeQuote",
+          throw new EOFError(-1, -1, "Missing semicolon at the end",
               getPaddedPrompt("semicolon"));
         }
       }

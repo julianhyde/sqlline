@@ -175,7 +175,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
   }
 
   /** Returns a highlight rule for the current connection. Never null. */
-  SyntaxRule getConnectionSpecificRule() {
+  private SyntaxRule getConnectionSpecificRule() {
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
     return databaseConnection == null
@@ -220,6 +220,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (ch == rule.getOpenQuote()) {
         pos = handleSqlIdentifierQuotes(buffer,
             String.valueOf(rule.getOpenQuote()),
+            String.valueOf(rule.getCloseQuote()),
             sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
@@ -329,24 +330,25 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * quoted string and mark sql identifier quoted line inside
    * {@code sqlIdentifierQuotesBitSet}.
    */
-  int handleSqlIdentifierQuotes(String line, String sqlIdentifier,
-      BitSet sqlIdentifierQuotesBitSet, int startingPoint) {
-    if (!sqlIdentifier.regionMatches(0, line, startingPoint,
-        sqlIdentifier.length())) {
+  int handleSqlIdentifierQuotes(String line, String openSqlIdentifier,
+      String closeSqlIdentifier, BitSet sqlIdentifierQuotesBitSet,
+      int startingPoint) {
+    if (!openSqlIdentifier.regionMatches(0, line, startingPoint,
+        openSqlIdentifier.length())) {
       return startingPoint;
     }
     int backslashCounter = 0;
-    for (int i = startingPoint + sqlIdentifier.length();
+    for (int i = startingPoint + openSqlIdentifier.length();
          i < line.length();
          i++) {
       if (line.charAt(i) == '\\') {
         backslashCounter++;
-      } else if (sqlIdentifier.regionMatches(0, line, i,
-          sqlIdentifier.length())) {
+      } else if (closeSqlIdentifier.regionMatches(0, line, i,
+          closeSqlIdentifier.length())) {
         if (backslashCounter % 2 == 0) {
           sqlIdentifierQuotesBitSet
-              .set(startingPoint, i + sqlIdentifier.length());
-          return i + sqlIdentifier.length() - 1;
+              .set(startingPoint, i + closeSqlIdentifier.length());
+          return i + closeSqlIdentifier.length() - 1;
         }
       } else {
         backslashCounter = 0;

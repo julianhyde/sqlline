@@ -370,6 +370,74 @@ public class SqlLineHighlighterTest {
    * identifier quote will be taken from driver
    */
   @Test
+  public void testBracketsAsSqlIdentifier() {
+    new MockUp<SyntaxRule>() {
+      @Mock
+      SyntaxRule getDefaultRule() {
+        return new SyntaxRule(null, "[", null);
+      }
+    };
+
+    String[] linesWithSquareBracketsSqlIdentifiers = {
+        "select 1 as [one] from dual",
+        "select 1 as [one two one] from dual",
+    };
+
+    String[] linesWithDoubleQuoteSqlIdentifiers = {
+        "select 1 as \"one\" from dual",
+        "select 1 as \"one two one\" from dual",
+    };
+
+    ExpectedHighlightStyle[] expectedStyle =
+        new ExpectedHighlightStyle[
+            linesWithSquareBracketsSqlIdentifiers.length];
+    for (int i = 0; i < expectedStyle.length; i++) {
+      String line = linesWithSquareBracketsSqlIdentifiers[i];
+      expectedStyle[i] = new ExpectedHighlightStyle(line.length());
+      expectedStyle[i].keywords.set(0, "select".length());
+      expectedStyle[i].defaults.set(line.indexOf(" 1"));
+      expectedStyle[i].numbers.set(line.indexOf("1 as"));
+      expectedStyle[i].defaults.set(line.indexOf(" as"));
+      expectedStyle[i].keywords.set(line.indexOf("as"), line.indexOf(" [one"));
+      expectedStyle[i].defaults.set(line.indexOf(" [one"));
+      expectedStyle[i].sqlIdentifierQuotes.
+          set(line.indexOf("[one"), line.indexOf(" from"));
+      expectedStyle[i].defaults.set(line.indexOf(" from"));
+      expectedStyle[i].keywords
+          .set(line.indexOf("from"), line.indexOf(" dual"));
+      expectedStyle[i].defaults.set(line.indexOf(" dual"), line.length());
+      checkLineAgainstAllHighlighters(line, expectedStyle[i]);
+    }
+
+    DispatchCallback dc = new DispatchCallback();
+
+    for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
+        : sqlLine2HighLighter.entrySet()) {
+      SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
+
+      for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
+        checkLineAgainstHighlighter(
+            linesWithDoubleQuoteSqlIdentifiers[i],
+            expectedStyle[i],
+            sqlLine,
+            sqlLine2HighLighterEntry.getValue());
+      }
+
+      sqlLine.getDatabaseConnection().close();
+    }
+  }
+
+  /**
+   * The test mocks default sql identifier to back tick
+   * and then checks that after connection done sql
+   * identifier quote will be taken from driver
+   */
+  @Test
   public void testH2SqlIdentifierFromDatabase() {
     new MockUp<SyntaxRule>() {
       @Mock

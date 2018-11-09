@@ -109,12 +109,23 @@ public class SqlLineHighlighterLowLevelTest {
         "`\n  \n`"
     };
 
+    String[] linesRequiredToBeSquareBracketQuoted = {
+        "[]",
+        "[from]",
+        "['']",
+        "[test \\] \n\\]select]",
+        "[/* \\]kjh]",
+        "[/* \\] \\[ \\]  ]",
+        "[--   ]",
+        "[\n  \n]"
+    };
+
     for (String line : linesRequiredToBeDoubleQuoted) {
       ExpectedHighlightStyle expectedStyle =
           new ExpectedHighlightStyle(line.length());
       expectedStyle.sqlIdentifierQuotes.set(0, line.length());
       BitSet actual = new BitSet(line.length());
-      defaultHighlighter.handleSqlIdentifierQuotes(line, "\"", actual, 0);
+      defaultHighlighter.handleSqlIdentifierQuotes(line, "\"", "\"", actual, 0);
       assertEquals(
           "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
     }
@@ -124,7 +135,17 @@ public class SqlLineHighlighterLowLevelTest {
           new ExpectedHighlightStyle(line.length());
       expectedStyle.sqlIdentifierQuotes.set(0, line.length());
       BitSet actual = new BitSet(line.length());
-      defaultHighlighter.handleSqlIdentifierQuotes(line, "`", actual, 0);
+      defaultHighlighter.handleSqlIdentifierQuotes(line, "`", "`", actual, 0);
+      assertEquals(
+          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+    }
+
+    for (String line : linesRequiredToBeSquareBracketQuoted) {
+      ExpectedHighlightStyle expectedStyle =
+          new ExpectedHighlightStyle(line.length());
+      expectedStyle.sqlIdentifierQuotes.set(0, line.length());
+      BitSet actual = new BitSet(line.length());
+      defaultHighlighter.handleSqlIdentifierQuotes(line, "[", "]", actual, 0);
       assertEquals(
           "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
     }
