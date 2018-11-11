@@ -11,81 +11,27 @@
 */
 package sqlline;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
- * Pre-defined one-line comments, sql identifier quotes for different databases.
+ * Database-specific rule which is used for highlighting,
+ * completion and line continuation.
+ *
+ * <p>Provides an additional set of keywords,
+ * and the quotation character for SQL identifiers.
  */
-public enum Dialect {
-  DEFAULT(null, '"', "--"),
-  // http://www.h2database.com/html/grammar.html#comment
-  H2("H2", "--", "//"),
-  // https://dev.mysql.com/doc/refman/8.0/en/comments.html
-  // https://mariadb.com/kb/en/library/comment-syntax/
-  MYSQL("MySQL", '`', "-- ", "--\t", "--\n", "#"),
-  // https://phoenix.apache.org/language/index.html#comments
-  PHOENIX("Phoenix", "--", "//");
+interface Dialect {
+  Set<String> DEFAULT_KEYWORD_SET = BuiltInDialect.initDefaultKeywordSet();
 
-  private final String databaseName;
-  private final char sqlIdentifierQuote;
-  private final Set<String> commentDefinition;
+  boolean containsKeyword(String keyword);
 
-  Dialect(String dbName, String... comments) {
-    this(dbName, DEFAULT_SQL_IDENTIFIER_QUOTE, comments);
-  }
+  Set<String> getOneLineComments();
 
-  Dialect(String dbName, char sqlIdentifierQuote, String... comments) {
-    this.databaseName = dbName;
-    this.sqlIdentifierQuote = sqlIdentifierQuote;
-    commentDefinition = Collections.unmodifiableSet(
-        Stream.of(comments).collect(Collectors.toSet()));
-  }
+  char getOpenQuote();
 
-  public Set<String> getCommentDefinition() {
-    return commentDefinition;
-  }
+  char getCloseQuote();
 
-  public char getSqlIdentifierQuote() {
-    return sqlIdentifierQuote;
-  }
-
-  static Dialect valueOf(String dbName, boolean ignoreCase) {
-    if (dbName == null) {
-      return DEFAULT;
-    }
-    for (Dialect dialect : values()) {
-      if (dialect == DEFAULT) {
-        continue;
-      }
-      if (dbName.length() >= dialect.databaseName.length()
-          && dbName.regionMatches(ignoreCase, 0,
-          dialect.databaseName, 0,
-          dialect.databaseName.length())) {
-        return dialect;
-      }
-    }
-    return DEFAULT;
-  }
-
-  static final Map<String, Dialect> BY_NAME;
-
-  static {
-    final Map<String, Dialect> map = new HashMap<>();
-    for (Dialect value : values()) {
-      String dbName = value.databaseName;
-      map.put(dbName == null ? null : dbName.toLowerCase(Locale.ROOT), value);
-    }
-    BY_NAME = Collections.unmodifiableMap(map);
-  }
-
-  private static final char DEFAULT_SQL_IDENTIFIER_QUOTE = '"';
+  boolean isUpper();
 }
 
 // End Dialect.java
-

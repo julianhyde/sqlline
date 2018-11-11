@@ -174,15 +174,6 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return sb.toAttributedString();
   }
 
-  /** Returns a highlight rule for the current connection. Never null. */
-  private DialectRule getDialectRule() {
-    final DatabaseConnection databaseConnection =
-        sqlLine.getDatabaseConnection();
-    return databaseConnection == null
-        ? DialectRule.getDefaultRule()
-        : databaseConnection.getDialectRule();
-  }
-
   private void handleSqlSyntax(String buffer,
       BitSet keywordBitSet,
       BitSet quoteBitSet,
@@ -200,7 +191,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       start = nextSpace == -1 ? buffer.length() : start + nextSpace;
     }
 
-    final DialectRule rule = getDialectRule();
+    final Dialect dialect = sqlLine.getDialect();
     for (int pos = start; pos < buffer.length(); pos++) {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
@@ -210,7 +201,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
               ? buffer.substring(wordStart, pos)
               : buffer.substring(wordStart);
           String upperWord = word.toUpperCase(Locale.ROOT);
-          if (rule.containsKeyword(upperWord)) {
+          if (dialect.containsKeyword(upperWord)) {
             keywordBitSet.set(wordStart, wordStart + word.length());
           }
           wordStart = -1;
@@ -218,10 +209,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           continue;
         }
       }
-      if (ch == rule.getOpenQuote()) {
+      if (ch == dialect.getOpenQuote()) {
         pos = handleSqlIdentifierQuotes(buffer,
-            String.valueOf(rule.getOpenQuote()),
-            String.valueOf(rule.getCloseQuote()),
+            String.valueOf(dialect.getOpenQuote()),
+            String.valueOf(dialect.getCloseQuote()),
             sqlIdentifierQuotesBitSet, pos);
       }
       if (ch == '\'') {
@@ -314,8 +305,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    *
    * @param line                        line where to handle
    *                                    sql identifier quoted string
-   * @param sqlIdentifier               Quote to use to
-   *                                    quote sql identifiers
+   * @param openSqlIdentifier           Start quote for SQL identifiers
+   * @param closeSqlIdentifier          End quote for SQL identifiers
    * @param sqlIdentifierQuotesBitSet   BitSet to use for positions
    *                                    of sql identifiers quoted lines
    * @param startingPoint               start point
@@ -433,10 +424,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } else {
-      final DialectRule rule = sqlLine.getDatabaseConnection() == null
-          ? DialectRule.getDefaultRule()
-          : sqlLine.getDatabaseConnection().getDialectRule();
-      for (String oneLineComment: rule.getOneLineComments()) {
+      final Dialect dialect = sqlLine.getDialect();
+      for (String oneLineComment : dialect.getOneLineComments()) {
         if (startingPoint <= line.length() - oneLineComment.length()
             && oneLineComment
             .regionMatches(0, line, startingPoint, oneLineComment.length())) {

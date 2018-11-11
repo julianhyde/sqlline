@@ -83,23 +83,20 @@ import org.jline.reader.impl.DefaultParser;
  * </table>
  */
 public class SqlLineParser extends DefaultParser {
-  private static final char[] DEFAULT_QUOTE_SET = new char[]{'\'', '"', '`'};
+  private static final String DEFAULT_QUOTES = "'\"`";
+
   private final SqlLine sqlLine;
 
   public SqlLineParser(final SqlLine sqlLine) {
     this.sqlLine = sqlLine;
-    DialectRule rule = getDialectRule();
-    if ('[' == rule.getOpenQuote() || '(' == rule.getOpenQuote()
-        || String.valueOf(DEFAULT_QUOTE_SET)
-            .indexOf(rule.getOpenQuote()) != -1) {
-      quoteChars(DEFAULT_QUOTE_SET);
-    } else {
-      final char[] quoteSet = new char[DEFAULT_QUOTE_SET.length + 1];
-      System.arraycopy(
-          DEFAULT_QUOTE_SET, 0, quoteSet, 0, DEFAULT_QUOTE_SET.length);
-      quoteSet[DEFAULT_QUOTE_SET.length] = rule.getOpenQuote();
-      quoteChars(quoteSet);
+    String quotes = DEFAULT_QUOTES;
+    final char openQuote = sqlLine.getDialect().getOpenQuote();
+    if ('[' != openQuote
+        && '(' != openQuote
+        && DEFAULT_QUOTES.indexOf(openQuote) == -1) {
+      quotes += openQuote;
     }
+    quoteChars(quotes.toCharArray());
   }
 
   public ParsedLine parse(final String line, final int cursor,
@@ -279,11 +276,15 @@ public class SqlLineParser extends DefaultParser {
 
   public String getQuoteWaitingPattern(String line, int quoteStart) {
     switch (line.charAt(quoteStart)) {
-    case '\'' : return "quote";
-    case '"' : return "dquote";
-    case '`' : return "`";
+    case '\'':
+      return "quote";
+    case '"':
+      return "dquote";
+    case '`':
+      return "`";
+    default:
+      return String.valueOf(line.charAt(quoteStart));
     }
-    return String.valueOf(line.charAt(quoteStart));
   }
 
   private void checkBracketBalance(int[] balance, char actual,
@@ -356,11 +357,11 @@ public class SqlLineParser extends DefaultParser {
           i = nextNonCommentedChar + "*/".length();
         }
       } else {
-        final DialectRule rule = getDialectRule();
-        for (String oneLineCommentString: rule.getOneLineComments()) {
+        final Dialect dialect = sqlLine.getDialect();
+        for (String oneLineCommentString : dialect.getOneLineComments()) {
           if (i <= buffer.length() - oneLineCommentString.length()
               && oneLineCommentString
-              .regionMatches(0, line, i, oneLineCommentString.length())) {
+                  .regionMatches(0, line, i, oneLineCommentString.length())) {
             int nextLine = line.indexOf('\n', i + 1);
             if (nextLine > lastNonQuoteCommentIndex) {
               i = nextLine;
@@ -382,8 +383,8 @@ public class SqlLineParser extends DefaultParser {
   }
 
   private boolean isOneLineComment(final String buffer, final int pos) {
-    final DialectRule rule = getDialectRule();
-    for (String oneLineCommentString : rule.getOneLineComments()) {
+    final Dialect dialect = sqlLine.getDialect();
+    for (String oneLineCommentString : dialect.getOneLineComments()) {
       if (pos <= buffer.length() - oneLineCommentString.length()
           && oneLineCommentString
               .regionMatches(0, buffer, pos, oneLineCommentString.length())) {
@@ -420,12 +421,6 @@ public class SqlLineParser extends DefaultParser {
     }
     prompt.append(waitingPattern);
     return prompt.toString();
-  }
-
-  private DialectRule getDialectRule() {
-    return sqlLine.getDatabaseConnection() == null
-        ? DialectRule.getDefaultRule()
-        : sqlLine.getDatabaseConnection().getDialectRule();
   }
 }
 

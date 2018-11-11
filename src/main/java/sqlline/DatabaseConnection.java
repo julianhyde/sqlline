@@ -32,7 +32,7 @@ class DatabaseConnection {
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
-  private DialectRule dialectRule;
+  private Dialect dialect;
 
   DatabaseConnection(SqlLine sqlLine, String driver, String url,
       String username, String password, Properties properties) {
@@ -67,21 +67,18 @@ class DatabaseConnection {
     // Deduce the string used to quote identifiers. For example, Oracle
     // uses double-quotes:
     //   SELECT * FROM "My Schema"."My Table"
-    String startQuote = meta.getIdentifierQuoteString();
+    String identifierQuoteString = meta.getIdentifierQuoteString();
+    if (identifierQuoteString.length() > 1) {
+      sqlLine.error("Identifier quote string is '" + identifierQuoteString
+          + "'; quote strings longer than 1 char are not supported");
+      identifierQuoteString = null;
+    }
     final String productName = meta.getDatabaseProductName();
     final Set<String> keywords =
         Stream.of(meta.getSQLKeywords().split(","))
             .collect(Collectors.toSet());
-
-    if (startQuote.length() > 1) {
-      sqlLine.error(
-          "Identifier quote string is '" + startQuote
-              + "'; quote strings longer than 1 char are not supported");
-      dialectRule = new DialectRule(keywords, null, productName);
-    } else {
-      dialectRule = new DialectRule(
-          keywords, startQuote, productName, meta.storesUpperCaseIdentifiers());
-    }
+    dialect = DialectImpl.create(keywords, identifierQuoteString,
+        productName, meta.storesUpperCaseIdentifiers());
   }
 
   /**
@@ -242,8 +239,8 @@ class DatabaseConnection {
     return sqlCompleter;
   }
 
-  DialectRule getDialectRule() {
-    return dialectRule;
+  Dialect getDialect() {
+    return dialect;
   }
 
   /** Schema. */

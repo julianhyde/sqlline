@@ -171,10 +171,15 @@ public class SqlLineHighlighterTest {
 
   @Test
   public void testMySqlCommentedStrings() {
-    new MockUp<DialectRule>() {
+    checkMySqlCommentedStrings(DialectImpl.create(null, null, "MySQL"));
+    checkMySqlCommentedStrings(BuiltInDialect.MYSQL);
+  }
+
+  private void checkMySqlCommentedStrings(final Dialect dialect) {
+    new MockUp<DialectImpl>() {
       @Mock
-      DialectRule getDefaultRule() {
-        return new DialectRule(null, null, "MySQL");
+      Dialect getDefault() {
+        return dialect;
       }
     };
 
@@ -200,10 +205,15 @@ public class SqlLineHighlighterTest {
 
   @Test
   public void testPhoenixCommentedStrings() {
-    new MockUp<DialectRule>() {
+    checkPhoenixCommentedStrings(DialectImpl.create(null, null, "Phoenix"));
+    checkPhoenixCommentedStrings(BuiltInDialect.PHOENIX);
+  }
+
+  private void checkPhoenixCommentedStrings(final Dialect dialect) {
+    new MockUp<DialectImpl>() {
       @Mock
-      DialectRule getDefaultRule() {
-        return new DialectRule(null, null, "Phoenix");
+      Dialect getDefault() {
+        return dialect;
       }
     };
 
@@ -428,10 +438,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testBracketsAsSqlIdentifier() {
-    new MockUp<DialectRule>() {
+    new MockUp<DialectImpl>() {
       @Mock
-      DialectRule getDefaultRule() {
-        return new DialectRule(null, "[", null);
+      Dialect getDefault() {
+        return DialectImpl.create(null, "[", null);
       }
     };
 
@@ -496,10 +506,10 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlIdentifierFromDatabase() {
-    new MockUp<DialectRule>() {
+    new MockUp<DialectImpl>() {
       @Mock
-      DialectRule getDefaultRule() {
-        return new DialectRule(null, "`", null);
+      Dialect getDefault() {
+        return DialectImpl.create(null, "`", null);
       }
     };
 
