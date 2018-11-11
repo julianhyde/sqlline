@@ -101,177 +101,188 @@ public class SqlLineParser extends DefaultParser {
 
   public ParsedLine parse(final String line, final int cursor,
       ParseContext context) {
-    if (sqlLine.getOpts().getUseLineContinuation()) {
-      eofOnUnclosedQuote(true);
-      eofOnEscapedNewLine(true);
-    } else {
-      eofOnUnclosedQuote(false);
-      eofOnEscapedNewLine(false);
+    try {
+      if (sqlLine.getOpts().getUseLineContinuation()) {
+        eofOnUnclosedQuote(true);
+        eofOnEscapedNewLine(true);
+      } else {
+        eofOnUnclosedQuote(false);
+        eofOnEscapedNewLine(false);
+        return super.parse(line, cursor, context);
+      }
+
+      final List<String> words = new LinkedList<>();
+      final StringBuilder current = new StringBuilder();
+
+      boolean containsNonCommentData = false;
+      int wordCursor = -1;
+      int wordIndex = -1;
+      int quoteStart = -1;
+      int oneLineCommentStart = -1;
+      int multiLineCommentStart = -1;
+      // if both elements of array are 0 then it is ok
+      // otherwise it should fail
+      final int[] roundBracketsBalance = new int[2];
+      final int[] squareBracketsBalance = new int[2];
+      int rawWordCursor = -1;
+      int rawWordLength = -1;
+      int rawWordStart = 0;
+      int lastNonQuoteCommentIndex = 0;
+      boolean isSql = isSql(line, context);
+
+      for (int i = 0; i < line.length(); i++) {
+        // once we reach the cursor, set the
+        // position of the selected index
+        if (i == cursor) {
+          wordIndex = words.size();
+          // the position in the current argument is just the
+          // length of the current argument
+          wordCursor = current.length();
+          rawWordCursor = i - rawWordStart;
+        }
+        if (oneLineCommentStart == -1
+            && multiLineCommentStart == -1
+            && quoteStart < 0 && isQuoteChar(line, i)) {
+          // Start a quote block
+          quoteStart = i;
+          containsNonCommentData = true;
+        } else {
+          char currentChar = line.charAt(i);
+          if (quoteStart >= 0) {
+            // In a quote block
+            if (line.charAt(quoteStart) == currentChar && !isEscaped(line, i)) {
+              // End the block; arg could be empty, but that's fine
+              words.add(current.toString());
+              current.setLength(0);
+              quoteStart = -1;
+              if (rawWordCursor >= 0 && rawWordLength < 0) {
+                rawWordLength = i - rawWordStart + 1;
+              }
+            } else {
+              if (!isEscapeChar(line, i)) {
+                // Take the next character
+                current.append(currentChar);
+              }
+            }
+          } else if (oneLineCommentStart == -1 && isMultiLineComment(line, i)) {
+            multiLineCommentStart = i;
+            rawWordLength = getRawWordLength(words, current, rawWordCursor,
+                rawWordLength, rawWordStart, i);
+            rawWordStart = i + 1;
+          } else if (multiLineCommentStart >= 0) {
+            if (currentChar == '/' && line.charAt(i - 1) == '*') {
+              // End the block; arg could be empty, but that's fine
+              words.add(current.toString());
+              current.setLength(0);
+              multiLineCommentStart = -1;
+              if (rawWordCursor >= 0 && rawWordLength < 0) {
+                rawWordLength = i - rawWordStart + 1;
+              }
+            }
+          } else if (oneLineCommentStart == -1 && isOneLineComment(line, i)) {
+            oneLineCommentStart = i;
+            rawWordLength = getRawWordLength(words, current, rawWordCursor,
+                rawWordLength, rawWordStart, i);
+            rawWordStart = i + 1;
+          } else if (oneLineCommentStart >= 0) {
+            if (currentChar == '\n') {
+              // End the block; arg could be empty, but that's fine
+              oneLineCommentStart = -1;
+              rawWordLength = getRawWordLength(words, current, rawWordCursor,
+                  rawWordLength, rawWordStart, i);
+              rawWordStart = i + 1;
+            } else {
+              current.append(currentChar);
+            }
+          } else {
+            // Not in a quote or comment block
+            checkBracketBalance(roundBracketsBalance, currentChar, '(', ')');
+            checkBracketBalance(squareBracketsBalance, currentChar, '[', ']');
+            containsNonCommentData = true;
+            if (!Character.isWhitespace(currentChar)) {
+              lastNonQuoteCommentIndex = i;
+            }
+            if (isDelimiter(line, i)) {
+              rawWordLength = getRawWordLength(words, current, rawWordCursor,
+                  rawWordLength, rawWordStart, i);
+              rawWordStart = i + 1;
+            } else {
+              if (!isEscapeChar(line, i)) {
+                current.append(currentChar);
+              }
+            }
+          }
+        }
+      }
+
+      if (current.length() > 0 || cursor == line.length()) {
+        words.add(current.toString());
+        if (rawWordCursor >= 0 && rawWordLength < 0) {
+          rawWordLength = line.length() - rawWordStart;
+        }
+      }
+
+      if (cursor == line.length()) {
+        wordIndex = words.size() - 1;
+        wordCursor = words.get(words.size() - 1).length();
+        rawWordCursor = cursor - rawWordStart;
+        rawWordLength = rawWordCursor;
+      }
+
+      if (isEofOnEscapedNewLine() && isEscapeChar(line, line.length() - 1)) {
+        throw new EOFError(-1, -1, "Escaped new line",
+            getPaddedPrompt("newline"));
+      }
+
+      if (context != ParseContext.COMPLETE) {
+        if (isEofOnUnclosedQuote() && quoteStart >= 0) {
+          throw new EOFError(-1, -1, "Missing closing quote",
+              getPaddedPrompt(getQuoteWaitingPattern(line, quoteStart)));
+        }
+
+        if (isSql) {
+          if (multiLineCommentStart != -1) {
+            throw new EOFError(-1, -1, "Missing end of comment",
+                getPaddedPrompt("*/"));
+          }
+
+          if (roundBracketsBalance[0] != 0 || roundBracketsBalance[1] != 0) {
+            throw new EOFError(-1, -1, "Round brackets balance fails",
+                getPaddedPrompt(
+                    roundBracketsBalance[0] == 0 ? "extra ')'" : ")"));
+          }
+
+          if (squareBracketsBalance[0] != 0 || squareBracketsBalance[1] != 0) {
+            throw new EOFError(-1, -1, "Square brackets balance fails",
+                getPaddedPrompt(
+                    squareBracketsBalance[0] == 0 ? "extra ']'" : "]"));
+          }
+
+          final int lastNonQuoteCommentIndex1 =
+              lastNonQuoteCommentIndex == line.length() - 1
+                  && lastNonQuoteCommentIndex - 1 >= 0
+                      ? lastNonQuoteCommentIndex - 1 : lastNonQuoteCommentIndex;
+          if (containsNonCommentData
+              && !isLineFinishedWithSemicolon(
+                  lastNonQuoteCommentIndex1, line)) {
+            throw new EOFError(-1, -1, "Missing semicolon at the end",
+                getPaddedPrompt("semicolon"));
+          }
+        }
+      }
+
+      String openingQuote = quoteStart >= 0
+          ? line.substring(quoteStart, quoteStart + 1) : null;
+      return new ArgumentList(line, words, wordIndex, wordCursor,
+          cursor, openingQuote, rawWordCursor, rawWordLength);
+    } catch (Exception e) {
+      if (e instanceof EOFError) {
+        // line continuation is expected
+        throw e;
+      }
+      sqlLine.handleException(e);
       return super.parse(line, cursor, context);
     }
-
-    final List<String> words = new LinkedList<>();
-    final StringBuilder current = new StringBuilder();
-
-    boolean containsNonCommentData = false;
-    int wordCursor = -1;
-    int wordIndex = -1;
-    int quoteStart = -1;
-    int oneLineCommentStart = -1;
-    int multiLineCommentStart = -1;
-    // if both elements of array are 0 then it is ok
-    // otherwise it should fail
-    final int[] roundBracketsBalance = new int[2];
-    final int[] squareBracketsBalance = new int[2];
-    int rawWordCursor = -1;
-    int rawWordLength = -1;
-    int rawWordStart = 0;
-    int lastNonQuoteCommentIndex = 0;
-    boolean isSql = isSql(line, context);
-
-    for (int i = 0; i < line.length(); i++) {
-      // once we reach the cursor, set the
-      // position of the selected index
-      if (i == cursor) {
-        wordIndex = words.size();
-        // the position in the current argument is just the
-        // length of the current argument
-        wordCursor = current.length();
-        rawWordCursor = i - rawWordStart;
-      }
-      if (oneLineCommentStart == -1
-          && multiLineCommentStart == -1
-          && quoteStart < 0 && isQuoteChar(line, i)) {
-        // Start a quote block
-        quoteStart = i;
-        containsNonCommentData = true;
-      } else {
-        char currentChar = line.charAt(i);
-        if (quoteStart >= 0) {
-          // In a quote block
-          if (line.charAt(quoteStart) == currentChar && !isEscaped(line, i)) {
-            // End the block; arg could be empty, but that's fine
-            words.add(current.toString());
-            current.setLength(0);
-            quoteStart = -1;
-            if (rawWordCursor >= 0 && rawWordLength < 0) {
-              rawWordLength = i - rawWordStart + 1;
-            }
-          } else {
-            if (!isEscapeChar(line, i)) {
-              // Take the next character
-              current.append(currentChar);
-            }
-          }
-        } else if (oneLineCommentStart == -1 && isMultiLineComment(line, i)) {
-          multiLineCommentStart = i;
-          rawWordLength = getRawWordLength(words, current, rawWordCursor,
-              rawWordLength, rawWordStart, i);
-          rawWordStart = i + 1;
-        } else if (multiLineCommentStart >= 0) {
-          if (currentChar == '/' && line.charAt(i - 1) == '*') {
-            // End the block; arg could be empty, but that's fine
-            words.add(current.toString());
-            current.setLength(0);
-            multiLineCommentStart = -1;
-            if (rawWordCursor >= 0 && rawWordLength < 0) {
-              rawWordLength = i - rawWordStart + 1;
-            }
-          }
-        } else if (oneLineCommentStart == -1 && isOneLineComment(line, i)) {
-          oneLineCommentStart = i;
-          rawWordLength = getRawWordLength(words, current, rawWordCursor,
-              rawWordLength, rawWordStart, i);
-          rawWordStart = i + 1;
-        } else if (oneLineCommentStart >= 0) {
-          if (currentChar == '\n') {
-            // End the block; arg could be empty, but that's fine
-            oneLineCommentStart = -1;
-            rawWordLength = getRawWordLength(words, current, rawWordCursor,
-                rawWordLength, rawWordStart, i);
-            rawWordStart = i + 1;
-          } else {
-            current.append(currentChar);
-          }
-        } else {
-          // Not in a quote or comment block
-          checkBracketBalance(roundBracketsBalance, currentChar, '(', ')');
-          checkBracketBalance(squareBracketsBalance, currentChar, '[', ']');
-          containsNonCommentData = true;
-          if (!Character.isWhitespace(currentChar)) {
-            lastNonQuoteCommentIndex = i;
-          }
-          if (isDelimiter(line, i)) {
-            rawWordLength = getRawWordLength(words, current, rawWordCursor,
-                rawWordLength, rawWordStart, i);
-            rawWordStart = i + 1;
-          } else {
-            if (!isEscapeChar(line, i)) {
-              current.append(currentChar);
-            }
-          }
-        }
-      }
-    }
-
-    if (current.length() > 0 || cursor == line.length()) {
-      words.add(current.toString());
-      if (rawWordCursor >= 0 && rawWordLength < 0) {
-        rawWordLength = line.length() - rawWordStart;
-      }
-    }
-
-    if (cursor == line.length()) {
-      wordIndex = words.size() - 1;
-      wordCursor = words.get(words.size() - 1).length();
-      rawWordCursor = cursor - rawWordStart;
-      rawWordLength = rawWordCursor;
-    }
-
-    if (isEofOnEscapedNewLine() && isEscapeChar(line, line.length() - 1)) {
-      throw new EOFError(-1, -1, "Escaped new line",
-          getPaddedPrompt("newline"));
-    }
-
-    if (context != ParseContext.COMPLETE) {
-      if (isEofOnUnclosedQuote() && quoteStart >= 0) {
-        throw new EOFError(-1, -1, "Missing closing quote",
-            getPaddedPrompt(getQuoteWaitingPattern(line, quoteStart)));
-      }
-
-      if (isSql) {
-        if (multiLineCommentStart != -1) {
-          throw new EOFError(-1, -1, "Missing end of comment",
-              getPaddedPrompt("*/"));
-        }
-
-        if (roundBracketsBalance[0] != 0 || roundBracketsBalance[1] != 0) {
-          throw new EOFError(-1, -1, "Round brackets balance fails",
-              getPaddedPrompt(
-                  roundBracketsBalance[0] == 0 ? "extra ')'" : ")"));
-        }
-
-        if (squareBracketsBalance[0] != 0 || squareBracketsBalance[1] != 0) {
-          throw new EOFError(-1, -1, "Square brackets balance fails",
-              getPaddedPrompt(
-                  squareBracketsBalance[0] == 0 ? "extra ']'" : "]"));
-        }
-
-        final int lastNonQuoteCommentIndex1 =
-            lastNonQuoteCommentIndex == line.length() - 1
-                ? lastNonQuoteCommentIndex - 1 : lastNonQuoteCommentIndex;
-        if (containsNonCommentData
-            && !isLineFinishedWithSemicolon(lastNonQuoteCommentIndex1, line)) {
-          throw new EOFError(-1, -1, "Missing semicolon at the end",
-              getPaddedPrompt("semicolon"));
-        }
-      }
-    }
-
-    String openingQuote = quoteStart >= 0
-        ? line.substring(quoteStart, quoteStart + 1) : null;
-    return new ArgumentList(line, words, wordIndex, wordCursor,
-        cursor, openingQuote, rawWordCursor, rawWordLength);
   }
 
   public String getQuoteWaitingPattern(String line, int quoteStart) {

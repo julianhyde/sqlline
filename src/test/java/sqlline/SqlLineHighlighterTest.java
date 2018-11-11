@@ -40,7 +40,7 @@ import static sqlline.SqlLineHighlighterLowLevelTest.getSqlLine;
 public class SqlLineHighlighterTest {
 
   private Map<SqlLine, SqlLineHighlighter> sqlLine2HighLighter = null;
-
+  private SqlLine sqlLineWithDefaultSolorScheme;
   /**
    * To add your color scheme to tests just put sqlline object
    * with corresponding highlighter into the map like below.
@@ -49,11 +49,12 @@ public class SqlLineHighlighterTest {
   @Before
   public void setUp() throws Exception {
     sqlLine2HighLighter = new HashMap<>();
-    SqlLine defaultSqlline = getSqlLine(SqlLineProperty.DEFAULT);
+    sqlLineWithDefaultSolorScheme = getSqlLine(SqlLineProperty.DEFAULT);
     SqlLine darkSqlLine = getSqlLine("dark");
     SqlLine lightSqlLine = getSqlLine("light");
     sqlLine2HighLighter
-        .put(defaultSqlline, new SqlLineHighlighter(defaultSqlline));
+        .put(sqlLineWithDefaultSolorScheme,
+            new SqlLineHighlighter(sqlLineWithDefaultSolorScheme));
     sqlLine2HighLighter.put(darkSqlLine, new SqlLineHighlighter(darkSqlLine));
     sqlLine2HighLighter.put(lightSqlLine, new SqlLineHighlighter(lightSqlLine));
   }
@@ -378,6 +379,23 @@ public class SqlLineHighlighterTest {
     expectedStyle.defaults.set(line.indexOf("=1"));
     expectedStyle.numbers.set(line.indexOf("=1") + 1);
     checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    //not valid sql with wrong symbols at the and
+    line = "select 1 as \"one\" from dual //";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.keywords.set(0, "select".length());
+    expectedStyle.defaults.set("select".length());
+    expectedStyle.numbers.set(line.indexOf("1"));
+    expectedStyle.defaults.set("select 1".length());
+    expectedStyle.keywords.set(line.indexOf("as"), line.indexOf(" \"one"));
+    expectedStyle.defaults.set(line.indexOf(" \"one"));
+    expectedStyle.sqlIdentifierQuotes
+        .set(line.indexOf("\"one\""), line.indexOf(" from"));
+    expectedStyle.defaults.set(line.indexOf(" from"));
+    expectedStyle.keywords.set(line.indexOf("from"), line.indexOf(" dual"));
+    expectedStyle.defaults.set(line.indexOf(" dual"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
   }
 
   /**
@@ -432,7 +450,7 @@ public class SqlLineHighlighterTest {
   }
 
   /**
-   * The test mocks default sql identifier to back tick
+   * The test mocks default sql identifier to square bracket
    * and then checks that after connection done sql
    * identifier quote will be taken from driver
    */
@@ -562,6 +580,62 @@ public class SqlLineHighlighterTest {
             expectedStyle[i],
             sqlLine,
             sqlLine2HighLighterEntry.getValue());
+      }
+
+      sqlLine.getDatabaseConnection().close();
+    }
+  }
+
+  /**
+   * Check if there is an exception while highlight processing
+   * then only the default style is applied
+   */
+  @Test
+  public void testHighlightWithException() {
+    new MockUp<SqlLineHighlighter>() {
+      @Mock
+      private void handleSqlSyntax(String buffer, BitSet keywordBitSet,
+          BitSet quoteBitSet, BitSet sqlIdentifierQuotesBitSet,
+          BitSet commentBitSet, BitSet numberBitSet, boolean isCommandPresent) {
+        throw new RuntimeException("Highlight exception");
+      }
+    };
+
+    String[] linesWithDoubleQuoteSqlIdentifiers = {
+        "select 1 as \"one\" from dual",
+        "select 1 as \"on\\\"e\" from dual",
+        "select 1 as \"on\\\"\ne\" from dual",
+    };
+
+    ExpectedHighlightStyle[] expectedStyle =
+        new ExpectedHighlightStyle[linesWithDoubleQuoteSqlIdentifiers.length];
+    for (int i = 0; i < expectedStyle.length; i++) {
+      String line = linesWithDoubleQuoteSqlIdentifiers[i];
+      expectedStyle[i] = new ExpectedHighlightStyle(line.length());
+      expectedStyle[i].defaults.set(0, line.length());
+      checkLineAgainstHighlighter(line,
+          expectedStyle[i],
+          sqlLineWithDefaultSolorScheme,
+          sqlLine2HighLighter.get(sqlLineWithDefaultSolorScheme));
+    }
+
+    DispatchCallback dc = new DispatchCallback();
+
+    for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
+        : sqlLine2HighLighter.entrySet()) {
+      SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
+
+      for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
+        checkLineAgainstHighlighter(
+            linesWithDoubleQuoteSqlIdentifiers[i],
+            expectedStyle[i],
+            sqlLineWithDefaultSolorScheme,
+            sqlLine2HighLighter.get(sqlLineWithDefaultSolorScheme));
       }
 
       sqlLine.getDatabaseConnection().close();
