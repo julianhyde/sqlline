@@ -17,15 +17,19 @@ import org.jline.reader.impl.DefaultParser;
 import org.junit.Assert;
 import org.junit.Test;
 
+import mockit.Mock;
+import mockit.MockUp;
+
 /**
  * Test cases for SqlLineParser.
  */
 public class SqlLineParserTest {
-  private static final String[] WRONG_LINES = new String[]{
+  private static final String[] WRONG_LINES = {
       "!sql",
       "   !all",
       " \n select",
       " \n test ",
+      "/",
       "select '1';-comment",
       "\nselect\n '1';- -comment\n",
       "select '1';comment\n\n",
@@ -166,6 +170,35 @@ public class SqlLineParserTest {
 
   @Test
   public void testSqlLineParserOfWrongLinesForSwitchedOfflineContinuation() {
+    final SqlLine sqlLine = new SqlLine();
+    sqlLine.getOpts().set(BuiltInProperty.USE_LINE_CONTINUATION, false);
+    final DefaultParser parser = new SqlLineParser(sqlLine);
+    final Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
+    for (String line : WRONG_LINES) {
+      try {
+        parser.parse(line, line.length(), acceptLine);
+      } catch (Throwable t) {
+        System.err.println("Problem line: [" + line + "]");
+        throw t;
+      }
+    }
+  }
+
+
+  /**
+   * In case of exception while {@link sqlline.SqlLineParser#parse}
+   * line continuation will be switched off for particular line.
+   */
+  @Test
+  public void testSqlLineParserWithException() {
+    new MockUp<SqlLineHighlighter>() {
+      @Mock
+      private boolean isLineFinishedWithSemicolon(
+          final int lastNonQuoteCommentIndex, final CharSequence buffer) {
+        throw new RuntimeException("Line continuation exception");
+      }
+    };
+
     final SqlLine sqlLine = new SqlLine();
     sqlLine.getOpts().set(BuiltInProperty.USE_LINE_CONTINUATION, false);
     final DefaultParser parser = new SqlLineParser(sqlLine);
