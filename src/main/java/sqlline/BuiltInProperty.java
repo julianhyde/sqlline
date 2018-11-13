@@ -56,6 +56,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   NULL_VALUE("nullValue", Type.STRING, DEFAULT),
   SILENT("silent", Type.BOOLEAN, false),
   OUTPUT_FORMAT("outputFormat", Type.STRING, "table"),
+  PROMPT("prompt", Type.STRING, "sqlline> "),
+  RIGHT_PROMPT("rightPrompt", Type.STRING, ""),
   ROW_LIMIT("rowLimit", Type.INTEGER, 0),
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),
   SHOW_HEADER("showHeader", Type.BOOLEAN, true),

@@ -51,6 +51,8 @@ import static sqlline.BuiltInProperty.MAX_HISTORY_ROWS;
 import static sqlline.BuiltInProperty.NULL_VALUE;
 import static sqlline.BuiltInProperty.NUMBER_FORMAT;
 import static sqlline.BuiltInProperty.OUTPUT_FORMAT;
+import static sqlline.BuiltInProperty.PROMPT;
+import static sqlline.BuiltInProperty.RIGHT_PROMPT;
 import static sqlline.BuiltInProperty.ROW_LIMIT;
 import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
 import static sqlline.BuiltInProperty.SHOW_HEADER;
@@ -600,6 +602,14 @@ public class SqlLineOpts implements Completer {
 
   public String getOutputFormat() {
     return get(OUTPUT_FORMAT);
+  }
+
+  public String getPrompt() {
+    return get(PROMPT);
+  }
+
+  public String getRightPrompt() {
+    return get(RIGHT_PROMPT);
   }
 
   public boolean getTrimScripts() {
