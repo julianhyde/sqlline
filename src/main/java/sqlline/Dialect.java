@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.sql.DatabaseMetaData;
 import java.util.Set;
 
 /**
@@ -27,11 +28,15 @@ interface Dialect {
 
   Set<String> getOneLineComments();
 
+  /** Returns the character that starts quoted identifiers in this dialect,
   char getOpenQuote();
 
   char getCloseQuote();
 
-  boolean isUpper();
+  /** Whether this dialect stores unquoted identifiers in upper-case.
+   *
+   * @see DatabaseMetaData#storesUpperCaseIdentifiers() */
+  boolean storesUpperCaseIdentifiers();
 }
 
 // End Dialect.java

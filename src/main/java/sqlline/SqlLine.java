@@ -1221,7 +1221,7 @@ public class SqlLine {
           String word = String.copyValueOf(chars, idStart, i - idStart - 1);
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
-          } else if (dialect.isUpper()) {
+          } else if (dialect.storesUpperCaseIdentifiers()) {
             word = word.toUpperCase(Locale.ROOT);
           }
           current.add(word);
@@ -1245,7 +1245,7 @@ public class SqlLine {
       if (state == UNQUOTED) {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
-        } else if (dialect.isUpper()) {
+        } else if (dialect.storesUpperCaseIdentifiers()) {
           word = word.toUpperCase(Locale.ROOT);
         }
       }
@@ -1262,6 +1262,7 @@ public class SqlLine {
     return words.toArray(new String[0][]);
   }
 
+  /** Returns the current dialect. */
   Dialect getDialect() {
     final DatabaseConnection databaseConnection = getDatabaseConnection();
     return databaseConnection == null

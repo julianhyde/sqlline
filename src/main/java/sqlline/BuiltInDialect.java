@@ -83,7 +83,7 @@ public enum BuiltInDialect implements Dialect {
     return closeQuote;
   }
 
-  @Override public boolean isUpper() {
+  @Override public boolean storesUpperCaseIdentifiers() {
     return storesUpperCaseIdentifier;
   }
 
