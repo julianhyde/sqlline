@@ -536,7 +536,13 @@ public class SqlLine {
         // Execute one instruction; terminate on executing a script if
         // there is an error.
         signalHandler.setCallback(callback);
-        dispatch(reader.readLine(getPrompt()), callback);
+        dispatch(
+            reader.readLine(
+                Prompt.getPrompt(this),
+                Prompt.getRightPrompt(this),
+                (Character) null,
+                null),
+            callback);
         if (saveHistory) {
           fileHistory.save();
         }
@@ -997,37 +1003,6 @@ public class SqlLine {
     if (next != warn) {
       showWarnings(next);
     }
-  }
-
-  String getPrompt() {
-    DatabaseConnection dbc = getDatabaseConnection();
-    if (dbc == null || dbc.getUrl() == null) {
-      return "sqlline> ";
-    } else if (dbc.getNickname() != null) {
-      return getPrompt(connections.getIndex() + ": "
-          + dbc.getNickname()) + "> ";
-    } else {
-      return getPrompt(connections.getIndex() + ": " + dbc.getUrl()) + "> ";
-    }
-  }
-
-  static String getPrompt(String url) {
-    if (url == null || url.length() == 0) {
-      url = "sqlline";
-    }
-
-    if (url.contains(";")) {
-      url = url.substring(0, url.indexOf(";"));
-    }
-    if (url.contains("?")) {
-      url = url.substring(0, url.indexOf("?"));
-    }
-
-    if (url.length() > 45) {
-      url = url.substring(0, 45);
-    }
-
-    return url;
   }
 
   /**

@@ -2958,6 +2958,24 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           command</link>.
         </para>
       </sect1>
+      <sect1 id="setting_prompt">
+        <title>prompt</title>
+        <para>
+            The tcsh-like format for how prompt is displayed.
+            For example, the setting '%[\033[1;33m%]sqlline%[\033[m%]>' yields
+            yellow sqlline and normal angle bracket.
+            Defaults to 'sqlline>'. If for the specific
+            database connection nickname is set then nickname will be used.
+        </para>
+      </sect1>
+      <sect1 id="setting_rightprompt">
+        <title>rightprompt</title>
+        <para>
+            The tcsh-like format for how right prompt is displayed.
+            The same patterns are applied as for prompt but it
+            does not care if nickname is set or not. Defaults to ''.
+        </para>
+      </sect1>
       <sect1 id="setting_rowlimit">
         <title>rowlimit</title>
         <para>
