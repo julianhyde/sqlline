@@ -169,6 +169,22 @@ public class SqlLineParserTest {
   }
 
   @Test
+  public void testSqlLineParserForWrongLinesWithEmptyPrompt() {
+    SqlLine sqlLine = new SqlLine();
+    sqlLine.getOpts().set(BuiltInProperty.PROMPT, "");
+    final DefaultParser parser = new SqlLineParser(sqlLine);
+    final Parser.ParseContext acceptLine = Parser.ParseContext.ACCEPT_LINE;
+    for (String line : WRONG_LINES) {
+      try {
+        parser.parse(line, line.length(), acceptLine);
+        Assert.fail("Missing closing quote or semicolon for line " + line);
+      } catch (EOFError eofError) {
+        //ok
+      }
+    }
+  }
+
+  @Test
   public void testSqlLineParserOfWrongLinesForSwitchedOfflineContinuation() {
     final SqlLine sqlLine = new SqlLine();
     sqlLine.getOpts().set(BuiltInProperty.USE_LINE_CONTINUATION, false);

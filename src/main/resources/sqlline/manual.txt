@@ -118,6 +118,8 @@ maxwidth
 nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
@@ -247,6 +249,8 @@ maxwidth
 nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
@@ -1127,10 +1131,12 @@ nullValue       String     Use String in place of  NULL values
 numberFormat    pattern    Format numbers using DecimalFormat pattern
 outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json
                            Format mode for result display
+prompt          pattern    Format prompt
 propertiesFile  path       File from which SQLLine reads properties on
                            startup; default is
                            $HOME/.sqlline/sqlline.properties (UNIX, Linux,
                            macOS), $HOME/sqlline/sqlline.properties (Windows)
+rightPrompt     pattern    Format right prompt
 rowLimit        integer    Maximum number of rows returned from a query; zero
                            means no limit
 showElapsedTime true/false Display execution time when verbose
@@ -2075,6 +2081,8 @@ maxwidth
 nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
@@ -2169,6 +2177,14 @@ The format for how numeric values are displayed. Setting to default causes numer
 outputformat
 
 The format for how results are displayed. For details, see the information on the outputformat command.
+
+prompt
+
+The tcsh-like format for how prompt is displayed. For example, the setting '%[\033[1;33m%]sqlline%[\033[m%]>' yields yellow sqlline and normal angle bracket. Defaults to 'sqlline>'. If for the specific database connection nickname is set then nickname will be used.
+
+rightprompt
+
+The tcsh-like format for how right prompt is displayed. The same patterns are applied as for prompt but it does not care if nickname is set or not. Defaults to ''.
 
 rowlimit
 
