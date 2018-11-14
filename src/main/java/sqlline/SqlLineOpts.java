@@ -19,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.jline.keymap.KeyMap;
+import org.jline.reader.Binding;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.History;
@@ -48,6 +50,7 @@ import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
 import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
 import static sqlline.BuiltInProperty.MAX_HISTORY_ROWS;
+import static sqlline.BuiltInProperty.MODE;
 import static sqlline.BuiltInProperty.NULL_VALUE;
 import static sqlline.BuiltInProperty.NUMBER_FORMAT;
 import static sqlline.BuiltInProperty.OUTPUT_FORMAT;
@@ -95,6 +98,7 @@ public class SqlLineOpts implements Completer {
               put(MAX_HISTORY_FILE_ROWS,
                   SqlLineOpts.this::setMaxHistoryFileRows);
               put(MAX_HISTORY_ROWS, SqlLineOpts.this::setMaxHistoryRows);
+              put(MODE, SqlLineOpts.this::setMode);
               put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
               put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
@@ -626,6 +630,33 @@ public class SqlLineOpts implements Completer {
 
   public boolean getUseLineContinuation() {
     return getBoolean(USE_LINE_CONTINUATION);
+  }
+
+  public String getMode() {
+    return get(MODE);
+  }
+
+  public void setMode(String mode) {
+    final LineReader reader = sqlLine.getLineReader();
+    if (reader == null || reader.getKeyMaps() == null) {
+      return;
+    }
+    final Map<String, KeyMap<Binding>> keyMaps = reader.getKeyMaps();
+    switch (mode) {
+    case LineReader.EMACS:
+    case SqlLineProperty.DEFAULT:
+      set(BuiltInProperty.MODE, LineReader.EMACS);
+      keyMaps.put(LineReader.MAIN, keyMaps.get(LineReader.EMACS));
+      break;
+    case "vi":
+      set(BuiltInProperty.MODE, mode);
+      keyMaps.put(LineReader.MAIN, keyMaps.get(LineReader.VIINS));
+      break;
+    default:
+      throw new IllegalArgumentException(
+          sqlLine.loc(
+              "unknown-mode", mode, Arrays.asList(LineReader.EMACS, "vi")));
+    }
   }
 
   public File getPropertiesFile() {

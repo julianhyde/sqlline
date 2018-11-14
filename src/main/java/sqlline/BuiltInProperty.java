@@ -13,6 +13,7 @@ package sqlline;
 
 import java.io.File;
 
+import org.jline.reader.LineReader;
 import org.jline.reader.impl.history.DefaultHistory;
 
 /**
@@ -52,6 +53,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   MAX_HISTORY_FILE_ROWS("maxHistoryFileRows",
       Type.INTEGER, DefaultHistory.DEFAULT_HISTORY_FILE_SIZE),
 
+  MODE("mode", Type.STRING, LineReader.EMACS),
   NUMBER_FORMAT("numberFormat", Type.STRING, DEFAULT),
   NULL_VALUE("nullValue", Type.STRING, DEFAULT),
   SILENT("silent", Type.BOOLEAN, false),

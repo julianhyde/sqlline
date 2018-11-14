@@ -2927,6 +2927,12 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           current width, falls back to 80.
         </para>
       </sect1>
+      <sect1 id="setting_mode">
+        <title>mode</title>
+        <para>
+          The editing mode to use in sqlline. Defaults to "emacs".
+        </para>
+      </sect1>
       <sect1 id="setting_nullvalue">
         <title>nullvalue</title>
         <para>
