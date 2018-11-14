@@ -620,6 +620,7 @@ public class SqlLine {
       LineReader lineReader, Widget widget, String name, CharSequence keySeq) {
     lineReader.getWidgets().put(name, widget);
     lineReader.getKeyMaps().get(LineReader.EMACS).bind(widget, keySeq);
+    lineReader.getKeyMaps().get(LineReader.VIINS).bind(widget, keySeq);
   }
 
   boolean nextColorSchemeWidget() {

@@ -115,6 +115,7 @@ maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
 maxwidth
+mode
 nullValue
 numberformat
 outputformat
@@ -246,6 +247,7 @@ maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
 maxwidth
+mode
 nullValue
 numberformat
 outputformat
@@ -1127,6 +1129,7 @@ maxHistoryFileRows integer The maximum number of history rows
                            to store in history file
 maxHistoryRows  integer    The maximum number of history rows
                            to store in memory
+mode            emacs/vi   The editing mode
 nullValue       String     Use String in place of  NULL values
 numberFormat    pattern    Format numbers using DecimalFormat pattern
 outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json
@@ -2078,6 +2081,7 @@ maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
 maxwidth
+mode
 nullValue
 numberformat
 outputformat
@@ -2165,6 +2169,10 @@ The maximum number of history rows to store in memory. Defaults to 500 (org.jlin
 maxwidth
 
 The maximum width to display before truncating data when using the "table" outputformat. Defaults to attempting to query the terminal for the current width, falls back to 80.
+
+mode
+
+The editing mode to use in sqlline. Defaults to "emacs".
 
 nullvalue
 

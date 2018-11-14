@@ -31,6 +31,7 @@ import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
+import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -1970,6 +1971,32 @@ public class SqlLineArgsTest {
           containsString(
               sqlLine.loc("unknown-colorscheme", invalidColorScheme,
                   new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet()))));
+      os.reset();
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testSetWrongEditingMode() {
+    final SqlLine sqlLine = new SqlLine();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      SqlLine.Status status = begin(sqlLine, os, false);
+      // Here the status is SqlLine.Status.OTHER
+      // because of EOF as the result of InputStream which
+      // is not used in the current test so it is ok
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      DispatchCallback dc = new DispatchCallback();
+      final String invalidEditingMode = "invalid";
+      sqlLine.runCommands(
+          Collections.singletonList(
+              "!set mode " + invalidEditingMode), dc);
+      assertThat(os.toString("UTF8"),
+          containsString(
+              sqlLine.loc("unknown-mode", invalidEditingMode,
+                  Arrays.asList(LineReader.EMACS, "vi"))));
       os.reset();
     } catch (Exception e) {
       // fail
