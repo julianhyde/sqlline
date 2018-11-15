@@ -738,7 +738,7 @@ public class SqlLine {
           && !line.regionMatches(1, "all", 0, "all".length())) {
         return null;
       }
-      if (!line.trim().startsWith("--") && !line.trim().startsWith("#")) {
+      if (!isComment(line)) {
         waitingPattern = ";";
       }
     }
@@ -812,10 +812,18 @@ public class SqlLine {
    * @param line the line to be tested
    * @return true if a comment
    */
+  boolean isComment(String line, boolean trim) {
+    final String trimmedLine = trim ? line.trim() : line;
+    for (String comment: getDialect().getSqlLineOneLineComments()) {
+      if (trimmedLine.startsWith(comment)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   boolean isComment(String line) {
-    // SQL92 comment prefix is "--"
-    // sqlline also supports shell-style "#" prefix
-    return line.startsWith("#") || line.startsWith("--");
+    return isComment(line, true);
   }
 
   /**
@@ -1264,7 +1272,7 @@ public class SqlLine {
 
   Dialect getDialect() {
     final DatabaseConnection databaseConnection = getDatabaseConnection();
-    return databaseConnection == null
+    return databaseConnection == null || databaseConnection.getDialect() == null
         ? DialectImpl.getDefault()
         : databaseConnection.getDialect();
   }

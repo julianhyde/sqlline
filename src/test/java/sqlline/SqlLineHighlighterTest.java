@@ -40,7 +40,7 @@ import static sqlline.SqlLineHighlighterLowLevelTest.getSqlLine;
 public class SqlLineHighlighterTest {
 
   private Map<SqlLine, SqlLineHighlighter> sqlLine2HighLighter = null;
-  private SqlLine sqlLineWithDefaultSolorScheme;
+  private SqlLine sqlLineWithDefaultColorScheme;
   /**
    * To add your color scheme to tests just put sqlline object
    * with corresponding highlighter into the map like below.
@@ -49,12 +49,12 @@ public class SqlLineHighlighterTest {
   @Before
   public void setUp() throws Exception {
     sqlLine2HighLighter = new HashMap<>();
-    sqlLineWithDefaultSolorScheme = getSqlLine(SqlLineProperty.DEFAULT);
+    sqlLineWithDefaultColorScheme = getSqlLine(SqlLineProperty.DEFAULT);
     SqlLine darkSqlLine = getSqlLine("dark");
     SqlLine lightSqlLine = getSqlLine("light");
     sqlLine2HighLighter
-        .put(sqlLineWithDefaultSolorScheme,
-            new SqlLineHighlighter(sqlLineWithDefaultSolorScheme));
+        .put(sqlLineWithDefaultColorScheme,
+            new SqlLineHighlighter(sqlLineWithDefaultColorScheme));
     sqlLine2HighLighter.put(darkSqlLine, new SqlLineHighlighter(darkSqlLine));
     sqlLine2HighLighter.put(lightSqlLine, new SqlLineHighlighter(lightSqlLine));
   }
@@ -255,10 +255,36 @@ public class SqlLineHighlighterTest {
 
   @Test
   public void testComplexStrings() {
-    // command with argument
-    String line = "!set version";
+    // comments
+    String line = "#!set version";
     ExpectedHighlightStyle expectedStyle =
         new ExpectedHighlightStyle(line.length());
+    expectedStyle.comments.set(0, line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // spaces before comments
+    line = "     #  !set";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.defaults.set(0, line.indexOf("#"));
+    expectedStyle.comments.set(line.indexOf("#"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    line = "     --  select 1 from dual;";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.defaults.set(0, line.indexOf("--"));
+    expectedStyle.comments.set(line.indexOf("--"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // command with argument
+    line = "!set version";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.commands.set(0, "!set".length());
+    expectedStyle.defaults.set("!set".length(), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // sqlline comments inside commands should be treated as default text
+    line = "!set # -- version";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
     expectedStyle.commands.set(0, "!set".length());
     expectedStyle.defaults.set("!set".length(), line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
@@ -286,6 +312,15 @@ public class SqlLineHighlighterTest {
     expectedStyle.defaults.set("!set".length(), line.indexOf("\"'\n\""));
     expectedStyle
         .sqlIdentifierQuotes.set(line.indexOf("\"'\n\""), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // sqlline comments for default dialect
+    // inside sql should be treated as default text
+    line = "select #'1'";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.keywords.set(0, "select".length());
+    expectedStyle.defaults.set("select".length(), line.indexOf('#') + 1);
+    expectedStyle.singleQuotes.set(line.indexOf('#') + 1, line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
     line = "select '1'";
@@ -615,8 +650,8 @@ public class SqlLineHighlighterTest {
       expectedStyle[i].defaults.set(0, line.length());
       checkLineAgainstHighlighter(line,
           expectedStyle[i],
-          sqlLineWithDefaultSolorScheme,
-          sqlLine2HighLighter.get(sqlLineWithDefaultSolorScheme));
+          sqlLineWithDefaultColorScheme,
+          sqlLine2HighLighter.get(sqlLineWithDefaultColorScheme));
     }
 
     DispatchCallback dc = new DispatchCallback();
@@ -634,8 +669,8 @@ public class SqlLineHighlighterTest {
         checkLineAgainstHighlighter(
             linesWithDoubleQuoteSqlIdentifiers[i],
             expectedStyle[i],
-            sqlLineWithDefaultSolorScheme,
-            sqlLine2HighLighter.get(sqlLineWithDefaultSolorScheme));
+            sqlLineWithDefaultColorScheme,
+            sqlLine2HighLighter.get(sqlLineWithDefaultColorScheme));
       }
 
       sqlLine.getDatabaseConnection().close();
