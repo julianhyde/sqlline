@@ -14,6 +14,7 @@ package sqlline;
 import java.util.BitSet;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.DefaultHighlighter;
@@ -52,14 +53,21 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       final BitSet commentBitSet = new BitSet(buffer.length());
       final BitSet numberBitSet = new BitSet(buffer.length());
       final String trimmed = buffer.trim();
-      boolean isCommandPresent = trimmed.startsWith(SqlLine.COMMAND_PREFIX);
-      final boolean isSql = isSqlQuery(trimmed, isCommandPresent);
+      final int startingPoint = getStartingPoint(buffer);
+      final boolean isCommandPresent =
+          trimmed.startsWith(SqlLine.COMMAND_PREFIX);
+      final boolean isComment =
+          !isCommandPresent && sqlLine.isComment(trimmed, false);
+      final boolean isSql = !isCommandPresent
+          && !isComment
+          && isSqlQuery(trimmed, isCommandPresent);
 
-      String possibleCommand;
       if (trimmed.length() > 1 && isCommandPresent) {
-        int end = trimmed.indexOf(' ');
-        possibleCommand = end == -1
-            ? trimmed.substring(1) : trimmed.substring(1, end);
+        final int end = trimmed.indexOf(' ');
+        final String possibleCommand =
+            end == -1
+                ? trimmed.substring(1)
+                : trimmed.substring(1, end);
         for (CommandHandler ch : sqlLine.getCommandHandlers()) {
           if (Objects.equals(possibleCommand, ch.getName())
               || ch.getNames().contains(possibleCommand)) {
@@ -72,11 +80,13 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         handleSqlSyntax(buffer, keywordBitSet, quoteBitSet,
             sqlIdentifierQuotesBitSet, commentBitSet, numberBitSet,
             isCommandPresent);
-      } else {
+      } else if (isCommandPresent) {
         handleQuotesInCommands(buffer, quoteBitSet, sqlIdentifierQuotesBitSet);
+      } else {
+        handleComments(buffer, commentBitSet, startingPoint, false);
       }
 
-      String search = reader.getSearchTerm();
+      final String search = reader.getSearchTerm();
       if (search != null && search.length() > 0) {
         underlineStart = buffer.indexOf(search);
         if (underlineStart >= 0) {
@@ -103,7 +113,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         }
       }
 
-      AttributedStringBuilder sb = new AttributedStringBuilder();
+      final AttributedStringBuilder sb = new AttributedStringBuilder();
       final int commandStart = command
           ? buffer.indexOf(SqlLine.COMMAND_PREFIX) : -1;
       final int commandEnd = command
@@ -112,7 +122,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
 
       final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
       for (int i = 0; i < buffer.length(); i++) {
-        if (isSql) {
+        if (i < startingPoint) {
+          sb.style(highlightStyle.getDefaultStyle());
+        } else if (isSql) {
           if (keywordBitSet.get(i)) {
             sb.style(highlightStyle.getKeywordStyle());
           } else if (quoteBitSet.get(i)) {
@@ -135,6 +147,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           } else if (sqlIdentifierQuotesBitSet != null
               && sqlIdentifierQuotesBitSet.get(i)) {
             sb.style(highlightStyle.getIdentifierStyle());
+          } else if (commentBitSet.get(i)) {
+            sb.style(highlightStyle.getCommentStyle());
           }
         }
 
@@ -177,6 +191,21 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       AttributedStringBuilder sb = new AttributedStringBuilder();
       return sb.append(buffer).toAttributedString();
     }
+  }
+
+  /**
+   * Returns the index of the first non-whitespace character.
+   *
+   * @param buffer Input string
+   * @return index of the first non-whitespace character
+   */
+  private int getStartingPoint(String buffer) {
+    for (int i = 0; i < buffer.length(); i++) {
+      if (!Character.isWhitespace(buffer.charAt(i))) {
+        return i;
+      }
+    }
+    return buffer.length();
   }
 
   private void handleSqlSyntax(String buffer,
@@ -224,7 +253,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         pos = handleSqlSingleQuotes(buffer, quoteBitSet, pos);
       }
       if (pos <= buffer.length() - 1) {
-        pos = handleComments(buffer, commentBitSet, pos);
+        pos = handleComments(buffer, commentBitSet, pos, true);
       }
       if (wordStart == -1
           && (Character.isLetter(ch) || ch == '@' || ch == '#' || ch == '_')
@@ -407,6 +436,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * @param line          Line where to handle commented string
    * @param commentBitSet BitSet to use for positions of single quoted lines
    * @param startingPoint Start point
+   * @param isSql         Is the line sql
    *
    * @return position of closing comment (multi-line comment)
    * or a new line position (one line comment)
@@ -421,7 +451,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * and mark comment position inside {@code commentBitSet}.
    */
   int handleComments(String line, BitSet commentBitSet,
-      int startingPoint) {
+      int startingPoint, boolean isSql) {
+    Set<String> oneLineComments = isSql
+        ? sqlLine.getDialect().getOneLineComments()
+        : sqlLine.getDialect().getSqlLineOneLineComments();
     final char ch = line.charAt(startingPoint);
     if (startingPoint + 1 < line.length()
         && ch == '/'
@@ -431,8 +464,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;
     } else {
-      final Dialect dialect = sqlLine.getDialect();
-      for (String oneLineComment : dialect.getOneLineComments()) {
+      for (String oneLineComment : oneLineComments) {
         if (startingPoint <= line.length() - oneLineComment.length()
             && oneLineComment
             .regionMatches(0, line, startingPoint, oneLineComment.length())) {

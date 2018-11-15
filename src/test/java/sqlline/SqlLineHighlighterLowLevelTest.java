@@ -153,7 +153,7 @@ public class SqlLineHighlighterLowLevelTest {
 
   /**
    * Low level test of
-   * {@link SqlLineHighlighter#handleComments(String, BitSet, int)}.
+   * {@link SqlLineHighlighter#handleComments(String, BitSet, int, boolean)}.
    *
    * <p>WARNING: Change this test only if you know what you are doing.
    * Otherwise put your test into
@@ -176,7 +176,7 @@ public class SqlLineHighlighterLowLevelTest {
           new ExpectedHighlightStyle(line.length());
       expectedStyle.comments.set(0, line.length());
       BitSet actual = new BitSet(line.length());
-      defaultHighlighter.handleComments(line, actual, 0);
+      defaultHighlighter.handleComments(line, actual, 0, true);
       assertEquals("Line [" + line + "]", expectedStyle.comments, actual);
     }
   }
