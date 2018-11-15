@@ -44,15 +44,23 @@ class IncrementalRows extends Rows {
       // and label size.
       //
       // H2 returns Integer.MAX_VALUE, so avoid that.
+      maxRow.sizes[i] = getDisplaySizeOrDefault(i, maxRow.sizes[i]);
+    }
+    nextRow = labelRow;
+    endOfResult = false;
+  }
+
+  private int getDisplaySizeOrDefault(int i, int defaultValue) {
+    try {
       final int displaySize = rsMeta.getColumnDisplaySize(i + 1);
       if (displaySize > maxRow.sizes[i]
           && displaySize < Integer.MAX_VALUE) {
-        maxRow.sizes[i] = displaySize;
+        return displaySize;
       }
+    } catch (SQLException e) {
+      sqlLine.handleException(e);
     }
-
-    nextRow = labelRow;
-    endOfResult = false;
+    return defaultValue;
   }
 
   public boolean hasNext() {
