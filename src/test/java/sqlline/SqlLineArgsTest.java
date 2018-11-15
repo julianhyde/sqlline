@@ -29,6 +29,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
+import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
 import org.jline.terminal.Terminal;
 import org.junit.Test;
@@ -1172,6 +1173,70 @@ public class SqlLineArgsTest {
     } finally {
       // Set error stream back
       System.setErr(originalErr);
+    }
+  }
+
+  /**
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/203">[SQLLINE-203]
+   * !indexes command fails because of Hive bug</a>.
+   * The bug in question is
+   * <a href="https://issues.apache.org/jira/browse/HIVE-20938">[HIVE-20983]
+   * HiveResultSetMetaData.getColumnDisplaySize throws for SHORT column</a>.
+   */
+  @Test
+  public void testOutputWithFailingColumnDisplaySize(
+      @Mocked final JDBCResultSetMetaData meta) {
+    try {
+      new Expectations() {
+        {
+          meta.getColumnCount();
+          result = 3;
+
+          meta.getColumnLabel(1);
+          result = "TABLE_CAT";
+
+          meta.getColumnLabel(2);
+          result = "TABLE_SCHEM";
+
+          meta.getColumnLabel(3);
+          result = "TABLE_NAME";
+
+          meta.getColumnDisplaySize(1);
+          result = new Exception("getColumnDisplaySize exception");
+        }
+      };
+
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      PrintStream sqllineOutputStream =
+          new PrintStream(os, false, StandardCharsets.UTF_8.name());
+      sqlLine.setOutputStream(sqllineOutputStream);
+      sqlLine.setErrorStream(sqllineOutputStream);
+      String[] args = {
+          "-d",
+          "org.hsqldb.jdbcDriver",
+          "-u",
+          "jdbc:hsqldb:res:scott",
+          "-n",
+          "SCOTT",
+          "-p",
+          "TIGER"
+      };
+      DispatchCallback callback = new DispatchCallback();
+      sqlLine.initArgs(args, callback);
+      Deencapsulation.setField(sqlLine, "initComplete", true);
+      sqlLine.getConnection();
+      sqlLine.runCommands(
+          Collections.singletonList("!set maxwidth 80"), callback);
+      sqlLine.runCommands(
+          Collections.singletonList("!set verbose true"), callback);
+      sqlLine.runCommands(
+          Collections.singletonList("!indexes"), callback);
+      assertThat(os.toString("UTF8"), not(containsString("Exception")));
+    } catch (Throwable e) {
+      // fail
+      throw new RuntimeException(e);
     }
   }
 
