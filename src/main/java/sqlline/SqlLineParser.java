@@ -332,6 +332,7 @@ public class SqlLineParser extends DefaultParser {
   private boolean isSql(String line, ParseContext context) {
     String trimmedLine = trimLeadingSpacesIfPossible(line, context);
     return !trimmedLine.isEmpty()
+        && !sqlLine.isComment(trimmedLine, false)
         && (trimmedLine.charAt(0) != '!'
             || trimmedLine.regionMatches(0, "!sql", 0, "!sql".length())
             || trimmedLine.regionMatches(0, "!all", 0, "!all".length()));

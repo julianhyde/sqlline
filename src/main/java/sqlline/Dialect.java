@@ -11,7 +11,9 @@
 */
 package sqlline;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Database-specific rule which is used for highlighting,
@@ -22,10 +24,18 @@ import java.util.Set;
  */
 interface Dialect {
   Set<String> DEFAULT_KEYWORD_SET = BuiltInDialect.initDefaultKeywordSet();
+  // SQL92 comment prefix is "--"
+  // sqlline also supports shell-style "#" prefix
+  String[] SQLLINE_ONE_LINE_COMMENTS = {"#", "--"};
 
   boolean containsKeyword(String keyword);
 
   Set<String> getOneLineComments();
+
+  default Set<String> getSqlLineOneLineComments() {
+    return Arrays.stream(
+        SQLLINE_ONE_LINE_COMMENTS).collect(Collectors.toSet());
+  }
 
   char getOpenQuote();
 
