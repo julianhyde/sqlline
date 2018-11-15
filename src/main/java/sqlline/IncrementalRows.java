@@ -33,10 +33,9 @@ class IncrementalRows extends Rows {
     super(sqlLine, rs);
     this.rs = rs;
     this.dispatchCallback = dispatchCallback;
-
-    labelRow = new Row(rsMeta.getColumnCount());
-    maxRow = new Row(rsMeta.getColumnCount());
-
+    final int columnCount = rsMeta.getColumnCount();
+    labelRow = new Row(columnCount);
+    maxRow = new Row(columnCount);
     // pre-compute normalization so we don't have to deal
     // with SQLExceptions later
     for (int i = 0; i < maxRow.sizes.length; ++i) {
@@ -44,15 +43,24 @@ class IncrementalRows extends Rows {
       // and label size.
       //
       // H2 returns Integer.MAX_VALUE, so avoid that.
+      maxRow.sizes[i] = getDisplaySizeOrDefault(i, maxRow.sizes[i]);
+    }
+    nextRow = labelRow;
+    endOfResult = false;
+  }
+
+  private int getDisplaySizeOrDefault(final int i, final int defaultValue) {
+    try {
       final int displaySize = rsMeta.getColumnDisplaySize(i + 1);
       if (displaySize > maxRow.sizes[i]
           && displaySize < Integer.MAX_VALUE) {
-        maxRow.sizes[i] = displaySize;
+        return displaySize;
       }
+    } catch (Exception e) {
+      // ignore; in particular, works around [HIVE-20938]
+      // "HiveResultSetMetaData.getColumnDisplaySize throws for SHORT column"
     }
-
-    nextRow = labelRow;
-    endOfResult = false;
+    return defaultValue;
   }
 
   public boolean hasNext() {
