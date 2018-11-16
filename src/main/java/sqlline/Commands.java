@@ -1327,9 +1327,16 @@ public class Commands {
       return;
     }
 
-    int index = Integer.parseInt(parts[1]);
-    if (!sqlLine.getDatabaseConnections().setIndex(index)) {
-      sqlLine.error(sqlLine.loc("invalid-connection", "" + index));
+    boolean isNumber;
+    int index = Integer.MIN_VALUE;
+    try {
+      index = Integer.parseInt(parts[1]);
+      isNumber = true;
+    } catch (Exception e) {
+      isNumber = false;
+    }
+    if (!isNumber || !sqlLine.getDatabaseConnections().setIndex(index)) {
+      sqlLine.error(sqlLine.loc("invalid-connection", parts[1]));
       list("", callback); // list the current connections
       callback.setToFailure();
       return;
