@@ -443,6 +443,21 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Test !go <non-existent connection indexes>.
+   */
+  @Test
+  public void testGoFailing() {
+    final String[] connectionIndexes = {"321", "invalid"};
+    for (String connectionIndex : connectionIndexes) {
+      final String script = "!go " + connectionIndex + "\n";
+      final String expected = "Invalid connection: " + connectionIndex;
+      checkScriptFile(script, false,
+          // Status.OTHER as checking of fail cases
+          equalTo(SqlLine.Status.OTHER), containsString(expected));
+    }
+  }
+
+  /**
    * Tests "!help go". "go" and "#" are synonyms.
    */
   @Test
