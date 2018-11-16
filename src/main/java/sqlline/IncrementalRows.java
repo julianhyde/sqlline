@@ -33,10 +33,9 @@ class IncrementalRows extends Rows {
     super(sqlLine, rs);
     this.rs = rs;
     this.dispatchCallback = dispatchCallback;
-
-    labelRow = new Row(rsMeta.getColumnCount());
-    maxRow = new Row(rsMeta.getColumnCount());
-
+    final int columnCount = rsMeta.getColumnCount();
+    labelRow = new Row(columnCount);
+    maxRow = new Row(columnCount);
     // pre-compute normalization so we don't have to deal
     // with SQLExceptions later
     for (int i = 0; i < maxRow.sizes.length; ++i) {
@@ -50,15 +49,15 @@ class IncrementalRows extends Rows {
     endOfResult = false;
   }
 
-  private int getDisplaySizeOrDefault(int i, int defaultValue) {
+  private int getDisplaySizeOrDefault(final int i, final int defaultValue) {
     try {
       final int displaySize = rsMeta.getColumnDisplaySize(i + 1);
       if (displaySize > maxRow.sizes[i]
           && displaySize < Integer.MAX_VALUE) {
         return displaySize;
       }
-    } catch (SQLException e) {
-      sqlLine.handleException(e);
+    } catch (Exception e) {
+      // ignore
     }
     return defaultValue;
   }
