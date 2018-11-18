@@ -425,7 +425,7 @@ public class SqlLineParser extends DefaultParser {
   }
 
   private String getPaddedPrompt(String waitingPattern) {
-    int length = Prompt.getPrompt(sqlLine).length();
+    int length = Prompt.getPrompt(sqlLine).columnLength();
     StringBuilder prompt = new StringBuilder(length);
     for (int i = 0; i < length - "> ".length() - waitingPattern.length(); i++) {
       prompt.append(i % 2 == 0 ? '.' : ' ');

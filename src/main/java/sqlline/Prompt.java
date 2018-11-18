@@ -21,6 +21,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
+import org.jline.utils.StyleResolver;
+
 /**
  * Prompt customization.
  */
@@ -46,10 +51,13 @@ class Prompt {
         }}
     );
 
+  private static final StyleResolver STYLE_RESOLVER =
+      new StyleResolver(s -> "");
+
   private Prompt() {
   }
 
-  static String getRightPrompt(SqlLine sqlLine) {
+  static AttributedString getRightPrompt(SqlLine sqlLine) {
     final int connectionIndex = sqlLine.getDatabaseConnections().getIndex();
     final String value = sqlLine.getOpts().get(BuiltInProperty.RIGHT_PROMPT);
     final String currentPrompt = String.valueOf((Object) null).equals(value)
@@ -57,7 +65,7 @@ class Prompt {
     return getPrompt(sqlLine, connectionIndex, currentPrompt);
   }
 
-  static String getPrompt(SqlLine sqlLine) {
+  static AttributedString getPrompt(SqlLine sqlLine) {
     final String defaultPrompt =
         String.valueOf(BuiltInProperty.PROMPT.defaultValue());
     final String currentPrompt = sqlLine.getOpts().get(BuiltInProperty.PROMPT);
@@ -81,9 +89,9 @@ class Prompt {
     }
   }
 
-  private static String getPrompt(
+  private static AttributedString getPrompt(
       SqlLine sqlLine, int connectionIndex, String prompt) {
-    StringBuilder promptStringBuilder = new StringBuilder();
+    AttributedStringBuilder promptStringBuilder = new AttributedStringBuilder();
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
     final DatabaseMetaData databaseMetaData = databaseConnection == null
@@ -101,7 +109,13 @@ class Prompt {
             switch (prompt.charAt(i + 1)) {
             case 'c':
               if (connectionIndex >= 0) {
-                promptStringBuilder.append(connectionIndex);
+                promptStringBuilder.append(String.valueOf(connectionIndex));
+              }
+              break;
+            case 'C':
+              if (connectionIndex >= 0) {
+                promptStringBuilder
+                    .append(String.valueOf(connectionIndex)).append(": ");
               }
               break;
             case 'd':
@@ -130,18 +144,13 @@ class Prompt {
               }
               break;
             case '[':
-              if (prompt.regionMatches(
-                  i + 2, START_COLOR, 0, START_COLOR.length())) {
-                int closeBracketIndex =
-                    prompt.indexOf("%]", i + 2 + START_COLOR.length());
-                if (closeBracketIndex > 0) {
-                  String color = prompt
-                      .substring(i + 2 + START_COLOR.length(),
-                          closeBracketIndex);
-                  promptStringBuilder.append('\033').append(color);
-                  i = closeBracketIndex;
-                  break;
-                }
+              int closeBracketIndex = prompt.indexOf("%]", i + 2);
+              if (closeBracketIndex > 0) {
+                String color = prompt.substring(i + 2, closeBracketIndex);
+                AttributedStyle style = STYLE_RESOLVER.resolve(color);
+                promptStringBuilder.style(style);
+                i = closeBracketIndex;
+                break;
               }
             // fall through if not a color
             case ':':
@@ -168,14 +177,14 @@ class Prompt {
         promptStringBuilder.append(prompt.charAt(i));
       }
     }
-    return promptStringBuilder.toString();
+    return promptStringBuilder.toAttributedString();
   }
 
-  private static String getDefaultPrompt(
+  private static AttributedString getDefaultPrompt(
       int connectionIndex, String url, String defaultPrompt) {
     String resultPrompt;
     if (url == null || url.length() == 0) {
-      return defaultPrompt;
+      return new AttributedString(defaultPrompt);
     } else {
       if (url.contains(";")) {
         url = url.substring(0, url.indexOf(";"));
@@ -187,7 +196,7 @@ class Prompt {
       if (resultPrompt.length() > 45) {
         resultPrompt = resultPrompt.substring(0, 45);
       }
-      return resultPrompt + "> ";
+      return new AttributedString(resultPrompt + "> ");
     }
   }
 
