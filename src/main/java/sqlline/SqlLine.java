@@ -531,6 +531,7 @@ public class SqlLine {
     // basic setup done. From this point on, honor opts value for showing
     // exception
     initComplete = true;
+    final Terminal terminal = lineReader.getTerminal();
     while (!exit) {
       try {
         // Execute one instruction; terminate on executing a script if
@@ -538,8 +539,8 @@ public class SqlLine {
         signalHandler.setCallback(callback);
         dispatch(
             reader.readLine(
-                Prompt.getPrompt(this),
-                Prompt.getRightPrompt(this),
+                Prompt.getPrompt(this).toAnsi(terminal),
+                Prompt.getRightPrompt(this).toAnsi(terminal),
                 (Character) null,
                 null),
             callback);
