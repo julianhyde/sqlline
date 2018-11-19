@@ -444,7 +444,7 @@ public class SqlLineArgsTest {
   }
 
   /**
-   * Test !go <non-existent connection indexes>.
+   * Test !go &lt;non-existent connection indexes&gt;.
    */
   @Test
   public void testGoFailing() {
@@ -1183,6 +1183,8 @@ public class SqlLineArgsTest {
    * The bug in question is
    * <a href="https://issues.apache.org/jira/browse/HIVE-20938">[HIVE-20983]
    * HiveResultSetMetaData.getColumnDisplaySize throws for SHORT column</a>.
+   *
+   * @param meta mocked JDBCResultSetMetaData to use in the test
    */
   @Test
   public void testOutputWithFailingColumnDisplaySize(
