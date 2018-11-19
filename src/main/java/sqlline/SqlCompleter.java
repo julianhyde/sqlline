@@ -11,7 +11,6 @@
 */
 package sqlline;
 
-import java.sql.DatabaseMetaData;
 import java.util.*;
 
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -32,7 +31,7 @@ class SqlCompleter extends StringsCompleter {
 
     // now add the keywords from the current connection
 
-    DatabaseMetaData meta = sqlLine.getDatabaseConnection().meta;
+    final DatabaseMetaDataWrapper meta = sqlLine.getDatabaseConnection().meta;
     try {
       keywords.append(",").append(meta.getSQLKeywords());
     } catch (Throwable t) {

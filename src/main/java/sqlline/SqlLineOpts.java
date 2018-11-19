@@ -63,6 +63,7 @@ import static sqlline.BuiltInProperty.SHOW_HEADER;
 import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
 import static sqlline.BuiltInProperty.SHOW_WARNINGS;
 import static sqlline.BuiltInProperty.SILENT;
+import static sqlline.BuiltInProperty.STRICT_JDBC;
 import static sqlline.BuiltInProperty.TIMEOUT;
 import static sqlline.BuiltInProperty.TIMESTAMP_FORMAT;
 import static sqlline.BuiltInProperty.TIME_FORMAT;
@@ -732,6 +733,10 @@ public class SqlLineOpts implements Completer {
           sqlLine.loc(
               "unknown-mode", mode, Arrays.asList(LineReader.EMACS, "vi")));
     }
+  }
+
+  public boolean getStrictJdbc() {
+    return getBoolean(STRICT_JDBC);
   }
 
   public File getPropertiesFile() {

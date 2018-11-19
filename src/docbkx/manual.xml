@@ -3029,6 +3029,16 @@ java.sql.SQLException: ORA-00942: table or view does not exist
       <sect1 id="setting_silent">
         <title>silent</title>
         <para>
+            If <literal>false</literal>, then use default values
+            defined by <literal>java.sql.DatabaseMetaData</literal>
+            in case an implementation of this interface fails with
+            e.g. "Method not supported", otherwise it also fails.
+            Defaults to <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_silent">
+        <title>silent</title>
+        <para>
           If <literal>true</literal>, then reduce the amount
           of informational messages displayed. Useful for redirecting
           a sqlline command to a file for later parsing. Defaults to

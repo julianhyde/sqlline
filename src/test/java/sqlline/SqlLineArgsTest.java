@@ -14,6 +14,7 @@ package sqlline;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -758,6 +759,72 @@ public class SqlLineArgsTest {
         true,
         equalTo(SqlLine.Status.OTHER),
         not(containsString(" 123 ")));
+  }
+
+  /**
+   * Emulation of Apache Hive behavior with throwing exceptions
+   * while calling {@link DatabaseMetaData#storesUpperCaseIdentifiers()}
+   * and {@link DatabaseMetaData#supportsTransactionIsolationLevel(int)}.
+   *
+   * <p>Also please see
+   * <a href="https://github.com/julianhyde/sqlline/issues/183">[SQLLINE-183]</a>.
+   *
+   * @param meta Mocked JDBCDatabaseMetaData
+   */
+  @Test
+  public void testExecutionWithNotSupportedMethods(
+      @Mocked final JDBCDatabaseMetaData meta) {
+    try {
+      new Expectations() {
+        {
+          // prevent calls to functions that also call resultSet.next
+          meta.getDatabaseProductName();
+          result = "hsqldb";
+          // prevent calls to functions that also call resultSet.next
+          meta.getDatabaseProductVersion();
+          result = "1.0";
+
+          // emulate apache hive behavior
+          meta.supportsTransactionIsolationLevel(4);
+          result = new SQLException("Method not supported");
+        }
+      };
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      PrintStream sqllineOutputStream =
+          new PrintStream(os, false, StandardCharsets.UTF_8.name());
+      sqlLine.setOutputStream(sqllineOutputStream);
+      sqlLine.setErrorStream(sqllineOutputStream);
+      String[] args = {
+          "-d",
+          "org.hsqldb.jdbcDriver",
+          "-u",
+          "jdbc:hsqldb:res:scott",
+          "-n",
+          "SCOTT",
+          "-p",
+          "TIGER"
+      };
+      DispatchCallback dc = new DispatchCallback();
+      sqlLine.initArgs(args, dc);
+      os.reset();
+      sqlLine.runCommands(Collections.singletonList("values 1;"), dc);
+      final String output = os.toString("UTF8");
+      final String line0 = "+-------------+";
+      final String line1 = "|     C1      |";
+      final String line2 = "+-------------+";
+      final String line3 = "| 1           |";
+      final String line4 = "+-------------+";
+      assertThat(output,
+          CoreMatchers.allOf(containsString(line0),
+              containsString(line1),
+              containsString(line2),
+              containsString(line3),
+              containsString(line4)));
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
+    }
   }
 
   @Test

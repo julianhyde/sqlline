@@ -72,6 +72,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   SHOW_HEADER("showHeader", Type.BOOLEAN, true),
   SHOW_NESTED_ERRS("showNestedErrs", Type.BOOLEAN, false),
   SHOW_WARNINGS("showWarnings", Type.BOOLEAN, true),
+  STRICT_JDBC("strictJdbc", Type.BOOLEAN, false),
   TIME_FORMAT("timeFormat", Type.STRING, DEFAULT),
   TIMEOUT("timeout", Type.INTEGER, -1),
   TIMESTAMP_FORMAT("timestampFormat", Type.STRING, DEFAULT),

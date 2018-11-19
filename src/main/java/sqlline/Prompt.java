@@ -11,7 +11,6 @@
 */
 package sqlline;
 
-import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -30,8 +29,6 @@ import org.jline.utils.StyleResolver;
  * Customization for the prompt shown at the start of each line.
  */
 class Prompt {
-  private static final String START_COLOR = "\\033";
-
   private static final Map<Character, Supplier<String>>
       DATE_TIME_FORMATS = Collections.unmodifiableMap(
         new HashMap<Character, Supplier<String>>() {
@@ -94,8 +91,10 @@ class Prompt {
     AttributedStringBuilder promptStringBuilder = new AttributedStringBuilder();
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
-    final DatabaseMetaData databaseMetaData = databaseConnection == null
-        ? null : databaseConnection.meta;
+    final DatabaseMetaDataWrapper databaseMetaData =
+        databaseConnection == null
+            ? null
+            : databaseConnection.meta;
     final SqlLineOpts opts = sqlLine.getOpts();
     for (int i = 0; i < prompt.length(); i++) {
       switch (prompt.charAt(i)) {
