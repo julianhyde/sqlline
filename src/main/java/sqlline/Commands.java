@@ -200,14 +200,12 @@ public class Commands {
         return;
       }
 
-      Object res = sqlLine.getReflector().invoke(sqlLine.getDatabaseMetaData(),
-          DatabaseMetaData.class, cmd, argList);
+      final Object res = sqlLine.getReflector()
+          .invoke(sqlLine.getDatabaseMetaData(), DatabaseMetaDataWrapper.class,
+              cmd, argList);
       if (res instanceof ResultSet) {
-        ResultSet rs = (ResultSet) res;
-        try {
+        try (ResultSet rs = (ResultSet) res) {
           sqlLine.print(rs, callback);
-        } finally {
-          rs.close();
         }
       } else if (res != null) {
         sqlLine.output(res.toString());
