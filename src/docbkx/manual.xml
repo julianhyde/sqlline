@@ -4,7 +4,7 @@
 [
     <!-- "http://www.docbook.org/xml/4.2/docbookx.dtd" -->
     <!-- "file:/sw/share/xml/dtd/docbookx/4.2.0/docbookx.dtd" -->
-    <!ENTITY VERSION "1.5.0">
+    <!ENTITY VERSION "1.6.0">
 ]>
 <book>
   <bookinfo>
