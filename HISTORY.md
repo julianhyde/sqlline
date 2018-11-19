@@ -2,6 +2,93 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.6.0">1.6.0</a> (2018-11-21)
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/183">SQLLINE-183</a>]
+  Add wrapper around `DatabaseMetaData`, to make SQLLine less susceptible to
+  errors in underlying JDBC driver
+* [<a href="https://github.com/julianhyde/sqlline/issues/60">SQLLINE-60</a>]
+  Add `mode` property to switch between emacs/vi editing modes
+* [<a href="https://github.com/julianhyde/sqlline/issues/199">SQLLINE-199</a>]
+  Make use of jline3's powerful StyleResolver functionality to parse styles
+* [<a href="https://github.com/julianhyde/sqlline/issues/199">SQLLINE-199</a>]
+  Add `prompt` and `rightPrompt` properties to allow customization of prompt and
+  right prompt
+* [<a href="https://github.com/julianhyde/sqlline/issues/201">SQLLINE-201</a>]
+  Line continuation and highlight for sqlline comments
+* [<a href="https://github.com/julianhyde/sqlline/issues/203">SQLLINE-203</a>]
+  Carry on even if JDBC driver's `ResultSetMetaData.getColumnDisplaySize()`
+  throws
+* [<a href="https://github.com/julianhyde/sqlline/issues/205">SQLLINE-205</a>]
+  Show human-readable message if `!go` command fails
+* [<a href="https://github.com/julianhyde/sqlline/issues/190">SQLLINE-190</a>]
+  Make sure that exceptions during highlighting/line continuation do not cause
+  infinite loops
+* [<a href="https://github.com/julianhyde/sqlline/issues/190">SQLLINE-190</a>]
+  Add `Dialect` API, and various database-specific behaviors
+* [<a href="https://github.com/julianhyde/sqlline/issues/164">SQLLINE-164</a>]
+  Syntax highliting
+* [<a href="https://github.com/julianhyde/sqlline/issues/184">SQLLINE-184</a>]
+  Multi-line parsing is fooled by a line that ends in a semi-colon followed by a
+  comment
+* [<a href="https://github.com/julianhyde/sqlline/issues/168">SQLLINE-168</a>]
+  In multiline parsing, detect mismatched brackets and parentheses
+* [<a href="https://github.com/julianhyde/sqlline/issues/129">SQLLINE-129</a>]
+  Allow multiline query parsing in shell mode and files
+* [<a href="https://github.com/julianhyde/sqlline/issues/151">SQLLINE-151</a>]
+  Add property `escapeOutput` to escape control symbols
+* [<a href="https://github.com/julianhyde/sqlline/issues/177">SQLLINE-177</a>]
+  Add `maxHistoryRows` and `maxHistoryFileRows` properties
+* [<a href="https://github.com/julianhyde/sqlline/issues/160">SQLLINE-160</a>]
+  Use `maxColumnWidth` in `TableOutputFormat` column width calculation
+* [<a href="https://github.com/julianhyde/sqlline/issues/158">SQLLINE-158</a>]
+  Add `xmlattrs` output format name as a synonym for `xmlattr`
+* [<a href="https://github.com/julianhyde/sqlline/issues/155">SQLLINE-155</a>]
+  Do not use default encoding
+* [<a href="https://github.com/julianhyde/sqlline/issues/105">SQLLINE-105</a>]
+  Upgrade to jline3, and add `!rerun` command (also known as `!/`)
+* [<a href="https://github.com/julianhyde/sqlline/issues/143">SQLLINE-143</a>]
+  Add `!reset` command, and add a mode to `!set` command to show current value
+* [<a href="https://github.com/julianhyde/sqlline/issues/146">SQLLINE-146</a>]
+  Add read-only `version` property
+
+Other:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/191">SQLLINE-191</a>]
+  Release 1.6
+* [<a href="https://github.com/julianhyde/sqlline/issues/193">SQLLINE-193</a>]
+  Add key strokes to help output
+* Upgrade JMockit to 1.41
+* [<a href="https://github.com/julianhyde/sqlline/issues/141">SQLLINE-141</a>]
+  Add test for `!save` command
+* [<a href="https://github.com/julianhyde/sqlline/issues/179">SQLLINE-179</a>]
+  Add `<useManifestOnlyJar>false</useManifestOnlyJar>` setting for
+  `maven-surefire-plugin`
+* [<a href="https://github.com/julianhyde/sqlline/issues/181">SQLLINE-181</a>]
+  Use `<code;>` tag rather than `<tt>`, as `<tt>` is deprecated in HTML5
+* [<a href="https://github.com/julianhyde/sqlline/issues/166">SQLLINE-166</a>]
+  Refactor properties, adding `enum BuiltInProperty` and
+  `interface SqlLineProperty.Writer`
+* [<a href="https://github.com/julianhyde/sqlline/issues/172">SQLLINE-172</a>]
+  Travis CI fails for Oracle JDK 10
+* [<a href="https://github.com/julianhyde/sqlline/issues/98">SQLLINE-98</a>]
+  Add `appveyor.yml`, to allow CI on Windows
+* Generate javadoc in HTML 5
+* [<a href="https://github.com/julianhyde/sqlline/issues/162">SQLLINE-162</a>]
+  Various cleanup in `SqlLineArgsTest`
+* [<a href="https://github.com/julianhyde/sqlline/issues/163">SQLLINE-163</a>]
+  Upgrade `checkstyle` to 7.8.2, `maven-checkstyle-plugin` to 3.0.0 to support
+  Java 8 syntax
+* Site: Publish manual and API for release 1.5.0
+* [<a href="https://github.com/julianhyde/sqlline/issues/153">SQLLINE-153</a>]
+  Invalid link to API docs on `README.md` page
+* [<a href="https://github.com/julianhyde/sqlline/issues/149">SQLLINE-149</a>]
+  Correct typos
+* [<a href="https://github.com/julianhyde/sqlline/issues/142">SQLLINE-142</a>]
+  Add missed `-e` option in `--help` output
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.5.0">1.5.0</a> (2018-09-09)
 
 Bugs and functional changes:
