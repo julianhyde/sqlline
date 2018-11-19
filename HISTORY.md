@@ -4,6 +4,29 @@ For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/
 
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.6.0">1.6.0</a> (2018-11-21)
 
+Upgrading to
+<a href="https://github.com/julianhyde/sqlline/issues/105">`jline3`</a>
+and improved
+<a href="https://github.com/julianhyde/sqlline/issues/190">dialect support</a>
+allowed us to add
+<a href="https://github.com/julianhyde/sqlline/issues/164">syntax highglighting</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/190">line continuation</a>
+and
+<a href="https://github.com/julianhyde/sqlline/issues/184">multi-line editing</a>.
+There are new commands
+<a href="https://github.com/julianhyde/sqlline/issues/105">`!rerun`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/105">`!/`</a> and
+<a href="https://github.com/julianhyde/sqlline/issues/143">`!reset`</a>,
+new properties
+<a href="https://github.com/julianhyde/sqlline/issues/60">`mode`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/151">`escapeOutput`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/199">`prompt`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/199">`rightPrompt`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/177">`maxHistoryRows`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/177">`maxHistoryFileRows`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/146">`version`</a>,
+and improvements to existing commands.
+
 Bugs and functional changes:
 
 * [<a href="https://github.com/julianhyde/sqlline/issues/183">SQLLINE-183</a>]
@@ -12,7 +35,7 @@ Bugs and functional changes:
 * [<a href="https://github.com/julianhyde/sqlline/issues/60">SQLLINE-60</a>]
   Add `mode` property to switch between emacs/vi editing modes
 * [<a href="https://github.com/julianhyde/sqlline/issues/199">SQLLINE-199</a>]
-  Make use of jline3's powerful StyleResolver functionality to parse styles
+  Make use of jline3's powerful `StyleResolver` functionality to parse styles
 * [<a href="https://github.com/julianhyde/sqlline/issues/199">SQLLINE-199</a>]
   Add `prompt` and `rightPrompt` properties to allow customization of prompt and
   right prompt
@@ -67,7 +90,7 @@ Other:
   Add `<useManifestOnlyJar>false</useManifestOnlyJar>` setting for
   `maven-surefire-plugin`
 * [<a href="https://github.com/julianhyde/sqlline/issues/181">SQLLINE-181</a>]
-  Use `<code;>` tag rather than `<tt>`, as `<tt>` is deprecated in HTML5
+  Use `<code>` tag rather than `<tt>`, as `<tt>` is deprecated in HTML5
 * [<a href="https://github.com/julianhyde/sqlline/issues/166">SQLLINE-166</a>]
   Refactor properties, adding `enum BuiltInProperty` and
   `interface SqlLineProperty.Writer`
