@@ -158,8 +158,11 @@ public class SqlLineOpts implements Completer {
     // for autocompletion specified in SqlLineProperty.BOOLEAN_VALUES
     final String booleanTypeString = Type.BOOLEAN.toString();
     sb.append(booleanTypeString);
-    comp.put(booleanTypeString, new StringsCompleter(booleanProperties
-        .stream().map(BuiltInProperty::propertyName).toArray(String[]::new)));
+    comp.put(booleanTypeString,
+        new StringsCompleter(booleanProperties
+            .stream()
+            .map(BuiltInProperty::propertyName)
+            .toArray(String[]::new)));
     final String booleanPropertyValueKey = booleanTypeString + "_value";
     comp.put(booleanPropertyValueKey,
         new StringsCompleter(BuiltInProperty.BOOLEAN_VALUES));
