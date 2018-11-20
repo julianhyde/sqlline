@@ -32,6 +32,8 @@ import org.jline.reader.LineReader;
 import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,6 +45,18 @@ import static org.junit.Assert.assertThat;
  */
 public class CompletionTest {
   private final SqlLine sqlLine = new SqlLine();
+
+  @Before
+  public void setUp() {
+    System.setProperty(TerminalBuilder.PROP_DUMB,
+        Boolean.TRUE.toString());
+  }
+
+  @After
+  public void tearDown() {
+    System.setProperty(TerminalBuilder.PROP_DUMB,
+        Boolean.FALSE.toString());
+  }
 
   @Test
   public void testCommandCompletions() {
