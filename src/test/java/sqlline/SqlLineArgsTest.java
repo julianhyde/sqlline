@@ -1546,6 +1546,19 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testPossibleMetadataValues() {
+    final String script = "!metadata 1\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        allOf(not(containsString("Exception")),
+            not(containsString("equals")),
+            not(containsString("notify")),
+            not(containsString("wait")),
+            not(containsString("toString")),
+            not(containsString("hashCode")),
+            not(containsString("notifyAll"))));
+  }
+
+  @Test
   public void testEmptyRecord() {
     final String line = "Usage: record <file name>";
     checkScriptFile("!record", true, equalTo(SqlLine.Status.OTHER),

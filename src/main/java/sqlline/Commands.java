@@ -182,7 +182,8 @@ public class Commands {
     }
 
     try {
-      Method[] methods = sqlLine.getDatabaseMetaData().getClass().getMethods();
+      Method[] methods =
+          sqlLine.getDatabaseMetaData().getClass().getDeclaredMethods();
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
