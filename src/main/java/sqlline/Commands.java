@@ -14,6 +14,7 @@ package sqlline;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -182,10 +183,16 @@ public class Commands {
     }
 
     try {
-      Method[] methods = sqlLine.getDatabaseMetaData().getClass().getMethods();
+      Method[] methods =
+          sqlLine.getDatabaseMetaData().getClass().getDeclaredMethods();
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
+        final int modifiers = method.getModifiers();
+        if (!Modifier.isPublic(modifiers)
+            || Modifier.isStatic(modifiers)) {
+          continue;
+        }
         methodNames.add(method.getName());
         methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
       }

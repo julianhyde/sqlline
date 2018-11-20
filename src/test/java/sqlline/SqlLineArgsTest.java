@@ -1545,6 +1545,23 @@ public class SqlLineArgsTest {
         allOf(containsString(line), not(containsString("Exception"))));
   }
 
+  /** Tests that methods inherited from Object are not included in the list
+   * of possible metadata methods. */
+  @Test
+  public void testPossibleMetadataValues() {
+    final String script = "!metadata 1\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString("allProceduresAreCallable"),
+            containsString("getIndexInfo"),
+            not(containsString("Exception")),
+            not(containsString("equals")),
+            not(containsString("notify")),
+            not(containsString("wait")),
+            not(containsString("toString")),
+            not(containsString("hashCode")),
+            not(containsString("notifyAll"))));
+  }
+
   @Test
   public void testEmptyRecord() {
     final String line = "Usage: record <file name>";
