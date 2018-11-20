@@ -58,8 +58,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           trimmed.startsWith(SqlLine.COMMAND_PREFIX);
       final boolean isComment =
           !isCommandPresent && sqlLine.isComment(trimmed, false);
-      final boolean isSql = !isCommandPresent
-          && !isComment
+      final boolean isSql = !isComment
           && isSqlQuery(trimmed, isCommandPresent);
 
       if (trimmed.length() > 1 && isCommandPresent) {
@@ -220,9 +219,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     if (isCommandPresent) {
       start = buffer.indexOf(SqlLine.COMMAND_PREFIX)
           + SqlLine.COMMAND_PREFIX.length();
-      int nextSpace =
-          buffer.indexOf(' ', buffer.indexOf(SqlLine.COMMAND_PREFIX));
-      start = nextSpace == -1 ? buffer.length() : start + nextSpace;
+      while (start < buffer.length()
+          && !Character.isWhitespace(buffer.charAt(start))) {
+        start++;
+      }
     }
 
     final Dialect dialect = sqlLine.getDialect();
