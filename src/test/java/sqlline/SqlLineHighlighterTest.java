@@ -315,6 +315,47 @@ public class SqlLineHighlighterTest {
         .sqlIdentifierQuotes.set(line.indexOf("\"'\n\""), line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
+    // sql with !sql command
+    line = "!sql select '1'";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.commands.set(0, "!sql".length());
+    expectedStyle.defaults.set("!sql".length());
+    expectedStyle.keywords.set(line.indexOf("select"), line.indexOf(" '1'"));
+    expectedStyle.defaults.set(line.indexOf(" '1'"));
+    expectedStyle.singleQuotes.set(line.indexOf("'1'"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // sql with !sql command started not from the first symbol
+    line = "  !sql select '1' /* comment*/";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.defaults.set(0, line.indexOf("!sql"));
+    expectedStyle.commands.set(line.indexOf("!sql"), line.indexOf(" select"));
+    expectedStyle.defaults.set(line.indexOf(" select"));
+    expectedStyle.keywords.set(line.indexOf("select"), line.indexOf(" '1'"));
+    expectedStyle.defaults.set(line.indexOf(" '1'"));
+    expectedStyle.singleQuotes
+        .set(line.indexOf("'1'"), line.indexOf(" /* comment*/"));
+    expectedStyle.defaults.set(line.indexOf(" /* comment*/"));
+    expectedStyle.comments.set(line.indexOf("/* comment*/"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // sql with !all command
+    line = "!all select '2' as \"two\"; -- comment";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.commands.set(0, "!all".length());
+    expectedStyle.defaults.set("!all".length());
+    expectedStyle.keywords.set(line.indexOf("select"), line.indexOf(" '2'"));
+    expectedStyle.defaults.set(line.indexOf(" '2'"));
+    expectedStyle.singleQuotes.set(line.indexOf("'2'"), line.indexOf(" as"));
+    expectedStyle.defaults.set(line.indexOf(" as"));
+    expectedStyle.keywords.set(line.indexOf("as"), line.indexOf(" \"two"));
+    expectedStyle.defaults.set(line.indexOf(" \"two"));
+    expectedStyle.sqlIdentifierQuotes
+        .set(line.indexOf("\"two\""), line.indexOf(";"));
+    expectedStyle.defaults.set(line.indexOf(";"), line.indexOf("--"));
+    expectedStyle.comments.set(line.indexOf("--"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
     // sqlline comments for default dialect
     // inside sql should be treated as default text
     line = "select #'1'";
