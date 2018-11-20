@@ -9,7 +9,7 @@ Upgrading to
 and improved
 <a href="https://github.com/julianhyde/sqlline/issues/190">dialect support</a>
 allowed us to add
-<a href="https://github.com/julianhyde/sqlline/issues/164">syntax highglighting</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/164">syntax highlighting</a>,
 <a href="https://github.com/julianhyde/sqlline/issues/190">line continuation</a>
 and
 <a href="https://github.com/julianhyde/sqlline/issues/184">multi-line editing</a>.
@@ -18,12 +18,15 @@ There are new commands
 <a href="https://github.com/julianhyde/sqlline/issues/105">`!/`</a> and
 <a href="https://github.com/julianhyde/sqlline/issues/143">`!reset`</a>,
 new properties
-<a href="https://github.com/julianhyde/sqlline/issues/60">`mode`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/164">`colorScheme`</a>,
 <a href="https://github.com/julianhyde/sqlline/issues/151">`escapeOutput`</a>,
-<a href="https://github.com/julianhyde/sqlline/issues/199">`prompt`</a>,
-<a href="https://github.com/julianhyde/sqlline/issues/199">`rightPrompt`</a>,
 <a href="https://github.com/julianhyde/sqlline/issues/177">`maxHistoryRows`</a>,
 <a href="https://github.com/julianhyde/sqlline/issues/177">`maxHistoryFileRows`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/60">`mode`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/199">`prompt`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/199">`rightPrompt`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/183">`strictJdbc`</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/190">`useLineContinuation`</a>,
 <a href="https://github.com/julianhyde/sqlline/issues/146">`version`</a>,
 and improvements to existing commands.
 
@@ -52,7 +55,7 @@ Bugs and functional changes:
 * [<a href="https://github.com/julianhyde/sqlline/issues/190">SQLLINE-190</a>]
   Add `Dialect` API, and various database-specific behaviors
 * [<a href="https://github.com/julianhyde/sqlline/issues/164">SQLLINE-164</a>]
-  Syntax highliting
+  Syntax highlighting
 * [<a href="https://github.com/julianhyde/sqlline/issues/184">SQLLINE-184</a>]
   Multi-line parsing is fooled by a line that ends in a semi-colon followed by a
   comment
