@@ -14,6 +14,7 @@ package sqlline;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -187,6 +188,9 @@ public class Commands {
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
+        if (!Modifier.isPublic(method.getModifiers())) {
+          continue;
+        }
         methodNames.add(method.getName());
         methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
       }
