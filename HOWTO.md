@@ -32,22 +32,35 @@ mvn clean
 Prepare:
 
 ```bash
-read -s GPG_PASSPHRASE
-mvn -Prelease -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.(y+1).0-SNAPSHOT -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:prepare
+export GPG_TTY=$(tty)
+mvn -Prelease -DreleaseVersion=x.y.0 -DdevelopmentVersion=x.(y+1).0-SNAPSHOT release:prepare
 ```
 
 Perform:
 
 ```bash
-mvn -Prelease -DskipTests -Darguments="-Dgpg.passphrase=${GPG_PASSPHRASE}" release:perform
+mvn -Prelease -DskipTests release:perform
 ```
 
-Publish the release:
+Stage the release:
 * Go to http://oss.sonatype.org and log in.
 * Under "Build Promotion", click on "Staging Repositories".
 * Select the line "sqlline-nnnn", and click "Close". You might need to
   click "Refresh" a couple of times before it closes.
-* If it closes without errors, click "Release".
+
+Start a vote by sending an email with subject
+"[VOTE] Release sqlline-X.Y.0 (release candidate N)" to
+[sqlline-dev](https://groups.google.com/forum/#!forum/sqlline-dev).
+Borrow the text from
+[a previous vote](https://groups.google.com/forum/#!topic/sqlline-dev/SWHPzpyBwv0)
+
+If the vote is successful, send an email with subject
+"[RESULT] [VOTE] Release sqlline-X.Y.0 (release candidate N)".
+
+Publish the release:
+* Go to http://oss.sonatype.org and log in.
+* Under "Build Promotion", click on "Staging Repositories".
+* Select the line "sqlline-nnnn", and click "Release".
 
 Wait a couple of hours for the artifacts to appear on Maven central,
 and announce the release.
