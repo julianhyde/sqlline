@@ -51,6 +51,7 @@ import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
 import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
 import static sqlline.BuiltInProperty.MAX_HISTORY_ROWS;
+import static sqlline.BuiltInProperty.MAX_WIDTH;
 import static sqlline.BuiltInProperty.MODE;
 import static sqlline.BuiltInProperty.NULL_VALUE;
 import static sqlline.BuiltInProperty.NUMBER_FORMAT;
@@ -698,6 +699,10 @@ public class SqlLineOpts implements Completer {
 
   public int getMaxHeight() {
     return getInt(MAX_HEIGHT);
+  }
+
+  public int getMaxWidth() {
+    return getInt(MAX_WIDTH);
   }
 
   public int getMaxColumnWidth() {
