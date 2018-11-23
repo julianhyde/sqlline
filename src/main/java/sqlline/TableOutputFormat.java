@@ -26,7 +26,7 @@ class TableOutputFormat implements OutputFormat {
     ColorBuffer header = null;
     ColorBuffer headerCols = null;
     final int maxWidth =
-        sqlLine.getOpts().getInt(BuiltInProperty.MAX_WIDTH);
+        sqlLine.getOpts().getMaxWidth();
     final int width = (maxWidth == 0
             && sqlLine.getLineReader() != null
         ? sqlLine.getLineReader().getTerminal().getWidth()
