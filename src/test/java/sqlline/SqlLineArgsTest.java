@@ -1570,6 +1570,7 @@ public class SqlLineArgsTest {
   public void testEscapeSqlMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set maxColumnWidth 15\n"
         + "!set escapeOutput yes\n"
         + "values \n"
         + "('\n"
