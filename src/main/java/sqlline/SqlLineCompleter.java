@@ -32,7 +32,7 @@ class SqlLineCompleter
 
   @Override public void complete(LineReader reader, ParsedLine line,
       List<Candidate> candidates) {
-    String bufferStr = reader.getBuffer().substring(0);
+    final String bufferStr = reader.getBuffer().substring(0).trim();
     if (bufferStr.startsWith(SqlLine.COMMAND_PREFIX)
         && !bufferStr.startsWith(SqlLine.COMMAND_PREFIX + "all")
         && !bufferStr.startsWith(SqlLine.COMMAND_PREFIX + "sql")) {
