@@ -90,6 +90,10 @@ public class SqlLineParserTest {
         // sql
         "select 1;",
         "select '1';",
+        // sqlline command comment with odd number of quotes
+        "  #select '1",
+        "--select '1`",
+        " -- select '\"",
         // one line comment right after semicolon
         "select '1';--comment",
         "select '1';-----comment",

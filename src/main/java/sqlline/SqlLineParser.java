@@ -396,6 +396,17 @@ public class SqlLineParser extends DefaultParser {
 
   private boolean isOneLineComment(final String buffer, final int pos) {
     final Dialect dialect = sqlLine.getDialect();
+    final int newLinePos = buffer.indexOf('\n');
+    if ((newLinePos == -1 || newLinePos > pos)
+        && buffer.substring(0, pos).trim().isEmpty()) {
+      for (String oneLineCommentString : dialect.getSqlLineOneLineComments()) {
+        if (pos <= buffer.length() - oneLineCommentString.length()
+            && oneLineCommentString
+            .regionMatches(0, buffer, pos, oneLineCommentString.length())) {
+          return true;
+        }
+      }
+    }
     for (String oneLineCommentString : dialect.getOneLineComments()) {
       if (pos <= buffer.length() - oneLineCommentString.length()
           && oneLineCommentString

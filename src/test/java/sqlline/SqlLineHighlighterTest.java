@@ -276,6 +276,20 @@ public class SqlLineHighlighterTest {
     expectedStyle.comments.set(line.indexOf("--"), line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
+    // odd number of quotes inside comments
+    line = "     --  select '1  as \" from dual;";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.defaults.set(0, line.indexOf("--"));
+    expectedStyle.comments.set(line.indexOf("--"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
+    // odd number of quotes inside comments
+    line = "     #  '`  \"  '2  as \";";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.defaults.set(0, line.indexOf("#"));
+    expectedStyle.comments.set(line.indexOf("#"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
     // command with argument
     line = "!set version";
     expectedStyle = new ExpectedHighlightStyle(line.length());
