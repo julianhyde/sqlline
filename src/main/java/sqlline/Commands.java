@@ -190,8 +190,8 @@ public class Commands {
     }
 
     try {
-      Method[] methods =
-          sqlLine.getDatabaseMetaData().getClass().getDeclaredMethods();
+      Method[] methods = sqlLine.getConnection()
+          .getMetaData().getClass().getDeclaredMethods();
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
@@ -215,7 +215,7 @@ public class Commands {
       }
 
       final Object res = sqlLine.getReflector()
-          .invoke(sqlLine.getDatabaseMetaData(), DatabaseMetaDataWrapper.class,
+          .invoke(sqlLine.getDatabaseMetaData(), DatabaseMetaData.class,
               cmd, argList);
       if (res instanceof ResultSet) {
         try (ResultSet rs = (ResultSet) res) {

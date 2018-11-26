@@ -290,7 +290,7 @@ public class SqlLine {
     return getDatabaseConnections().current().connection;
   }
 
-  DatabaseMetaDataWrapper getDatabaseMetaData() {
+  DatabaseMetaData getDatabaseMetaData() {
     if (getDatabaseConnections().current() == null) {
       throw new IllegalArgumentException(loc("no-current-connection"));
     }
@@ -996,7 +996,7 @@ public class SqlLine {
         new String[] {"TABLE"});
   }
 
-  Set<String> getColumnNames(DatabaseMetaDataWrapper meta) {
+  Set<String> getColumnNames(DatabaseMetaData meta) {
     Set<String> names = new HashSet<>();
     info(loc("building-tables"));
 
