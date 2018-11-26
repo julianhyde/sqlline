@@ -11,6 +11,8 @@
 */
 package sqlline;
 
+import java.lang.reflect.Proxy;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
@@ -26,7 +28,7 @@ import static org.hamcrest.core.Is.is;
 /**
  * Test cases for not supported {@link java.sql.DatabaseMetaData} methods.
  */
-public class DatabaseMetaDataWrapperTest {
+public class DatabaseMetaDataHandlerTest {
 
   @Test
   public void testExecutionWithNotSupportedMethods(
@@ -90,8 +92,11 @@ public class DatabaseMetaDataWrapperTest {
         }
       };
 
-      final DatabaseMetaDataWrapper wrapper =
-          new DatabaseMetaDataWrapper(new SqlLine(), meta);
+      final DatabaseMetaData wrapper =
+          (DatabaseMetaData) Proxy.newProxyInstance(
+            DatabaseMetaData.class.getClassLoader(),
+            new Class[]{DatabaseMetaData.class},
+            new DatabaseMetaDataHandler(meta));
 
       assertThat(wrapper.supportsAlterTableWithAddColumn(), is(false));
       assertThat(wrapper.isReadOnly(), is(false));
@@ -119,4 +124,4 @@ public class DatabaseMetaDataWrapperTest {
 
 }
 
-// End DatabaseMetaDataWrapperTest.java
+// End DatabaseMetaDataHandlerTest.java

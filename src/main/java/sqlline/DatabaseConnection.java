@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import org.jline.reader.impl.completer.ArgumentCompleter;
 class DatabaseConnection {
   private final SqlLine sqlLine;
   Connection connection;
-  DatabaseMetaDataWrapper meta;
+  DatabaseMetaData meta;
   private final String driver;
   private final String url;
   private final Properties info;
@@ -128,8 +129,10 @@ class DatabaseConnection {
     // Instead, we use the driver instance to make the connection
 
     connection = theDriver.connect(url, info);
-    meta = new DatabaseMetaDataWrapper(sqlLine, connection.getMetaData());
-
+    meta = (DatabaseMetaData) Proxy.newProxyInstance(
+        DatabaseMetaData.class.getClassLoader(),
+        new Class[] {DatabaseMetaData.class},
+        new DatabaseMetaDataHandler(connection.getMetaData()));
     try {
       sqlLine.debug(
           sqlLine.loc("connected",
@@ -219,7 +222,7 @@ class DatabaseConnection {
     return schema;
   }
 
-  DatabaseMetaDataWrapper getDatabaseMetaData() {
+  DatabaseMetaData getDatabaseMetaData() {
     return meta;
   }
 
