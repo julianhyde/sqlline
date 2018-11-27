@@ -99,7 +99,7 @@ Use the following definition to use `sqlline` in your maven project:
 Prerequisites:
 
 * Maven 3.2.5 or higher
-* Java 1.6 or higher (10 preferred)
+* Java 8 or higher (10 preferred)
 
 Check out and build:
 
@@ -133,6 +133,7 @@ mvn package
   <a href="mailto:sqlline-dev@googlegroups.com">sqlline-dev at googlegroups.com</a>
   (<a href="https://groups.google.com/group/sqlline-dev/topics">archive</a>,
   <a href="https://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
+* Twitter: [@SQLLineShell](https://twitter.com/SQLLineShell)
 * [Issues](https://github.com/julianhyde/sqlline/issues)
 * [Release notes and history](HISTORY.md)
 * [HOWTO](HOWTO.md)
