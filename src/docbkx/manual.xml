@@ -32,7 +32,7 @@
       <filename>sqlplus</filename> for Oracle, <filename>mysql</filename>
       for MySQL, and <filename>isql</filename> for Sybase/SQL Server.
       Since it is pure Java, it is platform independent, and will
-      run on any platform that can run Java 1.6 or higher.
+      run on any platform that can run Java 1.8 or higher.
       </para>
     </chapter>
 
@@ -74,7 +74,7 @@
             <listitem><para>
             <trademark>Java</trademark> Virtual Machine -
             SQLLine is a pure
-            java program, and requires Java version 1.6 or higher
+            java program, and requires Java version 1.8 or higher
             in order to run. The latest JVM can be downloaded from
             <ulink url="http://java.sun.com"/>.
             </para></listitem>
