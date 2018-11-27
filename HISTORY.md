@@ -2,7 +2,7 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
-## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.6.0">1.6.0</a> (2018-11-21)
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.6.0">1.6.0</a> (2018-11-26)
 
 This is the most colorful and interactive SQLLine ever! Upgrading to
 <a href="https://github.com/julianhyde/sqlline/issues/105">`jline3`</a>

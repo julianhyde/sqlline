@@ -212,7 +212,6 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
-          <stylesheetfile>${basedir}/doc/styles.css</stylesheetfile>
           <additionalOptions>${maven-javadoc-plugin.additionalOptions}</additionalOptions>
           <show>public</show>
         </configuration>
