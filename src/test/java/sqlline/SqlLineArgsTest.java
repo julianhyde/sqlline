@@ -62,8 +62,8 @@ public class SqlLineArgsTest {
     connectionSpec = CONNECTION_SPEC;
   }
 
-  static SqlLine.Status begin(
-      SqlLine sqlLine, OutputStream os, boolean saveHistory, String... args) {
+  static SqlLine.Status begin(SqlLine sqlLine, OutputStream os,
+      boolean saveHistory, String... args) {
     try {
       PrintStream beelineOutputStream = getPrintStream(os);
       sqlLine.setOutputStream(beelineOutputStream);
@@ -509,9 +509,7 @@ public class SqlLineArgsTest {
       new MockUp<Commands>() {
         @Mock
         void less(Terminal terminal, InputStream in, PrintStream out,
-                  PrintStream err,
-                  Path currentDir,
-                  String[] argv) {
+            PrintStream err, Path currentDir, String[] argv) {
         }
       };
 
@@ -1092,11 +1090,11 @@ public class SqlLineArgsTest {
     SqlLine sqlLine = new SqlLine();
     final String headerIntervalScript = "!set headerinterval abc\n";
     checkScriptFile(headerIntervalScript, false, equalTo(SqlLine.Status.OK),
-        containsString(sqlLine.loc("not-a-number")));
+        containsString(sqlLine.loc("not-a-number", "headerinterval", "abc")));
 
     final String rowLimitScript = "!set rowlimit xxx\n";
     checkScriptFile(rowLimitScript, false, equalTo(SqlLine.Status.OK),
-        containsString(sqlLine.loc("not-a-number")));
+        containsString(sqlLine.loc("not-a-number", "rowlimit", "xxx")));
   }
 
   @Test

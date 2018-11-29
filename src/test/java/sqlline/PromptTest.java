@@ -120,7 +120,7 @@ public class PromptTest {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     SqlLine sqlLine = new SqlLine();
     try {
-      SqlLine.Status status =
+      final SqlLine.Status status =
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertThat(status, equalTo(SqlLine.Status.OK));
       final DispatchCallback dc = new DispatchCallback();
@@ -149,7 +149,7 @@ public class PromptTest {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     SqlLine sqlLine = new SqlLine();
     try {
-      SqlLine.Status status =
+      final SqlLine.Status status =
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertThat(status, equalTo(SqlLine.Status.OK));
       final DispatchCallback dc = new DispatchCallback();
