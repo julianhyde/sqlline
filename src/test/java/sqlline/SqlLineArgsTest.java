@@ -1100,11 +1100,11 @@ public class SqlLineArgsTest {
     SqlLine sqlLine = new SqlLine();
     final String headerIntervalScript = "!set headerinterval abc\n";
     checkScriptFile(headerIntervalScript, false, equalTo(SqlLine.Status.OK),
-        containsString(sqlLine.loc("not-a-number")));
+        containsString(sqlLine.loc("not-a-number", "headerinterval", "abc")));
 
     final String rowLimitScript = "!set rowlimit xxx\n";
     checkScriptFile(rowLimitScript, false, equalTo(SqlLine.Status.OK),
-        containsString(sqlLine.loc("not-a-number")));
+        containsString(sqlLine.loc("not-a-number", "rowlimit", "xxx")));
   }
 
   @Test

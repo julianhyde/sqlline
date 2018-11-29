@@ -342,8 +342,14 @@ public class SqlLineOpts implements Completer {
         valueToSet = value instanceof Integer || value.getClass() == int.class
           ? value : Integer.parseInt(String.valueOf(value));
       } catch (Exception e) {
-        sqlLine.error(sqlLine.loc("not-a-number"));
-        sqlLine.handleException(e);
+        sqlLine.error(
+            sqlLine.loc(
+                "not-a-number",
+                key.propertyName().toLowerCase(Locale.ROOT),
+                value));
+        if (getVerbose()) {
+          sqlLine.handleException(e);
+        }
         return;
       }
       break;
