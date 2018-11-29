@@ -179,7 +179,8 @@ public class SqlLineArgsTest {
   @Test
   public void testMultilineScriptWithComments() {
     final String script1Text =
-        "-- a comment  \n values\n--comment\n (\n1\n, ' ab'\n--comment\n)\n;\n";
+        "!set incremental true\n"
+        + "-- a comment  \n values\n--comment\n (\n1\n, ' ab'\n--comment\n)\n;\n";
 
     checkScriptFile(script1Text, true,
         equalTo(SqlLine.Status.OK),
@@ -190,7 +191,8 @@ public class SqlLineArgsTest {
             + "+-------------+-----+"));
 
     final String script2Text =
-        "--comment \n values (';\n' /* comment */, '\"'"
+        "!set incremental true\n"
+        + "--comment \n values (';\n' /* comment */, '\"'"
         + "/*multiline;\n ;\n comment*/)\n -- ; \n; -- comment";
 
     checkScriptFile(script2Text, true,
@@ -286,6 +288,7 @@ public class SqlLineArgsTest {
   @Test
   public void testScriptWithOutput() {
     final String scriptText = "!set maxcolumnwidth 20\n"
+        + "!set incremental true\n"
         + "values 100 + 123;\n"
         + "-- a comment\n"
         + "values 100 + 253;\n";
@@ -313,7 +316,8 @@ public class SqlLineArgsTest {
   @Test
   public void testNull() {
     checkScriptFile(
-        "values (1, cast(null as integer), cast(null as varchar(3));\n",
+        "!set incremental true\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3));\n",
         false,
         equalTo(SqlLine.Status.OK),
         containsString(
@@ -339,6 +343,7 @@ public class SqlLineArgsTest {
   @Test
   public void testTableOutputNullWithoutHeader() {
     final String script = "!set showHeader false\n"
+        + "!set incremental true\n"
         + "values (1, cast(null as integer), cast(null as varchar(3));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
@@ -571,7 +576,8 @@ public class SqlLineArgsTest {
   public void testRecord() {
     File file = createTempFile("sqlline", ".log");
     checkScriptFile(
-        "values 1;\n"
+        "!set incremental true\n"
+        + "values 1;\n"
         + "!record " + file.getAbsolutePath() + "\n"
         + "!set outputformat csv\n"
         + "values 2;\n"
@@ -580,24 +586,25 @@ public class SqlLineArgsTest {
         + "values 3;\n",
         false,
         equalTo(SqlLine.Status.OK),
-        RegexMatcher.of("(?s)1/7          values 1;\n"
+        RegexMatcher.of("(?s)1/8          !set incremental true\n"
+                + "2/8          values 1;\n"
                 + "\\+-------------\\+\n"
                 + "\\|     C1      \\|\n"
                 + "\\+-------------\\+\n"
                 + "\\| 1           \\|\n"
                 + "\\+-------------\\+\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n"
-                + "2/7          !record .*.log\n"
+                + "3/8          !record .*.log\n"
                 + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-                + "3/7          !set outputformat csv\n"
-                + "4/7          values 2;\n"
+                + "4/8          !set outputformat csv\n"
+                + "5/8          values 2;\n"
                 + "'C1'\n"
                 + "'2'\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n"
-                + "5/7          !record\n"
+                + "6/8          !record\n"
                 + "Recording stopped.\n"
-                + "6/7          !set outputformat csv\n"
-                + "7/7          values 3;\n"
+                + "7/8          !set outputformat csv\n"
+                + "8/8          values 3;\n"
                 + "'C1'\n"
                 + "'3'\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
@@ -606,12 +613,12 @@ public class SqlLineArgsTest {
     assertFileContains(file,
         RegexMatcher.of("Saving all output to \".*.log\". "
             + "Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            + "6/8          !record\n"));
   }
 
   /** Test case for
@@ -661,7 +668,8 @@ public class SqlLineArgsTest {
   public void testRecordFilenameWithSpace() {
     File file = createTempFile("sqlline file with spaces", ".log");
     checkScriptFile(
-        "values 1;\n"
+        "!set incremental true\n"
+            + "values 1;\n"
             + "!record " + file.getAbsolutePath() + "\n"
             + "!set outputformat csv\n"
             + "values 2;\n"
@@ -670,24 +678,25 @@ public class SqlLineArgsTest {
             + "values 3;\n",
         false,
         equalTo(SqlLine.Status.OK),
-        RegexMatcher.of("(?s)1/7          values 1;\n"
+        RegexMatcher.of("(?s)1/8          !set incremental true\n"
+            + "2/8          values 1;\n"
             + "\\+-------------\\+\n"
             + "\\|     C1      \\|\n"
             + "\\+-------------\\+\n"
             + "\\| 1           \\|\n"
             + "\\+-------------\\+\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "2/7          !record .*.log\n"
+            + "3/8          !record .*.log\n"
             + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"
+            + "6/8          !record\n"
             + "Recording stopped.\n"
-            + "6/7          !set outputformat csv\n"
-            + "7/7          values 3;\n"
+            + "7/8          !set outputformat csv\n"
+            + "8/8          values 3;\n"
             + "'C1'\n"
             + "'3'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
@@ -696,12 +705,12 @@ public class SqlLineArgsTest {
     assertFileContains(file,
         RegexMatcher.of("Saving all output to \".*.log\". "
             + "Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            + "6/8          !record\n"));
   }
 
   private static void assertFileContains(File file, Matcher<String> matcher) {
@@ -808,6 +817,8 @@ public class SqlLineArgsTest {
       DispatchCallback dc = new DispatchCallback();
       sqlLine.initArgs(args, dc);
       os.reset();
+      sqlLine.runCommands(
+          Collections.singletonList("!set incremental true"), dc);
       sqlLine.runCommands(Collections.singletonList("values 1;"), dc);
       final String output = os.toString("UTF8");
       final String line0 = "+-------------+";
@@ -1298,6 +1309,8 @@ public class SqlLineArgsTest {
       Deencapsulation.setField(sqlLine, "initComplete", true);
       sqlLine.getConnection();
       sqlLine.runCommands(
+          Collections.singletonList("!set incremental true"), callback);
+      sqlLine.runCommands(
           Collections.singletonList("!set maxwidth 80"), callback);
       sqlLine.runCommands(
           Collections.singletonList("!set verbose true"), callback);
@@ -1327,6 +1340,8 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
       beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(
+          Collections.singletonList("!set incremental true"), dc);
       String fakeNonEmptyPassword = "nonEmptyPasswd";
       beeLine.runCommands(
           Collections.singletonList("!connect "
@@ -1432,6 +1447,8 @@ public class SqlLineArgsTest {
               + StringUtils.convertBytesToHex(
               fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))
               + "\""), dc);
+      beeLine.runCommands(
+          Collections.singletonList("!set incremental true"), dc);
       beeLine.runCommands(Collections.singletonList("!tables"), dc);
       output = os.toString("UTF8");
       final String expected1 = "| TABLE_CAT | TABLE_SCHEM | "
@@ -1479,6 +1496,7 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set maxcolumnwidth 15\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 =
         "|    TABLE_CAT    |   TABLE_SCHEM   |   TABLE_NAME    |   TABLE_TYPE    |      |";
@@ -1493,6 +1511,7 @@ public class SqlLineArgsTest {
     connectionSpec = ConnectionSpec.H2;
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
@@ -1513,6 +1532,7 @@ public class SqlLineArgsTest {
     connectionSpec = ConnectionSpec.ERROR_H2_DRIVER;
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
@@ -1608,6 +1628,7 @@ public class SqlLineArgsTest {
   public void testSqlMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
         + "!sql \n"
         + "values \n"
         + "(1, 2) \n"
@@ -1626,6 +1647,7 @@ public class SqlLineArgsTest {
   public void testAllMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
         + "!all \n"
         + "values \n"
         + "(1, '2') \n"
@@ -1810,6 +1832,8 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
       beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(
+          Collections.singletonList("!set incremental true"), dc);
       beeLine.runCommands(
           Collections.singletonList("!set maxcolumnwidth 30"), dc);
       beeLine.runCommands(
