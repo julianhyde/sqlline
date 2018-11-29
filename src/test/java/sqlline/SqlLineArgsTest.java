@@ -1088,6 +1088,18 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testSetNonIntValuesToIntProperties() {
+    SqlLine sqlLine = new SqlLine();
+    final String headerIntervalScript = "!set headerinterval abc\n";
+    checkScriptFile(headerIntervalScript, false, equalTo(SqlLine.Status.OK),
+        containsString(sqlLine.loc("not-a-number")));
+
+    final String rowLimitScript = "!set rowlimit xxx\n";
+    checkScriptFile(rowLimitScript, false, equalTo(SqlLine.Status.OK),
+        containsString(sqlLine.loc("not-a-number")));
+  }
+
+  @Test
   public void testSelectXmlAttributes() {
     final String script = "!set outputformat xmlattr\n"
         + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ']]> 1''2\"3\t<>&4');\n";
