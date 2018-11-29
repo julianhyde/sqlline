@@ -12,7 +12,6 @@
 package sqlline;
 
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -508,11 +507,9 @@ public class SqlLineHighlighterTest {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
       SqlLineHighlighter sqlLineHighlighter =
           sqlLine2HighLighterEntry.getValue();
-      sqlLine.runCommands(
-          Collections.singletonList("!connect "
-              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-          dc);
+      sqlLine.runCommands(dc, "!connect "
+          + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+          + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
       for (String line : linesRequiredToBeConnectionSpecificKeyWords) {
         ExpectedHighlightStyle expectedStyle =
@@ -576,11 +573,9 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2Highlighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      sqlLine.runCommands(
-          Collections.singletonList("!connect "
-              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-          dc);
+      sqlLine.runCommands(dc, "!connect "
+          + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+          + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
       for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
         checkLineAgainstHighlighter(
@@ -645,11 +640,9 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2Highlighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      sqlLine.runCommands(
-          Collections.singletonList("!connect "
-              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-          dc);
+      sqlLine.runCommands(dc, "!connect "
+          + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+          + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
       for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
         checkLineAgainstHighlighter(
@@ -701,11 +694,9 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2Highlighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      sqlLine.runCommands(
-          Collections.singletonList("!connect "
-              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-          dc);
+      sqlLine.runCommands(dc, "!connect "
+          + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+          + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
       for (int i = 0; i < linesWithDoubleQuoteSqlIdentifiers.length; i++) {
         checkLineAgainstHighlighter(

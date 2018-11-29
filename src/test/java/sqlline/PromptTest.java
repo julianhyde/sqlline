@@ -12,7 +12,6 @@
 package sqlline;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -116,11 +115,9 @@ public class PromptTest {
   public void testPromptWithNickname() {
     SqlLine sqlLine = new SqlLine();
     DispatchCallback dc = new DispatchCallback();
-    sqlLine.runCommands(
-        Collections.singletonList("!connect "
-            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-        dc);
+    sqlLine.runCommands(dc, "!connect "
+        + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+        + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
     // custom prompt with data from connection
     final SqlLineOpts opts = sqlLine.getOpts();
@@ -138,11 +135,9 @@ public class PromptTest {
   public void testPromptWithConnection() {
     SqlLine sqlLine = new SqlLine();
     DispatchCallback dc = new DispatchCallback();
-    sqlLine.runCommands(
-        Collections.singletonList("!connect "
-            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-        dc);
+    sqlLine.runCommands(dc, "!connect "
+        + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+        + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
 
     // custom prompt with data from connection
     final SqlLineOpts opts = sqlLine.getOpts();

@@ -1768,6 +1768,11 @@ public class SqlLine {
     }
   }
 
+  // for testing
+  int runCommands(DispatchCallback callback, String... cmds) {
+    return runCommands(Arrays.asList(cmds), callback);
+  }
+
   public int runCommands(List<String> cmds, DispatchCallback callback) {
     int successCount = 0;
 

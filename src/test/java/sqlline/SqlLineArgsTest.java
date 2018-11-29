@@ -179,7 +179,8 @@ public class SqlLineArgsTest {
   @Test
   public void testMultilineScriptWithComments() {
     final String script1Text =
-        "-- a comment  \n values\n--comment\n (\n1\n, ' ab'\n--comment\n)\n;\n";
+        "!set incremental true\n"
+        + "-- a comment  \n values\n--comment\n (\n1\n, ' ab'\n--comment\n)\n;\n";
 
     checkScriptFile(script1Text, true,
         equalTo(SqlLine.Status.OK),
@@ -190,7 +191,8 @@ public class SqlLineArgsTest {
             + "+-------------+-----+"));
 
     final String script2Text =
-        "--comment \n values (';\n' /* comment */, '\"'"
+        "!set incremental true\n"
+        + "--comment \n values (';\n' /* comment */, '\"'"
         + "/*multiline;\n ;\n comment*/)\n -- ; \n; -- comment";
 
     checkScriptFile(script2Text, true,
@@ -286,6 +288,7 @@ public class SqlLineArgsTest {
   @Test
   public void testScriptWithOutput() {
     final String scriptText = "!set maxcolumnwidth 20\n"
+        + "!set incremental true\n"
         + "values 100 + 123;\n"
         + "-- a comment\n"
         + "values 100 + 253;\n";
@@ -312,9 +315,9 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testNull() {
-    checkScriptFile(
-        "values (1, cast(null as integer), cast(null as varchar(3));\n",
-        false,
+    final String script = "!set incremental true\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+    checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString(
             "+-------------+-------------+-----+\n"
@@ -339,6 +342,7 @@ public class SqlLineArgsTest {
   @Test
   public void testTableOutputNullWithoutHeader() {
     final String script = "!set showHeader false\n"
+        + "!set incremental true\n"
         + "values (1, cast(null as integer), cast(null as varchar(3));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
@@ -519,8 +523,7 @@ public class SqlLineArgsTest {
       // because of EOF as the result of InputStream which
       // is not used in the current test so it is ok
       // assertThat(status, equalTo(SqlLine.Status.OK));
-      beeLine.runCommands(Collections.singletonList("!manual"),
-          new DispatchCallback());
+      beeLine.runCommands(new DispatchCallback(), "!manual");
       String output = baos.toString("UTF8");
 
       assertThat(output, containsString(expectedLine));
@@ -570,34 +573,35 @@ public class SqlLineArgsTest {
   @Test
   public void testRecord() {
     File file = createTempFile("sqlline", ".log");
-    checkScriptFile(
-        "values 1;\n"
+    final String script = "!set incremental true\n"
+        + "values 1;\n"
         + "!record " + file.getAbsolutePath() + "\n"
         + "!set outputformat csv\n"
         + "values 2;\n"
         + "!record\n"
         + "!set outputformat csv\n"
-        + "values 3;\n",
-        false,
+        + "values 3;\n";
+    checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
-        RegexMatcher.of("(?s)1/7          values 1;\n"
+        RegexMatcher.of("(?s)1/8          !set incremental true\n"
+                + "2/8          values 1;\n"
                 + "\\+-------------\\+\n"
                 + "\\|     C1      \\|\n"
                 + "\\+-------------\\+\n"
                 + "\\| 1           \\|\n"
                 + "\\+-------------\\+\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n"
-                + "2/7          !record .*.log\n"
+                + "3/8          !record .*.log\n"
                 + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-                + "3/7          !set outputformat csv\n"
-                + "4/7          values 2;\n"
+                + "4/8          !set outputformat csv\n"
+                + "5/8          values 2;\n"
                 + "'C1'\n"
                 + "'2'\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n"
-                + "5/7          !record\n"
+                + "6/8          !record\n"
                 + "Recording stopped.\n"
-                + "6/7          !set outputformat csv\n"
-                + "7/7          values 3;\n"
+                + "7/8          !set outputformat csv\n"
+                + "8/8          values 3;\n"
                 + "'C1'\n"
                 + "'3'\n"
                 + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
@@ -606,12 +610,12 @@ public class SqlLineArgsTest {
     assertFileContains(file,
         RegexMatcher.of("Saving all output to \".*.log\". "
             + "Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            + "6/8          !record\n"));
   }
 
   /** Test case for
@@ -660,34 +664,35 @@ public class SqlLineArgsTest {
   @Test
   public void testRecordFilenameWithSpace() {
     File file = createTempFile("sqlline file with spaces", ".log");
-    checkScriptFile(
-        "values 1;\n"
-            + "!record " + file.getAbsolutePath() + "\n"
-            + "!set outputformat csv\n"
-            + "values 2;\n"
-            + "!record\n"
-            + "!set outputformat csv\n"
-            + "values 3;\n",
-        false,
+    final String script = "!set incremental true\n"
+        + "values 1;\n"
+        + "!record " + file.getAbsolutePath() + "\n"
+        + "!set outputformat csv\n"
+        + "values 2;\n"
+        + "!record\n"
+        + "!set outputformat csv\n"
+        + "values 3;\n";
+    checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
-        RegexMatcher.of("(?s)1/7          values 1;\n"
+        RegexMatcher.of("(?s)1/8          !set incremental true\n"
+            + "2/8          values 1;\n"
             + "\\+-------------\\+\n"
             + "\\|     C1      \\|\n"
             + "\\+-------------\\+\n"
             + "\\| 1           \\|\n"
             + "\\+-------------\\+\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "2/7          !record .*.log\n"
+            + "3/8          !record .*.log\n"
             + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"
+            + "6/8          !record\n"
             + "Recording stopped.\n"
-            + "6/7          !set outputformat csv\n"
-            + "7/7          values 3;\n"
+            + "7/8          !set outputformat csv\n"
+            + "8/8          values 3;\n"
             + "'C1'\n"
             + "'3'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
@@ -696,12 +701,12 @@ public class SqlLineArgsTest {
     assertFileContains(file,
         RegexMatcher.of("Saving all output to \".*.log\". "
             + "Enter \"record\" with no arguments to stop it.\n"
-            + "3/7          !set outputformat csv\n"
-            + "4/7          values 2;\n"
+            + "4/8          !set outputformat csv\n"
+            + "5/8          values 2;\n"
             + "'C1'\n"
             + "'2'\n"
             + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "5/7          !record\n"));
+            + "6/8          !record\n"));
   }
 
   private static void assertFileContains(File file, Matcher<String> matcher) {
@@ -808,7 +813,9 @@ public class SqlLineArgsTest {
       DispatchCallback dc = new DispatchCallback();
       sqlLine.initArgs(args, dc);
       os.reset();
-      sqlLine.runCommands(Collections.singletonList("values 1;"), dc);
+      sqlLine.runCommands(dc,
+          "!set incremental true",
+          "values 1;");
       final String output = os.toString("UTF8");
       final String line0 = "+-------------+";
       final String line1 = "|     C1      |";
@@ -870,12 +877,11 @@ public class SqlLineArgsTest {
       // To prevent that, forcibly set init to true.
       Deencapsulation.setField(sqlLine, "initComplete", true);
       sqlLine.getConnection();
-      sqlLine.runCommands(
-          Arrays.asList("CREATE TABLE rsTest ( a int);",
-              "insert into rsTest values (1);",
-              "insert into rsTest values (2);",
-              "select a from rsTest; "),
-          callback);
+      sqlLine.runCommands(callback,
+          "CREATE TABLE rsTest ( a int);",
+          "insert into rsTest values (1);",
+          "insert into rsTest values (2);",
+          "select a from rsTest; ");
       String output = os.toString("UTF8");
       assertThat(output, containsString("Generated Exception"));
     } catch (Throwable t) {
@@ -970,15 +976,13 @@ public class SqlLineArgsTest {
     sqlLine.setErrorStream(sqllineOutputStream);
 
     try {
-      sqlLine.runCommands(
-          Collections.singletonList("!typeinfo"), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!typeinfo");
       String output = os.toString("UTF8");
       assertThat(
           output, not(containsString("java.lang.NullPointerException")));
       assertThat(output, containsString("No current connection"));
 
-      sqlLine.runCommands(
-          Collections.singletonList("!nativesql"), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!nativesql");
       output = os.toString("UTF8");
       assertThat(
           output, not(containsString("java.lang.NullPointerException")));
@@ -999,22 +1003,18 @@ public class SqlLineArgsTest {
     begin(sqlLine, os, false, args);
 
     try {
-      sqlLine.runCommands(Collections.singletonList("!hello"),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!hello");
       String output = os.toString("UTF8");
       assertThat(output, containsString("HELLO WORLD"));
       os.reset();
-      sqlLine.runCommands(Collections.singletonList("!test"),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!test");
       output = os.toString("UTF8");
       assertThat(output, containsString("HELLO WORLD"));
       os.reset();
-      sqlLine.runCommands(Collections.singletonList("!help hello"),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!help hello");
       output = os.toString("UTF8");
       assertThat(output, containsString("help for hello test"));
-      sqlLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(sqlLine.isExit());
     } catch (Exception e) {
       // fail
@@ -1032,10 +1032,8 @@ public class SqlLineArgsTest {
       final String script = "!commandhandler"
           + " sqlline.extensions.HelloWorld2CommandHandler"
           + " sqlline.extensions.HelloWorldCommandHandler";
-      sqlLine.runCommands(Collections.singletonList(script),
-          new DispatchCallback());
-      sqlLine.runCommands(Collections.singletonList("!hello"),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), script);
+      sqlLine.runCommands(new DispatchCallback(), "!hello");
       String output = os.toString("UTF8");
       assertThat(output, containsString("HELLO WORLD2"));
       final String expected = "Could not add command handler "
@@ -1043,12 +1041,10 @@ public class SqlLineArgsTest {
           + "[hello, test] is already present";
       assertThat(output, containsString(expected));
       os.reset();
-      sqlLine.runCommands(Collections.singletonList("!help hello"),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!help hello");
       output = os.toString("UTF8");
       assertThat(output, containsString("help for hello2"));
-      sqlLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(sqlLine.isExit());
     } catch (Exception e) {
       // fail
@@ -1179,38 +1175,32 @@ public class SqlLineArgsTest {
 
       // successful cases
       final SqlLine sqlLine = new SqlLine();
-      sqlLine.runCommands(
-          Collections.singletonList(okTimeFormat), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), okTimeFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
-      sqlLine.runCommands(
-          Collections.singletonList(defaultTimeFormat), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), defaultTimeFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
-      sqlLine.runCommands(
-          Collections.singletonList(okDateFormat), new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), okDateFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
-      sqlLine.runCommands(Collections.singletonList(defaultDateFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), defaultDateFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
-      sqlLine.runCommands(Collections.singletonList(okTimestampFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), okTimestampFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
-      sqlLine.runCommands(Collections.singletonList(defaultTimestampFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), defaultTimestampFormat);
       assertThat(errBaos.toString("UTF8"),
           not(
               anyOf(containsString("Error setting configuration"),
@@ -1223,16 +1213,13 @@ public class SqlLineArgsTest {
           "!set timestampFormat 'YYYY-MM-ddTHH:MI:ss'\n";
 
       // failed cases
-      sqlLine.runCommands(Collections.singletonList(wrongTimeFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), wrongTimeFormat);
       assertThat(errBaos.toString("UTF8"),
           containsString("Illegal pattern character 'q'"));
-      sqlLine.runCommands(Collections.singletonList(wrongDateFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), wrongDateFormat);
       assertThat(errBaos.toString("UTF8"),
           containsString("Illegal pattern character 'A'"));
-      sqlLine.runCommands(Collections.singletonList(wrongTimestampFormat),
-          new DispatchCallback());
+      sqlLine.runCommands(new DispatchCallback(), wrongTimestampFormat);
       assertThat(errBaos.toString("UTF8"),
           containsString("Illegal pattern character 'T'"));
     } catch (Throwable t) {
@@ -1297,12 +1284,11 @@ public class SqlLineArgsTest {
       sqlLine.initArgs(args, callback);
       Deencapsulation.setField(sqlLine, "initComplete", true);
       sqlLine.getConnection();
-      sqlLine.runCommands(
-          Collections.singletonList("!set maxwidth 80"), callback);
-      sqlLine.runCommands(
-          Collections.singletonList("!set verbose true"), callback);
-      sqlLine.runCommands(
-          Collections.singletonList("!indexes"), callback);
+      sqlLine.runCommands(callback,
+          "!set incremental true",
+          "!set maxwidth 80",
+          "!set verbose true",
+          "!indexes");
       assertThat(os.toString("UTF8"), not(containsString("Exception")));
     } catch (Throwable e) {
       // fail
@@ -1326,23 +1312,23 @@ public class SqlLineArgsTest {
           begin(beeLine, os, false, "-e", "!set maxwidth 80");
       assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
-      beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(dc,
+          "!set maxwidth 80",
+          "!set incremental true");
       String fakeNonEmptyPassword = "nonEmptyPasswd";
-      beeLine.runCommands(
-          Collections.singletonList("!connect "
-              + " -p PASSWORD_HASH TRUE "
-              + ConnectionSpec.H2.url + " "
-              + ConnectionSpec.H2.username + " "
-              + StringUtils.convertBytesToHex(
-              fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))),
-          dc);
-      beeLine.runCommands(Collections.singletonList("!tables"), dc);
+      final byte[] bytes =
+          fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8);
+      beeLine.runCommands(dc, "!connect "
+          + " -p PASSWORD_HASH TRUE "
+          + ConnectionSpec.H2.url + " "
+          + ConnectionSpec.H2.username + " "
+          + StringUtils.convertBytesToHex(bytes));
+      beeLine.runCommands(dc, "!tables");
       String output = os.toString("UTF8");
       final String expected = "| TABLE_CAT | TABLE_SCHEM | "
           + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
       assertThat(output, containsString(expected));
-      beeLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      beeLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(beeLine.isExit());
     } catch (Throwable t) {
       // fail
@@ -1368,22 +1354,20 @@ public class SqlLineArgsTest {
           begin(beeLine, os, false, "-e", "!set maxwidth 80");
       assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
-      beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(dc, "!set maxwidth 80");
       String fakeNonEmptyPassword = "nonEmptyPasswd";
-      beeLine.runCommands(
-          Collections.singletonList("!connect "
-              + " -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE "
-              + ConnectionSpec.H2.url + " "
-              + ConnectionSpec.H2.username + " "
-              + StringUtils.convertBytesToHex(
-              fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))),
-          dc);
-      beeLine.runCommands(Collections.singletonList("select 1;"), dc);
+      final byte[] bytes =
+          fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8);
+      beeLine.runCommands(dc, "!connect "
+            + " -p PASSWORD_HASH TRUE -p ALLOW_LITERALS NONE "
+            + ConnectionSpec.H2.url + " "
+            + ConnectionSpec.H2.username + " "
+            + StringUtils.convertBytesToHex(bytes));
+      beeLine.runCommands(dc, "select 1;");
       String output = os.toString("UTF8");
       final String expected = "Error:";
       assertThat(output, containsString(expected));
-      beeLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      beeLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(beeLine.isExit());
     } catch (Throwable t) {
       // fail
@@ -1408,44 +1392,43 @@ public class SqlLineArgsTest {
     DispatchCallback dc = new DispatchCallback();
 
     try {
-      beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
+      beeLine.runCommands(dc, "!set maxwidth 80");
 
       // fail attempt
       String fakeNonEmptyPassword = "nonEmptyPasswd";
-      beeLine.runCommands(
-          Collections.singletonList("!connect \""
-              + ConnectionSpec.H2.url
-              + " ;PASSWORD_HASH=TRUE\" "
-              + ConnectionSpec.H2.username
-              + " \"" + fakeNonEmptyPassword + "\""), dc);
+      beeLine.runCommands(dc, "!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE\" "
+            + ConnectionSpec.H2.username
+            + " \"" + fakeNonEmptyPassword + "\"");
       String output = os.toString("UTF8");
       final String expected0 = "Error:";
       assertThat(output, containsString(expected0));
       os.reset();
 
       // success attempt
-      beeLine.runCommands(
-          Collections.singletonList("!connect \""
-              + ConnectionSpec.H2.url
-              + " ;PASSWORD_HASH=TRUE;ALLOW_LITERALS=NONE\" "
-              + ConnectionSpec.H2.username + " \""
-              + StringUtils.convertBytesToHex(
-              fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8))
-              + "\""), dc);
-      beeLine.runCommands(Collections.singletonList("!tables"), dc);
+      final byte[] bytes =
+          fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8);
+      beeLine.runCommands(dc, "!connect \""
+            + ConnectionSpec.H2.url
+            + " ;PASSWORD_HASH=TRUE;ALLOW_LITERALS=NONE\" "
+            + ConnectionSpec.H2.username + " \""
+            + StringUtils.convertBytesToHex(bytes)
+            + "\"");
+      beeLine.runCommands(dc, "!set incremental true");
+      beeLine.runCommands(dc, "!tables");
       output = os.toString("UTF8");
       final String expected1 = "| TABLE_CAT | TABLE_SCHEM | "
           + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
       assertThat(output, containsString(expected1));
 
-      beeLine.runCommands(Collections.singletonList("select 5;"), dc);
+      beeLine.runCommands(dc, "select 5;");
       output = os.toString("UTF8");
       final String expected2 = "Error:";
       assertThat(output, containsString(expected2));
       os.reset();
 
-      beeLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      beeLine.runCommands(new DispatchCallback(), "!quit");
       output = os.toString("UTF8");
       assertThat(output,
           allOf(not(containsString("Error:")), containsString("!quit")));
@@ -1479,6 +1462,7 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set maxcolumnwidth 15\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 =
         "|    TABLE_CAT    |   TABLE_SCHEM   |   TABLE_NAME    |   TABLE_TYPE    |      |";
@@ -1493,6 +1477,7 @@ public class SqlLineArgsTest {
     connectionSpec = ConnectionSpec.H2;
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
@@ -1513,6 +1498,7 @@ public class SqlLineArgsTest {
     connectionSpec = ConnectionSpec.ERROR_H2_DRIVER;
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
         + "!tables\n";
     final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
@@ -1608,6 +1594,7 @@ public class SqlLineArgsTest {
   public void testSqlMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
         + "!sql \n"
         + "values \n"
         + "(1, 2) \n"
@@ -1626,6 +1613,7 @@ public class SqlLineArgsTest {
   public void testAllMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
         + "!all \n"
         + "values \n"
         + "(1, '2') \n"
@@ -1809,17 +1797,16 @@ public class SqlLineArgsTest {
       // is not used in the current test so it is ok
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
-      beeLine.runCommands(Collections.singletonList("!set maxwidth 80"), dc);
-      beeLine.runCommands(
-          Collections.singletonList("!set maxcolumnwidth 30"), dc);
-      beeLine.runCommands(
-          Collections.singletonList("!connect "
-              + ConnectionSpec.H2.url + " "
-              + ConnectionSpec.H2.username + " "
-              + "\"\""), dc);
+      beeLine.runCommands(dc, "!set maxwidth 80");
+      beeLine.runCommands(dc, "!set incremental true");
+      beeLine.runCommands(dc, "!set maxcolumnwidth 30");
+      beeLine.runCommands(dc, "!connect "
+          + ConnectionSpec.H2.url + " "
+          + ConnectionSpec.H2.username + " "
+          + "\"\"");
       os.reset();
 
-      beeLine.runCommands(Collections.singletonList("!/ 1"), dc);
+      beeLine.runCommands(dc, "!/ 1");
       String output = os.toString("UTF8");
       final String expected0 = "+----------------------------+";
       final String expected1 = "|             C1             |";
@@ -1830,32 +1817,30 @@ public class SqlLineArgsTest {
               containsString(expected2)));
       os.reset();
 
-      beeLine.runCommands(Collections.singletonList("!/ 4"), dc);
+      beeLine.runCommands(dc, "!/ 4");
       output = os.toString("UTF8");
       String expectedLine3 = "Cycled rerun of commands from history [2, 4]";
       assertThat(output, containsString(expectedLine3));
       os.reset();
 
-      beeLine.runCommands(Collections.singletonList("!/ 3"), dc);
+      beeLine.runCommands(dc, "!/ 3");
       output = os.toString("UTF8");
       String expectedLine4 = "Cycled rerun of commands from history [3, 5, 7]";
       assertThat(output, containsString(expectedLine4));
       os.reset();
 
-      beeLine.runCommands(Collections.singletonList("!/ 8"), dc);
+      beeLine.runCommands(dc, "!/ 8");
       output = os.toString("UTF8");
       String expectedLine5 = "Cycled rerun of commands from history [8]";
       assertThat(output, containsString(expectedLine5));
       os.reset();
 
-      beeLine.runCommands(
-          Collections.singletonList("!rerun " + Integer.MAX_VALUE), dc);
+      beeLine.runCommands(dc, "!rerun " + Integer.MAX_VALUE);
       output = os.toString("UTF8");
       String expectedLine6 =
           "Usage: rerun <offset>, available range of offset is -7..8";
       assertThat(output, containsString(expectedLine6));
-      beeLine.runCommands(
-          Collections.singletonList("!quit"), new DispatchCallback());
+      beeLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(beeLine.isExit());
     } catch (Exception e) {
       // fail
@@ -1996,11 +1981,9 @@ public class SqlLineArgsTest {
       DispatchCallback dc = new DispatchCallback();
 
       final int maxLines = 3;
-      beeLine.runCommands(
-          Collections.singletonList("!set maxHistoryFileRows " + maxLines), dc);
+      beeLine.runCommands(dc, "!set maxHistoryFileRows " + maxLines);
       os.reset();
-      beeLine.runCommands(
-          Collections.singletonList("!history"), dc);
+      beeLine.runCommands(dc, "!history");
       assertEquals(maxLines + 1,
           os.toString("UTF8").split("\\s+\\d{2}:\\d{2}:\\d{2}\\s+").length);
       os.reset();
@@ -2022,13 +2005,11 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
 
-      beeLine.runCommands(
-          Collections.singletonList("!save"), dc);
+      beeLine.runCommands(dc, "!save");
       assertThat(os.toString("UTF8"),
           containsString("Saving preferences to"));
       os.reset();
-      beeLine.runCommands(
-          Collections.singletonList("!set"), dc);
+      beeLine.runCommands(dc, "!set");
       assertThat(os.toString("UTF8"),
           allOf(containsString("autoCommit"),
               not(containsString("Unknown property:"))));
@@ -2051,9 +2032,7 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
       final String invalidColorScheme = "invalid";
-      sqlLine.runCommands(
-          Collections.singletonList(
-              "!set colorscheme " + invalidColorScheme), dc);
+      sqlLine.runCommands(dc, "!set colorscheme " + invalidColorScheme);
       assertThat(os.toString("UTF8"),
           containsString(
               sqlLine.loc("unknown-colorscheme", invalidColorScheme,
@@ -2077,9 +2056,7 @@ public class SqlLineArgsTest {
       assertThat(status, equalTo(SqlLine.Status.OTHER));
       DispatchCallback dc = new DispatchCallback();
       final String invalidEditingMode = "invalid";
-      sqlLine.runCommands(
-          Collections.singletonList(
-              "!set mode " + invalidEditingMode), dc);
+      sqlLine.runCommands(dc, "!set mode " + invalidEditingMode);
       assertThat(os.toString("UTF8"),
           containsString(
               sqlLine.loc("unknown-mode", invalidEditingMode,

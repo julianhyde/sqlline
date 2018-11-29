@@ -40,7 +40,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   HEADER_INTERVAL("headerInterval", Type.INTEGER, 100),
   HISTORY_FILE("historyFile", Type.STRING,
       new File(SqlLineOpts.saveDir(), "history").getAbsolutePath()),
-  INCREMENTAL("incremental", Type.BOOLEAN, true),
+  INCREMENTAL("incremental", Type.BOOLEAN, false),
   ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ"),
   MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, -1),
   // don't save maxheight, maxwidth: it is automatically set based on
