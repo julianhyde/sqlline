@@ -128,7 +128,7 @@ public class SqlLineParser extends DefaultParser {
       int rawWordLength = -1;
       int rawWordStart = 0;
       int lastNonQuoteCommentIndex = 0;
-      boolean isSql = isSql(line, context);
+      boolean isSql = isSql(sqlLine, line, context);
 
       for (int i = 0; i < line.length(); i++) {
         // once we reach the cursor, set the
@@ -329,7 +329,7 @@ public class SqlLineParser extends DefaultParser {
     return rawWordLength;
   }
 
-  private boolean isSql(String line, ParseContext context) {
+  static boolean isSql(SqlLine sqlLine, String line, ParseContext context) {
     String trimmedLine = trimLeadingSpacesIfPossible(line, context);
     return !trimmedLine.isEmpty()
         && !sqlLine.isComment(trimmedLine, false)

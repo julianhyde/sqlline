@@ -256,10 +256,73 @@ public class SqlLineArgsTest {
   public void testScriptFileContainsComment() {
     final String scriptText = "values 10 + 23;\n"
         + "-- a comment\n"
-        + "values 100 + 23;\n";
+        + "values 100 + 23";
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  @Test
+  public void testMultilineScriptFileWithComments() {
+    final String scriptText = "--comment\n\n"
+        + "values \n10 \n+ \n23;\n\n\n"
+        + "-- a comment\n"
+        + "\n\nvalues "
+            + "--comment inside\n\n"
+            + "100 --comment inside\n\n"
+            + "+ \n\n23\n\n\n;\n\n\n\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  @Test
+  public void testMultilineScriptFileWithMultilineQuotedStrings() {
+    final String scriptText = "--comment\n\n"
+        + "values '\nmultiline;\n;\n; string\n'"
+        + ";\n\n\n"
+        + "values '\nmultiline2;\n;\n; string2\n'"
+        + ";\n\n\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(containsString("multiline2;"), containsString("; string2")));
+  }
+
+  /**
+   * Tests sql with H2 specific one-line comment '//'
+   */
+  @Test
+  public void testMultilineScriptWithH2Comments() {
+    final SqlLine sqlLine = new SqlLine();
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      final File tmpHistoryFile = createTempFile("queryToExecute", "temp");
+      try (BufferedWriter bw =
+               new BufferedWriter(
+                   new OutputStreamWriter(new FileOutputStream(tmpHistoryFile),
+                       StandardCharsets.UTF_8))) {
+        bw.write("\n\nselect * from information_schema.tables// ';\n"
+            + "// \";"
+            + ";\n"
+            + "\n"
+            + "\n");
+        bw.flush();
+      }
+      SqlLine.Status status =
+          begin(sqlLine, os, false,
+              "-u", ConnectionSpec.H2.url,
+              "-n", ConnectionSpec.H2.username,
+              "--run=" + tmpHistoryFile.getAbsolutePath());
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      String output = os.toString("UTF8");
+      final String expected = "| TABLE_CATALOG | TABLE_SCHEMA |"
+          + " TABLE_NAME | TABLE_TYPE | STORAGE_TYPE | SQL  |";
+      assertThat(output, containsString(expected));
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
+      assertTrue(sqlLine.isExit());
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
+    }
   }
 
   /** Test case for
