@@ -746,7 +746,7 @@ public class SqlLine {
           && !line.regionMatches(1, "all", 0, "all".length())) {
         return null;
       }
-      if (!isComment(line)) {
+      if (!line.isEmpty() && !isComment(line)) {
         waitingPattern = ";";
       }
     }

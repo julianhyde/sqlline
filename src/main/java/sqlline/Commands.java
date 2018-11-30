@@ -1470,7 +1470,7 @@ public class Commands {
           }
         }
 
-        if (cmd != null) {
+        if (cmd != null && !cmd.toString().trim().isEmpty()) {
           // ### REVIEW: oops, somebody left the last command
           // unterminated; should we fix it for them or complain?
           // For now be nice and fix it.

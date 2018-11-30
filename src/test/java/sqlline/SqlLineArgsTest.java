@@ -260,6 +260,20 @@ public class SqlLineArgsTest {
         allOf(containsString(" 33 "), containsString(" 123 ")));
   }
 
+  @Test
+  public void testMultilineScriptFileWithComments() {
+    final String scriptText = "--comment\n\n"
+        + "values \n10 \n+ \n23;\n\n\n"
+        + "-- a comment\n"
+        + "\n\nvalues "
+            + "--comment inside\n\n"
+            + "100 --comment inside\n\n"
+            + "+ \n\n23\n\n\n;\n\n\n\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
   /** Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/72">[SQLLINE-72]
    * Allow quoted file names (including spaces) in <code>!record</code>,
