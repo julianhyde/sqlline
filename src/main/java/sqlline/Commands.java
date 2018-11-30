@@ -19,7 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 
+import org.jline.reader.EOFError;
 import org.jline.reader.History;
+import org.jline.reader.Parser;
 import org.jline.reader.UserInterruptException;
 
 /**
@@ -1428,57 +1430,44 @@ public class Commands {
     List<String> cmds = new LinkedList<>();
 
     try {
-      BufferedReader reader =
-          new BufferedReader(
-              new InputStreamReader(
-                  new FileInputStream(
-                      expand(filename)), StandardCharsets.UTF_8));
-      try {
+      Parser parser = sqlLine.getLineReader().getParser();
+      try (BufferedReader reader = new BufferedReader(
+          new InputStreamReader(
+              new FileInputStream(
+                  expand(filename)), StandardCharsets.UTF_8))) {
         // ### NOTE: fix for sf.net bug 879427
-        StringBuilder cmd = null;
-        String waitingPattern = null;
+        StringBuilder cmd = new StringBuilder();
+        boolean needsContinuation;
         for (;;) {
           String scriptLine = reader.readLine();
-
           if (scriptLine == null) {
             break;
           }
+          // we're continuing an existing command
+          cmd.append(" \n");
+          cmd.append(scriptLine);
 
-          if (cmd != null) {
-            // we're continuing an existing command
-            cmd.append(" \n");
-            cmd.append(scriptLine);
-
-            waitingPattern =
-                sqlLine.getWaitingPattern(scriptLine, waitingPattern);
-            if (waitingPattern == null) {
-              // this command has terminated
-              cmds.add(maybeTrim(cmd.toString()));
-              cmd = null;
-            }
-          } else {
-            // we're starting a new command
-            waitingPattern =
-                sqlLine.getWaitingPattern(scriptLine, waitingPattern);
-            if (waitingPattern != null) {
-              // multi-line
-              cmd = new StringBuilder(scriptLine);
-            } else {
-              // single-line
-              cmds.add(maybeTrim(scriptLine));
-            }
+          try {
+            needsContinuation = false;
+            parser.parse(
+                cmd.toString(), cmd.length(), Parser.ParseContext.ACCEPT_LINE);
+          } catch (EOFError e) {
+            needsContinuation = true;
+          }
+          if (!needsContinuation && !cmd.toString().trim().isEmpty()) {
+            cmds.add(maybeTrim(cmd.toString()));
+            cmd = new StringBuilder();
           }
         }
 
-        if (cmd != null && !cmd.toString().trim().isEmpty()) {
+        if (SqlLineParser
+            .isSql(sqlLine, cmd.toString(), Parser.ParseContext.ACCEPT_LINE)) {
           // ### REVIEW: oops, somebody left the last command
           // unterminated; should we fix it for them or complain?
           // For now be nice and fix it.
           cmd.append(";");
           cmds.add(cmd.toString());
         }
-      } finally {
-        reader.close();
       }
 
       // success only if all the commands were successful

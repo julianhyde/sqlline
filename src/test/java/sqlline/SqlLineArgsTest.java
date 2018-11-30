@@ -254,7 +254,7 @@ public class SqlLineArgsTest {
   public void testScriptFileContainsComment() {
     final String scriptText = "values 10 + 23;\n"
         + "-- a comment\n"
-        + "values 100 + 23;\n";
+        + "values 100 + 23";
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(" 33 "), containsString(" 123 ")));
@@ -272,6 +272,18 @@ public class SqlLineArgsTest {
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(" 33 "), containsString(" 123 ")));
+  }
+
+  @Test
+  public void testMultilineScriptFileWithMultilineQuotedStrings() {
+    final String scriptText = "--comment\n\n"
+        + "values '\nmultiline;\n;\n; string\n'"
+        + ";\n\n\n"
+        + "values '\nmultiline2;\n;\n; string2\n'"
+        + ";\n\n\n";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(containsString("multiline2;"), containsString("; string2")));
   }
 
   /** Test case for
