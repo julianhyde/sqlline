@@ -416,7 +416,12 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         || line.charAt(end) == '/'
         || line.charAt(end) == ')'
         || line.charAt(end) == '%'
-        || line.charAt(end) == '*') {
+        || line.charAt(end) == '*'
+        || line.charAt(end) == '!'
+        || line.charAt(end) == '^'
+        || line.charAt(end) == '|'
+        || line.charAt(end) == '&'
+        || line.charAt(end) == ']') {
       numberBitSet.set(startingPoint, end);
     }
     startingPoint = end - 1;

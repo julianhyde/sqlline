@@ -381,6 +381,29 @@ public class SqlLineHighlighterTest {
     expectedStyle.singleQuotes.set(line.indexOf(' ') + 1, line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
+    line = "select map[1*5,2],1|2,1^2,1!=0";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.keywords.set(0, "select".length());
+    expectedStyle.defaults.set("select".length(), line.indexOf("1*"));
+    expectedStyle.numbers.set(line.indexOf("1*"));
+    expectedStyle.defaults.set(line.indexOf('*'));
+    expectedStyle.numbers.set(line.indexOf('5'));
+    expectedStyle.defaults.set(line.indexOf(','));
+    expectedStyle.numbers.set(line.indexOf('2'));
+    expectedStyle.defaults.set(line.indexOf(']'), line.indexOf("1|"));
+    expectedStyle.numbers.set(line.indexOf("1|"));
+    expectedStyle.defaults.set(line.indexOf('|'));
+    expectedStyle.numbers.set(line.indexOf("2,1"));
+    expectedStyle.defaults.set(line.indexOf(",1^"));
+    expectedStyle.numbers.set(line.indexOf("1^"));
+    expectedStyle.defaults.set(line.indexOf("^2"));
+    expectedStyle.numbers.set(line.indexOf("2,1!"));
+    expectedStyle.defaults.set(line.indexOf(",1!"));
+    expectedStyle.numbers.set(line.indexOf("1!"));
+    expectedStyle.defaults.set(line.indexOf("!="), line.indexOf('0'));
+    expectedStyle.numbers.set(line.indexOf('0'));
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
     //no spaces
     line = "select'1'as\"21\"";
     expectedStyle = new ExpectedHighlightStyle(line.length());
