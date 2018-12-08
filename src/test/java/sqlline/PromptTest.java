@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -23,6 +24,8 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+
+import static sqlline.SqlLineArgsTest.begin;
 
 /**
  * Test cases for prompt and right prompt.
@@ -114,43 +117,59 @@ public class PromptTest {
 
   @Test
   public void testPromptWithNickname() {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     SqlLine sqlLine = new SqlLine();
-    DispatchCallback dc = new DispatchCallback();
-    sqlLine.runCommands(
-        Collections.singletonList("!connect "
-            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-        dc);
+    try {
+      SqlLine.Status status = begin(
+          sqlLine, os, false, "-e", "!set maxwidth 80");
+      final DispatchCallback dc = new DispatchCallback();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
 
-    // custom prompt with data from connection
-    final SqlLineOpts opts = sqlLine.getOpts();
-    sqlLine.getDatabaseConnection().setNickname("nickname");
-    opts.set(BuiltInProperty.PROMPT, "%u@%n>");
-    opts.set(BuiltInProperty.RIGHT_PROMPT, "//%d%c");
-    // if nickname is specified for the connection
-    // it has more priority than prompt.
-    // Right prompt does not care about nickname
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("0: nickname> "));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
+      // custom prompt with data from connection
+      final SqlLineOpts opts = sqlLine.getOpts();
+      sqlLine.getDatabaseConnection().setNickname("nickname");
+      opts.set(BuiltInProperty.PROMPT, "%u@%n>");
+      opts.set(BuiltInProperty.RIGHT_PROMPT, "//%d%c");
+      // if nickname is specified for the connection
+      // it has more priority than prompt.
+      // Right prompt does not care about nickname
+      assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("0: nickname> "));
+      assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
   }
 
   @Test
   public void testPromptWithConnection() {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     SqlLine sqlLine = new SqlLine();
-    DispatchCallback dc = new DispatchCallback();
-    sqlLine.runCommands(
-        Collections.singletonList("!connect "
-            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
-            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
-        dc);
+    try {
+      SqlLine.Status status = begin(
+          sqlLine, os, false, "-e", "!set maxwidth 80");
+      final DispatchCallback dc = new DispatchCallback();
+      sqlLine.runCommands(
+          Collections.singletonList("!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\""),
+          dc);
 
-    // custom prompt with data from connection
-    final SqlLineOpts opts = sqlLine.getOpts();
-    opts.set(BuiltInProperty.PROMPT, "%u@%n>");
-    opts.set(BuiltInProperty.RIGHT_PROMPT, "//%d%c");
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("jdbc:h2:mem:@SA>"));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
-    sqlLine.getDatabaseConnection().close();
+      // custom prompt with data from connection
+      final SqlLineOpts opts = sqlLine.getOpts();
+      opts.set(BuiltInProperty.PROMPT, "%u@%n>");
+      opts.set(BuiltInProperty.RIGHT_PROMPT, "//%d%c");
+      assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("jdbc:h2:mem:@SA>"));
+      assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
+      sqlLine.getDatabaseConnection().close();
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
   }
 }
 

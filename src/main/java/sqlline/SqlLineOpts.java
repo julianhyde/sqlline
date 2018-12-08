@@ -467,8 +467,10 @@ public class SqlLineOpts implements Completer {
       propertiesMap.put(HISTORY_FILE, Commands.expand(historyFile));
     }
     if (sqlLine != null && sqlLine.getLineReader() != null) {
-      final History history = sqlLine.getLineReader().getHistory();
-      if (history != null) {
+      History history = sqlLine.getLineReader().getHistory();
+      if (history == null) {
+        history = new DefaultHistory();
+      } else {
         try {
           history.save();
         } catch (IOException e) {
@@ -477,7 +479,7 @@ public class SqlLineOpts implements Completer {
       }
       sqlLine.getLineReader()
           .setVariable(LineReader.HISTORY_FILE, get(HISTORY_FILE));
-      new DefaultHistory().attach(sqlLine.getLineReader());
+      history.attach(sqlLine.getLineReader());
     }
   }
 
