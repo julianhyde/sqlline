@@ -62,7 +62,7 @@ public class SqlLineArgsTest {
     connectionSpec = CONNECTION_SPEC;
   }
 
-  private static SqlLine.Status begin(
+  static SqlLine.Status begin(
       SqlLine sqlLine, OutputStream os, boolean saveHistory, String... args) {
     try {
       PrintStream beelineOutputStream = getPrintStream(os);
@@ -512,17 +512,13 @@ public class SqlLineArgsTest {
                   PrintStream err,
                   Path currentDir,
                   String[] argv) {
-          return;
         }
       };
 
       SqlLine beeLine = new SqlLine();
       SqlLine.Status status =
-          begin(beeLine, baos, false);
-      // Here it is the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      // assertThat(status, equalTo(SqlLine.Status.OK));
+          begin(beeLine, baos, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
       beeLine.runCommands(new DispatchCallback(), "!manual");
       String output = baos.toString("UTF8");
 
@@ -1630,11 +1626,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testAppInfoMessage() {
-    Pair pair = run();
-    // Here it is the status is SqlLine.Status.OTHER
-    // because of EOF as the result of InputStream which
-    // is not used in the current test so it is ok
-    // assertThat(status, equalTo(SqlLine.Status.OK));
+    Pair pair = run("-e", "!set maxwidth 80");
+    assertThat(pair.status, equalTo(SqlLine.Status.OK));
     assertThat(pair.output,
         containsString(Application.DEFAULT_APP_INFO_MESSAGE));
 
@@ -1791,19 +1784,17 @@ public class SqlLineArgsTest {
       bw.flush();
 
       SqlLine.Status status = begin(beeLine, os, true,
-          "--historyfile=" + tmpHistoryFile.getAbsolutePath());
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
+          "--historyfile=" + tmpHistoryFile.getAbsolutePath(),
+          "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
-      beeLine.runCommands(dc, "!set maxwidth 80");
-      beeLine.runCommands(dc, "!set incremental true");
-      beeLine.runCommands(dc, "!set maxcolumnwidth 30");
-      beeLine.runCommands(dc, "!connect "
-          + ConnectionSpec.H2.url + " "
-          + ConnectionSpec.H2.username + " "
-          + "\"\"");
+      beeLine.runCommands(dc,
+          "!set incremental true",
+          "!set maxcolumnwidth 30",
+          "!connect "
+              + ConnectionSpec.H2.url + " "
+              + ConnectionSpec.H2.username + " "
+              + "\"\"");
       os.reset();
 
       beeLine.runCommands(dc, "!/ 1");
@@ -1973,11 +1964,9 @@ public class SqlLineArgsTest {
       bw.close();
 
       SqlLine.Status status = begin(beeLine, os, true,
-          "--historyfile=" + tmpHistoryFile.getAbsolutePath());
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
+          "--historyfile=" + tmpHistoryFile.getAbsolutePath(),
+          "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
 
       final int maxLines = 3;
@@ -1998,14 +1987,11 @@ public class SqlLineArgsTest {
     final SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
-      SqlLine.Status status = begin(beeLine, os, false);
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
-      DispatchCallback dc = new DispatchCallback();
+      SqlLine.Status status = begin(beeLine, os, false,
+          "-e", "!save");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      final DispatchCallback dc = new DispatchCallback();
 
-      beeLine.runCommands(dc, "!save");
       assertThat(os.toString("UTF8"),
           containsString("Saving preferences to"));
       os.reset();
@@ -2025,12 +2011,10 @@ public class SqlLineArgsTest {
     final SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
-      SqlLine.Status status = begin(sqlLine, os, false);
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
-      DispatchCallback dc = new DispatchCallback();
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      final DispatchCallback dc = new DispatchCallback();
       final String invalidColorScheme = "invalid";
       sqlLine.runCommands(dc, "!set colorscheme " + invalidColorScheme);
       assertThat(os.toString("UTF8"),
@@ -2049,11 +2033,9 @@ public class SqlLineArgsTest {
     final SqlLine sqlLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
-      SqlLine.Status status = begin(sqlLine, os, false);
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
       DispatchCallback dc = new DispatchCallback();
       final String invalidEditingMode = "invalid";
       sqlLine.runCommands(dc, "!set mode " + invalidEditingMode);
