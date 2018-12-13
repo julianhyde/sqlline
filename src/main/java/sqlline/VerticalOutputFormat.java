@@ -11,6 +11,9 @@
 */
 package sqlline;
 
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
+
 /**
  * OutputFormat for vertical column name: value format.
  */
@@ -45,9 +48,11 @@ class VerticalOutputFormat implements OutputFormat {
 
     for (int i = 0; (i < head.length) && (i < vals.length); i++) {
       sqlLine.output(
-          sqlLine.getColorBuffer()
-              .bold(sqlLine.getColorBuffer().pad(head[i], headWidth).getMono())
-              .append((vals[i] == null) ? "" : vals[i]));
+          new AttributedStringBuilder()
+              .append(SqlLine.PAD.apply(head[i], headWidth),
+                  AttributedStyle.BOLD)
+              .append((vals[i] == null) ? "" : vals[i])
+              .toAttributedString());
     }
 
     sqlLine.output(""); // spacing

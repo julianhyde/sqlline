@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Output file.
  */
-public class OutputFile {
+public class OutputFile implements AutoCloseable {
   final File file;
   final PrintWriter out;
 

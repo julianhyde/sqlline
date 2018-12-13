@@ -28,6 +28,9 @@ import org.jline.reader.Parser;
 import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 
 /**
  * Collection of available commands.
@@ -459,17 +462,10 @@ public class Commands {
       }
 
       List<String> cmds = new LinkedList<>();
-      ResultSet rs = sqlLine.getTables();
-      try {
+      try (ResultSet rs = sqlLine.getTables()) {
         while (rs.next()) {
           cmds.add("DROP TABLE "
               + rs.getString("TABLE_NAME") + ";");
-        }
-      } finally {
-        try {
-          rs.close();
-        } catch (Exception e) {
-          // ignore
         }
       }
 
@@ -538,33 +534,29 @@ public class Commands {
       driverNames.put(driver.getClass().getName(), driver);
     }
 
-    String compliant =
-        sqlLine.getColorBuffer().pad(sqlLine.loc("compliant"), 10).getMono();
-    String jdbcVersion =
-        sqlLine.getColorBuffer().pad(sqlLine.loc("jdbc-version"), 8).getMono();
-    String driverClass =
-        sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono();
-    sqlLine.output(sqlLine.getColorBuffer()
-        .bold(compliant)
-        .bold(jdbcVersion)
-        .bold(driverClass));
+    final String header = SqlLine.PAD.apply(sqlLine.loc("compliant"), 10)
+        + SqlLine.PAD.apply(sqlLine.loc("jdbc-version"), 8)
+        + sqlLine.loc("driver-class");
+    sqlLine.output(new AttributedString(header, AttributedStyle.BOLD));
 
     for (Map.Entry<String, Driver> driverEntry : driverNames.entrySet()) {
-      final Driver driver = driverEntry.getValue();
       final String name = driverEntry.getKey();
       try {
-        ColorBuffer msg = sqlLine.getColorBuffer()
-            .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
-            .pad(driver.getMajorVersion() + "."
-                + driver.getMinorVersion(), 8)
-            .append(name);
+        final Class<?> klass = Class.forName(name);
+        Driver driver = (Driver) klass.getConstructor().newInstance();
+        final String msg =
+            SqlLine.PAD.apply(driver.jdbcCompliant() ? "yes" : "no", 10)
+            + SqlLine.PAD.apply(
+                driver.getMajorVersion() + "." + driver.getMinorVersion(), 8)
+            + name;
         if (driver.jdbcCompliant()) {
           sqlLine.output(msg);
         } else {
-          sqlLine.output(sqlLine.getColorBuffer().red(msg.getMono()));
+          sqlLine.output(new AttributedString(msg, AttributedStyles.RED));
         }
       } catch (Throwable t) {
-        sqlLine.output(sqlLine.getColorBuffer().red(name)); // error with driver
+        // error with driver
+        sqlLine.output(new AttributedString(name, AttributedStyles.RED));
       }
     }
 
@@ -784,10 +776,11 @@ public class Commands {
     for (String method : METHODS) {
       try {
         sqlLine.output(
-            sqlLine.getColorBuffer()
-                .pad(method, padlen)
-                .append("" + sqlLine.getReflector()
-                    .invoke(sqlLine.getDatabaseMetaData(), method)));
+            new AttributedStringBuilder()
+                .append(SqlLine.PAD.apply(method, padlen))
+                .append(String.valueOf(sqlLine.getReflector()
+                    .invoke(sqlLine.getDatabaseMetaData(), method)))
+                .toAttributedString());
       } catch (Exception e) {
         sqlLine.handleException(e);
       }
@@ -977,14 +970,11 @@ public class Commands {
 
         if (hasResults) {
           do {
-            ResultSet rs = stmnt.getResultSet();
-            try {
+            try (ResultSet rs = stmnt.getResultSet()) {
               int count = sqlLine.print(rs, callback);
               long end = System.currentTimeMillis();
 
               reportResult(sqlLine.loc("rows-selected", count), start, end);
-            } finally {
-              rs.close();
             }
           } while (SqlLine.getMoreResults(stmnt));
         } else {
@@ -1334,12 +1324,11 @@ public class Commands {
         closed = true;
       }
 
-      sqlLine.output(
-          sqlLine.getColorBuffer()
-              .pad(" #" + index++ + "", 5)
-              .pad(closed ? sqlLine.loc("closed") : sqlLine.loc("open"), 9)
-              .pad(databaseConnection.getNickname(), 20)
-              .append(" " + databaseConnection.getUrl()));
+      sqlLine.output(SqlLine.PAD.apply(" #" + index++ + "", 5)
+          + SqlLine.PAD.apply(
+              closed ? sqlLine.loc("closed") : sqlLine.loc("open"), 9)
+          + SqlLine.PAD.apply(databaseConnection.getNickname(), 20)
+          + " " + databaseConnection.getUrl());
     }
 
     callback.setToSuccess();
@@ -1684,7 +1673,7 @@ public class Commands {
   public void help(String line, DispatchCallback callback) {
     String[] parts = sqlLine.split(line);
     String cmd = parts.length > 1 ? parts[1] : "";
-    TreeSet<ColorBuffer> clist = new TreeSet<>();
+    TreeSet<String> clist = new TreeSet<>();
 
     for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       if (cmd.length() == 0
@@ -1694,13 +1683,13 @@ public class Commands {
         if (cmd.equals("set")) {
           help += sqlLine.loc("variables");
         }
-        clist.add(sqlLine.getColorBuffer()
-            .pad("!" + commandHandler.getName(), 20)
-            .append(help));
+        clist.add(
+            SqlLine.PAD.apply(
+                SqlLine.COMMAND_PREFIX + commandHandler.getName(), 20) + help);
       }
     }
 
-    for (ColorBuffer c : clist) {
+    for (String c : clist) {
       sqlLine.output(c);
     }
 

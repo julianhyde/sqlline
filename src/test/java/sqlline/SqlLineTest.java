@@ -93,13 +93,13 @@ public class SqlLineTest {
 
   @Test
   public void testCenterString() {
-    assertEquals("abc", ColorBuffer.centerString("abc", -1));
-    assertEquals("abc", ColorBuffer.centerString("abc", 1));
-    assertEquals("abc ", ColorBuffer.centerString("abc", 4));
-    assertEquals(" abc ", ColorBuffer.centerString("abc", 5));
+    assertEquals("abc", TableOutputFormat.centerString("abc", -1));
+    assertEquals("abc", TableOutputFormat.centerString("abc", 1));
+    assertEquals("abc ", TableOutputFormat.centerString("abc", 4));
+    assertEquals(" abc ", TableOutputFormat.centerString("abc", 5));
     // centerString used to have cartesian performance
     assertEquals(
-        1234567, ColorBuffer.centerString("abc", 1234567).length());
+        1234567, TableOutputFormat.centerString("abc", 1234567).length());
   }
 
   @Test

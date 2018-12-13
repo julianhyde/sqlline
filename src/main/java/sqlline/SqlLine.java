@@ -26,6 +26,7 @@ import java.text.ChoiceFormat;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.Date;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -34,6 +35,9 @@ import org.jline.reader.*;
 import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 
 import static org.jline.keymap.KeyMap.alt;
 
@@ -56,6 +60,9 @@ public class SqlLine {
       ResourceBundle.getBundle(SqlLine.class.getName(), Locale.ROOT);
 
   private static final String SEPARATOR = System.getProperty("line.separator");
+  static final BiFunction<String, Integer, String> PAD =
+      (value, padLen) -> String.format(Locale.ROOT, "%1$-" + padLen + "s",
+      Objects.toString(value, ""));
   private boolean exit = false;
   /** Whether we are currently prompting for input (say, user name or
    * password). If prompting, we ignore trailing linefeeds, but for SQL input we
@@ -290,23 +297,6 @@ public class SqlLine {
       throw new IllegalArgumentException(loc("no-current-connection"));
     }
     return connections.current().getDatabaseMetaData();
-  }
-
-
-  /**
-   * Entry point to creating a {@link ColorBuffer} with color
-   * enabled or disabled depending on the value of {@link SqlLineOpts#getColor}.
-   */
-  ColorBuffer getColorBuffer() {
-    return new ColorBuffer(getOpts().getColor());
-  }
-
-  /**
-   * Entry point to creating a {@link ColorBuffer} with color enabled or
-   * disabled depending on the value of {@link SqlLineOpts#getColor}.
-   */
-  ColorBuffer getColorBuffer(String msg) {
-    return new ColorBuffer(msg, getOpts().getColor());
   }
 
   /**
@@ -773,7 +763,7 @@ public class SqlLine {
    * @param msg the message to print
    */
   public void output(String msg) {
-    output(msg, true);
+    output(msg, true, getOutputStream());
   }
 
   public void info(String msg) {
@@ -782,7 +772,7 @@ public class SqlLine {
     }
   }
 
-  public void info(ColorBuffer msg) {
+  public void info(AttributedString msg) {
     if (!getOpts().getSilent()) {
       output(msg, true, getErrorStream());
     }
@@ -795,7 +785,7 @@ public class SqlLine {
    * @return false always
    */
   public boolean error(String msg) {
-    output(getColorBuffer().red(msg), true, errorStream);
+    output(new AttributedString(msg, AttributedStyles.RED), true, errorStream);
     return false;
   }
 
@@ -806,27 +796,25 @@ public class SqlLine {
 
   public void debug(String msg) {
     if (getOpts().getVerbose()) {
-      output(getColorBuffer().blue(msg), true, errorStream);
+      output(
+          new AttributedString(msg, AttributedStyles.BLUE), true, errorStream);
     }
   }
 
-  public void output(ColorBuffer msg) {
+  public void output(AttributedString msg) {
     output(msg, true);
   }
 
-  public void output(String msg, boolean newline, PrintStream out) {
-    output(getColorBuffer(msg), newline, out);
-  }
-
-  public void output(ColorBuffer msg, boolean newline) {
+  public void output(AttributedString msg, boolean newline) {
     output(msg, newline, getOutputStream());
   }
 
-  public void output(ColorBuffer msg, boolean newline, PrintStream out) {
+  private void output(
+      String msg, String ansiMsg, boolean newline, PrintStream out) {
     if (newline) {
-      out.println(msg.getColor());
+      out.println(ansiMsg);
     } else {
-      out.print(msg.getColor());
+      out.print(ansiMsg);
     }
 
     if (recordOutputFile == null) {
@@ -836,18 +824,23 @@ public class SqlLine {
     // only write to the record file if we are writing a line ...
     // otherwise we might get garbage from backspaces and such.
     if (newline) {
-      recordOutputFile.addLine(msg.getMono()); // always just write mono
+      recordOutputFile.addLine(msg); // always just write mono
     }
   }
 
-  /**
-   * Print the specified message to the console
-   *
-   * @param msg     the message to print
-   * @param newline if false, do not append a newline
-   */
-  public void output(String msg, boolean newline) {
-    output(getColorBuffer(msg), newline);
+  public void output(String msg, boolean newline, PrintStream out) {
+    output(msg, msg, newline, out);
+  }
+
+  public void output(AttributedString msg, boolean newline, PrintStream out) {
+    if (getOpts().getColor()) {
+      final String ansiMsg = getTerminal() == null
+          ? msg.toAnsi()
+          : msg.toAnsi(getTerminal());
+      output(msg.toString(), ansiMsg, newline, out);
+    } else {
+      output(msg.toString(), newline, out);
+    }
   }
 
   void autocommitStatus(Connection c) throws SQLException {
@@ -1631,34 +1624,26 @@ public class SqlLine {
   }
 
   void runBatch(List<String> statements) {
-    try {
-      Statement stmnt = createStatement();
-      try {
-        for (String statement : statements) {
-          stmnt.addBatch(statement);
-        }
+    try (Statement stmnt = createStatement()) {
+      for (String statement : statements) {
+        stmnt.addBatch(statement);
+      }
 
-        int[] counts = stmnt.executeBatch();
-        if (counts == null) {
-          counts = new int[0];
-        }
+      int[] counts = stmnt.executeBatch();
+      if (counts == null) {
+        counts = new int[0];
+      }
 
-        output(
-            getColorBuffer()
-                .pad(getColorBuffer().bold("COUNT"), 8)
-                .append(getColorBuffer().bold("STATEMENT")));
+      output(new AttributedStringBuilder()
+          .append(SqlLine.PAD.apply("COUNT", 8), AttributedStyle.BOLD)
+          .append("STATEMENT", AttributedStyle.BOLD)
+          .toAttributedString());
 
-        for (int i = 0; i < counts.length; i++) {
-          output(
-              getColorBuffer().pad(counts[i] + "", 8)
-                  .append(statements.get(i)));
-        }
-      } finally {
-        try {
-          stmnt.close();
-        } catch (Exception e) {
-          // ignore
-        }
+      for (int i = 0; i < counts.length; i++) {
+        output(new AttributedStringBuilder()
+            .append(SqlLine.PAD.apply(counts[i] + "", 8))
+            .append(statements.get(i))
+            .toAttributedString());
       }
     } catch (Exception e) {
       handleException(e);
@@ -1677,7 +1662,11 @@ public class SqlLine {
       int index = 1;
       int size = cmds.size();
       for (String cmd : cmds) {
-        info(getColorBuffer().pad(index++ + "/" + size, 13).append(cmd));
+        info(new AttributedStringBuilder()
+            .append(SqlLine.PAD.apply(index++ + "/" + size, 13))
+            .append(cmd)
+            .toAttributedString());
+
         dispatch(cmd, callback);
         boolean success = callback.isSuccess();
         // if we do not force script execution, abort
@@ -1702,12 +1691,12 @@ public class SqlLine {
   }
 
   void outputProperty(String key, String value) {
-    output(getColorBuffer()
-        .green(getColorBuffer()
-            .pad(key, 20)
-            .getMono())
-        .append(value));
+    output(new AttributedStringBuilder()
+        .append(SqlLine.PAD.apply(key, 20), AttributedStyles.GREEN)
+        .append(value)
+        .toAttributedString());
   }
+
   public SqlLineOpts getOpts() {
     return appConfig.opts;
   }
@@ -1788,6 +1777,10 @@ public class SqlLine {
 
   LineReader getLineReader() {
     return lineReader;
+  }
+
+  Terminal getTerminal() {
+    return lineReader == null ? null : lineReader.getTerminal();
   }
 
   void setLineReader(LineReader reader) {
