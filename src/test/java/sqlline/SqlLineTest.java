@@ -15,6 +15,8 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -92,14 +94,22 @@ public class SqlLineTest {
   }
 
   @Test
+  public void testRpad() {
+    assertThat(SqlLine.rpad("x", 1), is("x"));
+    assertThat(SqlLine.rpad("x", 2), is("x "));
+    assertThat(SqlLine.rpad("xyz", 2), is("xyz"));
+    assertThat(SqlLine.rpad(" x ", 5), is(" x   "));
+    assertThat(SqlLine.rpad(null, 2), is("  "));
+  }
+
+  @Test
   public void testCenterString() {
-    assertEquals("abc", ColorBuffer.centerString("abc", -1));
-    assertEquals("abc", ColorBuffer.centerString("abc", 1));
-    assertEquals("abc ", ColorBuffer.centerString("abc", 4));
-    assertEquals(" abc ", ColorBuffer.centerString("abc", 5));
-    // centerString used to have cartesian performance
-    assertEquals(
-        1234567, ColorBuffer.centerString("abc", 1234567).length());
+    assertThat(SqlLine.center("abc", -1), is("abc"));
+    assertThat(SqlLine.center("abc", 1), is("abc"));
+    assertThat(SqlLine.center("abc", 4), is("abc "));
+    assertThat(SqlLine.center("abc", 5), is(" abc "));
+    // center used to have cartesian performance
+    assertThat(SqlLine.center("abc", 1234567).length(), is(1234567));
   }
 
   @Test

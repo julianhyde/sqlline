@@ -11,6 +11,12 @@
 */
 package sqlline;
 
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
+
+import static sqlline.SqlLine.rpad;
+
 /**
  * OutputFormat for a pretty, table-like format.
  */
@@ -23,8 +29,8 @@ class TableOutputFormat implements OutputFormat {
 
   public int print(Rows rows) {
     int index = 0;
-    ColorBuffer header = null;
-    ColorBuffer headerCols = null;
+    AttributedString header = null;
+    AttributedString headerCols = null;
     final int maxWidth =
         sqlLine.getOpts().getMaxWidth();
     final int width = (maxWidth == 0
@@ -37,8 +43,9 @@ class TableOutputFormat implements OutputFormat {
 
     for (; rows.hasNext();) {
       Rows.Row row = rows.next();
-      ColorBuffer cbuf = getOutputString(rows, row);
-      cbuf = cbuf.truncate(width);
+      AttributedString attributedString = getOutputString(rows, row);
+      attributedString = attributedString
+          .substring(0, Math.min(attributedString.length(), width));
 
       if (index == 0) {
         StringBuilder h = new StringBuilder();
@@ -49,10 +56,12 @@ class TableOutputFormat implements OutputFormat {
           h.append("-+-");
         }
 
-        headerCols = cbuf;
+        headerCols = attributedString;
         header =
-            sqlLine.getColorBuffer().green(h.toString()).truncate(
-                headerCols.getVisibleLength());
+            new AttributedStringBuilder()
+                .append(h.toString(), AttributedStyles.GREEN)
+                .toAttributedString()
+                .subSequence(0, Math.min(h.length(), headerCols.length()));
       }
 
       if (sqlLine.getOpts().getShowHeader()) {
@@ -67,7 +76,7 @@ class TableOutputFormat implements OutputFormat {
       }
 
       if (index != 0) { // don't output the header twice
-        printRow(cbuf, false);
+        printRow(attributedString, false);
       }
 
       index++;
@@ -80,62 +89,75 @@ class TableOutputFormat implements OutputFormat {
     return index - 1;
   }
 
-  void printRow(ColorBuffer cbuff, boolean header) {
+  void printRow(AttributedString attributedString, boolean header) {
+    AttributedStringBuilder builder = new AttributedStringBuilder();
     if (header) {
-      sqlLine.output(sqlLine.getColorBuffer()
-          .green("+-")
-          .append(cbuff)
-          .green("-+"));
+      sqlLine.output(
+          builder.append("+-", AttributedStyles.GREEN)
+              .append(attributedString)
+              .append("-+", AttributedStyles.GREEN)
+              .toAttributedString());
     } else {
-      sqlLine.output(sqlLine.getColorBuffer()
-          .green("| ")
-          .append(cbuff)
-          .green(" |"));
+      sqlLine.output(
+          builder.append("| ", AttributedStyles.GREEN)
+              .append(attributedString)
+              .append(" |", AttributedStyles.GREEN)
+              .toAttributedString());
     }
   }
 
-  public ColorBuffer getOutputString(Rows rows, Rows.Row row) {
+  public AttributedString getOutputString(Rows rows, Rows.Row row) {
     return getOutputString(rows, row, " | ");
   }
 
-  ColorBuffer getOutputString(Rows rows, Rows.Row row, String delim) {
-    ColorBuffer buf = sqlLine.getColorBuffer();
+  private AttributedString getOutputString(
+      Rows rows, Rows.Row row, String delim) {
+    AttributedStringBuilder builder = new AttributedStringBuilder();
 
+    boolean isStyled = sqlLine.getOpts().getColor();
     for (int i = 0; i < row.values.length; i++) {
-      if (buf.getVisibleLength() > 0) {
-        buf.green(delim);
+      if (builder.length() > 0) {
+        builder.append(delim,
+            isStyled ? AttributedStyles.GREEN : AttributedStyle.DEFAULT);
       }
 
-      ColorBuffer v;
+      String v;
 
       final int[] sizes = row.sizes;
       if (row.isMeta) {
-        v = sqlLine.getColorBuffer().center(row.values[i], sizes[i]);
+        v = SqlLine.center(row.values[i], row.sizes[i]);
         if (rows.isPrimaryKey(i)) {
-          buf.cyan(v.getMono());
+          builder.append(v, AttributedStyles.CYAN);
         } else {
-          buf.bold(v.getMono());
+          builder.append(v, AttributedStyle.BOLD);
         }
       } else {
-        v = sqlLine.getColorBuffer().pad(row.values[i], sizes[i]);
+        v = rpad(row.values[i], row.sizes[i]);
         if (rows.isPrimaryKey(i)) {
-          buf.cyan(v.getMono());
+          builder.append(v, AttributedStyles.CYAN);
         } else {
-          buf.append(v.getMono());
+          builder.append(v);
         }
       }
     }
 
     if (row.deleted) { // make deleted rows red
-      buf = sqlLine.getColorBuffer().red(buf.getMono());
+      return new AttributedStringBuilder()
+          .append(builder.toString(), AttributedStyles.RED)
+          .toAttributedString();
     } else if (row.updated) { // make updated rows blue
-      buf = sqlLine.getColorBuffer().blue(buf.getMono());
+      return new AttributedStringBuilder()
+          .append(builder.toString(), AttributedStyles.BLUE)
+          .toAttributedString();
     } else if (row.inserted) { // make new rows green
-      buf = sqlLine.getColorBuffer().green(buf.getMono());
+      return new AttributedStringBuilder()
+          .append(builder.toString(), AttributedStyles.GREEN)
+          .toAttributedString();
     }
 
-    return buf;
+    return builder.toAttributedString();
   }
+
 }
 
 // End TableOutputFormat.java
