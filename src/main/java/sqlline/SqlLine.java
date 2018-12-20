@@ -405,10 +405,10 @@ public class SqlLine {
           new DispatchCallback());
     }
 
-    if (url != null) {
+    if (url != null || user != null || pass != null || driver != null) {
       String com =
           COMMAND_PREFIX + "connect "
-              + url + " "
+              + (url == null ? "\"\"" : url) + " "
               + (user == null || user.length() == 0 ? "''" : user) + " "
               + (pass == null || pass.length() == 0 ? "''" : pass) + " "
               + (driver == null ? "" : driver);

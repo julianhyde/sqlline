@@ -2091,6 +2091,32 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testStartupArgsWithoutUrl() {
+    try {
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      PrintStream sqllineOutputStream =
+          new PrintStream(os, false, StandardCharsets.UTF_8.name());
+      sqlLine.setOutputStream(sqllineOutputStream);
+      sqlLine.setErrorStream(sqllineOutputStream);
+      String[] args = {
+          "-d",
+          "org.hsqldb.jdbcDriver",
+          "-n",
+          "SCOTT",
+          "-p",
+          "TIGER"
+      };
+      DispatchCallback callback = new DispatchCallback();
+      sqlLine.initArgs(args, callback);
+      assertThat(os.toString("UTF8"), containsString(sqlLine.loc("no-url")));
+    } catch (Throwable e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
