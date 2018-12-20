@@ -329,8 +329,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScan() {
-    final String expectedLine0 = "Compliant Version Driver Class\n";
-    final String expectedLine1 = "yes       2.4     org.hsqldb.jdbcDriver";
+    final String expectedLine0 = "Compliant Version Driver Class";
+    final String expectedLine1 = "yes       2.4     org.hsqldb.jdbc.JDBCDriver";
     checkScriptFile("!scan\n", false,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(expectedLine0), containsString(expectedLine1)));
@@ -1694,6 +1694,56 @@ public class SqlLineArgsTest {
         + "values(null)";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         containsString("custom_null"));
+  }
+
+  @Test
+  public void testScanForEmptyAllowedDrivers() {
+    new MockUp<CustomApplication>() {
+      @Mock
+      public List<String> allowedDrivers() {
+        return Collections.emptyList();
+      }
+    };
+
+    final String script = "!appconfig"
+        + " sqlline.extensions.CustomApplication\n"
+        + "!scan";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString("No driver classes found"));
+  }
+
+  @Test
+  public void testScanForOnlyH2Allowed() {
+    new MockUp<CustomApplication>() {
+      @Mock
+      public List<String> allowedDrivers() {
+        return Collections.singletonList("org.h2.Driver");
+      }
+    };
+
+    final String script = "!appconfig"
+        + " sqlline.extensions.CustomApplication\n"
+        + "!scan";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString("yes       1.4     org.h2.Driver"),
+                not(containsString("org.hsqldb.jdbc.JDBCDriver"))));
+  }
+
+  @Test
+  public void testScanForOnlyHsqldbAllowed() {
+    new MockUp<CustomApplication>() {
+      @Mock
+      public List<String> allowedDrivers() {
+        return Collections.singletonList("org.hsqldb.jdbc.JDBCDriver");
+      }
+    };
+
+    final String script = "!appconfig"
+        + " sqlline.extensions.CustomApplication\n"
+        + "!scan";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString("yes       2.4     org.hsqldb.jdbc.JDBCDriver"),
+            not(containsString("org.h2.Driver"))));
   }
 
   @Test

@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -315,7 +314,10 @@ public class SqlLine {
    * Walk through all the known drivers and try to register them.
    */
   void registerKnownDrivers() {
-    for (String driverName : appConfig.knownDrivers) {
+    if (appConfig.allowedDrivers == null) {
+      return;
+    }
+    for (String driverName : appConfig.allowedDrivers) {
       try {
         Class.forName(driverName);
       } catch (Throwable t) {
@@ -1598,22 +1600,17 @@ public class SqlLine {
         return driver.getClass().getCanonicalName();
       }
 
-      // first try known drivers...
-      scanDrivers(true);
+      System.out.println("before");
+      scanDrivers();
 
       if ((driver = findRegisteredDriver(url)) != null) {
         return driver.getClass().getCanonicalName();
       }
 
-      // now really scan...
-      scanDrivers(false);
-
-      if ((driver = findRegisteredDriver(url)) != null) {
-        return driver.getClass().getCanonicalName();
-      }
-
+      System.out.println("return null");
       return null;
     } catch (Exception e) {
+      e.printStackTrace();
       debug(e.toString());
       return null;
     }
@@ -1635,49 +1632,25 @@ public class SqlLine {
     return null;
   }
 
-  Set<Driver> scanDrivers(String line) throws IOException {
-    return scanDrivers(false);
-  }
-
-  Set<Driver> scanDrivers(boolean knownOnly) throws IOException {
+  Set<Driver> scanDrivers() {
     long start = System.currentTimeMillis();
 
-    Set<String> classNames = new HashSet<>();
-
-    if (!knownOnly) {
-      classNames.addAll(ClassNameCompleter.getClassNames());
-    }
-
-    classNames.addAll(appConfig.knownDrivers);
-
-    Set<Driver> driverClasses = new HashSet<>();
-
-    for (String className : classNames) {
-      if (!className.toLowerCase(Locale.ROOT).contains("driver")) {
-        continue;
-      }
-
-      try {
-        Class c =
-            Class.forName(className, false,
-                Thread.currentThread().getContextClassLoader());
-        if (!Driver.class.isAssignableFrom(c)) {
-          continue;
+    Set<Driver> scannedDrivers = new HashSet<>();
+    // if appConfig.allowedDrivers.isEmpty() then do nothing
+    if (appConfig.allowedDrivers == null
+        || !appConfig.allowedDrivers.isEmpty()) {
+      Set<String> driverClasses = appConfig.allowedDrivers == null
+          ? Collections.emptySet() : new HashSet<>(appConfig.allowedDrivers);
+      for (Driver driver : ServiceLoader.load(Driver.class)) {
+        if (driverClasses.isEmpty()
+            || driverClasses.contains(driver.getClass().getCanonicalName())) {
+          scannedDrivers.add(driver);
         }
-
-        if (Modifier.isAbstract(c.getModifiers())) {
-          continue;
-        }
-
-        // now instantiate and initialize it
-        driverClasses.add((Driver) c.getConstructor().newInstance());
-      } catch (Throwable t) {
-        // ignore
       }
     }
     long end = System.currentTimeMillis();
     info("scan complete in " + (end - start) + "ms");
-    return driverClasses;
+    return scannedDrivers;
   }
 
   ///////////////////////////////////////
@@ -1914,6 +1887,7 @@ public class SqlLine {
   }
 
   void setAppConfig(Application application) {
+    setDrivers(null);
     this.application = application;
     this.appConfig = new Config(application);
   }
@@ -1948,13 +1922,13 @@ public class SqlLine {
   /** Cache of configuration settings that come from
    * {@link Application}. */
   private class Config {
-    final Collection<String> knownDrivers;
+    final Collection<String> allowedDrivers;
     final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
     final Map<String, HighlightStyle> name2highlightStyle;
     Config(Application application) {
-      this(application.initDrivers(),
+      this(application.allowedDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
           application.getOutputFormats(SqlLine.this),
@@ -1966,8 +1940,8 @@ public class SqlLine {
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats,
         Map<String, HighlightStyle> name2HighlightStyle) {
-      this.knownDrivers = Collections.unmodifiableSet(
-          new HashSet<>(knownDrivers));
+      this.allowedDrivers = knownDrivers == null
+          ? null : Collections.unmodifiableSet(new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
           new ArrayList<>(commandHandlers));
@@ -1976,17 +1950,17 @@ public class SqlLine {
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
-      return new Config(this.knownDrivers, this.opts,
+      return new Config(this.allowedDrivers, this.opts,
           commandHandlers, this.formats, this.name2highlightStyle);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
-      return new Config(this.knownDrivers, this.opts,
+      return new Config(this.allowedDrivers, this.opts,
           this.commandHandlers, formats, this.name2highlightStyle);
     }
 
     Config withOpts(SqlLineOpts opts) {
-      return new Config(this.knownDrivers, opts,
+      return new Config(this.allowedDrivers, opts,
           this.commandHandlers, this.formats, this.name2highlightStyle);
     }
   }
