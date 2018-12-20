@@ -1205,7 +1205,7 @@ public class Commands {
 
     if (url == null || url.length() == 0) {
       callback.setToFailure();
-      sqlLine.error("Property \"url\" is required");
+      sqlLine.error(sqlLine.loc("no-url"));
       return;
     }
     if (driver == null || driver.length() == 0) {
