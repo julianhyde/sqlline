@@ -192,6 +192,7 @@ public class Application {
   }
 
   /**
+   * Deprecated as META-INF/services/java.sql.Driver is used instead
    * Returns the set of known JDBC drivers.
    *
    * <p>Override this method to modify set of supported known drivers.
@@ -200,6 +201,7 @@ public class Application {
    *
    * @see #DEFAULT_DRIVERS
    */
+  @Deprecated
   public Collection<String> initDrivers() {
     return DEFAULT_DRIVERS;
   }

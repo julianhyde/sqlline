@@ -326,8 +326,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScan() {
-    final String expectedLine0 = "Compliant Version Driver Class\n";
-    final String expectedLine1 = "yes       2.4     org.hsqldb.jdbcDriver";
+    final String expectedLine0 = "Compliant Version Driver Class";
+    final String expectedLine1 = "yes       2.4     org.hsqldb.jdbc.JDBCDriver";
     checkScriptFile("!scan\n", false,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(expectedLine0), containsString(expectedLine1)));

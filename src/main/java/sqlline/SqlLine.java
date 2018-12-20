@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -1635,45 +1634,16 @@ public class SqlLine {
     return null;
   }
 
-  Set<Driver> scanDrivers(String line) throws IOException {
+  Set<Driver> scanDrivers(String line) {
     return scanDrivers(false);
   }
 
-  Set<Driver> scanDrivers(boolean knownOnly) throws IOException {
+  Set<Driver> scanDrivers(boolean knownOnly) {
     long start = System.currentTimeMillis();
 
-    Set<String> classNames = new HashSet<>();
-
-    if (!knownOnly) {
-      classNames.addAll(ClassNameCompleter.getClassNames());
-    }
-
-    classNames.addAll(appConfig.knownDrivers);
-
     Set<Driver> driverClasses = new HashSet<>();
-
-    for (String className : classNames) {
-      if (!className.toLowerCase(Locale.ROOT).contains("driver")) {
-        continue;
-      }
-
-      try {
-        Class c =
-            Class.forName(className, false,
-                Thread.currentThread().getContextClassLoader());
-        if (!Driver.class.isAssignableFrom(c)) {
-          continue;
-        }
-
-        if (Modifier.isAbstract(c.getModifiers())) {
-          continue;
-        }
-
-        // now instantiate and initialize it
-        driverClasses.add((Driver) c.getConstructor().newInstance());
-      } catch (Throwable t) {
-        // ignore
-      }
+    for (Driver driver : ServiceLoader.load(Driver.class)) {
+      driverClasses.add(driver);
     }
     long end = System.currentTimeMillis();
     info("scan complete in " + (end - start) + "ms");

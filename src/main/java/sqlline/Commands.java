@@ -498,9 +498,8 @@ public class Commands {
     callback.setToSuccess();
   }
 
-  public void scan(String line, DispatchCallback callback)
-      throws IOException {
-    TreeSet<String> names = new TreeSet<>();
+  public void scan(String line, DispatchCallback callback) {
+    TreeMap<String, Driver> driverNames = new TreeMap<>();
 
     if (sqlLine.getDrivers() == null) {
       sqlLine.setDrivers(sqlLine.scanDrivers(line));
@@ -510,8 +509,9 @@ public class Commands {
         sqlLine.loc("drivers-found-count", sqlLine.getDrivers().size()));
 
     // unique the list
+
     for (Driver driver : sqlLine.getDrivers()) {
-      names.add(driver.getClass().getName());
+      driverNames.put(driver.getClass().getName(), driver);
     }
 
     String compliant =
@@ -525,10 +525,10 @@ public class Commands {
         .bold(jdbcVersion)
         .bold(driverClass));
 
-    for (String name : names) {
+    for (Map.Entry<String, Driver> driverEntry : driverNames.entrySet()) {
+      final Driver driver = driverEntry.getValue();
+      final String name = driverEntry.getKey();
       try {
-        final Class<?> klass = Class.forName(name);
-        Driver driver = (Driver) klass.getConstructor().newInstance();
         ColorBuffer msg = sqlLine.getColorBuffer()
             .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
             .pad(driver.getMajorVersion() + "."
