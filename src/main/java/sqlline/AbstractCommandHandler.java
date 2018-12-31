@@ -45,19 +45,19 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     }
   }
 
-  public String getHelpText() {
+  @Override public String getHelpText() {
     return helpText;
   }
 
-  public String getName() {
+  @Override public String getName() {
     return this.name;
   }
 
-  public List<String> getNames() {
+  @Override public List<String> getNames() {
     return this.names;
   }
 
-  public String matches(String line) {
+  @Override public String matches(String line) {
     if (line == null || line.length() == 0) {
       return null;
     }
@@ -76,8 +76,12 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     return null;
   }
 
-  public List<Completer> getParameterCompleters() {
+  @Override public List<Completer> getParameterCompleters() {
     return parameterCompleters;
+  }
+
+  @Override public boolean echoToFile() {
+    return true;
   }
 }
 

@@ -2110,6 +2110,27 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testScript() {
+    final File file = createTempFile("sqlline", ".script");
+    final String script = "!script " + file.getAbsolutePath() + "\n"
+        + "values (100, 200);\n"
+        + "!set maxcolumnwidth -1\n"
+        + "!script\n"
+        + "values (1, 2);\n";
+    final String expected = "(?s)1/5          !script.*"
+        + "2/5          values \\(100, 200\\);.*"
+        + "3/5          !set maxcolumnwidth -1.*"
+        + "4/5          !script.*"
+        + "5/5          values \\(1, 2\\);.*";
+    checkScriptFile(script, false, equalTo(SqlLine.Status.OK),
+        RegexMatcher.of(expected));
+
+    final String output = "values \\(100, 200\\);\n"
+        + "!set maxcolumnwidth -1\n";
+    assertFileContains(file, RegexMatcher.of(output));
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {

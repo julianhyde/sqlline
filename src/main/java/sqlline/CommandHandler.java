@@ -61,6 +61,17 @@ public interface CommandHandler {
    * @return Completers that can handle parameters
    */
   List<Completer> getParameterCompleters();
+
+  /**
+   * Returns whether the command should be written to the output file of the
+   * {@code !script} command.
+   *
+   * <p>Returns {@code true} by default, but the {@code !script} command hides
+   * itself by returning {@code false}.
+   *
+   * @return true if command should be written to file
+   */
+  boolean echoToFile();
 }
 
 // End CommandHandler.java

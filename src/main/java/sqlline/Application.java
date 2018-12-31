@@ -243,7 +243,11 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "all"),
         new ReflectiveCommandHandler(sqlLine, empty, "go", "#"),
         new ReflectiveCommandHandler(sqlLine, new FileNameCompleter(),
-            "script"),
+            "script") {
+          @Override public boolean echoToFile() {
+            return false;
+          }
+        },
         new ReflectiveCommandHandler(sqlLine, new FileNameCompleter(),
             "record"),
         new ReflectiveCommandHandler(sqlLine, empty, "brief"),
