@@ -61,6 +61,14 @@ public interface CommandHandler {
    * @return Completers that can handle parameters
    */
   List<Completer> getParameterCompleters();
+
+  /**
+   * Checks if command is allowed to be written to file.
+   * For example, when !script command is enabled.
+   *
+   * @return true if command should be written to file
+   */
+  boolean echoToFile();
 }
 
 // End CommandHandler.java

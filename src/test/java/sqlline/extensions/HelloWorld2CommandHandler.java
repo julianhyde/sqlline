@@ -81,6 +81,10 @@ public class HelloWorld2CommandHandler implements CommandHandler {
   @Override public List<Completer> getParameterCompleters() {
     return Collections.emptyList();
   }
+
+  @Override public boolean echoToFile() {
+    return true;
+  }
 }
 
 // End HelloWorld2CommandHandler.java

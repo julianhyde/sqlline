@@ -679,20 +679,16 @@ public class SqlLine {
 
     line = line.trim();
 
-    // save it to the current script, if any
-    if (scriptOutputFile != null) {
-      scriptOutputFile.addLine(line);
-    }
-
     if (isHelpRequest(line)) {
       line = COMMAND_PREFIX + "help";
     }
 
+    boolean echoToFile = true;
     if (line.startsWith(COMMAND_PREFIX)) {
       Map<String, CommandHandler> cmdMap = new TreeMap<>();
-      line = line.substring(1);
+      String commandLine = line.substring(1);
       for (CommandHandler commandHandler : getCommandHandlers()) {
-        String match = commandHandler.matches(line);
+        String match = commandHandler.matches(commandLine);
         if (match != null) {
           cmdMap.put(match, commandHandler);
         }
@@ -702,14 +698,14 @@ public class SqlLine {
       switch (cmdMap.size()) {
       case 0:
         callback.setStatus(DispatchCallback.Status.FAILURE);
-        error(loc("unknown-command", line));
+        error(loc("unknown-command", commandLine));
         return;
       case 1:
         matchingHandler = cmdMap.values().iterator().next();
         break;
       default:
         // look for the exact match
-        matchingHandler = cmdMap.get(split(line, 1)[0]);
+        matchingHandler = cmdMap.get(split(commandLine, 1)[0]);
         if (matchingHandler == null) {
           callback.setStatus(DispatchCallback.Status.FAILURE);
           error(loc("multiple-matches", cmdMap.keySet().toString()));
@@ -718,12 +714,19 @@ public class SqlLine {
         break;
       }
 
+      echoToFile = matchingHandler.echoToFile();
       callback.setStatus(DispatchCallback.Status.RUNNING);
-      matchingHandler.execute(line, callback);
+      matchingHandler.execute(commandLine, callback);
     } else {
       callback.setStatus(DispatchCallback.Status.RUNNING);
       commands.sql(line, callback);
     }
+
+    // save it to the current script, if any
+    if (scriptOutputFile != null && echoToFile) {
+      scriptOutputFile.addLine(line);
+    }
+
   }
 
   /**
