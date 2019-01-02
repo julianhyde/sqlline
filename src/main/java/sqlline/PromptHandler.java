@@ -26,9 +26,13 @@ import org.jline.utils.AttributedStyle;
 import org.jline.utils.StyleResolver;
 
 /**
- * Customization for the prompt shown at the start of each line.
+ * Default prompt handler class which allows customization
+ * for the prompt shown at the start of each line.
+ *
+ * <p>This class can be extended to allow customizations for:
+ * default prompt, prompt or right prompt.
  */
-class Prompt {
+public class PromptHandler {
   private static final Map<Character, Supplier<String>>
       DATE_TIME_FORMATS = Collections.unmodifiableMap(
         new HashMap<Character, Supplier<String>>() {
@@ -51,10 +55,13 @@ class Prompt {
   private static final StyleResolver STYLE_RESOLVER =
       new StyleResolver(s -> "");
 
-  private Prompt() {
+  protected final SqlLine sqlLine;
+
+  public PromptHandler(SqlLine sqlLine) {
+    this.sqlLine = sqlLine;
   }
 
-  static AttributedString getRightPrompt(SqlLine sqlLine) {
+  public AttributedString getRightPrompt() {
     final int connectionIndex = sqlLine.getDatabaseConnections().getIndex();
     final String value = sqlLine.getOpts().get(BuiltInProperty.RIGHT_PROMPT);
     final String currentPrompt = String.valueOf((Object) null).equals(value)
@@ -62,7 +69,7 @@ class Prompt {
     return getPrompt(sqlLine, connectionIndex, currentPrompt);
   }
 
-  static AttributedString getPrompt(SqlLine sqlLine) {
+  public AttributedString getPrompt() {
     final String defaultPrompt =
         String.valueOf(BuiltInProperty.PROMPT.defaultValue());
     final String currentPrompt = sqlLine.getOpts().get(BuiltInProperty.PROMPT);
@@ -75,7 +82,7 @@ class Prompt {
           ? getDefaultPrompt(-1, null, defaultPrompt)
           : getPrompt(sqlLine, -1, currentPrompt);
     } else {
-      final int connectionIndex = sqlLine.getDatabaseConnections().getIndex();
+      final int connectionIndex = sqlLine.getConnectionMetadata().getIndex();
       if (useDefaultPrompt || dbc.getNickname() != null) {
         final String nickNameOrUrl =
             dbc.getNickname() == null ? dbc.getUrl() : dbc.getNickname();
@@ -86,24 +93,18 @@ class Prompt {
     }
   }
 
-  private static AttributedString getPrompt(
+  protected AttributedString getPrompt(
       SqlLine sqlLine, int connectionIndex, String prompt) {
     AttributedStringBuilder promptStringBuilder = new AttributedStringBuilder();
-    final DatabaseConnection databaseConnection =
-        sqlLine.getDatabaseConnection();
-    final DatabaseMetaDataWrapper databaseMetaData =
-        databaseConnection == null
-            ? null
-            : databaseConnection.meta;
     final SqlLineOpts opts = sqlLine.getOpts();
+    final ConnectionMetadata meta = sqlLine.getConnectionMetadata();
     for (int i = 0; i < prompt.length(); i++) {
       switch (prompt.charAt(i)) {
       case '%':
         if (i < prompt.length() - 1) {
-          final Supplier<String> dateFormat =
-              DATE_TIME_FORMATS.get(prompt.charAt(i + 1));
-          if (dateFormat != null) {
-            promptStringBuilder.append(dateFormat.get());
+          String dateTime = formatDateTime(prompt.charAt(i + 1));
+          if (dateTime != null) {
+            promptStringBuilder.append(dateTime);
           } else {
             switch (prompt.charAt(i + 1)) {
             case 'c':
@@ -118,35 +119,34 @@ class Prompt {
               }
               break;
             case 'd':
-              if (databaseConnection != null) {
-                try {
-                  promptStringBuilder
-                      .append(databaseMetaData.getDatabaseProductName());
-                } catch (Exception e) {
-                  // skip
-                }
+              String databaseProductName = meta.getDatabaseProductName();
+              if (databaseProductName != null) {
+                promptStringBuilder.append(databaseProductName);
               }
               break;
             case 'n':
-              if (databaseConnection != null) {
-                try {
-                  promptStringBuilder
-                      .append(databaseMetaData.getUserName());
-                } catch (Exception e) {
-                  // skip
-                }
+              String userName = meta.getUserName();
+              if (userName != null) {
+                promptStringBuilder.append(userName);
               }
               break;
             case 'u':
-              if (databaseConnection != null) {
-                promptStringBuilder.append(databaseConnection.getUrl());
+              String url = meta.getUrl();
+              if (url != null) {
+                promptStringBuilder.append(url);
+              }
+              break;
+            case 'S':
+              String currentSchema = meta.getCurrentSchema();
+              if (currentSchema != null) {
+                promptStringBuilder.append(currentSchema);
               }
               break;
             case '[':
               int closeBracketIndex = prompt.indexOf("%]", i + 2);
               if (closeBracketIndex > 0) {
                 String color = prompt.substring(i + 2, closeBracketIndex);
-                AttributedStyle style = STYLE_RESOLVER.resolve(color);
+                AttributedStyle style = resolveStyle(color);
                 promptStringBuilder.style(style);
                 i = closeBracketIndex;
                 break;
@@ -179,7 +179,7 @@ class Prompt {
     return promptStringBuilder.toAttributedString();
   }
 
-  private static AttributedString getDefaultPrompt(
+  protected AttributedString getDefaultPrompt(
       int connectionIndex, String url, String defaultPrompt) {
     String resultPrompt;
     if (url == null || url.length() == 0) {
@@ -199,10 +199,22 @@ class Prompt {
     }
   }
 
+  protected AttributedStyle resolveStyle(String value) {
+    return STYLE_RESOLVER.resolve(value);
+  }
+
+  protected String formatDateTime(char c) {
+    Supplier<String> dateFormat = DATE_TIME_FORMATS.get(c);
+    if (dateFormat != null) {
+      return dateFormat.get();
+    }
+    return null;
+  }
+
   private static String getFormattedDateTime(final String pattern) {
     final SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.ROOT);
     return sdf.format(new Date());
   }
 }
 
-// End Prompt.java
+// End PromptHandler.java

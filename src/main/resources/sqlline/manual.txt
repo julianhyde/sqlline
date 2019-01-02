@@ -68,6 +68,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -203,6 +205,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -428,6 +432,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -1087,6 +1093,7 @@ sqlline> !help
                     vertical, csv, tsv, xmlattrs, xmlelements, json)
 !primarykeys        List all the primary keys for the specified table
 !procedures         List all the procedures
+!prompthandler      Set custom prompt handler class name
 !properties         Connect to the database specified in the properties file(s)
 !quit               Exits the program
 !reconnect          Reconnect to the database

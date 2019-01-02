@@ -1778,6 +1778,38 @@ public class Commands {
     }
   }
 
+  public void prompthandler(String line, DispatchCallback callback) {
+    String example =
+        "Usage: prompthandler <prompt handler class name>"
+          + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 2) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    String className = parts[1];
+
+    PromptHandler promptHandler;
+    if ("default".equalsIgnoreCase(className)) {
+      promptHandler = new PromptHandler(sqlLine);
+    } else {
+      try {
+        promptHandler = (PromptHandler) Class.forName(className)
+          .getConstructor(SqlLine.class).newInstance(sqlLine);
+      } catch (Exception e) {
+        callback.setToFailure();
+        sqlLine.error("Could not initialize " + className);
+        return;
+      }
+    }
+
+    sqlLine.updatePromptHandler(promptHandler);
+    callback.setToSuccess();
+  }
+
   static Map<String, String> asMap(Properties properties) {
     //noinspection unchecked
     return (Map) properties;
