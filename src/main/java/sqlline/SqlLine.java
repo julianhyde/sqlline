@@ -71,6 +71,7 @@ public class SqlLine {
   private final Reflector reflector;
   private Application application;
   private Config appConfig;
+  private ConnectionMetadata connectionMetadata = new ConnectionMetadata(this);
 
   // saveDir() is used in various opts that assume it's set. But that means
   // properties starting with "sqlline" are read into props in unspecific
@@ -343,6 +344,7 @@ public class SqlLine {
     String logFile = null;
     String commandHandler = null;
     String appConfig = null;
+    String promptHandler = null;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -394,6 +396,8 @@ public class SqlLine {
           nickname = args[++i];
         } else if (args[i].equals("-ac")) {
           appConfig = args[++i];
+        } else if (args[i].equals("-ph")) {
+          promptHandler = args[++i];
         } else {
           return Status.ARGS;
         }
@@ -433,6 +437,11 @@ public class SqlLine {
       }
       dispatch(COMMAND_PREFIX + "commandhandler " + sb.toString(),
           new DispatchCallback());
+    }
+
+    if (promptHandler != null) {
+      dispatch(COMMAND_PREFIX + "prompthandler "
+          + promptHandler, new DispatchCallback());
     }
 
     // now load properties files
@@ -541,8 +550,8 @@ public class SqlLine {
         signalHandler.setCallback(callback);
         dispatch(
             reader.readLine(
-                Prompt.getPrompt(this).toAnsi(terminal),
-                Prompt.getRightPrompt(this).toAnsi(terminal),
+                getPromptHandler().getPrompt().toAnsi(terminal),
+                getPromptHandler().getRightPrompt().toAnsi(terminal),
                 (Character) null,
                 null),
             callback);
@@ -1839,6 +1848,18 @@ public class SqlLine {
     appConfig = appConfig.withFormats(formats);
   }
 
+  public PromptHandler getPromptHandler() {
+    return appConfig.promptHandler;
+  }
+
+  public void updatePromptHandler(PromptHandler promptHandler) {
+    appConfig = appConfig.withPromptHandler(promptHandler);
+  }
+
+  public ConnectionMetadata getConnectionMetadata() {
+    return connectionMetadata;
+  }
+
   /** Exit status returned to the operating system. OK, ARGS, OTHER
    * correspond to 0, 1, 2. */
   public enum Status {
@@ -1853,19 +1874,22 @@ public class SqlLine {
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
     final Map<String, HighlightStyle> name2highlightStyle;
+    final PromptHandler promptHandler;
     Config(Application application) {
       this(application.allowedDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
           application.getOutputFormats(SqlLine.this),
-          application.getName2HighlightStyle());
+          application.getName2HighlightStyle(),
+          application.getPromptHandler(SqlLine.this));
     }
 
     Config(Collection<String> knownDrivers,
         SqlLineOpts opts,
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats,
-        Map<String, HighlightStyle> name2HighlightStyle) {
+        Map<String, HighlightStyle> name2HighlightStyle,
+        PromptHandler promptHandler) {
       this.allowedDrivers = knownDrivers == null
           ? null : Collections.unmodifiableSet(new HashSet<>(knownDrivers));
       this.opts = opts;
@@ -1873,21 +1897,31 @@ public class SqlLine {
           new ArrayList<>(commandHandlers));
       this.formats = Collections.unmodifiableMap(formats);
       this.name2highlightStyle = name2HighlightStyle;
+      this.promptHandler = promptHandler;
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
       return new Config(this.allowedDrivers, this.opts,
-          commandHandlers, this.formats, this.name2highlightStyle);
+          commandHandlers, this.formats, this.name2highlightStyle,
+          this.promptHandler);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
       return new Config(this.allowedDrivers, this.opts,
-          this.commandHandlers, formats, this.name2highlightStyle);
+          this.commandHandlers, formats, this.name2highlightStyle,
+          this.promptHandler);
     }
 
     Config withOpts(SqlLineOpts opts) {
       return new Config(this.allowedDrivers, opts,
-          this.commandHandlers, this.formats, this.name2highlightStyle);
+          this.commandHandlers, this.formats, this.name2highlightStyle,
+          this.promptHandler);
+    }
+
+    Config withPromptHandler(PromptHandler promptHandler) {
+      return new Config(this.allowedDrivers, this.opts,
+        this.commandHandlers, this.formats, this.name2highlightStyle,
+        promptHandler);
     }
   }
 }

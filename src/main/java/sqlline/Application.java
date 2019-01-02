@@ -36,7 +36,7 @@ import org.jline.reader.impl.completer.StringsCompleter;
  *
  * <p>This class can be extended to allow customizations for:
  * known drivers, output formats, commands,
- * information message, session options.
+ * information message, session options, prompt handler.
  *
  * <p>You can pass the name of the sub-class to SQLLine
  * via the {@code -ac} command-line parameter or {@code !appconfig} command.
@@ -289,6 +289,7 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "call"),
         new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
         new ReflectiveCommandHandler(sqlLine, empty, "rerun", "/"),
+        new ReflectiveCommandHandler(sqlLine, empty, "prompthandler"),
     };
     return Collections.unmodifiableList(Arrays.asList(handlers));
   }
@@ -308,6 +309,10 @@ public class Application {
    */
   public SqlLineOpts getOpts(SqlLine sqlLine) {
     return new SqlLineOpts(sqlLine);
+  }
+
+  public PromptHandler getPromptHandler(SqlLine sqlLine) {
+    return new PromptHandler(sqlLine);
   }
 
   private Set<String> getMetadataMethodNames() {

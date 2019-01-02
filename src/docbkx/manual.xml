@@ -1178,6 +1178,7 @@ sqlline> !help
 !nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
                   (table, vertical, csv, tsv, xmlattrs, xmlelements, json)
+!prompthandler    Set custom prompt handler class name
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
 !procedures       List all the procedures
@@ -2962,6 +2963,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           see the information on the
           <link linkend="command_outputformat">outputformat
           command</link>.
+        </para>
+      </sect1>
+      <sect1 id="setting_prompthandler">
+        <title>prompthandler</title>
+        <para>
+          Sets prompt handler class name in order to customize prompts default
+          configuration.
         </para>
       </sect1>
       <sect1 id="setting_prompt">

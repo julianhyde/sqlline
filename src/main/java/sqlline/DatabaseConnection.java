@@ -243,6 +243,15 @@ class DatabaseConnection {
     return dialect;
   }
 
+  String getCurrentSchema() {
+    try {
+      return connection.getSchema();
+    } catch (Exception e) {
+      // ignore
+      return null;
+    }
+  }
+
   /** Schema. */
   class Schema {
     private List<Table> tables;

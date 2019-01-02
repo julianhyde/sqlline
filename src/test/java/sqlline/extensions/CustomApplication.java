@@ -25,6 +25,7 @@ import sqlline.Application;
 import sqlline.BuiltInProperty;
 import sqlline.CommandHandler;
 import sqlline.OutputFormat;
+import sqlline.PromptHandler;
 import sqlline.ReflectiveCommandHandler;
 import sqlline.SqlLine;
 import sqlline.SqlLineOpts;
@@ -34,7 +35,7 @@ import sqlline.SqlLineOpts;
  * application configuration.
  *
  * <p>Overrides information message, output formats, commands,
- * connection url examples, session options.
+ * connection url examples, session options, prompt handler.
  */
 public class CustomApplication extends Application {
 
@@ -89,6 +90,11 @@ public class CustomApplication extends Application {
     opts.set(BuiltInProperty.NULL_VALUE, "custom_null");
     return opts;
   }
+
+  @Override public PromptHandler getPromptHandler(SqlLine sqlLine) {
+    return new CustomPromptHandler(sqlLine);
+  }
+
 }
 
 // End CustomApplication.java
