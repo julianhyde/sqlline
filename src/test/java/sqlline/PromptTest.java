@@ -34,26 +34,26 @@ public class PromptTest {
   public void testPromptWithoutConnection() {
     SqlLine sqlLine = new SqlLine();
     // default prompt
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(),
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
         is(BuiltInProperty.PROMPT.defaultValue()));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(),
         is(BuiltInProperty.RIGHT_PROMPT.defaultValue()));
 
     // custom constant prompt
     final SqlLineOpts opts = sqlLine.getOpts();
     opts.set(BuiltInProperty.PROMPT, "custom_prompt");
     opts.set(BuiltInProperty.RIGHT_PROMPT, "custom_right_prompt");
-    assertThat(Prompt.getPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getPrompt(),
         is(new AttributedString("custom_prompt")));
-    assertThat(Prompt.getRightPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt(),
         is(new AttributedString("custom_right_prompt")));
 
     // custom constant multiline prompt
     opts.set(BuiltInProperty.PROMPT, "custom\nprompt\n");
     opts.set(BuiltInProperty.RIGHT_PROMPT, "custom\nright\nprompt\n");
-    assertThat(Prompt.getPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getPrompt(),
         is(new AttributedString("custom\nprompt\n")));
-    assertThat(Prompt.getRightPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt(),
         is(new AttributedString("custom\nright\nprompt\n")));
 
     // custom constant colored prompt
@@ -63,9 +63,9 @@ public class PromptTest {
     promptBuilder.append("sqlline", AttributedStyles.YELLOW).append(">>");
     AttributedStringBuilder rightPromptBuilder = new AttributedStringBuilder();
     rightPromptBuilder.append("end", AttributedStyle.BOLD);
-    assertThat(Prompt.getPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getPrompt(),
         is(promptBuilder.toAttributedString()));
-    assertThat(Prompt.getRightPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt(),
         is(rightPromptBuilder.toAttributedString()));
 
     opts.set(BuiltInProperty.PROMPT, "%[f:b,italic%]sqlline%[default%]>>");
@@ -80,9 +80,9 @@ public class PromptTest {
             AttributedStyle.DEFAULT
                 .foreground(AttributedStyle.MAGENTA).underline());
     rightPromptBuilder.append("]");
-    assertThat(Prompt.getPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getPrompt(),
         is(promptBuilder.toAttributedString()));
-    assertThat(Prompt.getRightPrompt(sqlLine),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt(),
         is(rightPromptBuilder.toAttributedString()));
 
     // custom prompt with date values
@@ -90,27 +90,28 @@ public class PromptTest {
     opts.set(BuiltInProperty.RIGHT_PROMPT, "[%w_%W_%o_%O_%y_%Y]");
     final SimpleDateFormat sdf =
         new SimpleDateFormat("d_E_MM_MMM_YY_YYYY", Locale.ROOT);
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(),
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
         is(sdf.format(new Date()) + ">"));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(),
+    assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(),
         is("[" + sdf.format(new Date()) + "]"));
 
     // custom prompt with data from connection (empty if there is no connection)
     opts.set(BuiltInProperty.PROMPT, "%u%n");
     opts.set(BuiltInProperty.RIGHT_PROMPT, "%d%c");
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is(""));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is(""));
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(), is(""));
+    assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(), is(""));
 
     opts.set(BuiltInProperty.PROMPT, "%u%c>");
     opts.set(BuiltInProperty.RIGHT_PROMPT, "<<<%n%d");
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is(">"));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("<<<"));
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(), is(">"));
+    assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(), is("<<<"));
 
     // custom prompt with property value
     opts.set(BuiltInProperty.PROMPT, "%:color:>");
     opts.set(BuiltInProperty.RIGHT_PROMPT, "%:outputformat:");
-    assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is(opts.getColor() + ">"));
-    assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(),
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is(opts.getColor() + ">"));
+    assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(),
         is(opts.getOutputFormat()));
   }
 
@@ -135,8 +136,11 @@ public class PromptTest {
       // if nickname is specified for the connection
       // it has more priority than prompt.
       // Right prompt does not care about nickname
-      assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("0: nickname> "));
-      assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
+      assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+          is("0: nickname> "));
+      assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(),
+          is("//H20"));
+      sqlLine.getDatabaseConnection().close();
     } catch (Exception e) {
       // fail
       throw new RuntimeException(e);
@@ -160,14 +164,58 @@ public class PromptTest {
       final SqlLineOpts opts = sqlLine.getOpts();
       opts.set(BuiltInProperty.PROMPT, "%u@%n>");
       opts.set(BuiltInProperty.RIGHT_PROMPT, "//%d%c");
-      assertThat(Prompt.getPrompt(sqlLine).toAnsi(), is("jdbc:h2:mem:@SA>"));
-      assertThat(Prompt.getRightPrompt(sqlLine).toAnsi(), is("//H20"));
+      assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+          is("jdbc:h2:mem:@SA>"));
+      assertThat(sqlLine.getPromptHandler().getRightPrompt().toAnsi(),
+          is("//H20"));
       sqlLine.getDatabaseConnection().close();
     } catch (Exception e) {
       // fail
       throw new RuntimeException(e);
     }
   }
+
+  @Test
+  public void testPromptWithSchema() {
+    SqlLine sqlLine = new SqlLine();
+    sqlLine.getOpts().set(BuiltInProperty.PROMPT, "%u%S>");
+
+    sqlLine.runCommands(new DispatchCallback(),
+        "!connect "
+            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
+
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("jdbc:h2:mem:PUBLIC>"));
+
+    sqlLine.runCommands(new DispatchCallback(), "use information_schema");
+
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("jdbc:h2:mem:INFORMATION_SCHEMA>"));
+
+    sqlLine.getDatabaseConnection().close();
+  }
+
+  @Test
+  public void testCustomPromptHandler() {
+    SqlLine sqlLine = new SqlLine();
+    sqlLine.runCommands(new DispatchCallback(),
+        "!connect "
+            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"",
+        "!prompthandler sqlline.extensions.CustomPromptHandler");
+
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("my_app (PUBLIC)>"));
+
+    sqlLine.runCommands(new DispatchCallback(), "!prompthandler default");
+
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("0: jdbc:h2:mem:> "));
+
+    sqlLine.getDatabaseConnection().close();
+  }
+
 }
 
 // End PromptTest.java
