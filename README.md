@@ -38,6 +38,13 @@ $ coursier launch sqlline:sqlline:1.6.0 org.hsqldb:hsqldb:2.4.1 net.hydromatic:f
 0: jdbc:hsqldb:res:foodmart> !quit
 ```
 
+From bash connecting to apache drill using kerberos
+
+```
+/opt/apache-drill-1.15.0/bin/sqlline -u "jdbc:drill:drillbit=example.com;auth=kerberos"
+```
+Note the  url string above is quoted as  `;` is a command seperater in bash
+
 ## Getting started
 
 Copy the `sqlline` script (or `sqlline.bat` for Windows),
