@@ -70,7 +70,7 @@ sqlline> !quit
 To get help:
 
 ```bash
-sqlline --help
+$ sqlline --help
 ```
 
 If you prefer, you can invoke Java directly, without using the
@@ -79,6 +79,32 @@ If you prefer, you can invoke Java directly, without using the
 ```bash
 $ java -jar sqlline-VERSION-jar-with-dependencies.jar --help
 ```
+
+### Connecting using URLs
+
+A URL (or connect string) is a string that specifies the location of your
+database, and perhaps credentials and other parameters specific to your
+database's JDBC driver. It always starts with '`jdbc:`', usually followed by
+the machine name of the database and additional parameters.
+
+For example, the following
+[bash](https://en.wikipedia.org/wiki/Bash_\(Unix_shell\)) command connects to
+[Apache Drill](https://drill.apache.org), assuming that Drill is installed in
+`/opt/apache-drill-1.15.0`:
+
+```bash
+$ /opt/apache-drill-1.15.0/bin/sqlline -u "jdbc:drill:drillbit=example.com;auth=kerberos"
+```
+
+Because '`;`' is a command separator in bash, the URL is included in
+double-quotes ('`"`'). You will need to quote the URL and other arguments if
+they contain characters that are special in your shell; different shells have
+different special characters, but
+space ('<code>&nbsp;</code>'),
+dollar ('`$`'),
+single-quote ('`'`'),
+bang ('`!`') and
+percent ('`%`') are some common examples.
 
 Read [the manual](http://julianhyde.github.io/sqlline/manual.html).
 
