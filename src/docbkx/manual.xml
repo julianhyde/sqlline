@@ -57,10 +57,7 @@
     <chapter id="obtaining">
       <title>Obtaining SQLLine</title>
       <para>
-        SQLLine is hosted on SourceForge, and is located at
-        <ulink url="http://sqlline.sf.net"/>.
-        The latest release can be downloaded from
-        <ulink url="http://sqlline.sf.net/download.html"/>.
+        SQLLine could be found at <ulink url="http://search.maven.org/">Maven Central</ulink>.
       </para>
     </chapter>
 
@@ -80,10 +77,10 @@
             </para></listitem>
             <listitem><para>
             JLine - SQLLine uses the JLine console reader for
-            command line editing, tab-completion, and command
-            history. It can be downloaded from
-            <ulink url="http://jline.sf.net"/>. Version
-            0.8.1 or higher is required.
+            command line editing, tab-completion, command
+            history and highlighting. It can be downloaded from
+            <ulink url="http://search.maven.org/">Maven Central</ulink>. Version
+            3.9.0 or higher is required.
             </para></listitem>
             <listitem><para>
             <trademark>JDBC</trademark> Driver(s) - Since
@@ -116,9 +113,17 @@
           <filename>sqllinedir</filename>.
           </para></listitem>
           <listitem><para>
-          Download the latest <filename>jline.jar</filename> from
-          <ulink url="http://jline.sf.net"/> into
+          Download the latest <filename>jline-terminal.jar</filename>,
+          <filename>jline-reader.jar</filename>,
+          <filename>jline-builtins.jar</filename> from
+          <ulink url="http://search.maven.org/">Maven Central</ulink> into
           <filename>sqllinedir</filename>.
+          For the case of Windows OS additionally it is required to download
+          into <filename>sqllinedir</filename>
+          the latest <filename>jline-terminal-jna.jar</filename>,
+          <filename>jline-terminal-jansi.jar</filename>,
+          <filename>jansi.jar</filename>,
+          and version 4.2.2 <filename>jna.jar</filename>
           </para></listitem>
           <listitem><para>
           Download your database's JDBC driver files into
@@ -139,8 +144,8 @@
         SQLLine can be run with the following command:
           <cmdsynopsis>
           <command>java</command>
-          <arg choice="req">-Djava.ext.dirs=<replaceable>sqllinedir</replaceable></arg>
-          <arg choice="req"><replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
+          <arg choice="req">-cp <replaceable>"sqllinedir/*"</replaceable></arg>
+          <arg choice="req">-jar <replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
           <arg rep="repeat" choice="opt"><replaceable>options</replaceable></arg>
           <arg rep="repeat" choice="opt"><replaceable>properties files</replaceable></arg>
           </cmdsynopsis>
@@ -149,7 +154,7 @@
         <filename>/usr/share/java/</filename> (this is typical for
         Debian Linux), then you might run:
         <screen>
-java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
+java -cp "/usr/share/java/*" -jar /usr/share/java/sqlline.jar
         </screen>
         </para>
 
@@ -249,12 +254,171 @@ Autocommit status: true
       <sect1 id="completion">
         <title>Command Completion</title>
         <para>
-        On UNIX systems, SQLLine allows command-line completion
+        SQLLine allows command-line completion
         using the tab key. This will be familiar for users of such
         popular shells as bash and tcsh. In general, hitting
         the TAB key when part of the way through typing a command
         will fill in the rest of the command, or else will display
         a selection of appropriate possibilities.
+        </para>
+      </sect1>
+    </chapter>
+
+    <chapter id="options">
+      <title>Option Reference</title>
+
+      <sect1 id="-u">
+        <title>-u</title>
+        <para>
+          <cmdsynopsis>
+            <command>-u</command>
+            <arg choice="req">&lt;database url></arg>
+          </cmdsynopsis>
+          The JDBC URL to connect to. In case of having spaces,
+          semicolumns inside url please use quotes (double or single) e.g.
+          <screen>./sqlline -u "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.druid.DruidSchemaFactory; schema.url=http://localhost:8082; schema.coordinatorUrl=http://localhost:8081"</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-n">
+        <title>-n</title>
+        <para>
+          <cmdsynopsis>
+            <command>-n</command>
+            <arg choice="req">&lt;username></arg>
+          </cmdsynopsis>
+          The username to connect as
+        </para>
+      </sect1>
+
+      <sect1 id="-p">
+        <title>-p</title>
+        <para>
+          <cmdsynopsis>
+            <command>-p</command>
+            <arg choice="req">&lt;password></arg>
+          </cmdsynopsis>
+          The password to connect as
+        </para>
+      </sect1>
+
+
+      <sect1 id="-d">
+        <title>-d</title>
+        <para>
+          <cmdsynopsis>
+            <command>-d</command>
+            <arg choice="req">&lt;driver class></arg>
+          </cmdsynopsis>
+          The driver class to use. For instance
+          <screen>./sqlline -u jdbc:mysql://localhost:3306/scott -n user -p password -d com.mysql.jdbc.Driver</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-e">
+        <title>-e</title>
+        <para>
+          <cmdsynopsis>
+            <command>-e</command>
+            <arg choice="req">&lt;command></arg>
+          </cmdsynopsis>
+          The command to execute, for instance
+          <screen>./sqlline -e "!set maxwidth 80"</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-nn">
+        <title>-nn</title>
+        <para>
+          <cmdsynopsis>
+            <command>-nn</command>
+            <arg choice="req">&lt;nickname></arg>
+          </cmdsynopsis>
+          Nickname for the connection
+        </para>
+      </sect1>
+
+      <sect1 id="-ch">
+        <title>-ch</title>
+        <para>
+          <cmdsynopsis>
+            <command>-ch</command>
+            <arg choice="req">&lt;command handler>[,&lt;command handler>]*</arg>
+          </cmdsynopsis>
+          A custom command handler to use.
+          In case of several command handlers use comma as separator, for instance
+          <screen>./sqlline -ch sqlline.commandhandler.HelloWorldCommandHandler,org.apache.calcite.HelloWorld2CommandHandler</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-f">
+        <title>-f</title>
+        <para>
+          <cmdsynopsis>
+            <command>-f</command>
+            <arg choice="req">&lt;file></arg>
+          </cmdsynopsis>
+          Script file to execute (same as --run), e.g.
+          <screen>./sqlline -f fileToExecute</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-log">
+        <title>-log</title>
+        <para>
+          <cmdsynopsis>
+            <command>-log</command>
+            <arg choice="req">&lt;file></arg>
+          </cmdsynopsis>
+          File to write output, e.g.
+          <screen>./sqlline -log output</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-ac">
+        <title>-ac</title>
+        <para>
+          <cmdsynopsis>
+            <command>-ac</command>
+            <arg choice="req">&lt;class name></arg>
+          </cmdsynopsis>
+          Application configuration class name, for instance
+          <screen>./sqlline -ac sqlline.extensions.CustomApplication</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="--run">
+        <title>--run</title>
+        <para>
+          <cmdsynopsis>
+            <command>--run=</command>
+            <arg choice="req">/path/to/file</arg>
+          </cmdsynopsis>
+          Run one script and then exit, e.g.
+          <screen>./sqlline --run=fileToRun</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="--help">
+        <title>--help</title>
+        <para>
+          <cmdsynopsis>
+            <command>--help</command>
+          </cmdsynopsis>
+          Display help
+        </para>
+      </sect1>
+
+      <sect1 id="--&lt;property_name>">
+        <title>--&lt;property_name></title>
+        <para>
+          <cmdsynopsis>
+            <command>--&lt;property_name>=[value]</command>
+          </cmdsynopsis>
+          Set the specified value for property_name. For instance
+          <screen>./sqlline --verbose=true --mode=vi --nullValue=123</screen>
+          For details, see the <link linkend="sect_command_properties">
+          properties command</link> documentation.
         </para>
       </sect1>
     </chapter>
