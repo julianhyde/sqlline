@@ -58,6 +58,10 @@
       <title>Obtaining SQLLine</title>
       <para>
         SQLLine could be found at <ulink url="http://search.maven.org/">Maven Central</ulink>.
+        SQLLine's source could be found at
+        <ulink url="https://github.com/julianhyde/sqlline/">SQLLine source</ulink>.
+        SQLLine's releases could be found at
+        <ulink url="https://github.com/julianhyde/sqlline/releases">SQLLine releases</ulink>.
       </para>
     </chapter>
 
@@ -76,11 +80,15 @@
             <ulink url="http://java.sun.com"/>.
             </para></listitem>
             <listitem><para>
-            JLine - SQLLine uses the JLine console reader for
+            JLine3 - SQLLine uses the JLine3 console reader for
             command line editing, tab-completion, command
-            history and highlighting. It can be downloaded from
+            history, highlighting and prompting. It can be downloaded from
             <ulink url="http://search.maven.org/">Maven Central</ulink>. Version
             3.9.0 or higher is required.
+            Jline3's source could be found at
+            <ulink url="https://github.com/jline/jline3">JLine3 source</ulink>.
+            JLine3's releases could be found at
+            <ulink url="https://github.com/jline/jline3/releases">JLine3 releases</ulink>.
             </para></listitem>
             <listitem><para>
             <trademark>JDBC</trademark> Driver(s) - Since
@@ -249,6 +257,104 @@ Autocommit status: true
 0: jdbc:oracle:thin:@localhost:1521:mydb>
         </screen>
         </example>
+        </para>
+      </sect1>
+      <sect1 id="issuing_multiline_sql">
+        <title>Issuing multiline commands</title>
+        <para>
+          A query or command need not be given all on a single line,
+          so lengthy queries that require several lines are not a problem.
+          SQLLine determines where the statement ends by looking for
+          the terminating semicolon (SQL command) or newline (SQLLine command),
+          not by looking for the end of the input line.
+          (In other words, SQLLine accepts free-format input:
+          it collects input lines but does not execute them until it sees the terminating symbol.)
+        <example id="simple_multiline">
+          <title>Multiline SQL</title>
+          <screen>
+0: jdbc:calcite:model=example/csv/target/test> select 'multiline ;
+. . . . . . . . . . . . . . . . . . . . quote> value'
+. . . . . . . . . . . . . . . . . . semicolon> /*
+. . . . . . . . . . . . . . . . . . . . . .*/> "just 'a'
+. . . . . . . . . . . . . . . . . . . . . .*/> comment";
+. . . . . . . . . . . . . . . . . . . . . .*/> */
+. . . . . . . . . . . . . . . . . . semicolon> ;
++-------------------+
+|      EXPR$0       |
++-------------------+
+| multiline ;
+value |
++-------------------+
+1 row selected (0.035 seconds)
+0: jdbc:calcite:model=example/csv/target/test>
+          </screen>
+        </example>
+        The prompt provides valuable feedback showing what SQLLine is waiting for.
+        The following table shows each of the prompts one may see
+        and summarizes what they mean about the state that SQLLine is in
+          <table frame='all'>
+            <tgroup cols='2' align='left' colsep='1' rowsep='1'>
+              <colspec colname='Prompt'/>
+              <colspec colname='Meaning'/>
+              <thead>
+                <row>
+                  <entry align="center">Prompt</entry>
+                  <entry align="center">Meaning</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>sqlline></entry>
+                  <entry>Ready for a new query</entry>
+                </row>
+                <row>
+                  <entry>semicolon></entry>
+                  <entry>Waiting for next line of multiple-line query,
+                    waiting for completion of query with semicolon (;)</entry>
+                </row>
+                <row>
+                  <entry>quote></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a single quote (')</entry>
+                </row>
+                <row>
+                  <entry>dquote></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a double quote (")</entry>
+                </row>
+                <row>
+                  <entry>`></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with (`)</entry>
+                </row>
+                <row>
+                  <entry>*/></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a multi-line comment that began with "/*"</entry>
+                </row>
+                <row>
+                  <entry>(></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a round bracket, "("</entry>
+                </row>
+                <row>
+                  <entry>[></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a square bracket, "["</entry>
+                </row>
+                <row>
+                  <entry>extra ')'></entry>
+                  <entry>There is an extra round bracket ")", that is
+                    not opened with "("</entry>
+                </row>
+                <row>
+                  <entry>extra ']'></entry>
+                  <entry>There is an extra square bracket "]", that is
+                    not opened with "["</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
         </para>
       </sect1>
       <sect1 id="completion">
@@ -3132,10 +3238,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         <title>prompt</title>
         <para>
             The tcsh-like format for how prompt is displayed.
-            For example, the setting '%[\033[1;33m%]sqlline%[\033[m%]>' yields
+            For example, the setting
+            <literal>%[\033[1;33m%]sqlline%[\033[m%]></literal> yields
             yellow sqlline and normal angle bracket.
-            Defaults to 'sqlline>'. If for the specific
-            database connection nickname is set then nickname will be used.
+            Defaults to <literal>sqlline></literal>. If for the specific
+            database connection nickname is set, then nickname will be used.
+            For details, see the
+            <link linkend="prompting">Prompting</link> documentation.
         </para>
       </sect1>
       <sect1 id="setting_rightprompt">
@@ -3144,6 +3253,8 @@ java.sql.SQLException: ORA-00942: table or view does not exist
             The tcsh-like format for how right prompt is displayed.
             The same patterns are applied as for prompt but it
             does not care if nickname is set or not. Defaults to ''.
+            For details, see the
+            <link linkend="prompting">Prompting</link> documentation.
         </para>
       </sect1>
       <sect1 id="setting_rowlimit">
@@ -3218,7 +3329,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Any other setting results in fetch via ResultSet.getObject
           and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
           java.text.SimpleDateFormat</ulink>. For example,
-          the setting "HH:mm:ss" yields values like "14:12:11".
+          the setting <literal>HH:mm:ss</literal> yields values like <literal>14:12:11</literal>.
           </para>
       </sect1>
       <sect1 id="setting_timestampformat">
@@ -3230,7 +3341,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Any other setting results in fetch via ResultSet.getObject
           and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
           java.text.SimpleDateFormat</ulink>. For example,
-          the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
+          the setting <literal>dd/MM/YYYY'T'HH:mm:ss</literal> yields values like <literal>01/01/1970T12:32:12</literal>.
         </para>
       </sect1>
       <sect1 id="setting_trimscripts">
@@ -3257,6 +3368,171 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Show the current sqlline version. The property is read only.
         </para>
         </sect1>
+    </chapter>
+
+    <chapter id="prompting">
+      <title>Prompting</title>
+      SQLLine supports 3 types of prompts:
+      prompt, right prompt and secondary prompt.
+      Prompt - prompt on the left side with
+      default value <literal>sqlline></literal>.
+      Right prompt - prompt on the right side with empty default value.
+      Secondary prompt - prompt which appears while multiline editing.
+      SQLLine supports customization of prompt and right prompt via
+      <literal>!set prompt</literal> and <literal>!set rightPrompt</literal>.
+      The value of the selected prompt variable is printed literally,
+      except where a percent sign (%) is encountered.
+      Depending on the next character,
+      certain other text is substituted instead. Defined substitutions are:
+      <sect1 id="%c">
+        <title>%c</title>
+        <para>
+          Connection index (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%d">
+        <title>%d</title>
+        <para>
+          Database product name in case there is a database connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%D">
+        <title>%D</title>
+        <para>
+          Current date in format <literal>yyyy-MM-dd HH:mm:ss.SSS</literal>
+        </para>
+        For instance <screen>
+sqlline> !set prompt 'time: %D sqlline>'
+time: 2019-01-07 13:11:13.221 sqlline>
+      </screen>
+      </sect1>
+      <sect1 id="%m">
+        <title>%m</title>
+        <para>
+          Minutes of the current time
+        </para>
+      </sect1>
+      <sect1 id="%o">
+        <title>%o</title>
+        <para>
+          The current month in numeric format
+        </para>
+      </sect1>
+      <sect1 id="%O">
+        <title>%O</title>
+        <para>
+          The current month in three-letter format (Jan, Feb, …)
+        </para>
+      </sect1>
+      <sect1 id="%n">
+        <title>%n</title>
+        <para>
+          User name for the current connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%P">
+        <title>%P</title>
+        <para>
+          am/pm
+        </para>
+      </sect1>
+      <sect1 id="%r">
+        <title>%r</title>
+        <para>
+          The current time, standard 12-hour time (1–12)
+        </para>
+      </sect1>
+      <sect1 id="%R">
+        <title>%R</title>
+        <para>
+          The current time, in 24-hour military time (0–23)
+        </para>
+      </sect1>
+      <sect1 id="%s">
+        <title>%s</title>
+        <para>
+          Seconds of the current time
+        </para>
+      </sect1>
+      <sect1 id="%u">
+        <title>%u</title>
+        <para>
+          Url of the current connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%w">
+        <title>%w</title>
+        <para>
+          The current day in a month
+        </para>
+      </sect1>
+      <sect1 id="%W">
+        <title>%W</title>
+        <para>
+          The current day of the week in three-letter format (Mon, Tue, …)
+        </para>
+      </sect1>
+      <sect1 id="%y">
+        <title>%y</title>
+        <para>
+          The current year, two digits
+        </para>
+      </sect1>
+      <sect1 id="%Y">
+        <title>%Y</title>
+        <para>
+          The current year, four digits
+        </para>
+      </sect1>
+      <sect1 id="%:property_name:">
+        <title>%:property_name:</title>
+        <para>
+          The value of the specified sqlline property (case insensitive).
+          For instance
+          For details, see the <link linkend="sect_command_properties">
+          properties command</link> documentation.
+        </para>
+        For instance, <screen>
+sqlline> !set prompt %:verbose::sqlline>
+false:sqlline>!set verbose true
+true:sqlline>
+      </screen>
+      </sect1>
+      <sect1 id="%[...%]">
+        <title>%[...%]</title>
+        <para>
+          Prompts can contain terminal control characters which,
+          for example, change the color, background,
+          or style of the prompt text. Both ansi and
+          constants or its shortcuts for styles could be used here, e.g.
+          <screen>
+!set prompt %[f:m%]sqlline%[default%]>
+!set prompt %[foreground:magenta%]sqlline%[default%]>
+!set prompt %[35%]sqlline%[%]>
+          </screen>
+          All three commands are identical.
+          SQLLine supports styles <literal>default</literal>,
+          <literal>bold</literal>, <literal>italic</literal>,
+          <literal>faint</literal>, <literal>underline</literal>,
+          <literal>blink</literal>, <literal>inverse</literal>,
+          <literal>inverse-neg</literal> (<literal>inverseneg</literal>),
+          <literal>conceal</literal>, <literal>crossed-out</literal>
+          (<literal>crossedout</literal>), <literal>hidden</literal>.
+          There are two styles for coloring <literal>foreground</literal>
+          (short options <literal>f</literal> and <literal>fg</literal>) and
+          <literal>background</literal>
+          (short options <literal>b</literal> and <literal>bg</literal>).
+          The short options for colors are available like
+          <literal>k</literal> for <literal>black</literal>,
+          <literal>r</literal> for <literal>red</literal>,
+          <literal>g</literal> for <literal>green</literal>,
+          <literal>y</literal> for <literal>yellow</literal>,
+          <literal>b</literal> for <literal>blue</literal>,
+          <literal>m</literal> for <literal>magenta</literal>,
+          <literal>c</literal> for <literal>cyan</literal>,
+          <literal>w</literal> for <literal>white</literal>.
+        </para>
+      </sect1>
     </chapter>
 
     <chapter id="known_drivers">
