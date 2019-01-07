@@ -314,6 +314,9 @@ public class SqlLine {
    * Walk through all the known drivers and try to register them.
    */
   void registerKnownDrivers() {
+    if (appConfig.allowedDrivers == null) {
+      return;
+    }
     for (String driverName : appConfig.allowedDrivers) {
       try {
         Class.forName(driverName);
@@ -1597,14 +1600,17 @@ public class SqlLine {
         return driver.getClass().getCanonicalName();
       }
 
+      System.out.println("before");
       scanDrivers();
 
       if ((driver = findRegisteredDriver(url)) != null) {
         return driver.getClass().getCanonicalName();
       }
 
+      System.out.println("return null");
       return null;
     } catch (Exception e) {
+      e.printStackTrace();
       debug(e.toString());
       return null;
     }
@@ -1630,12 +1636,16 @@ public class SqlLine {
     long start = System.currentTimeMillis();
 
     Set<Driver> scannedDrivers = new HashSet<>();
-    Set<String> driverClasses = appConfig.allowedDrivers == null
-        ? Collections.emptySet() : new HashSet<>(appConfig.allowedDrivers);
-    for (Driver driver : ServiceLoader.load(Driver.class)) {
-      if (driverClasses.isEmpty()
-          || driverClasses.contains(driver.getClass().getCanonicalName())) {
-        scannedDrivers.add(driver);
+    // if appConfig.allowedDrivers.isEmpty() then do nothing
+    if (appConfig.allowedDrivers == null
+        || !appConfig.allowedDrivers.isEmpty()) {
+      Set<String> driverClasses = appConfig.allowedDrivers == null
+          ? Collections.emptySet() : new HashSet<>(appConfig.allowedDrivers);
+      for (Driver driver : ServiceLoader.load(Driver.class)) {
+        if (driverClasses.isEmpty()
+            || driverClasses.contains(driver.getClass().getCanonicalName())) {
+          scannedDrivers.add(driver);
+        }
       }
     }
     long end = System.currentTimeMillis();
@@ -1872,6 +1882,7 @@ public class SqlLine {
   }
 
   void setAppConfig(Application application) {
+    setDrivers(null);
     this.application = application;
     this.appConfig = new Config(application);
   }
@@ -1924,8 +1935,8 @@ public class SqlLine {
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats,
         Map<String, HighlightStyle> name2HighlightStyle) {
-      this.allowedDrivers = Collections.unmodifiableSet(
-          new HashSet<>(knownDrivers));
+      this.allowedDrivers = knownDrivers == null
+          ? null : Collections.unmodifiableSet(new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
           new ArrayList<>(commandHandlers));

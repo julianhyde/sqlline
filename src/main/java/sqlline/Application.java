@@ -125,14 +125,14 @@ public class Application {
   }
 
   /**
-   * Returns the set of allowed JDBC drivers.
+   * Returns the list of allowed JDBC drivers.
    *
-   * <p>Override this method to modify set of allowed drivers.
+   * <p>Override this method to modify list of allowed drivers.
    *
-   * @return Collection of allowed drivers, empty if any is allowed
+   * @return List of allowed drivers, null if any is allowed
    */
-  public Collection<String> allowedDrivers() {
-    return Collections.emptyList();
+  public List<String> allowedDrivers() {
+    return null;
   }
 
   /**
