@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.jline.builtins.Completers.FileNameCompleter;
@@ -47,72 +46,6 @@ import org.jline.reader.impl.completer.StringsCompleter;
 public class Application {
 
   public static final String DEFAULT_APP_INFO_MESSAGE = "sqlline version ???";
-
-  private static final String[] DRIVERS = {
-      "centura.java.sqlbase.SqlbaseDriver",
-      "com.amazonaws.athena.jdbc.AthenaDriver",
-      "COM.cloudscape.core.JDBCDriver",
-      "com.ddtek.jdbc.db2.DB2Driver",
-      "com.ddtek.jdbc.informix.InformixDriver",
-      "com.ddtek.jdbc.oracle.OracleDriver",
-      "com.ddtek.jdbc.sqlserver.SQLServerDriver",
-      "com.ddtek.jdbc.sybase.SybaseDriver",
-      "COM.FirstSQL.Dbcp.DbcpDriver",
-      "com.ibm.as400.access.AS400JDBCDriver",
-      "com.ibm.db2.jcc.DB2Driver",
-      "COM.ibm.db2.jdbc.app.DB2Driver",
-      "COM.ibm.db2.jdbc.net.DB2Driver",
-      "com.imaginary.sql.msql.MsqlDriver",
-      "com.inet.tds.TdsDriver",
-      "com.informix.jdbc.IfxDriver",
-      "com.internetcds.jdbc.tds.Driver",
-      "com.internetcds.jdbc.tds.SybaseDriver",
-      "com.jnetdirect.jsql.JSQLDriver",
-      "com.lucidera.jdbc.LucidDbRmiDriver",
-      "com.mckoi.JDBCDriver",
-      "com.merant.datadirect.jdbc.db2.DB2Driver",
-      "com.merant.datadirect.jdbc.informix.InformixDriver",
-      "com.merant.datadirect.jdbc.oracle.OracleDriver",
-      "com.merant.datadirect.jdbc.sqlserver.SQLServerDriver",
-      "com.merant.datadirect.jdbc.sybase.SybaseDriver",
-      "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-      "com.mysql.jdbc.DatabaseMetaData",
-      "com.mysql.jdbc.Driver",
-      "com.mysql.jdbc.NonRegisteringDriver",
-      "com.pointbase.jdbc.jdbcDriver",
-      "com.pointbase.jdbc.jdbcEmbeddedDriver",
-      "com.pointbase.jdbc.jdbcUniversalDriver",
-      "com.sap.dbtech.jdbc.DriverSapDB",
-      "com.sqlstream.jdbc.Driver",
-      "com.sybase.jdbc2.jdbc.SybDriver",
-      "com.sybase.jdbc.SybDriver",
-      "com.thinweb.tds.Driver",
-      "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-      "interbase.interclient.Driver",
-      "intersolv.jdbc.sequelink.SequeLinkDriver",
-      "net.sourceforge.jtds.jdbc.Driver",
-      "openlink.jdbc2.Driver",
-      "oracle.jdbc.driver.OracleDriver",
-      "oracle.jdbc.OracleDriver",
-      "oracle.jdbc.pool.OracleDataSource",
-      "org.axiondb.jdbc.AxionDriver",
-      "org.enhydra.instantdb.jdbc.idbDriver",
-      "org.gjt.mm.mysql.Driver",
-      "org.hsqldb.jdbcDriver",
-      "org.hsql.jdbcDriver",
-      "org.luciddb.jdbc.LucidDbClientDriver",
-      "org.postgresql.Driver",
-      "org.sourceforge.jxdbcon.JXDBConDriver",
-      "postgres95.PGDriver",
-      "postgresql.Driver",
-      "solid.jdbc.SolidDriver",
-      "sun.jdbc.odbc.JdbcOdbcDriver",
-      "weblogic.jdbc.mssqlserver4.Driver",
-      "weblogic.jdbc.pool.Driver",
-  };
-
-  private static final SortedSet<String> DEFAULT_DRIVERS =
-      Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(DRIVERS)));
 
   private static final String[] CONNECTION_URLS = {
       "jdbc:JSQLConnect://<hostname>/database=<database>",
@@ -192,18 +125,21 @@ public class Application {
   }
 
   /**
-   * Deprecated as META-INF/services/java.sql.Driver is used instead
-   * Returns the set of known JDBC drivers.
+   * Returns the set of allowed JDBC drivers.
    *
-   * <p>Override this method to modify set of supported known drivers.
+   * <p>Override this method to modify set of allowed drivers.
    *
-   * @return Collection of known drivers
-   *
-   * @see #DEFAULT_DRIVERS
+   * @return Collection of allowed drivers, empty if any is allowed
    */
-  @Deprecated
-  public Collection<String> initDrivers() {
-    return DEFAULT_DRIVERS;
+  public Collection<String> allowedDrivers() {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Deprecated, use {@link Application#allowedDrivers} instead
+   */
+  @Deprecated public Collection<String> initDrivers() {
+    return allowedDrivers();
   }
 
   /**

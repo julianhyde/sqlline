@@ -314,7 +314,7 @@ public class SqlLine {
    * Walk through all the known drivers and try to register them.
    */
   void registerKnownDrivers() {
-    for (String driverName : appConfig.knownDrivers) {
+    for (String driverName : appConfig.allowedDrivers) {
       try {
         Class.forName(driverName);
       } catch (Throwable t) {
@@ -1597,15 +1597,7 @@ public class SqlLine {
         return driver.getClass().getCanonicalName();
       }
 
-      // first try known drivers...
-      scanDrivers(true);
-
-      if ((driver = findRegisteredDriver(url)) != null) {
-        return driver.getClass().getCanonicalName();
-      }
-
-      // now really scan...
-      scanDrivers(false);
+      scanDrivers();
 
       if ((driver = findRegisteredDriver(url)) != null) {
         return driver.getClass().getCanonicalName();
@@ -1634,20 +1626,21 @@ public class SqlLine {
     return null;
   }
 
-  Set<Driver> scanDrivers(String line) {
-    return scanDrivers(false);
-  }
-
-  Set<Driver> scanDrivers(boolean knownOnly) {
+  Set<Driver> scanDrivers() {
     long start = System.currentTimeMillis();
 
-    Set<Driver> driverClasses = new HashSet<>();
+    Set<Driver> scannedDrivers = new HashSet<>();
+    Set<String> driverClasses = appConfig.allowedDrivers == null
+        ? Collections.emptySet() : new HashSet<>(appConfig.allowedDrivers);
     for (Driver driver : ServiceLoader.load(Driver.class)) {
-      driverClasses.add(driver);
+      if (driverClasses.isEmpty()
+          || driverClasses.contains(driver.getClass().getCanonicalName())) {
+        scannedDrivers.add(driver);
+      }
     }
     long end = System.currentTimeMillis();
     info("scan complete in " + (end - start) + "ms");
-    return driverClasses;
+    return scannedDrivers;
   }
 
   ///////////////////////////////////////
@@ -1913,13 +1906,13 @@ public class SqlLine {
   /** Cache of configuration settings that come from
    * {@link Application}. */
   private class Config {
-    final Collection<String> knownDrivers;
+    final Collection<String> allowedDrivers;
     final SqlLineOpts opts;
     final Collection<CommandHandler> commandHandlers;
     final Map<String, OutputFormat> formats;
     final Map<String, HighlightStyle> name2highlightStyle;
     Config(Application application) {
-      this(application.initDrivers(),
+      this(application.allowedDrivers(),
           application.getOpts(SqlLine.this),
           application.getCommandHandlers(SqlLine.this),
           application.getOutputFormats(SqlLine.this),
@@ -1931,7 +1924,7 @@ public class SqlLine {
         Collection<CommandHandler> commandHandlers,
         Map<String, OutputFormat> formats,
         Map<String, HighlightStyle> name2HighlightStyle) {
-      this.knownDrivers = Collections.unmodifiableSet(
+      this.allowedDrivers = Collections.unmodifiableSet(
           new HashSet<>(knownDrivers));
       this.opts = opts;
       this.commandHandlers = Collections.unmodifiableList(
@@ -1941,17 +1934,17 @@ public class SqlLine {
     }
 
     Config withCommandHandlers(Collection<CommandHandler> commandHandlers) {
-      return new Config(this.knownDrivers, this.opts,
+      return new Config(this.allowedDrivers, this.opts,
           commandHandlers, this.formats, this.name2highlightStyle);
     }
 
     Config withFormats(Map<String, OutputFormat> formats) {
-      return new Config(this.knownDrivers, this.opts,
+      return new Config(this.allowedDrivers, this.opts,
           this.commandHandlers, formats, this.name2highlightStyle);
     }
 
     Config withOpts(SqlLineOpts opts) {
-      return new Config(this.knownDrivers, opts,
+      return new Config(this.allowedDrivers, opts,
           this.commandHandlers, this.formats, this.name2highlightStyle);
     }
   }

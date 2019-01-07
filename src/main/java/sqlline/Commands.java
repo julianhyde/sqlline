@@ -502,7 +502,7 @@ public class Commands {
     TreeMap<String, Driver> driverNames = new TreeMap<>();
 
     if (sqlLine.getDrivers() == null) {
-      sqlLine.setDrivers(sqlLine.scanDrivers(line));
+      sqlLine.setDrivers(sqlLine.scanDrivers());
     }
 
     sqlLine.info(
