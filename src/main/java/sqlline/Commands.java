@@ -18,11 +18,14 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.jline.reader.EOFError;
 import org.jline.reader.History;
 import org.jline.reader.Parser;
 import org.jline.reader.UserInterruptException;
+import org.jline.terminal.Terminal;
 
 /**
  * Collection of available commands.
@@ -478,6 +481,21 @@ public class Commands {
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  private int getUserAnswer(String question, int... allowedAnswers)
+      throws IOException {
+    final Set<Integer> allowedAnswerSet =
+        IntStream.of(allowedAnswers).boxed().collect(Collectors.toSet());
+    final Terminal terminal = sqlLine.getLineReader().getTerminal();
+    final PrintWriter writer = terminal.writer();
+    writer.write(question);
+    int c;
+    // The logic to prevent reaction of SqlLineParser here
+    do {
+      c = terminal.reader().read(100);
+    } while (c != -1 && !allowedAnswerSet.contains(c));
+    return c;
   }
 
   public void reconnect(String line, DispatchCallback callback) {
@@ -1704,31 +1722,26 @@ public class Commands {
   }
 
   private void sillyLess(InputStream in) throws IOException {
-    BufferedReader breader =
+    BufferedReader reader =
         new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     String man;
     int index = 0;
-    while ((man = breader.readLine()) != null) {
+    while ((man = reader.readLine()) != null) {
       index++;
       sqlLine.output(man);
 
       // silly little pager
       if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
-        String prompt = sqlLine.loc("enter-for-more");
-        sqlLine.getLineReader().getTerminal().writer().write(prompt);
-        int c;
-        // The logic to prevent reaction of SqlLineParser here
-        do {
-          c = sqlLine.getLineReader().getTerminal().reader().read(100);
-        } while (c != -1 && c != 13 && c != 'q');
-        if (c == -1 || c == 'q') {
+        final int userInput =
+            getUserAnswer(sqlLine.loc("enter-for-more"), 'q', 13);
+        if (userInput == -1 || userInput == 'q') {
           sqlLine.getLineReader().getTerminal().writer().write('\n');
           break;
         }
       }
     }
 
-    breader.close();
+    reader.close();
   }
 
   public void appconfig(String line, DispatchCallback callback) {
