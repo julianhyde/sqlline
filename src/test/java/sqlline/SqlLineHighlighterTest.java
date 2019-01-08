@@ -20,11 +20,9 @@ import org.jline.utils.AttributedStyle;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import mockit.Mock;
 import mockit.MockUp;
-import mockit.integration.junit4.JMockit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -35,7 +33,6 @@ import static sqlline.SqlLineHighlighterLowLevelTest.getSqlLine;
 /**
  * Tests for sql and command syntax highlighting in sqlline.
  */
-@RunWith(JMockit.class)
 public class SqlLineHighlighterTest {
 
   private Map<SqlLine, SqlLineHighlighter> sqlLine2Highlighter;
