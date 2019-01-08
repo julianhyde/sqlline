@@ -36,14 +36,12 @@ import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
 
-import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
-import mockit.integration.junit4.JMockit;
+import mockit.internal.reflection.FieldReflection;
 import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 import sqlline.extensions.CustomApplication;
 
@@ -53,7 +51,6 @@ import static org.junit.Assert.*;
 /**
  * Executes tests of the command-line arguments to SqlLine.
  */
-@RunWith(JMockit.class)
 public class SqlLineArgsTest {
   private static final ConnectionSpec CONNECTION_SPEC = ConnectionSpec.HSQLDB;
   private ConnectionSpec connectionSpec;
@@ -868,7 +865,8 @@ public class SqlLineArgsTest {
       // If sqlline is not initialized, handleSQLException will print
       // the entire stack trace.
       // To prevent that, forcibly set init to true.
-      Deencapsulation.setField(sqlLine, "initComplete", true);
+      FieldReflection
+          .setField(sqlLine.getClass(), sqlLine, "initComplete", true);
       sqlLine.getConnection();
       sqlLine.runCommands(
           Arrays.asList("CREATE TABLE rsTest ( a int);",
@@ -1295,7 +1293,8 @@ public class SqlLineArgsTest {
       };
       DispatchCallback callback = new DispatchCallback();
       sqlLine.initArgs(args, callback);
-      Deencapsulation.setField(sqlLine, "initComplete", true);
+      FieldReflection
+          .setField(sqlLine.getClass(), sqlLine, "initComplete", true);
       sqlLine.getConnection();
       sqlLine.runCommands(
           Collections.singletonList("!set maxwidth 80"), callback);

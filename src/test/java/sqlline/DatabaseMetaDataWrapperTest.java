@@ -16,11 +16,9 @@ import java.sql.SQLFeatureNotSupportedException;
 
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import mockit.integration.junit4.JMockit;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -28,7 +26,6 @@ import static org.junit.Assert.assertThat;
 /**
  * Test cases for not supported {@link java.sql.DatabaseMetaData} methods.
  */
-@RunWith(JMockit.class)
 public class DatabaseMetaDataWrapperTest {
 
   @Test

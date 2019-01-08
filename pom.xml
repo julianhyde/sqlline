@@ -31,7 +31,7 @@
     <h2.version>1.4.197</h2.version>
     <hsqldb.version>2.4.1</hsqldb.version>
     <jline.version>3.9.0</jline.version>
-    <jmockit.version>1.41</jmockit.version>
+    <jmockit.version>1.44</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
@@ -43,6 +43,7 @@
     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
     <maven-javadoc-plugin.additionalOptions>-html5</maven-javadoc-plugin.additionalOptions>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
 
@@ -259,6 +260,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <useManifestOnlyJar>false</useManifestOnlyJar>
           <systemPropertyVariables>
