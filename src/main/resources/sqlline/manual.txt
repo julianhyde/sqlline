@@ -128,6 +128,7 @@ historyfile
 incremental
 isolation
 keepSemicolon
+liveTemplates
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -277,6 +278,7 @@ historyfile
 incremental
 isolation
 keepSemicolon
+liveTemplates
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -1186,6 +1188,7 @@ incrementalBufferRows integer Enter incremental mode if a query returns more
                               than "incrementalBufferRows".
 isolation       LEVEL      Set transaction isolation level
 keepSemicolon   true/false Keep semicolon in queries
+liveTemplates   path       File with live templates
 maxColumnWidth  integer    The maximum width to use when displaying columns
 maxHeight       integer    The maximum height of the terminal
 maxWidth        integer    The maximum width of the terminal
@@ -2215,6 +2218,7 @@ historyfile
 incremental
 isolation
 keepSemicolon
+liveTemplates
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -2310,6 +2314,10 @@ The default transaction isolation that will be used for new connections. To chan
 keepSemicolon
 
 When set to true, semicolon at the end of queries will not be removed before. Defaults to false.
+
+liveTemplates
+
+The file containing a list of live templates. Defaults to empty.
 
 maxcolumnwidth
 

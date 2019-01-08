@@ -12,6 +12,9 @@
 package sqlline;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -57,6 +60,7 @@ import static sqlline.BuiltInProperty.INCREMENTAL;
 import static sqlline.BuiltInProperty.INCREMENTAL_BUFFER_ROWS;
 import static sqlline.BuiltInProperty.ISOLATION;
 import static sqlline.BuiltInProperty.KEEP_SEMICOLON;
+import static sqlline.BuiltInProperty.LIVE_TEMPLATES;
 import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
 import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
@@ -116,6 +120,7 @@ public class SqlLineOpts implements Completer {
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
+              put(LIVE_TEMPLATES, SqlLineOpts.this::setLiveTemplatesFile);
               put(MAX_HISTORY_FILE_ROWS,
                   SqlLineOpts.this::setMaxHistoryFileRows);
               put(MAX_HISTORY_ROWS, SqlLineOpts.this::setMaxHistoryRows);
@@ -878,6 +883,30 @@ public class SqlLineOpts implements Completer {
 
   public boolean getUseLineContinuation() {
     return getBoolean(USE_LINE_CONTINUATION);
+  }
+
+  public String getLiveTemplatesFile() {
+    return get(LIVE_TEMPLATES);
+  }
+
+  public void setLiveTemplatesFile(String fileName) {
+    final String currentValue = get(LIVE_TEMPLATES);
+    final String newValue = Commands.expand(fileName);
+    if (Objects.equals(currentValue, fileName)
+        || Objects.equals(currentValue, newValue)) {
+      return;
+    }
+    if (DEFAULT.equalsIgnoreCase(fileName)) {
+      set(LIVE_TEMPLATES, LIVE_TEMPLATES.defaultValue());
+    } else {
+      Path path = Paths.get(newValue);
+      if (!Files.exists(path) || Files.isDirectory(path)) {
+        sqlLine.error(sqlLine.loc("no-file", fileName));
+        return;
+      }
+      set(LIVE_TEMPLATES, newValue);
+    }
+    ((SqlLineExpander) sqlLine.getLineReader().getExpander()).reset();
   }
 
   public String getMode() {
