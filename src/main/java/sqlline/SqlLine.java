@@ -635,22 +635,25 @@ public class SqlLine {
         .option(LineReader.Option.AUTO_LIST, false)
         .option(LineReader.Option.AUTO_MENU, true)
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
-    final LineReader lineReader = inputStream == null
-        ? lineReaderBuilder
+    final LineReader lineReader;
+    if (inputStream == null) {
+      lineReader = lineReaderBuilder
           .appName("sqlline")
           .completer(new SqlLineCompleter(this))
           .highlighter(new SqlLineHighlighter(this))
-          .build()
-        : lineReaderBuilder.build();
-
-    autopairWidgets = new AutopairWidgets(lineReader);
-    toggleJlineAutopairWidget(getOpts().getAutoPairing());
-    addWidget(lineReader,
-        this::toggleAutopairWidget, "AUTOPAIRING", alt(ctrl('p')));
-    addWidget(lineReader,
-        this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
-    addWidget(lineReader,
-        this::toggleLineNumbersWidget, "TOGGLE_LINE_NUMBERS", alt(ctrl('n')));
+          .expander(new SqlLineExpander(this))
+          .build();
+      autopairWidgets = new AutopairWidgets(lineReader);
+      toggleJlineAutopairWidget(getOpts().getAutoPairing());
+      addWidget(lineReader,
+          this::toggleAutopairWidget, "AUTOPAIRING", alt(ctrl('p')));
+      addWidget(lineReader,
+          this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
+      addWidget(lineReader,
+          this::toggleLineNumbersWidget, "TOGGLE_LINE_NUMBERS", alt(ctrl('n')));
+    } else {
+      lineReader = lineReaderBuilder.build();
+    }
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;

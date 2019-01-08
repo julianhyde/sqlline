@@ -58,6 +58,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ",
       true, false, new HashSet<>(new Application().getIsolationLevels())),
   KEEP_SEMICOLON("keepSemicolon", Type.BOOLEAN, false),
+  LIVE_TEMPLATES("liveTemplates", Type.STRING, ""),
   MAX_COLUMN_WIDTH("maxColumnWidth", Type.INTEGER, -1),
   // don't save maxheight, maxwidth: it is automatically set based on
   // the terminal configuration

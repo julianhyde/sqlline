@@ -3313,6 +3313,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           will not be removed before. Defaults to false.
         </para>
       </sect1>
+      <sect1 id="setting_liveTemplates">
+        <title>liveTemplates</title>
+        <para>
+          The file containing a list of live templates.
+          Defaults to empty.
+        </para>
+      </sect1>
       <sect1 id="setting_maxcolumnwidth">
         <title>maxcolumnwidth</title>
         <para>
