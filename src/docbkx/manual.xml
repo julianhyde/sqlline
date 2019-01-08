@@ -61,7 +61,7 @@
         SQLLine's source could be found at
         <ulink url="https://github.com/julianhyde/sqlline/">SQLLine source</ulink>.
         SQLLine's releases could be found at
-        <ulink url="https://github.com/julianhyde/sqlline/releases">SQLLine releases</ulink>.
+        <ulink url="https://julianhyde.github.io/sqlline/">SQLLine releases</ulink>.
       </para>
     </chapter>
 
@@ -87,8 +87,8 @@
             3.9.0 or higher is required.
             Jline3's source could be found at
             <ulink url="https://github.com/jline/jline3">JLine3 source</ulink>.
-            JLine3's releases could be found at
-            <ulink url="https://github.com/jline/jline3/releases">JLine3 releases</ulink>.
+            JLine3's releases could be found at maven central
+            <ulink url="https://repo1.maven.org/maven2/org/jline/">JLine3 releases</ulink>.
             </para></listitem>
             <listitem><para>
             <trademark>JDBC</trademark> Driver(s) - Since
