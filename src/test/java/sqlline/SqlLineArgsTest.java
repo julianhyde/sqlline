@@ -300,7 +300,8 @@ public class SqlLineArgsTest {
                new BufferedWriter(
                    new OutputStreamWriter(new FileOutputStream(tmpHistoryFile),
                        StandardCharsets.UTF_8))) {
-        bw.write("\n\nselect * from information_schema.tables// ';\n"
+        bw.write("\n\n!set incremental true\n"
+            + "\n\nselect * from information_schema.tables// ';\n"
             + "// \";"
             + ";\n"
             + "\n"
