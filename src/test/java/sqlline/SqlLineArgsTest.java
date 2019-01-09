@@ -300,11 +300,17 @@ public class SqlLineArgsTest {
                new BufferedWriter(
                    new OutputStreamWriter(new FileOutputStream(tmpHistoryFile),
                        StandardCharsets.UTF_8))) {
-        bw.write("\n\nselect * from information_schema.tables// ';\n"
+        final String script = "\n"
+            + "\n"
+            + "!set incremental true\n"
+            + "\n"
+            + "\n"
+            + "select * from information_schema.tables// ';\n"
             + "// \";"
             + ";\n"
             + "\n"
-            + "\n");
+            + "\n";
+        bw.write(script);
         bw.flush();
       }
       SqlLine.Status status =
