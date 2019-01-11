@@ -46,6 +46,7 @@ import static sqlline.BuiltInProperty.FORCE;
 import static sqlline.BuiltInProperty.HEADER_INTERVAL;
 import static sqlline.BuiltInProperty.HISTORY_FILE;
 import static sqlline.BuiltInProperty.INCREMENTAL;
+import static sqlline.BuiltInProperty.INCREMENTAL_BUFFER_ROWS;
 import static sqlline.BuiltInProperty.ISOLATION;
 import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
@@ -671,6 +672,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getIncremental() {
     return getBoolean(INCREMENTAL);
+  }
+
+  public int getIncrementalBufferRows() {
+    return getInt(INCREMENTAL_BUFFER_ROWS);
   }
 
   public boolean getSilent() {

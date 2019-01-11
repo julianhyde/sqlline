@@ -21,28 +21,44 @@ import java.util.List;
  * Rows implementation which buffers all rows in a linked list.
  */
 class BufferedRows extends Rows {
-  private final List<Row> list;
-
-  private final Iterator<Row> iterator;
+  private final ResultSet rs;
+  private final Row columnNames;
+  private final int columnCount;
+  private final int limit;
+  private List<Row> list;
+  private Iterator<Row> iterator;
 
   BufferedRows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     super(sqlLine, rs);
+    this.rs = rs;
+    int incrementalBufferRows = sqlLine.getOpts().getIncrementalBufferRows();
 
-    list = new LinkedList<>();
-
-    int count = rsMeta.getColumnCount();
-
-    list.add(new Row(count));
-
-    while (rs.next()) {
-      list.add(new Row(count, rs));
-    }
-
+    limit = incrementalBufferRows < 0
+        ? Integer.MAX_VALUE : incrementalBufferRows;
+    columnCount = rsMeta.getColumnCount();
+    columnNames = new Row(columnCount);
+    list = nextList();
     iterator = list.iterator();
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    if (iterator.hasNext()) {
+      return true;
+    } else {
+      try {
+        list = nextList();
+        iterator = list.iterator();
+        // Drain the first Row, which just contains column names
+        if (!iterator.hasNext()) {
+          return false;
+        }
+        iterator.next();
+
+        return iterator.hasNext();
+      } catch (SQLException ex) {
+        throw new WrappedSqlException(ex);
+      }
+    }
   }
 
   public Row next() {
@@ -69,6 +85,18 @@ class BufferedRows extends Rows {
     for (Row row : list) {
       row.sizes = max;
     }
+  }
+
+  private List<Row> nextList() throws SQLException {
+    List<Row> list = new LinkedList<>();
+    list.add(columnNames);
+
+    int counter = 0;
+    while (counter++ < limit && rs.next()) {
+      list.add(new Row(columnCount, rs));
+    }
+
+    return list;
   }
 }
 

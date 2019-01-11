@@ -2876,11 +2876,26 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           When set to <literal>false</literal>,
           the entire result set is fetched and buffered
           before being displayed, yielding optimal display
-          column sizing.  When set to <literal>true</literal>,
+          column sizing. When set to <literal>true</literal>,
           result rows are displayed immediately as they are
           fetched, yielding lower latency and memory usage
           at the price of extra display column padding.
           Defaults to <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_incrementalbufferrows">
+        <title>incrementalbufferrows</title>
+        <para>
+          When <literal>incremental</literal> set
+          to <literal>false</literal> and the entire result set
+          has more rows than value of
+          <literal>incrementalBufferRows</literal>
+          sqlline will enter <literal>incremental</literal> mode.
+          In that case result rows are displayed by batches
+          of <literal>incrementalbufferrows</literal> size.
+          Negative value means no entering
+          <literal>incremental</literal> mode.
+          Defaults to <literal>1000</literal>.
         </para>
       </sect1>
       <sect1 id="setting_isolation">
