@@ -2092,6 +2092,72 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testIncrementalBufferRows() {
+    final String script1 = "!set incrementalBufferRows -1\n"
+        + "!set incremental false\n"
+        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+    final String line1 = ""
+        + "+------+------+\n"
+        + "|  C1  |  C2  |\n"
+        + "+------+------+\n"
+        + "| 100  | 200  |\n"
+        + "| 1    | 2    |\n"
+        + "+------+------+";
+    checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+
+    final String script2 = "!set incrementalBufferRows 0\n"
+        + "!set incremental false\n"
+        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+    final String line2 = ""
+        + "+-----+-----+\n"
+        + "| C1  | C2  |\n"
+        + "+-----+-----+\n"
+        + "+-----+-----+";
+    checkScriptFile(script2, true, equalTo(SqlLine.Status.OK),
+        containsString(line2));
+
+    final String script3 = "!set incrementalBufferRows 1\n"
+        + "!set incremental false\n"
+        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+    final String line3 = ""
+        + "+------+------+\n"
+        + "|  C1  |  C2  |\n"
+        + "+------+------+\n"
+        + "| 100  | 200  |\n"
+        + "| 1 | 2 |\n"
+        + "+------+------+";
+    checkScriptFile(script3, true, equalTo(SqlLine.Status.OK),
+        containsString(line3));
+
+    final String script4 = "!set incrementalBufferRows 2\n"
+        + "!set incremental false\n"
+        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+    final String line4 = ""
+        + "+------+------+\n"
+        + "|  C1  |  C2  |\n"
+        + "+------+------+\n"
+        + "| 100  | 200  |\n"
+        + "| 1    | 2    |\n"
+        + "+------+------+";
+    checkScriptFile(script4, true, equalTo(SqlLine.Status.OK),
+        containsString(line4));
+
+    final String script5 = "!set incrementalBufferRows default\n"
+        + "!set incremental false\n"
+        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+    final String line5 = ""
+        + "+------+------+\n"
+        + "|  C1  |  C2  |\n"
+        + "+------+------+\n"
+        + "| 100  | 200  |\n"
+        + "| 1    | 2    |\n"
+        + "+------+------+";
+    checkScriptFile(script5, true, equalTo(SqlLine.Status.OK),
+        containsString(line5));
+  }
+
+  @Test
   public void testMaxHistoryFileRows() {
     final SqlLine beeLine = new SqlLine();
     ByteArrayOutputStream os = new ByteArrayOutputStream();

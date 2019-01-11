@@ -18,31 +18,57 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Rows implementation which buffers all rows in a linked list.
+ * Rows implementation that buffers rows in a linked list.
+ *
+ * <p>Detailed behavior depends on
+ * {@link SqlLineOpts#getIncrementalBufferRows() incrementalBufferRows},
+ * as follows:
+ *
+ * <ul>
+ * <li>If {@code incrementalBufferRows} is negative, it buffers all rows;
+ * <li>If {@code incrementalBufferRows} is zero, it buffers nothing;
+ * <li>If the number of rows in result set is more than
+ *     {@code incrementalBufferRows} and incremental property is false,
+ *     then it enters incremental mode, with buffered limit
+ *     {@code incrementalBufferRows}.
+ * </ul>
  */
 class BufferedRows extends Rows {
-  private final List<Row> list;
-
-  private final Iterator<Row> iterator;
+  private final ResultSet rs;
+  private final Row columnNames;
+  private final int columnCount;
+  private final int limit;
+  private List<Row> list;
+  private Iterator<Row> iterator;
 
   BufferedRows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     super(sqlLine, rs);
-
-    list = new LinkedList<>();
-
-    int count = rsMeta.getColumnCount();
-
-    list.add(new Row(count));
-
-    while (rs.next()) {
-      list.add(new Row(count, rs));
-    }
-
+    this.rs = rs;
+    limit = sqlLine.getOpts().getIncrementalBufferRows();
+    columnCount = rsMeta.getColumnCount();
+    columnNames = new Row(columnCount);
+    list = nextList();
     iterator = list.iterator();
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    if (iterator.hasNext()) {
+      return true;
+    } else {
+      try {
+        list = nextList();
+        iterator = list.iterator();
+        // Drain the first Row, which just contains column names
+        if (!iterator.hasNext()) {
+          return false;
+        }
+        iterator.next();
+
+        return iterator.hasNext();
+      } catch (SQLException ex) {
+        throw new WrappedSqlException(ex);
+      }
+    }
   }
 
   public Row next() {
@@ -69,6 +95,23 @@ class BufferedRows extends Rows {
     for (Row row : list) {
       row.sizes = max;
     }
+  }
+
+  private List<Row> nextList() throws SQLException {
+    final List<Row> list = new LinkedList<>();
+    list.add(columnNames);
+
+    if (limit >= 0) {
+      int counter = 0;
+      while (counter++ < limit && rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
+    } else {
+      while (rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
+    }
+    return list;
   }
 }
 
