@@ -18,7 +18,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Rows implementation which buffers all rows in a linked list.
+ * Rows implementation which buffers rows in a linked list.
+ * If incrementalBufferRows is negative it buffers all rows.
+ * If incrementalBufferRows is zero it buffers nothing.
+ * If the number of rows in result set is more than incrementalBufferRows
+ * and incremental property is false than it enters incremental mode with
+ * buffered limit incrementalBufferRows.
  */
 class BufferedRows extends Rows {
   private final ResultSet rs;
