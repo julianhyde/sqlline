@@ -20,6 +20,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
@@ -34,7 +35,6 @@ import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.junit.jupiter.api.Test;
 
@@ -1735,7 +1735,7 @@ public class SqlLineArgsTest {
         + "!set outputformat json\n"
         + "values 1;";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        containsString("Unknown output format \"json\""));
+        containsString("Unknown outputFormat \"json\""));
   }
 
   @Test
@@ -1860,6 +1860,24 @@ public class SqlLineArgsTest {
     final String script = "!set 1 2 3";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
         containsString("Usage: set [all | <property name> [<value>]]"));
+  }
+
+  @Test
+  public void testSetWrongValueToEnumTypeProperties() {
+    Collection<BuiltInProperty> propertiesWithAvailableValues =
+        Arrays.stream(BuiltInProperty.values())
+            .filter(t -> !t.getAvailableValues().isEmpty())
+            .collect(Collectors.toSet());
+    final String wrongValue = "wrong_value";
+    for (BuiltInProperty property: propertiesWithAvailableValues) {
+      final String script =
+          "!set " + property.propertyName() + " " + wrongValue + "\n";
+      checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+          allOf(
+              containsString("Unknown " + property.propertyName() + " \""
+                  + wrongValue + "\""),
+              not(containsString("Exception"))));
+    }
   }
 
   @Test
@@ -2131,50 +2149,6 @@ public class SqlLineArgsTest {
       assertThat(os.toString("UTF8"),
           allOf(containsString("autoCommit"),
               not(containsString("Unknown property:"))));
-      os.reset();
-    } catch (Exception e) {
-      // fail
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Test
-  public void testSetWrongColorScheme() {
-    final SqlLine sqlLine = new SqlLine();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    try {
-      SqlLine.Status status =
-          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
-      assertThat(status, equalTo(SqlLine.Status.OK));
-      final DispatchCallback dc = new DispatchCallback();
-      final String invalidColorScheme = "invalid";
-      sqlLine.runCommands(dc, "!set colorscheme " + invalidColorScheme);
-      assertThat(os.toString("UTF8"),
-          containsString(
-              sqlLine.loc("unknown-colorscheme", invalidColorScheme,
-                  new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet()))));
-      os.reset();
-    } catch (Exception e) {
-      // fail
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Test
-  public void testSetWrongEditingMode() {
-    final SqlLine sqlLine = new SqlLine();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    try {
-      SqlLine.Status status =
-          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
-      assertThat(status, equalTo(SqlLine.Status.OK));
-      DispatchCallback dc = new DispatchCallback();
-      final String invalidEditingMode = "invalid";
-      sqlLine.runCommands(dc, "!set mode " + invalidEditingMode);
-      assertThat(os.toString("UTF8"),
-          containsString(
-              sqlLine.loc("unknown-mode", invalidEditingMode,
-                  Arrays.asList(LineReader.EMACS, "vi"))));
       os.reset();
     } catch (Exception e) {
       // fail
