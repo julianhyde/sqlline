@@ -33,7 +33,6 @@ import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -1861,12 +1860,12 @@ public class SqlLineArgsTest {
 
   @Test
   public void testSetWrongValueToEnumTypeProperties() {
-    Collection<BuiltInProperty> nominalProperties =
+    Collection<BuiltInProperty> propertiesWithAvailableValues =
         Arrays.stream(BuiltInProperty.values())
             .filter(t -> !t.getAvailableValues().isEmpty())
             .collect(Collectors.toSet());
     final String wrongValue = "wrong_value";
-    for (BuiltInProperty property : nominalProperties) {
+    for (BuiltInProperty property: propertiesWithAvailableValues) {
       final String script =
           "!set " + property.propertyName() + " " + wrongValue + "\n";
       checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
@@ -2145,54 +2144,6 @@ public class SqlLineArgsTest {
       assertThat(os.toString("UTF8"),
           allOf(containsString("autoCommit"),
               not(containsString("Unknown property:"))));
-      os.reset();
-    } catch (Exception e) {
-      // fail
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Test
-  public void testSetWrongColorScheme() {
-    final SqlLine sqlLine = new SqlLine();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    try {
-      SqlLine.Status status =
-          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
-      assertThat(status, equalTo(SqlLine.Status.OK));
-      final DispatchCallback dc = new DispatchCallback();
-      final String invalidColorScheme = "invalid";
-      sqlLine.runCommands(dc, "!set colorscheme " + invalidColorScheme);
-      assertThat(os.toString("UTF8"),
-          containsString(
-              sqlLine.loc("unknown-value",
-                  BuiltInProperty.COLOR_SCHEME.propertyName(),
-                  invalidColorScheme,
-                  BuiltInProperty.COLOR_SCHEME.getAvailableValues())));
-      os.reset();
-    } catch (Exception e) {
-      // fail
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Test
-  public void testSetWrongEditingMode() {
-    final SqlLine sqlLine = new SqlLine();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    try {
-      SqlLine.Status status =
-          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
-      assertThat(status, equalTo(SqlLine.Status.OK));
-      DispatchCallback dc = new DispatchCallback();
-      final String invalidEditingMode = "invalid";
-      sqlLine.runCommands(dc, "!set mode " + invalidEditingMode);
-      assertThat(os.toString("UTF8"),
-          containsString(
-              sqlLine.loc("unknown-value",
-                  BuiltInProperty.MODE.propertyName(),
-                  invalidEditingMode,
-                  Arrays.asList(LineReader.EMACS, "vi"))));
       os.reset();
     } catch (Exception e) {
       // fail
