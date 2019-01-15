@@ -762,7 +762,7 @@ public class SqlLineOpts implements Completer {
       set(OUTPUT_FORMAT, OUTPUT_FORMAT.defaultValue());
       return;
     }
-    
+
     Set<String> availableFormats =
         sqlLine.getOutputFormats().keySet().stream()
             .map(t -> t.toUpperCase(Locale.ROOT)).collect(Collectors.toSet());
