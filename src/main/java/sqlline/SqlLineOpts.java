@@ -103,6 +103,7 @@ public class SqlLineOpts implements Completer {
               put(MAX_HISTORY_ROWS, SqlLineOpts.this::setMaxHistoryRows);
               put(MODE, SqlLineOpts.this::setMode);
               put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
+              put(OUTPUT_FORMAT, SqlLineOpts.this::setOutputFormat);
               put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
             }
@@ -411,6 +412,13 @@ public class SqlLineOpts implements Completer {
           ? (String) value : String.valueOf(value);
       valueToSet = DEFAULT.equalsIgnoreCase(strValue)
           ? key.defaultValue() : value;
+      if (!key.getAvailableValues().isEmpty()
+          && !key.getAvailableValues().contains(valueToSet.toString())) {
+        sqlLine.error(
+            sqlLine.loc("unknown-value",
+                key.propertyName(), value, key.getAvailableValues()));
+        return;
+      }
       break;
     case INTEGER:
       try {
@@ -484,7 +492,7 @@ public class SqlLineOpts implements Completer {
           DecimalFormatSymbols.getInstance(Locale.ROOT));
       nf.format(Integer.MAX_VALUE);
     } catch (Exception e) {
-      throw new IllegalArgumentException(e.getMessage());
+      sqlLine.handleException(e);
     }
     propertiesMap.put(NUMBER_FORMAT, numberFormat);
   }
@@ -572,9 +580,8 @@ public class SqlLineOpts implements Completer {
       propertiesMap.put(COLOR_SCHEME, colorScheme);
       return;
     }
-    throw new IllegalArgumentException(
-        sqlLine.loc("unknown-colorscheme", colorScheme,
-            new TreeSet<>(BuiltInHighlightStyle.BY_NAME.keySet())));
+    sqlLine.error(sqlLine.loc("unknown-value", COLOR_SCHEME.propertyName(),
+        colorScheme, COLOR_SCHEME.getAvailableValues()));
   }
 
   public String getColorScheme() {
@@ -653,7 +660,7 @@ public class SqlLineOpts implements Completer {
         return;
       }
     }
-    throw new IllegalArgumentException("CsvQuoteCharacter is '"
+    sqlLine.error("CsvQuoteCharacter is '"
         + csvQuoteCharacter + "'; it must be a character of default");
   }
 
@@ -744,9 +751,29 @@ public class SqlLineOpts implements Completer {
       keyMaps.put(LineReader.MAIN, keyMaps.get(LineReader.VIINS));
       break;
     default:
-      throw new IllegalArgumentException(
-          sqlLine.loc(
-              "unknown-mode", mode, Arrays.asList(LineReader.EMACS, "vi")));
+      sqlLine.error(
+          sqlLine.loc("unknown-value", MODE.propertyName(),
+              mode, Arrays.asList(LineReader.EMACS, "vi")));
+    }
+  }
+
+  public void setOutputFormat(String outputFormat) {
+    if (DEFAULT.equalsIgnoreCase(outputFormat)) {
+      set(OUTPUT_FORMAT, OUTPUT_FORMAT.defaultValue());
+      return;
+    }
+    
+    Set<String> availableFormats =
+        sqlLine.getOutputFormats().keySet().stream()
+            .map(t -> t.toUpperCase(Locale.ROOT)).collect(Collectors.toSet());
+    if (availableFormats.contains(outputFormat.toUpperCase(Locale.ROOT))) {
+      set(OUTPUT_FORMAT, outputFormat);
+    } else {
+      sqlLine.error(
+          sqlLine.loc("unknown-value",
+              OUTPUT_FORMAT.propertyName(),
+              outputFormat,
+              sqlLine.getOutputFormats().keySet()));
     }
   }
 

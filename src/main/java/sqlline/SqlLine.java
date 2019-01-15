@@ -1526,14 +1526,12 @@ public class SqlLine {
         return driver.getClass().getCanonicalName();
       }
 
-      System.out.println("before");
       scanDrivers();
 
       if ((driver = findRegisteredDriver(url)) != null) {
         return driver.getClass().getCanonicalName();
       }
 
-      System.out.println("return null");
       return null;
     } catch (Exception e) {
       e.printStackTrace();
@@ -1601,11 +1599,6 @@ public class SqlLine {
         updFormats.put("csv", f);
         updateOutputFormats(updFormats);
       }
-    }
-
-    if (f == null) {
-      error(loc("unknown-format", format, getOutputFormats().keySet()));
-      f = new TableOutputFormat(this);
     }
 
     Rows rows;
