@@ -13,7 +13,9 @@ package sqlline;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,8 +36,7 @@ import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.Mock;
@@ -46,7 +47,8 @@ import net.hydromatic.scott.data.hsqldb.ScottHsqldb;
 import sqlline.extensions.CustomApplication;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Executes tests of the command-line arguments to SqlLine.
@@ -162,11 +164,11 @@ public class SqlLineArgsTest {
     return createTempFile(prefix, suffix, null);
   }
 
-  private File createTempFile(String prefix, String suffix, File directory) {
+  private File createTempFile(String prefix, String suffix, Path directory) {
     try {
-      File scriptFile = File.createTempFile(prefix, suffix, directory);
-      scriptFile.deleteOnExit();
-      return scriptFile;
+      return directory == null
+          ? Files.createTempFile(prefix, suffix).toFile()
+          : Files.createTempFile(directory, prefix, suffix).toFile();
     } catch (IOException e) {
       // fail
       throw new RuntimeException(e);
@@ -599,25 +601,27 @@ public class SqlLineArgsTest {
   @Test
   public void testRunFromHome() {
     try {
-      File home = new File(System.getProperty("user.home"));
-      TemporaryFolder tmpFolder = new TemporaryFolder(home);
-      tmpFolder.create();
-      File tmpFile = createTempFile("test", ".sql", tmpFolder.getRoot());
+      Path tmpDir =
+          Files.createTempDirectory(
+              Paths.get(System.getProperty("user.home")),
+              "tmpdir" + System.nanoTime());
+
+      File tmpFile = createTempFile("test", ".sql", tmpDir);
       try (Writer fw = new OutputStreamWriter(
           new FileOutputStream(tmpFile), StandardCharsets.UTF_8)) {
         fw.write("!set outputformat csv\n");
         fw.write("values (1, 2, 3, 4, 5);");
         fw.flush();
         checkScriptFile("!run ~" + File.separatorChar
-                + tmpFolder.getRoot().getName()
-                + File.separatorChar + tmpFile.getName(),
+                + tmpDir.getFileName()
+                + File.separatorChar + tmpFile.getName().toString(),
             false,
             equalTo(SqlLine.Status.OK),
             allOf(containsString("!set outputformat csv"),
                 containsString("values (1, 2, 3, 4, 5);")));
       } finally {
         // will remove tmpFile as well
-        tmpFolder.delete();
+        tmpDir.toFile().delete();
       }
     } catch (Exception e) {
       // fail
