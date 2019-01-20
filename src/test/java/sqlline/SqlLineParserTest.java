@@ -14,11 +14,12 @@ package sqlline;
 import org.jline.reader.EOFError;
 import org.jline.reader.Parser;
 import org.jline.reader.impl.DefaultParser;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Mock;
 import mockit.MockUp;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test cases for SqlLineParser.
@@ -165,7 +166,7 @@ public class SqlLineParserTest {
     for (String line : WRONG_LINES) {
       try {
         parser.parse(line, line.length(), acceptLine);
-        Assert.fail("Missing closing quote or semicolon for line " + line);
+        fail("Missing closing quote or semicolon for line " + line);
       } catch (EOFError eofError) {
         //ok
       }
@@ -181,7 +182,7 @@ public class SqlLineParserTest {
     for (String line : WRONG_LINES) {
       try {
         parser.parse(line, line.length(), acceptLine);
-        Assert.fail("Missing closing quote or semicolon for line " + line);
+        fail("Missing closing quote or semicolon for line " + line);
       } catch (EOFError eofError) {
         //ok
       }

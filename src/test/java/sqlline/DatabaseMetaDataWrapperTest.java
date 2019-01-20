@@ -15,13 +15,13 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.Mocked;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Test cases for not supported {@link java.sql.DatabaseMetaData} methods.

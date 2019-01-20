@@ -32,13 +32,11 @@ import org.jline.reader.LineReader;
 import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test cases for Completions.
@@ -46,13 +44,13 @@ import static org.junit.Assert.assertThat;
 public class CompletionTest {
   private final SqlLine sqlLine = new SqlLine();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     System.setProperty(TerminalBuilder.PROP_DUMB,
         Boolean.TRUE.toString());
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     System.setProperty(TerminalBuilder.PROP_DUMB,
         Boolean.FALSE.toString());
@@ -68,23 +66,15 @@ public class CompletionTest {
     for (char c = 'a'; c <= 'z'; c++) {
       final Set<String> expectedSubSet = filterSet(commandSet, "!" + c);
       final Set<String> actual = getLineReaderCompletedSet(lineReader, "!" + c);
-      assertEquals("Completion for command !" + c, expectedSubSet, actual);
+      assertEquals(expectedSubSet, actual, "Completion for command !" + c);
     }
 
-    // check completions of ! + one symbol
+    // check completions of space + tabs + ! + one symbol
     for (char c = 'a'; c <= 'z'; c++) {
       final Set<String> expectedSubSet = filterSet(commandSet, "!" + c);
       final Set<String> actual =
           getLineReaderCompletedSet(lineReader, "  \t\t  !" + c);
-      assertEquals("Completion for command !" + c, expectedSubSet, actual);
-    }
-
-    // check completions of ! + one symbol
-    for (char c = 'a'; c <= 'z'; c++) {
-      final Set<String> expectedSubSet = filterSet(commandSet, "!" + c);
-      final Set<String> actual =
-          getLineReaderCompletedSet(lineReader, "  \t\t  !" + c);
-      assertEquals("Completion for command !" + c, expectedSubSet, actual);
+      assertEquals(expectedSubSet, actual, "Completion for command !" + c);
     }
 
     // check completions if the whole command is finished
@@ -104,9 +94,9 @@ public class CompletionTest {
           + property.propertyName().toLowerCase(Locale.ROOT);
       final Set<String> actual =
           getLineReaderCompletedSet(lineReader, command + " ");
-      assertEquals("Completion for command '"
-              + resetCommand + property.propertyName() + "'",
-          Collections.singleton(command), actual);
+      assertEquals(Collections.singleton(command), actual,
+          "Completion for command '"
+              + resetCommand + property.propertyName() + "'");
     }
   }
 
@@ -155,11 +145,9 @@ public class CompletionTest {
     try {
       SqlLine sqlLine = new SqlLine();
       ByteArrayOutputStream os = new ByteArrayOutputStream();
-      SqlLine.Status status = begin(sqlLine, os, false);
-      // Here the status is SqlLine.Status.OTHER
-      // because of EOF as the result of InputStream which
-      // is not used in the current test so it is ok
-      assertThat(status, equalTo(SqlLine.Status.OTHER));
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertEquals(status, SqlLine.Status.OK);
       sqlLine.runCommands(new DispatchCallback(),
           "!set maxwidth 80",
           "!connect "
