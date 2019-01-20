@@ -19,11 +19,11 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for auxiliary methods in {@link SqlLineHighlighter}.
@@ -32,13 +32,13 @@ public class SqlLineHighlighterLowLevelTest {
   private SqlLine defaultSqlline = null;
   private SqlLineHighlighter defaultHighlighter = null;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     defaultSqlline = getSqlLine(SqlLineProperty.DEFAULT);
     defaultHighlighter = new SqlLineHighlighter(defaultSqlline);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     defaultSqlline = null;
     defaultHighlighter = null;
@@ -71,7 +71,7 @@ public class SqlLineHighlighterLowLevelTest {
       expectedStyle.singleQuotes.set(0, line.length());
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleSqlSingleQuotes(line, actual, 0);
-      assertEquals("Line [" + line + "]", expectedStyle.singleQuotes, actual);
+      assertEquals(expectedStyle.singleQuotes, actual, "Line [" + line + "]");
     }
   }
 
@@ -126,8 +126,8 @@ public class SqlLineHighlighterLowLevelTest {
       expectedStyle.sqlIdentifierQuotes.set(0, line.length());
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleSqlIdentifierQuotes(line, "\"", "\"", actual, 0);
-      assertEquals(
-          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+      assertEquals(expectedStyle.sqlIdentifierQuotes, actual,
+          "Line [" + line + "]");
     }
 
     for (String line : linesRequiredToBeBackTickQuoted) {
@@ -137,7 +137,7 @@ public class SqlLineHighlighterLowLevelTest {
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleSqlIdentifierQuotes(line, "`", "`", actual, 0);
       assertEquals(
-          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+          expectedStyle.sqlIdentifierQuotes, actual, "Line [" + line + "]");
     }
 
     for (String line : linesRequiredToBeSquareBracketQuoted) {
@@ -147,7 +147,7 @@ public class SqlLineHighlighterLowLevelTest {
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleSqlIdentifierQuotes(line, "[", "]", actual, 0);
       assertEquals(
-          "Line [" + line + "]", expectedStyle.sqlIdentifierQuotes, actual);
+          expectedStyle.sqlIdentifierQuotes, actual, "Line [" + line + "]");
     }
   }
 
@@ -177,7 +177,7 @@ public class SqlLineHighlighterLowLevelTest {
       expectedStyle.comments.set(0, line.length());
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleComments(line, actual, 0, true);
-      assertEquals("Line [" + line + "]", expectedStyle.comments, actual);
+      assertEquals(expectedStyle.comments, actual, "Line [" + line + "]");
     }
   }
 
@@ -203,7 +203,7 @@ public class SqlLineHighlighterLowLevelTest {
       expectedStyle.numbers.set(0, line.length());
       BitSet actual = new BitSet(line.length());
       defaultHighlighter.handleNumbers(line, actual, 0);
-      assertEquals("Line [" + line + "]", expectedStyle.numbers, actual);
+      assertEquals(expectedStyle.numbers, actual, "Line [" + line + "]");
     }
   }
 
@@ -237,10 +237,10 @@ public class SqlLineHighlighterLowLevelTest {
       BitSet actualDoubleQuotes = new BitSet(line.length());
       defaultHighlighter
           .handleQuotesInCommands(line, actualSingleQuotes, actualDoubleQuotes);
-      assertEquals("Line [" + line + "]",
-          expectedStyle.singleQuotes, actualSingleQuotes);
-      assertEquals("Line [" + line + "]",
-          expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes);
+      assertEquals(expectedStyle.singleQuotes, actualSingleQuotes,
+          "Line [" + line + "]");
+      assertEquals(expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes,
+          "Line [" + line + "]");
     }
 
     for (String line : commandsWithDoubleQuotedInput) {
@@ -252,10 +252,10 @@ public class SqlLineHighlighterLowLevelTest {
       BitSet actualDoubleQuotes = new BitSet(line.length());
       defaultHighlighter
           .handleQuotesInCommands(line, actualSingleQuotes, actualDoubleQuotes);
-      assertEquals("Line [" + line + "]",
-          expectedStyle.singleQuotes, actualSingleQuotes);
-      assertEquals("Line [" + line + "]",
-          expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes);
+      assertEquals(expectedStyle.singleQuotes, actualSingleQuotes,
+          "Line [" + line + "]");
+      assertEquals(expectedStyle.sqlIdentifierQuotes, actualDoubleQuotes,
+          "Line [" + line + "]");
     }
   }
 

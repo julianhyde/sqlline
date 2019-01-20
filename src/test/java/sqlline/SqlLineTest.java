@@ -13,110 +13,109 @@ package sqlline;
 
 import java.util.Objects;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test cases for SQLLine.
  */
-public class SqlLineTest extends TestCase {
-  /**
-   * Public constructor.
-   */
-  public SqlLineTest() {}
-
-  /**
-   * Public constructor with test name, required by junit.
-   *
-   * @param testName Test name
-   */
-  public SqlLineTest(String testName) {
-    super(testName);
-  }
+public class SqlLineTest {
 
   /**
    * Unit test for {@link SqlLine#splitCompound(String)}.
    */
+  @Test
   public void testSplitCompound() {
     final SqlLine line = new SqlLine();
     String[][] strings;
 
     // simple line
     strings = line.splitCompound("abc de  fgh");
-    assertEquals(new String[][] {{"ABC"}, {"DE"}, {"FGH"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {"DE"}, {"FGH"}}, strings);
 
     // line with double quotes
     strings = line.splitCompound("abc \"de fgh\" ijk");
-    assertEquals(new String[][] {{"ABC"}, {"de fgh"}, {"IJK"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {"de fgh"}, {"IJK"}}, strings);
 
     // line with double quotes as first and last
     strings = line.splitCompound("\"abc de\"  fgh \"ijk\"");
-    assertEquals(new String[][] {{"abc de"}, {"FGH"}, {"ijk"}}, strings);
+    assertArrayEquals(new String[][] {{"abc de"}, {"FGH"}, {"ijk"}}, strings);
 
     // escaped double quotes, and dots inside quoted identifiers
     strings = line.splitCompound("\"ab.c \"\"de\"  fgh.ij");
-    assertEquals(new String[][] {{"ab.c \"de"}, {"FGH", "IJ"}}, strings);
+    assertArrayEquals(new String[][] {{"ab.c \"de"}, {"FGH", "IJ"}}, strings);
 
     // single quotes do not affect parsing
     strings = line.splitCompound("'abc de'  fgh");
-    assertEquals(new String[][] {{"'ABC"}, {"DE'"}, {"FGH"}}, strings);
+    assertArrayEquals(new String[][] {{"'ABC"}, {"DE'"}, {"FGH"}}, strings);
 
     // incomplete double-quoted identifiers are implicitly completed
     strings = line.splitCompound("abcdefgh   \"ijk");
-    assertEquals(new String[][] {{"ABCDEFGH"}, {"ijk"}}, strings);
+    assertArrayEquals(new String[][] {{"ABCDEFGH"}, {"ijk"}}, strings);
 
     // dot at start of line is illegal, but we are lenient and ignore it
     strings = line.splitCompound(".abc def.gh");
-    assertEquals(new String[][] {{"ABC"}, {"DEF", "GH"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {"DEF", "GH"}}, strings);
 
     // spaces around dots are fine
     strings = line.splitCompound("abc de .  gh .i. j");
-    assertEquals(new String[][] {{"ABC"}, {"DE", "GH", "I", "J"}}, strings);
+    assertArrayEquals(
+        new String[][] {{"ABC"}, {"DE", "GH", "I", "J"}}, strings);
 
     // double-quote inside an unquoted identifier is treated like a regular
     // character; should be an error, but we are lenient
     strings = line.splitCompound("abc\"de \"fg\"");
-    assertEquals(new String[][] {{"ABC\"DE"}, {"fg"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC\"DE"}, {"fg"}}, strings);
 
     // null value only if unquoted
     strings = line.splitCompound("abc null");
-    assertEquals(new String[][] {{"ABC"}, {null}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {null}}, strings);
     strings = line.splitCompound("abc foo.null.bar");
-    assertEquals(new String[][] {{"ABC"}, {"FOO", null, "BAR"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {"FOO", null, "BAR"}}, strings);
     strings = line.splitCompound("abc foo.\"null\".bar");
-    assertEquals(new String[][] {{"ABC"}, {"FOO", "null", "BAR"}}, strings);
+    assertArrayEquals(
+        new String[][] {{"ABC"}, {"FOO", "null", "BAR"}}, strings);
     strings = line.splitCompound("abc foo.\"NULL\".bar");
-    assertEquals(new String[][] {{"ABC"}, {"FOO", "NULL", "BAR"}}, strings);
+    assertArrayEquals(
+        new String[][] {{"ABC"}, {"FOO", "NULL", "BAR"}}, strings);
 
     // trim trailing whitespace and semicolon
     strings = line.splitCompound("abc ;\t     ");
-    assertEquals(new String[][] {{"ABC"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}}, strings);
     // keep semicolon inside line
     strings = line.splitCompound("abc\t;def");
-    assertEquals(new String[][] {{"ABC"}, {";DEF"}}, strings);
+    assertArrayEquals(new String[][] {{"ABC"}, {";DEF"}}, strings);
   }
 
+  @Test
   public void testCenterString() {
     assertEquals("abc", ColorBuffer.centerString("abc", -1));
     assertEquals("abc", ColorBuffer.centerString("abc", 1));
     assertEquals("abc ", ColorBuffer.centerString("abc", 4));
     assertEquals(" abc ", ColorBuffer.centerString("abc", 5));
     // centerString used to have cartesian performance
-    assertEquals(1234567, ColorBuffer.centerString("abc", 1234567).length());
+    assertEquals(
+        1234567, ColorBuffer.centerString("abc", 1234567).length());
   }
 
+  @Test
   public void testLoadingSystemPropertiesOnCreate() {
     System.setProperty("sqlline.Isolation", "TRANSACTION_NONE");
     SqlLine line = new SqlLine();
     try {
-      assertEquals("TRANSACTION_NONE", line.getOpts().getIsolation());
+      assertEquals(
+          "TRANSACTION_NONE", line.getOpts().getIsolation());
     } finally {
       // set back to the default for tests running in the same JVM.
       System.setProperty("sqlline.Isolation", "TRANSACTION_REPEATABLE_READ");
     }
   }
 
+  @Test
   public void testSplit() {
     SqlLine line = new SqlLine();
     String[] strings;
@@ -124,36 +123,38 @@ public class SqlLineTest extends TestCase {
     // query check
     strings = line.split("values (1, cast(null as integer), "
         + "cast(null as varchar(3));", " ");
-    assertEquals(new String[] {"values", "(1,", "cast(null", "as", "integer),",
-        "cast(null", "as", "varchar(3));"}, strings);
+    assertArrayEquals(
+        new String[]{"values", "(1,", "cast(null", "as", "integer),",
+            "cast(null", "as", "varchar(3));"}, strings);
     // space
     strings = line.split("set csvdelimiter ' '", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", " "}, strings);
+    assertArrayEquals(new String[]{"set", "csvdelimiter", " "}, strings);
     // space with double quotes
     strings = line.split("set csvdelimiter \" \"", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", " "}, strings);
+    assertArrayEquals(new String[]{"set", "csvdelimiter", " "}, strings);
     // table and space
     strings = line.split("set csvdelimiter '\t. '", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", "\t. "}, strings);
+    assertArrayEquals(new String[]{"set", "csvdelimiter", "\t. "}, strings);
     // \n
     strings = line.split("set csvdelimiter ' ,\n; '", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", " ,\n; "}, strings);
+    assertArrayEquals(new String[]{"set", "csvdelimiter", " ,\n; "}, strings);
     // double quote inside singles
     strings = line.split("set csvdelimiter ' \"\" \" '", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", " \"\" \" "}, strings);
+    assertArrayEquals(
+        new String[] {"set", "csvdelimiter", " \"\" \" "}, strings);
     // single quotes inside doubles
     strings = line.split("set csvdelimiter \" ' '' \"", " ");
-    assertEquals(new String[]{"set", "csvdelimiter", " ' '' "}, strings);
+    assertArrayEquals(new String[]{"set", "csvdelimiter", " ' '' "}, strings);
     // timestamp string
     strings = line.split("set timestampformat 01/01/1970T12:32:12", " ");
-    assertEquals(
+    assertArrayEquals(
         new String[]{"set", "timestampformat", "01/01/1970T12:32:12"}, strings);
 
     strings = line.split("?", " ");
-    assertEquals(new String[]{"?"}, strings);
+    assertArrayEquals(new String[]{"?"}, strings);
 
     strings = line.split("#", " ");
-    assertEquals(new String[]{"#"}, strings);
+    assertArrayEquals(new String[]{"#"}, strings);
 
     try {
       line.split("set csvdelimiter '", " ");
@@ -205,6 +206,7 @@ public class SqlLineTest extends TestCase {
     }
   }
 
+  @Test
   public void testNextColorScheme() {
     final SqlLine sqlLine = new SqlLine();
     final String initialScheme = sqlLine.getOpts().getColorScheme();
@@ -219,33 +221,6 @@ public class SqlLineTest extends TestCase {
     }
     assertNotEquals(limit, counter);
     assertEquals(initialScheme, currentScheme);
-  }
-
-  void assertEquals(String[][] expectedses, String[][] actualses) {
-    assertEquals(expectedses.length, actualses.length);
-    for (int i = 0; i < expectedses.length; ++i) {
-      String[] expecteds = expectedses[i];
-      String[] actuals = actualses[i];
-      assertEquals(expecteds.length, actuals.length);
-      for (int j = 0; j < expecteds.length; ++j) {
-        String expected = expecteds[j];
-        String actual = actuals[j];
-        assertEquals(expected, actual);
-      }
-    }
-  }
-
-  void assertEquals(String[] expectedses, String[] actualses) {
-    assertEquals(expectedses.length, actualses.length);
-    for (int j = 0; j < expectedses.length; ++j) {
-      String expected = expectedses[j];
-      String actual = actualses[j];
-      if (expected == null) {
-        assertNull(actual);
-      } else {
-        assertEquals(expected, actual);
-      }
-    }
   }
 }
 

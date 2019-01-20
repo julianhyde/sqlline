@@ -17,16 +17,15 @@ import java.util.Map;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import mockit.Mock;
 import mockit.MockUp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static sqlline.SqlLineHighlighterLowLevelTest.ExpectedHighlightStyle;
 import static sqlline.SqlLineHighlighterLowLevelTest.getSqlLine;
 
@@ -43,7 +42,7 @@ public class SqlLineHighlighterTest {
    * with corresponding highlighter into the map like below.
    * @throws Exception if error while sqlline initialization happens
    */
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     sqlLine2Highlighter = new HashMap<>();
     sqlLineWithDefaultColorScheme = getSqlLine(SqlLineProperty.DEFAULT);
@@ -56,7 +55,7 @@ public class SqlLineHighlighterTest {
     sqlLine2Highlighter.put(lightSqlLine, new SqlLineHighlighter(lightSqlLine));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     sqlLine2Highlighter = null;
   }
@@ -773,9 +772,9 @@ public class SqlLineHighlighterTest {
       if (Character.isWhitespace(line.charAt(i))) {
         continue;
       }
-      assertEquals(getFailedStyleMessage(line, i, "default"),
-          i == 0 ? defaultStyle + 32 : defaultStyle,
-          attributedString.styleAt(i).getStyle());
+      assertEquals(i == 0 ? defaultStyle + 32 : defaultStyle,
+          attributedString.styleAt(i).getStyle(),
+          getFailedStyleMessage(line, i, "default"));
     }
   }
 
@@ -809,14 +808,14 @@ public class SqlLineHighlighterTest {
       int style,
       String styleName) {
     if (styleBitSet.get(i)) {
-      assertEquals(getFailedStyleMessage(line, i, styleName),
-          i == 0 ? style + 32 : style,
-          highlightedLine.styleAt(i).getStyle());
+      assertEquals(i == 0 ? style + 32 : style,
+          highlightedLine.styleAt(i).getStyle(),
+          getFailedStyleMessage(line, i, styleName));
     } else {
       if (!Character.isWhitespace(line.charAt(i))) {
-        assertNotEquals(getNegativeFailedStyleMessage(line, i, styleName),
-            i == 0 ? style + 32 : style,
-            highlightedLine.styleAt(i).getStyle());
+        assertNotEquals(i == 0 ? style + 32 : style,
+            highlightedLine.styleAt(i).getStyle(),
+            getNegativeFailedStyleMessage(line, i, styleName));
       }
     }
   }
