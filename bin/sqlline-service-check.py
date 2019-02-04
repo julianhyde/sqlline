@@ -21,12 +21,12 @@ import time
 
 class Load(nagiosplugin.Resource):
 	""" Construct the class for Icinga """
-	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, sqlline_bin, username):
+	def __init__(self, database, adserver, hostname, auth_mode, PASSWORD, port, query, queryfile, realm, sqlline_bin, username):
 		logging.debug("Initializing")
 		self.adserver = adserver
 		self.database = database
 		self.hostname = hostname
-		self.mode = mode
+		self.auth_mode = auth_mode
 		self.PASSWORD = PASSWORD
 		self.port = port
 		self.query = query
@@ -38,11 +38,11 @@ class Load(nagiosplugin.Resource):
 	def execute_sqlline(self, execute_type):
 		"""Executes the query of file"""
 
-		if self.mode == "kerberos":
+		if self.auth_mode == "kerberos":
 			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port \
 				+ '/;AuthMech=1;KrbHostFQDN=' + self.adserver + ';KrbServiceName=hive;KrbHostFQDN=' \
 				+ self.hostname + ';KrbRealm=' + self.realm + '"'
-		elif self.mode == "ssl":
+		elif self.auth_mode == "ssl":
 			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port + '/;ssl=1;AuthMech=3"'
 
 		logging.debug("JDBC used: " + str(jdbc))
@@ -208,7 +208,7 @@ def main():
 	database = args.database
 	debug = args.debug
 	hostname = args.hostname
-	mode = args.mode
+	auth_mode = args.auth_mode
 	query_cmds = []
 	realm = args.realm
 	scriptdir = os.path.dirname(os.path.abspath(__file__))
@@ -237,7 +237,7 @@ def main():
 
 	# Authentication
 	# Setup creds for non-kerberos (if required)
-	if args.creds and mode != "kerberos":
+	if args.creds and auth_mode != "kerberos":
 		# use supplied credentials file
 		credentials_file = open(args.creds)
 		line = credentials_file.readlines()
@@ -245,7 +245,7 @@ def main():
 		PASSWORD = line[1].rstrip()
 		credentials_file.close()
 
-	elif not args.creds and mode != "kerberos":
+	elif not args.creds and auth_mode != "kerberos":
 		sys.exit("Credentials required for non-kerberos use")
 
 	elif not args.username:
@@ -254,7 +254,7 @@ def main():
 		username = args.username
 		PASSWORD = ""
 
-	if mode == "kerberos":
+	if auth_mode == "kerberos":
 		# Check for required args that support kerberos
 		if not args.adserver:
 			sys.exit("--adserver is required for kerberos usage (e.g. hostname.domain.com)")
@@ -276,7 +276,7 @@ def main():
 	# Get metrics
 	try:
 		check = nagiosplugin.Check(
-			Load(database, adserver, hostname, mode, PASSWORD,port, \
+			Load(database, adserver, hostname, auth_mode, PASSWORD,port, \
 			query, queryfile, realm, sqlline_bin, username), \
 			nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
 	except:
