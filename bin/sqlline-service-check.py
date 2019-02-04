@@ -195,7 +195,7 @@ def main():
 		help='return warning if load is outside RANGE')
 	aparser.add_argument('-c', '--critical', metavar='RANGE', default='', required=True,
 		help='return critical if load is outside RANGE')
-	aparser.add_argument('-m', '--max', metavar='RANGE', default='',
+	aparser.add_argument('-m', '--max', metavar='RANGE', default='', required=True,
 		help='return error if load is outside RANGE')
 	aparser.add_argument('-r', '--realm', action='store', help="AD Server realm (e.g. DOMAIN.COM)")
 	aparser.add_argument('-u', '--username', required=False, help="Username")
