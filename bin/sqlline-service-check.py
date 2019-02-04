@@ -27,6 +27,7 @@ class Load(nagiosplugin.Resource):
 		self.database = database
 		self.hostname = hostname
 		self.auth_mode = auth_mode
+		self.max_value = max_value
 		self.PASSWORD = PASSWORD
 		self.port = port
 		self.query = query
