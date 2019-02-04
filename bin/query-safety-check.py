@@ -1,13 +1,14 @@
 #!/bin/python
 # Description: Nagios/Icinga plugin for Hiveserver2 checks
-#	       Uses sqlline. Intended for Icinga ONLY
+#	       Uses sqlline. Intended for Tidal jobs
+#		   This script does not depend on external libraries so
+#		   it can be used with Tidal.
 # Metrics:
 #	Returns query completion time in seconds	
 
 import argparse
 import getpass
 import logging
-import nagiosplugin
 import os
 import random
 import re
@@ -19,10 +20,9 @@ import time
 # Notes
 # probe seems to be a special function, required
 
-class Load(nagiosplugin.Resource):
+class QuerySafetyCheck():
 	""" Construct the class for Icinga """
-	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, sqlline_bin, username):
-		logging.debug("Initializing")
+	def __init__(self, database, adserver, hostname, mode, PASSWORD, port, query, queryfile, realm, username):
 		self.adserver = adserver
 		self.database = database
 		self.hostname = hostname
@@ -33,7 +33,6 @@ class Load(nagiosplugin.Resource):
 		self.queryfile = queryfile
 		self.realm = realm
 		self.username = username
-		self.sqlline_bin = sqlline_bin
 
 	def execute_sqlline(self, execute_type):
 		"""Executes the query of file"""
@@ -59,16 +58,15 @@ class Load(nagiosplugin.Resource):
 			sys.exit("Invalid execution type specified")	
 
 		# Execute sqlline
-		logging.debug("Execute sqlline")
-		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
-			queryfile, "-n", self.username, "-p", self.PASSWORD], \
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		logging.info("Execute sqlline")
+		sqlline_cmd_stream = subprocess.Popen(["bin/sqlline", "-u", jdbc, "-f", \
+			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Poll for status on the process to check if it's running
 		try:	
-			logging.debug("Getting stdout/stderr")
+			logging.info("Getting stdout/stderr")
 			stdout, stderr = sqlline_cmd_stream.communicate()
-			logging.debug("Retrieved stdout/stderr")
+			logging.info("Retrieved stdout/stderr")
 		except:
 			logging.error('Process was killed by timeout.')
 			raise
@@ -78,12 +76,12 @@ class Load(nagiosplugin.Resource):
 				sqlline_cmd_stream.kill()
 				stdout, stderr = sqlline_cmd_stream.communicate()
 
-		logging.debug("Analyzing output")
+		logging.info("Analyzing output")
 		# Parse stdout and stderr for metrics
 		# Right now, stats are trapper in stderr
 		perfstat = 0
 		if stdout:
-			logging.debug("...checking stdout")
+			logging.info("...checking stdout")
 			# Iterate for debugging
 			for line in stdout.split('\n'):
 				logging.debug(line)
@@ -95,7 +93,7 @@ class Load(nagiosplugin.Resource):
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
 		if stderr:
-			logging.debug("...checking stderr")
+			logging.info("...checking stderr")
 			for line in stderr.split('\n'):
 				logging.debug(line)
 				# Check for some common traps for better stderr handling
@@ -114,7 +112,7 @@ class Load(nagiosplugin.Resource):
 					perfstat += float(re.sub('.*rows selected \(', '', line).strip(') seconds'))
 
 		logging.debug("Total runtime: " + str(perfstat))
-		logging.debug("Query execution complete.")
+		logging.info("Query execution complete.")
 
 		# Check if perfstat was not updated at all
 		if perfstat == 0:
@@ -130,10 +128,8 @@ class Load(nagiosplugin.Resource):
 			elif self.query:
 				perfstat = self.execute_sqlline("query")
 
-			logging.debug("Returning metrics to nagiosplugin")
 			# Check the time metric with defaults for min/max set
-			return nagiosplugin.Metric('query_time', perfstat, min=0,
-				 max=args.max, context='query_time')
+			logging.info("Query time: " + str(perfstat))
 		except:
 			raise
 
@@ -143,12 +139,11 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	 
 	# create console handler and set level
 	handler = logging.StreamHandler()
+	formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	if debug:
 		handler.setLevel(logging.DEBUG)
-		formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	else:
 		handler.setLevel(logging.INFO)
-		formatter = logging.Formatter("%(message)s")
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
@@ -166,9 +161,6 @@ def initialize_logger(debug, log_filename, log_filename_debug):
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)			
 
-def signal_handler(signum, frame):
-	raise Exception("Process must have timeout out...")
-
 def main():
 	""" Main function """
 
@@ -177,8 +169,7 @@ def main():
 	aparser = argparse.ArgumentParser(description="Python wrapper for sqlline service check",
 	formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=60,width=90))
 	aparser.add_argument('-ad', '--adserver', action='store', help="AD Server (kerberos)")
-	aparser.add_argument('-am', '--auth-mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
-	aparser.add_argument('--creds', help="Supply credentials file.")
+	aparser.add_argument('--creds', action='store', help="Supply credentials file.")
 	aparser.add_argument('-db', '--database', required=False, default='default', \
 		help="Hive database to use. The database 'default is used by default'")
 	aparser.add_argument('-dbg', '--debug', help="Turn on stdout debugging")
@@ -189,14 +180,13 @@ def main():
 	aparser.add_argument('-kt', '--keytab', help="Supply a custom keytab file")
 	aparser.add_argument('-ln', '--log-name', action='store', default="sqlline-service-check", help="log filename")
 	aparser.add_argument('-lf', '--log-folder', action='store', default="/home/"+ getpass.getuser() +"/sqlline-service-check/", help="log folder name")
+	aparser.add_argument('-m', '--mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
 	aparser.add_argument('-p', '--port', required=False, help="Hive hostname port")
 	aparser.add_argument('-q', '--query', required=False, default=None, action='store', help="Query supplied")
 	aparser.add_argument('-w', '--warning', metavar='RANGE', default='',
 		help='return warning if load is outside RANGE')
 	aparser.add_argument('-c', '--critical', metavar='RANGE', default='',
 		help='return critical if load is outside RANGE')
-	aparser.add_argument('-m', '--max', metavar='RANGE', default='',
-		help='return error if load is outside RANGE')
 	aparser.add_argument('-r', '--realm', action='store', help="AD Server realm (e.g. DOMAIN.COM)")
 	aparser.add_argument('-u', '--username', required=False, help="Username")
 	aparser.add_argument('-v', '--verbose', action='count', default=0,
@@ -211,8 +201,6 @@ def main():
 	mode = args.mode
 	query_cmds = []
 	realm = args.realm
-	scriptdir = os.path.dirname(os.path.abspath(__file__))
-	sqlline_bin = scriptdir + '/sqlline'
 
 	if args.query and args.filename:
 		sys.exit("Cannot specify both a query and a file")
@@ -230,9 +218,6 @@ def main():
 	log_filename = log_folder + args.log_name + "-" + args.hostname + ".log"
 	log_filename_debug = log_folder + args.log_name + "-" + args.hostname + "-debug.log"
 	initialize_logger(debug, log_filename, log_filename_debug)
-
-	# For Tidal, set term type or execution may hange
-	# We saw this with beeline as well
 	logging.debug("===== Starting Logger =====")
 
 	# Authentication
@@ -260,10 +245,17 @@ def main():
 			sys.exit("--adserver is required for kerberos usage (e.g. hostname.domain.com)")
 		if not args.realm:
 			sys.exit("--realm is required for kerberos usage (e.g. DOMAIN.COM)")
-		proc_status = subprocess.call(['kinit', '-kt', \
-			args.keytab, username + '@GEISINGER.EDU'], stdout=open('/dev/null', 'w'))
+
+		# Test for kerberos ticket
+		proc_status = subprocess.call(['klist', '-s'])
 		if proc_status is not 0:
-			sys.exit("Failed to kinit")
+			if not args.keytab:
+				sys.exit("No kerberos ticket found and no keytab provided!")
+			logging.info("No keberos ticket found, calling kinit")	
+			proc_status = subprocess.call(['kinit', '-kt', \
+				args.keytab, username + '@GEISINGER.EDU'], stdout=open('/dev/null', 'w'))
+			if proc_status is not 0:
+				sys.exit("Failed to kinit")
 
 	# Port
 	if not args.port:
@@ -275,18 +267,19 @@ def main():
 
 	# Get metrics
 	try:
-		check = nagiosplugin.Check(
-			Load(database, adserver, hostname, mode, PASSWORD,port, \
-			query, queryfile, realm, sqlline_bin, username), \
-			nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
+		# Instantiate class and check
+		logging.debug("Instantiating class")
+		check = QuerySafetyCheck(database, adserver, hostname, mode, PASSWORD,port, \
+			query, queryfile, realm, username)
+			#nagiosplugin.ScalarContext('query_time', args.warning, args.critical))
 	except:
 		raise
 		sys.exit("Failed to run metrics check")
 
 	# Run check
-	logging.debug("Running check")
+	logging.info("Running check")
 	try:
-		check.main(verbose=args.verbose)
+		check.probe()
 	except:
 		raise
 

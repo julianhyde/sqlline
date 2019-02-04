@@ -22,10 +22,8 @@ install: build
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
-	# Needed due to Tidal checks using old Icinga script that requires nagiosplugin library
-	pipenv install
 
-install-icinga: build
+install-icinga: build install
 	# Build pipenv environment for python wrapper
 	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
@@ -42,3 +40,7 @@ clean:
 	@echo "Cleaning and purging project files and local repository artifacts..."
 	mvn clean
 	mvn build-helper:remove-project-artifact
+	rm -f /usr/local/bin/sqlline
+	rm -f /usr/lib64/nagios/plugins/sqlline-service-check
+	rm -f /usr/local/bin/sqlline-service-check
+
