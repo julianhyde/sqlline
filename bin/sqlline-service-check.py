@@ -134,7 +134,7 @@ class Load(nagiosplugin.Resource):
 			logging.debug("Returning metrics to nagiosplugin")
 			# Check the time metric with defaults for min/max set
 			return nagiosplugin.Metric('query_time', perfstat, min=0,
-				 max=60, context='query_time')
+				 max=args.max, context='query_time')
 		except:
 			raise
 
@@ -178,6 +178,7 @@ def main():
 	aparser = argparse.ArgumentParser(description="Python wrapper for sqlline service check",
 	formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=60,width=90))
 	aparser.add_argument('-ad', '--adserver', action='store', help="AD Server (kerberos)")
+	aparser.add_argument('-am', '--auth-mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
 	aparser.add_argument('--creds', help="Supply credentials file.")
 	aparser.add_argument('-db', '--database', required=False, default='default', \
 		help="Hive database to use. The database 'default is used by default'")
@@ -189,13 +190,14 @@ def main():
 	aparser.add_argument('-kt', '--keytab', help="Supply a custom keytab file")
 	aparser.add_argument('-ln', '--log-name', action='store', default="sqlline-service-check", help="log filename")
 	aparser.add_argument('-lf', '--log-folder', action='store', default="/home/"+ getpass.getuser() +"/sqlline-service-check/", help="log folder name")
-	aparser.add_argument('-m', '--mode', action='store', required=True, help="Authentication mode. One of: ssl,kerberos")
 	aparser.add_argument('-p', '--port', required=False, help="Hive hostname port")
 	aparser.add_argument('-q', '--query', required=False, default=None, action='store', help="Query supplied")
 	aparser.add_argument('-w', '--warning', metavar='RANGE', default='',
 		help='return warning if load is outside RANGE')
 	aparser.add_argument('-c', '--critical', metavar='RANGE', default='',
 		help='return critical if load is outside RANGE')
+	aparser.add_argument('-m', '--max', metavar='RANGE', default='',
+		help='return error if load is outside RANGE')
 	aparser.add_argument('-r', '--realm', action='store', help="AD Server realm (e.g. DOMAIN.COM)")
 	aparser.add_argument('-u', '--username', required=False, help="Username")
 	aparser.add_argument('-v', '--verbose', action='count', default=0,
