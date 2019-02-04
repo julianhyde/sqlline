@@ -191,9 +191,9 @@ def main():
 	aparser.add_argument('-lf', '--log-folder', action='store', default="/home/"+ getpass.getuser() +"/sqlline-service-check/", help="log folder name")
 	aparser.add_argument('-p', '--port', required=False, help="Hive hostname port")
 	aparser.add_argument('-q', '--query', required=False, default=None, action='store', help="Query supplied")
-	aparser.add_argument('-w', '--warning', metavar='RANGE', default='',
+	aparser.add_argument('-w', '--warning', metavar='RANGE', default='', required=True,
 		help='return warning if load is outside RANGE')
-	aparser.add_argument('-c', '--critical', metavar='RANGE', default='',
+	aparser.add_argument('-c', '--critical', metavar='RANGE', default='', required=True,
 		help='return critical if load is outside RANGE')
 	aparser.add_argument('-m', '--max', metavar='RANGE', default='',
 		help='return error if load is outside RANGE')
