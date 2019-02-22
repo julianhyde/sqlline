@@ -30,7 +30,7 @@
     <forbiddenapis.version>2.6</forbiddenapis.version>
     <h2.version>1.4.197</h2.version>
     <hsqldb.version>2.4.1</hsqldb.version>
-    <jline.version>3.9.0</jline.version>
+    <jline.version>3.10.0</jline.version>
     <jmockit.version>1.44</jmockit.version>
     <junit.version>4.12</junit.version>
     <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
