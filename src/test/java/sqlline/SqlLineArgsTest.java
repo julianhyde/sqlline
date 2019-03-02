@@ -2225,6 +2225,103 @@ public class SqlLineArgsTest {
     }
   }
 
+  /**
+   * Test to Set/Reset confirm.
+   */
+  @Test
+  public void testConfirmFlag() {
+    try {
+      DispatchCallback callback = new DispatchCallback();
+      SqlLine line = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      assertEquals(Boolean.FALSE, line.getOpts().getConfirm());
+      begin(line, os, false, "-e", "!set confirm true");
+      assertEquals(Boolean.TRUE, line.getOpts().getConfirm());
+      begin(line, os, false, "-e", "!set confirm false");
+      assertEquals(Boolean.FALSE, line.getOpts().getConfirm());
+    } catch (Throwable e) {
+      //fail
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Test effects of confirm flag.
+   */
+  @Test
+  public void testConfirmFlagEffects() {
+
+    new MockUp<sqlline.Commands>() {
+      @Mock
+      public int getUserAnswer(
+          String question, int... allowedAnswers) {
+        return 'n';
+      }
+    };
+
+    SqlLine line = new SqlLine();
+    assertEquals(Boolean.FALSE, line.getOpts().getConfirm());
+    assertEquals("default", line.getOpts().getConfirmPattern());
+    String script = "CREATE TABLE dummy_test(pk int);\n"
+        + "INSERT INTO dummy_test(pk) VALUES(1);\n"
+        + "INSERT INTO dummy_test(pk) VALUES(2);\n"
+        + "INSERT INTO dummy_test(pk) VALUES(3);\n"
+        + "DELETE FROM dummy_test;\n"
+        + "DROP TABLE dummy_test;\n";
+    checkScriptFile(script, true,
+        equalTo(SqlLine.Status.OK),
+        containsString(" "));
+
+    script = "!set confirm true\n" + script;
+    checkScriptFile(script, true,
+        equalTo(SqlLine.Status.OTHER),
+        containsString(line.loc("abort-action")));
+  }
+
+  /**
+   * Test effects of confirm flag.
+   */
+  @Test
+  public void testConfirmPattern() {
+    SqlLine line = new SqlLine();
+    assertEquals(Boolean.FALSE, line.getOpts().getConfirm());
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+    begin(line, os, false, "-e",
+        "!set confirmPattern \"^(?i:(TRUNCATE|ALTER))\"");
+
+    assertEquals("^(?i:(TRUNCATE|ALTER))", line.getOpts()
+        .getConfirmPattern());
+
+    begin(line, os, false, "-e", "!set confirmPattern default");
+
+    assertEquals(line.loc("default-confirm-pattern"),
+        line.getOpts().getConfirmPattern());
+
+  }
+
+  /**
+   * Test for illegal regex in confirmPattern
+   */
+  @Test
+  public void testExceptionConfirmPattern() {
+    try {
+      SqlLine line = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      assertEquals(Boolean.FALSE, line.getOpts().getConfirm());
+      SqlLine.Status status =
+          begin(line, os, false, "-e",
+              "!set confirmPattern \"^(?i*:(TRUNCATE|ALTER))\"");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      assertThat(os.toString("UTF8"), containsString("invalid regex"));
+      os.reset();
+    } catch (Throwable e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {

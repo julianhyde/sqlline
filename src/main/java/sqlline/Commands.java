@@ -490,6 +490,8 @@ public class Commands {
     final Terminal terminal = sqlLine.getLineReader().getTerminal();
     final PrintWriter writer = terminal.writer();
     writer.write(question);
+    writer.write('\n');
+    writer.flush();
     int c;
     // The logic to prevent reaction of SqlLineParser here
     do {
@@ -947,7 +949,16 @@ public class Commands {
 
       try {
         long start = System.currentTimeMillis();
-
+        if (sqlLine.getOpts().getCompiledConfirmPattern().matcher(sql).find()
+              && sqlLine.getOpts().getConfirm()) {
+          String question = sqlLine.loc("really-perform-action");
+          final int userResponse = getUserAnswer(question, 'y', 'n', 'Y', 'N');
+          if (userResponse != 'y') {
+            sqlLine.error(sqlLine.loc("abort-action"));
+            callback.setToFailure();
+            return;
+          }
+        }
         if (call) {
           stmnt = sqlLine.getDatabaseConnection().connection.prepareCall(sql);
           callback.trackSqlQuery(stmnt);

@@ -17,6 +17,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.jline.builtins.Completers;
@@ -36,6 +38,8 @@ import static sqlline.BuiltInProperty.AUTO_COMMIT;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
 import static sqlline.BuiltInProperty.COLOR;
 import static sqlline.BuiltInProperty.COLOR_SCHEME;
+import static sqlline.BuiltInProperty.CONFIRM;
+import static sqlline.BuiltInProperty.CONFIRM_PATTERN;
 import static sqlline.BuiltInProperty.CSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
@@ -95,6 +99,7 @@ public class SqlLineOpts implements Completer {
           new HashMap<SqlLineProperty, SqlLineProperty.Writer>() {
             {
               put(COLOR_SCHEME, SqlLineOpts.this::setColorScheme);
+              put(CONFIRM_PATTERN, SqlLineOpts.this::setConfirmPattern);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
@@ -107,6 +112,7 @@ public class SqlLineOpts implements Completer {
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
             }
           });
+  private Pattern compiledConfirmPattern = null;
 
   public SqlLineOpts(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
@@ -766,6 +772,18 @@ public class SqlLineOpts implements Completer {
     return this.runFile;
   }
 
+  public boolean getConfirm() {
+    return getBoolean(CONFIRM);
+  }
+
+  public String getConfirmPattern() {
+    return get(CONFIRM_PATTERN);
+  }
+
+  public void setConfirmPattern(String confirmPattern) {
+    set(CONFIRM_PATTERN, getValidConfirmPatternOrThrow(confirmPattern));
+  }
+
   private String getValidDateTimePatternOrThrow(String dateTimePattern) {
     if (DEFAULT.equalsIgnoreCase(dateTimePattern)) {
       return dateTimePattern;
@@ -779,6 +797,29 @@ public class SqlLineOpts implements Completer {
     return dateTimePattern;
   }
 
+  private String getValidConfirmPatternOrThrow(String confirmPattern) {
+    if (confirmPattern == null) {
+      throw new IllegalArgumentException("Confirm pattern is null");
+    }
+    if (DEFAULT.equalsIgnoreCase(confirmPattern)) {
+      confirmPattern = sqlLine.loc("default-confirm-pattern");
+    }
+    set(CONFIRM_PATTERN, confirmPattern);
+    try {
+      compiledConfirmPattern = Pattern.compile(confirmPattern);
+    } catch (PatternSyntaxException ex) {
+      throw new IllegalArgumentException("invalid "
+              + "regex provided for confirmPattern");
+    }
+    return confirmPattern;
+  }
+
+  public Pattern getCompiledConfirmPattern() {
+    if (compiledConfirmPattern == null) {
+      compiledConfirmPattern = Pattern.compile(getConfirmPattern());
+    }
+    return compiledConfirmPattern;
+  }
 }
 
 // End SqlLineOpts.java
