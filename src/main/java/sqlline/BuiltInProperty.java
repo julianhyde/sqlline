@@ -33,6 +33,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   COLOR_SCHEME("colorScheme", Type.STRING, DEFAULT, true, false,
       new Application().getName2HighlightStyle().keySet()),
   COLOR("color", Type.BOOLEAN, false),
+  CONFIRM("confirm", Type.BOOLEAN, false),
+  CONFIRM_PATTERN("confirmPattern", Type.STRING, DEFAULT),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
   CSV_QUOTE_CHARACTER("csvQuoteCharacter", Type.CHAR, '\''),

@@ -101,6 +101,8 @@ autocommit
 autosave
 color
 colorScheme
+confirm
+confirmPattern
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -234,6 +236,8 @@ autocommit
 autosave
 color
 colorScheme
+confirm
+confirmPattern
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -1109,6 +1113,9 @@ autoSave        true/false Automatically save preferences
 color           true/false Control whether color is used for display
 colorScheme     chester/dark/dracula/light/obsidian/solarized/vs2010
                            Syntax highlight schema
+confirm         true/false Prompts for confirmation before running
+                           commands specified in confirmPattern
+confirmPattern  pattern    Pattern commands to issue prompt before execution
 csvDelimiter    String     Delimiter in csv outputFormat
 csvQuoteCharacter char     Quote character in csv outputFormat
 dateFormat      pattern    Format dates using SimpleDateFormat pattern
@@ -2070,6 +2077,8 @@ autocommit
 autosave
 color
 colorScheme
+confirm
+confirmPattern
 csvDelimiter
 csvQuoteCharacter
 dateformat
@@ -2117,6 +2126,14 @@ If true, then output to the terminal will use color for a more pleasing visual e
 colorScheme
 
 If chester/dark/dracula/light/obsidian/solarized/vs2010, then this scheme will be used for command/sql syntax highlighting. If default then there is no syntax highlighting.
+
+confirm
+
+If true, then user will be prompted for confirmation if commands matching with confirmPattern are executed.
+
+confirmPattern
+
+If default with confirm = true, user will be prompted for DROP and DELETE commands, otherwise, for the commands as matched in the pattern.
 
 csvDelimiter
 
