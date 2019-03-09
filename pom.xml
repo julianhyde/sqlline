@@ -215,6 +215,7 @@
         <configuration>
           <additionalOptions>${maven-javadoc-plugin.additionalOptions}</additionalOptions>
           <show>public</show>
+          <source>${maven.compiler.source}</source>
         </configuration>
         <executions>
           <execution>
