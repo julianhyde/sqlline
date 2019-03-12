@@ -18,12 +18,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Rows implementation which buffers rows in a linked list.
- * If incrementalBufferRows is negative it buffers all rows.
- * If incrementalBufferRows is zero it buffers nothing.
- * If the number of rows in result set is more than incrementalBufferRows
- * and incremental property is false than it enters incremental mode with
- * buffered limit incrementalBufferRows.
+ * Rows implementation that buffers rows in a linked list.
+ *
+ * <p>Detailed behavior depends on
+ * {@link SqlLineOpts#getIncrementalBufferRows() incrementalBufferRows},
+ * as follows:
+ *
+ * <ul>
+ * <li>If {@code incrementalBufferRows} is negative, it buffers all rows;
+ * <li>If {@code incrementalBufferRows} is zero, it buffers nothing;
+ * <li>If the number of rows in result set is more than
+ *     {@code incrementalBufferRows} and incremental property is false,
+ *     then it enters incremental mode, with buffered limit
+ *     {@code incrementalBufferRows}.
+ * </ul>
  */
 class BufferedRows extends Rows {
   private final ResultSet rs;
@@ -36,10 +44,7 @@ class BufferedRows extends Rows {
   BufferedRows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     super(sqlLine, rs);
     this.rs = rs;
-    int incrementalBufferRows = sqlLine.getOpts().getIncrementalBufferRows();
-
-    limit = incrementalBufferRows < 0
-        ? Integer.MAX_VALUE : incrementalBufferRows;
+    limit = sqlLine.getOpts().getIncrementalBufferRows();
     columnCount = rsMeta.getColumnCount();
     columnNames = new Row(columnCount);
     list = nextList();
@@ -93,14 +98,19 @@ class BufferedRows extends Rows {
   }
 
   private List<Row> nextList() throws SQLException {
-    List<Row> list = new LinkedList<>();
+    final List<Row> list = new LinkedList<>();
     list.add(columnNames);
 
-    int counter = 0;
-    while (counter++ < limit && rs.next()) {
-      list.add(new Row(columnCount, rs));
+    if (limit >= 0) {
+      int counter = 0;
+      while (counter++ < limit && rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
+    } else {
+      while (rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
     }
-
     return list;
   }
 }

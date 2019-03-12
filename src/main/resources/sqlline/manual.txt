@@ -2158,7 +2158,7 @@ When set to false, the entire result set is fetched and buffered before being di
 
 incrementalBufferRows
 
-When incremental set to false and the entire result set has more rows than value of incrementalBufferRows sqlline will enter incremental mode. In that case result rows are displayed by batches of incrementalbufferrows size. Negative value means no entering incremental mode. Defaults to 1000.
+When incremental set to false and the entire result set has more rows than value of incrementalBufferRows, sqlline will enter incremental mode. In that case, result rows are displayed by batches of size incrementalBufferRows. If value is negative, sqlline never enters incremental mode. Defaults to 1000.
 
 isolation
 
