@@ -2024,11 +2024,11 @@ public class SqlLineArgsTest {
             + "!set incremental false\n"
             + "values (100, 200)";
     final String line1 = ""
-            + "+------+------+\n"
-            + "|  C1  |  C2  |\n"
-            + "+------+------+\n"
-            + "| 100  | 200  |\n"
-            + "+------+------+";
+            + "+-----+-----+\n"
+            + "| C1  | C2  |\n"
+            + "+-----+-----+\n"
+            + "| 100 | 200 |\n"
+            + "+-----+-----+";
     checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
             containsString(line1));
 
@@ -2036,11 +2036,11 @@ public class SqlLineArgsTest {
             + "!set incremental false\n"
             + "values (100, 200)";
     final String line2 = ""
-            + "+------+------+\n"
-            + "|  C1  |  C2  |\n"
-            + "+------+------+\n"
-            + "| 100  | 200  |\n"
-            + "+------+------+";
+            + "+-----+-----+\n"
+            + "| C1  | C2  |\n"
+            + "+-----+-----+\n"
+            + "| 100 | 200 |\n"
+            + "+-----+-----+";
     checkScriptFile(script2, true, equalTo(SqlLine.Status.OK),
             containsString(line2));
 
@@ -2048,11 +2048,11 @@ public class SqlLineArgsTest {
             + "!set incremental false\n"
             + "values (100, 200)";
     final String line3 = ""
-            + "+------+------+\n"
-            + "|  C1  |  C2  |\n"
-            + "+------+------+\n"
-            + "| 100  | 200  |\n"
-            + "+------+------+";
+            + "+-----+-----+\n"
+            + "| C1  | C2  |\n"
+            + "+-----+-----+\n"
+            + "| 100 | 200 |\n"
+            + "+-----+-----+";
     checkScriptFile(script3, true, equalTo(SqlLine.Status.OK),
             containsString(line3));
 
@@ -2069,68 +2069,102 @@ public class SqlLineArgsTest {
             containsString(line4));
   }
 
+  /** Tests with incrementalBufferRows = -1; query stays in non-incremental
+   * mode. */
   @Test
   public void testIncrementalBufferRows() {
     final String script1 = "!set incrementalBufferRows -1\n"
         + "!set incremental false\n"
-        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+        + "select * from (values (10, 20), (1, 2), (111, 2), (11, 2222))";
     final String line1 = ""
-        + "+------+------+\n"
-        + "|  C1  |  C2  |\n"
-        + "+------+------+\n"
-        + "| 100  | 200  |\n"
-        + "| 1    | 2    |\n"
-        + "+------+------+";
+        + "+-----+------+\n"
+        + "| C1  |  C2  |\n"
+        + "+-----+------+\n"
+        + "| 10  | 20   |\n"
+        + "| 1   | 2    |\n"
+        + "| 111 | 2    |\n"
+        + "| 11  | 2222 |\n"
+        + "+-----+------+";
     checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
         containsString(line1));
+  }
 
+  /** Tests with incrementalBufferRows = 0; query goes straight into
+   * incremental mode. */
+  @Test
+  public void testIncrementalBufferRows2() {
     final String script2 = "!set incrementalBufferRows 0\n"
         + "!set incremental false\n"
-        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+        + "select * from (values (1, 2), (1, 20), (111, 20), (11, 2222), (1, 22))";
     final String line2 = ""
-        + "+-----+-----+\n"
-        + "| C1  | C2  |\n"
-        + "+-----+-----+\n"
-        + "+-----+-----+";
+        + "+----+----+\n"
+        + "| C1 | C2 |\n"
+        + "+----+----+\n"
+        + "| 1  | 2  |\n"
+        + "| 1  | 20 |\n"
+        + "| 111 | 20 |\n"
+        + "| 11  | 2222 |\n"
+        + "| 1   | 22   |\n"
+        + "+----+----+";
     checkScriptFile(script2, true, equalTo(SqlLine.Status.OK),
         containsString(line2));
+  }
 
+  /** Tests with incrementalBufferRows = 1; query starts in non-incremental mode
+   * and switches to incremental after 1 row. */
+  @Test
+  public void testIncrementalBufferRows3() {
     final String script3 = "!set incrementalBufferRows 1\n"
         + "!set incremental false\n"
-        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+        + "select * from (values (10, 20), (1, 2), (111, 2), (11, 2222), (111, 2222))";
     final String line3 = ""
-        + "+------+------+\n"
-        + "|  C1  |  C2  |\n"
-        + "+------+------+\n"
-        + "| 100  | 200  |\n"
-        + "| 1 | 2 |\n"
-        + "+------+------+";
+        + "+----+----+\n"
+        + "| C1 | C2 |\n"
+        + "+----+----+\n"
+        + "| 10 | 20 |\n"
+        + "| 1  | 2  |\n"
+        + "| 111 | 2  |\n"
+        + "| 11  | 2222 |\n"
+        + "| 111 | 2222 |\n"
+        + "+----+----+";
     checkScriptFile(script3, true, equalTo(SqlLine.Status.OK),
         containsString(line3));
+  }
 
-    final String script4 = "!set incrementalBufferRows 2\n"
+  /** Tests with incrementalBufferRows = 4; query starts in non-incremental mode
+   * and rows run out before the limit is reached. */
+  @Test
+  public void testIncrementalBufferRows4() {
+    final String script4 = "!set incrementalBufferRows 4\n"
         + "!set incremental false\n"
-        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+        + "select * from (values (10, 20), (1, 2), (111, 2), (11, 2222))";
     final String line4 = ""
-        + "+------+------+\n"
-        + "|  C1  |  C2  |\n"
-        + "+------+------+\n"
-        + "| 100  | 200  |\n"
-        + "| 1    | 2    |\n"
-        + "+------+------+";
+        + "+-----+------+\n"
+        + "| C1  |  C2  |\n"
+        + "+-----+------+\n"
+        + "| 10  | 20   |\n"
+        + "| 1   | 2    |\n"
+        + "| 111 | 2    |\n"
+        + "| 11  | 2222 |\n"
+        + "+-----+------+";
     checkScriptFile(script4, true, equalTo(SqlLine.Status.OK),
         containsString(line4));
+  }
 
+  @Test
+  public void testIncrementalBufferRows5() {
+    // With incrementalBufferRows default (1000), query starts and
+    // stays in incremental mode.
     final String script5 = "!set incrementalBufferRows default\n"
         + "!set incremental false\n"
-        + "select * from (values (100, 200)) union all select * from (values (1, 2))";
+        + "select * from (values (10, 20), (1, 2))";
     final String line5 = ""
-        + "+------+------+\n"
-        + "|  C1  |  C2  |\n"
-        + "+------+------+\n"
-        + "| 100  | 200  |\n"
-        + "| 1    | 2    |\n"
-        + "+------+------+";
+        + "+----+----+\n"
+        + "| C1 | C2 |\n"
+        + "+----+----+\n"
+        + "| 10 | 20 |\n"
+        + "| 1  | 2  |\n"
+        + "+----+----+";
     checkScriptFile(script5, true, equalTo(SqlLine.Status.OK),
         containsString(line5));
   }
