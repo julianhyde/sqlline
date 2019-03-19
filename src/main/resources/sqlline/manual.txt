@@ -1,7 +1,7 @@
-SQLLine 1.5.0
+SQLLine 1.7.0
 
 Copyright © 2002, 2003, 2004, 2005 Marc Prud'hommeaux
-Copyright 2006-2018 Julian Hyde
+Copyright 2006-2019 Julian Hyde
 
 SQLLine Manual
 Introduction

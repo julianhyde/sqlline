@@ -2,6 +2,110 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.7.0">1.7.0</a> (2019-03-21)
+
+Continuing the major changes in the previous release, this release adds more improvements to interactivity, including
+custom prompts
+(<a href="https://github.com/julianhyde/sqlline/issues/278">`promptscript`</a> property and
+<a href="https://github.com/julianhyde/sqlline/issues/246">custom prompt handler</a>),
+warnings before executing dangerous commands
+(<a href="https://github.com/julianhyde/sqlline/issues/239">`confirm` and `confirmPattern` properties</a>),
+and improved validation for
+<a href="https://github.com/julianhyde/sqlline/issues/260">enum</a>
+and
+<a href="https://github.com/julianhyde/sqlline/issues/224">integer</a>
+properties.
+
+Large result sets are formatted better, faster, and using less memory,
+due to two improvements: the
+<a href="https://github.com/julianhyde/sqlline/issues/228">default
+for the `incremental` prompty is now false</a>,
+and a new
+<a href="https://github.com/julianhyde/sqlline/issues/251">`incrementalBufferRows`</a>
+property is 1,000 by default. In combination, this means that SQLLine
+will read the first 1,000 rows of a query, set column widths
+accordingly, and adjust column widths if larger values are seen
+later.
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* Prompt customization:
+  * [<a href="https://github.com/julianhyde/sqlline/issues/278">SQLLINE-278</a>]
+    Add 'promptscript' property, generating prompt from a JavaScript program
+  * [<a href="https://github.com/julianhyde/sqlline/issues/246">SQLLINE-246</a>]
+    Custom prompt handler
+* [<a href="https://github.com/julianhyde/sqlline/issues/276">SQLLINE-276</a>]
+  Unable to submit password interactively
+* Column-widths
+  * [<a href="https://github.com/julianhyde/sqlline/issues/251">SQLLINE-251</a>]
+    Enter "incremental" mode if a query returns more than `incrementalBufferRows`
+  * [<a href="https://github.com/julianhyde/sqlline/issues/228">SQLLINE-228</a>]
+    Set `incremental` property to false by default (Cheng Lian)
+* [<a href="https://github.com/julianhyde/sqlline/issues/239">SQLLINE-239</a>]
+  Confirm before executing 'dangerous' SQL commands such as `DROP` and
+  `DELETE`; controlled by new properties `confirm` and `confirmPattern`
+* [<a href="https://github.com/julianhyde/sqlline/issues/258">SQLLINE-258</a>]
+  Correct highlighting of numbers followed by `]`, `!`, `*`, `|`, `&`, `^`
+* [<a href="https://github.com/julianhyde/sqlline/issues/260">SQLLINE-260</a>]
+  Validate given values for enum type properties (e.g. `outputFormat`,
+  `colorScheme`) before setting
+* [<a href="https://github.com/julianhyde/sqlline/issues/226">SQLLINE-226</a>]
+  Correct highlighting and line continuation for quotes inside sqlline comments
+* [<a href="https://github.com/julianhyde/sqlline/issues/186">SQLLINE-186</a>]
+  In definitions of built-in properties, define available values for completion
+* [<a href="https://github.com/julianhyde/sqlline/issues/236">SQLLINE-236</a>]
+  Add error message if URL property is absent but user, password or driver is
+  present
+* [<a href="https://github.com/julianhyde/sqlline/issues/232">SQLLINE-232</a>]
+  Use `SqlLineParser` for file parsing, the same parser as for interactive
+* [<a href="https://github.com/julianhyde/sqlline/issues/242">SQLLINE-242</a>]
+  Script command should not write itself to file when spooling ends
+* [<a href="https://github.com/julianhyde/sqlline/issues/5">SQLLINE-5</a>]
+  Use `ServiceLoader` to load drivers, rather than `Class.forName`
+* [<a href="https://github.com/julianhyde/sqlline/issues/224">SQLLINE-224</a>]
+  Print exception traces only in case of `verbose` on
+* [<a href="https://github.com/julianhyde/sqlline/issues/224">SQLLINE-224</a>]
+  Validate values for integer properties before setting
+* [<a href="https://github.com/julianhyde/sqlline/issues/134">SQLLINE-134</a>]
+  Reuse history object while resetting history, use `-e` option to hide prompt
+  output
+* Upgrades:
+  * [<a href="https://github.com/julianhyde/sqlline/issues/252">SQLLINE-252</a>]
+    Update `jmockit` to 1.44
+  * [<a href="https://github.com/julianhyde/sqlline/issues/266">SQLLINE-266</a>]
+    Update `junit` to version 5 and `checkstyle` to version 8
+  * [<a href="https://github.com/julianhyde/sqlline/issues/268">SQLLINE-268</a>]
+    Bump `jline3` version to 3.10.0
+  * [<a href="https://github.com/julianhyde/sqlline/issues/275">SQLLINE-275</a>]
+    Upgrade `checkstyle` to 8.18
+
+Other:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/191">SQLLINE-279</a>]
+  Release 1.7
+* [<a href="https://github.com/julianhyde/sqlline/issues/257">SQLLINE-257</a>]
+  Separate the code that switches off `SqlLineParser` from the code that reads
+  user answer
+* [<a href="https://github.com/julianhyde/sqlline/issues/11">SQLLINE-11</a>]
+  Add 'Command line options' and 'Prompting' sections to manual
+* [<a href="https://github.com/julianhyde/sqlline/issues/270">SQLLINE-270</a>]
+  Remove `maven-compiler-plugin` from `pom.xml`
+* [<a href="https://github.com/julianhyde/sqlline/issues/273">SQLLINE-273</a>]
+  Failed to generate javadoc on JDK 11
+* Enable Travis CI on 'scratch' branch
+* [<a href="https://github.com/julianhyde/sqlline/issues/255">SQLLINE-255</a>]
+  Explicitly set `incremental` property inside
+  `sqlline.SqlLineArgsTest#testMultilineScriptWithH2Comments`
+* [<a href="https://github.com/julianhyde/sqlline/issues/217">SQLLINE-217</a>]
+  Enable JDK 11 for AppVeyor
+* [<a href="https://github.com/julianhyde/sqlline/issues/245">SQLLINE-245</a>]
+  Example of launching SQLLine using a bash command-line, explaining how to
+  quote special characters in the URL (Terence Namusonge)
+* [<a href="https://github.com/julianhyde/sqlline/issues/221">SQLLINE-221</a>]
+  Now require Java 8 or higher
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.6.0">1.6.0</a> (2018-11-26)
 
 This is the most colorful and interactive SQLLine ever! Upgrading to
