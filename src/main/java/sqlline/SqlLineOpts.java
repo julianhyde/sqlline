@@ -400,6 +400,17 @@ public class SqlLineOpts implements Completer {
     }
   }
 
+  /** Returns whether the property is its default value.
+   *
+   * <p>This true if it has not been assigned a value,
+   * or if has been assigned a value equal to its default value. */
+  public boolean isDefault(SqlLineProperty property) {
+    final String defaultValue = String.valueOf(property.defaultValue());
+    final String currentValue = get(property);
+    return String.valueOf((Object) null).equals(currentValue)
+        || Objects.equals(currentValue, defaultValue);
+  }
+
   public String get(String key) {
     SqlLineProperty property = BuiltInProperty.valueOf(key, true);
     if (property == null) {
