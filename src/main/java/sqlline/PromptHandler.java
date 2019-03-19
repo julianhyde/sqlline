@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.jline.utils.AttributedString;
@@ -63,9 +62,10 @@ public class PromptHandler {
 
   public AttributedString getRightPrompt() {
     final int connectionIndex = sqlLine.getDatabaseConnections().getIndex();
-    final String value = sqlLine.getOpts().get(BuiltInProperty.RIGHT_PROMPT);
-    final String currentPrompt = String.valueOf((Object) null).equals(value)
-        ? (String) BuiltInProperty.RIGHT_PROMPT.defaultValue() : value;
+    final String currentPrompt =
+        sqlLine.getOpts().isDefault(BuiltInProperty.RIGHT_PROMPT)
+            ? (String) BuiltInProperty.RIGHT_PROMPT.defaultValue()
+            : sqlLine.getOpts().get(BuiltInProperty.RIGHT_PROMPT);
     return getPrompt(sqlLine, connectionIndex, currentPrompt);
   }
 
@@ -73,10 +73,9 @@ public class PromptHandler {
     final String defaultPrompt =
         String.valueOf(BuiltInProperty.PROMPT.defaultValue());
     final String currentPrompt = sqlLine.getOpts().get(BuiltInProperty.PROMPT);
-    DatabaseConnection dbc = sqlLine.getDatabaseConnection();
-    boolean useDefaultPrompt =
-        String.valueOf((Object) null).equals(currentPrompt)
-            || Objects.equals(currentPrompt, defaultPrompt);
+    final DatabaseConnection dbc = sqlLine.getDatabaseConnection();
+    final boolean useDefaultPrompt =
+        sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT);
     if (dbc == null || dbc.getUrl() == null) {
       return useDefaultPrompt
           ? getDefaultPrompt(-1, null, defaultPrompt)

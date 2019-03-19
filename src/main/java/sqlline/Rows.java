@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -52,49 +51,36 @@ abstract class Rows implements Iterator<Rows.Row> {
     rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
-    final String numberFormatPropertyValue =
-        sqlLine.getOpts().getNumberFormat();
-    if (Objects.equals(numberFormatPropertyValue,
-        BuiltInProperty.NUMBER_FORMAT.defaultValue())) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.NUMBER_FORMAT)) {
       numberFormat = null;
     } else {
-      numberFormat = new DecimalFormat(numberFormatPropertyValue,
+      final String pattern =
+          sqlLine.getOpts().get(BuiltInProperty.NUMBER_FORMAT);
+      numberFormat = new DecimalFormat(pattern,
           DecimalFormatSymbols.getInstance(Locale.ROOT));
     }
-    final String dateFormatPropertyValue =
-        sqlLine.getOpts().getDateFormat();
-    if (Objects.equals(dateFormatPropertyValue,
-        BuiltInProperty.DATE_FORMAT.defaultValue())) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.DATE_FORMAT)) {
       dateFormat = null;
     } else {
-      dateFormat =
-          new SimpleDateFormat(dateFormatPropertyValue, Locale.ROOT);
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.DATE_FORMAT);
+      dateFormat = new SimpleDateFormat(pattern, Locale.ROOT);
     }
-    final String timeFormatPropertyValue =
-        sqlLine.getOpts().getTimeFormat();
-    if (Objects.equals(timeFormatPropertyValue,
-        BuiltInProperty.TIME_FORMAT.defaultValue())) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.TIME_FORMAT)) {
       timeFormat = null;
     } else {
-      timeFormat =
-          new SimpleDateFormat(timeFormatPropertyValue, Locale.ROOT);
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIME_FORMAT);
+      timeFormat = new SimpleDateFormat(pattern, Locale.ROOT);
     }
-    final String timestampFormatPropertyValue =
-        sqlLine.getOpts().getTimestampFormat();
-    if (Objects.equals(timestampFormatPropertyValue,
-        BuiltInProperty.TIMESTAMP_FORMAT.defaultValue())) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.TIMESTAMP_FORMAT)) {
       timestampFormat = null;
     } else {
-      timestampFormat =
-          new SimpleDateFormat(timestampFormatPropertyValue, Locale.ROOT);
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIMESTAMP_FORMAT);
+      timestampFormat = new SimpleDateFormat(pattern, Locale.ROOT);
     }
-    final String nullPropertyValue =
-        sqlLine.getOpts().getNullValue();
-    if (Objects.equals(nullPropertyValue,
-        BuiltInProperty.NULL_VALUE.defaultValue())) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.NULL_VALUE)) {
       nullValue = null;
     } else {
-      nullValue = String.valueOf(nullPropertyValue);
+      nullValue = sqlLine.getOpts().get(BuiltInProperty.NULL_VALUE);
     }
     escapeOutput = sqlLine.getOpts().getEscapeOutput();
   }
