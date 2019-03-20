@@ -69,6 +69,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   SILENT("silent", Type.BOOLEAN, false),
   OUTPUT_FORMAT("outputFormat", Type.STRING, "table"),
   PROMPT("prompt", Type.STRING, "sqlline> "),
+  PROMPT_SCRIPT("promptScript", Type.STRING, ""),
   RIGHT_PROMPT("rightPrompt", Type.STRING, ""),
   ROW_LIMIT("rowLimit", Type.INTEGER, 0),
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),

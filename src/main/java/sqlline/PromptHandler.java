@@ -18,6 +18,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
@@ -56,6 +61,12 @@ public class PromptHandler {
 
   protected final SqlLine sqlLine;
 
+  static final Supplier<ScriptEngine> SCRIPT_ENGINE_SUPPLIER =
+      new MemoizingSupplier<>(() -> {
+        final ScriptEngineManager engineManager = new ScriptEngineManager();
+        return engineManager.getEngineByName("nashorn");
+      });
+
   public PromptHandler(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
@@ -70,6 +81,11 @@ public class PromptHandler {
   }
 
   public AttributedString getPrompt() {
+    if (!sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT_SCRIPT)) {
+      final String promptScript =
+          sqlLine.getOpts().get(BuiltInProperty.PROMPT_SCRIPT);
+      return getPromptFromScript(sqlLine, promptScript);
+    }
     final String defaultPrompt =
         String.valueOf(BuiltInProperty.PROMPT.defaultValue());
     final String currentPrompt = sqlLine.getOpts().get(BuiltInProperty.PROMPT);
@@ -89,6 +105,25 @@ public class PromptHandler {
       } else {
         return getPrompt(sqlLine, connectionIndex, currentPrompt);
       }
+    }
+  }
+
+  private AttributedString getPromptFromScript(SqlLine sqlLine,
+      String promptScript) {
+    try {
+      final ScriptEngine engine = SCRIPT_ENGINE_SUPPLIER.get();
+      final Bindings bindings = new SimpleBindings();
+      final ConnectionMetadata meta = sqlLine.getConnectionMetadata();
+      bindings.put("connectionIndex", meta.getIndex());
+      bindings.put("databaseProductName", meta.getDatabaseProductName());
+      bindings.put("userName", meta.getUserName());
+      bindings.put("url", meta.getUrl());
+      bindings.put("currentSchema", meta.getCurrentSchema());
+      final Object o = engine.eval(promptScript, bindings);
+      return new AttributedString(String.valueOf(o));
+    } catch (ScriptException e) {
+      e.printStackTrace();
+      return new AttributedString(">");
     }
   }
 

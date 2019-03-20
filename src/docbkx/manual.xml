@@ -3280,6 +3280,25 @@ java.sql.SQLException: ORA-00942: table or view does not exist
             <link linkend="prompting">Prompting</link> documentation.
         </para>
       </sect1>
+      <sect1 id="setting_promptscript">
+        <title>promptscript</title>
+        <para>
+          Sets a JavaScript program that is evaluated to
+          generate a prompt. If specified, <literal>prompt</literal>
+          is ignored. The following variables are pre-defined for use in the
+          JavaScript:
+          <literal>connectionIndex</literal>,
+          <literal>currentSchema</literal>,
+          <literal>databaseProductName</literal>,
+          <literal>url</literal>,
+          <literal>userName</literal>.
+          For instance <screen>
+          sqlline> !set promptscript ' databaseProductName.toLowerCase() + ":" + connectionIndex + "> " '
+          hsql database engine:0>
+        </screen>
+
+        </para>
+      </sect1>
       <sect1 id="setting_rowlimit">
         <title>rowlimit</title>
         <para>
