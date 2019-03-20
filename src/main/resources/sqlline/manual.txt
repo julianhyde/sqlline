@@ -2228,6 +2228,16 @@ rightprompt
 
 The tcsh-like format for how right prompt is displayed. The same patterns are applied as for prompt but it does not care if nickname is set or not. Defaults to ''.
 
+promptscript
+
+A JavaScript program that is evaluated to generate a prompt. If specified, prompt is ignored.
+
+The following variables are pre-defined for use in the JavaScript: connectionIndex
+currentSchema, databaseProductName, url, userName. For example:
+
+sqlline> !set promptscript ' databaseProductName.toLowerCase() + ":" + connectionIndex + "> " '
+hsql database engine:0>
+
 rowlimit
 
 The maximum number of rows to fetch per query. Defaults to 0, which is interpreted as fetching all rows.

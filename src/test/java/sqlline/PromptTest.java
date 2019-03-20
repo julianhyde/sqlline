@@ -197,6 +197,27 @@ public class PromptTest {
   }
 
   @Test
+  public void testPromptScript() {
+    SqlLine sqlLine = new SqlLine();
+    sqlLine.getOpts().set(BuiltInProperty.PROMPT_SCRIPT, "'hel' + 'lo'");
+
+    sqlLine.runCommands(new DispatchCallback(),
+        "!connect "
+            + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+            + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("hello"));
+
+    sqlLine.getOpts().set(BuiltInProperty.PROMPT_SCRIPT, ""
+        + "'i=' + connectionIndex + ',p=' + databaseProductName +"
+        + " ',n=' + userName + ',u=' + url + ',s=' + currentSchema + '>'");
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("i=0,p=H2,n=SA,u=jdbc:h2:mem:,s=PUBLIC>"));
+
+    sqlLine.getDatabaseConnection().close();
+  }
+
+  @Test
   public void testCustomPromptHandler() {
     SqlLine sqlLine = new SqlLine();
     sqlLine.runCommands(new DispatchCallback(),
