@@ -23,8 +23,10 @@ import java.util.stream.IntStream;
 
 import org.jline.reader.EOFError;
 import org.jline.reader.History;
+import org.jline.reader.MaskingCallback;
 import org.jline.reader.Parser;
 import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
 
 /**
@@ -1262,12 +1264,15 @@ public class Commands {
     sqlLine.debug("Connecting to " + url);
 
     if (username == null) {
-      username = sqlLine.getLineReader()
-          .readLine("Enter username for " + url + ": ");
+      username = sqlLine.withPrompting(() ->
+          sqlLine.getLineReader()
+              .readLine("Enter username for " + url + ": "));
     }
     if (password == null) {
-      password = sqlLine.getLineReader()
-          .readLine("Enter password for " + url + ": ", '*');
+      password = sqlLine.withPrompting(() ->
+          sqlLine.getLineReader()
+              .readLine("Enter password for " + url + ": ",
+                  null, new MaskingCallbackImpl('*'), null));
     }
 
     Properties info = (Properties) props.get(CONNECT_PROPERTY);
@@ -1813,6 +1818,37 @@ public class Commands {
   static Map<String, String> asMap(Properties properties) {
     //noinspection unchecked
     return (Map) properties;
+  }
+
+  /**
+   * Callback that masks input while reading a password.
+   */
+  private static class MaskingCallbackImpl implements MaskingCallback {
+    private final Character mask;
+
+    MaskingCallbackImpl(Character mask) {
+      this.mask = Objects.requireNonNull(mask);
+    }
+
+    @Override public String display(String line) {
+      if (mask.equals(LineReaderImpl.NULL_MASK)) {
+        return "";
+      } else {
+        final StringBuilder sb = new StringBuilder(line.length());
+        for (char c : line.toCharArray()) {
+          if (c == '\n') {
+            sb.append(c);
+          } else {
+            sb.append((char) mask);
+          }
+        }
+        return sb.toString();
+      }
+    }
+
+    @Override public String history(String line) {
+      return null;
+    }
   }
 }
 

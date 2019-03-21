@@ -26,6 +26,7 @@ import java.text.ChoiceFormat;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.Date;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -56,6 +57,10 @@ public class SqlLine {
 
   private static final String SEPARATOR = System.getProperty("line.separator");
   private boolean exit = false;
+  /** Whether we are currently prompting for input (say, user name or
+   * password). If prompting, we ignore trailing linefeeds, but for SQL input we
+   * include them in a multi-line command. */
+  private boolean prompting = false;
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
@@ -1852,6 +1857,23 @@ public class SqlLine {
 
   public ConnectionMetadata getConnectionMetadata() {
     return connectionMetadata;
+  }
+
+  /** Enables prompting, applies an action, and disables prompting. */
+  <R> R withPrompting(Supplier<R> action) {
+    if (prompting) {
+      throw new IllegalArgumentException();
+    }
+    prompting = true;
+    try {
+      return action.get();
+    } finally {
+      prompting = false;
+    }
+  }
+
+  boolean isPrompting() {
+    return prompting;
   }
 
   /** Exit status returned to the operating system. OK, ARGS, OTHER
