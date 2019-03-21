@@ -102,7 +102,8 @@ public class SqlLineParser extends DefaultParser {
   public ParsedLine parse(final String line, final int cursor,
       ParseContext context) {
     try {
-      if (sqlLine.getOpts().getUseLineContinuation()) {
+      if (sqlLine.getOpts().getUseLineContinuation()
+          && !sqlLine.isPrompting()) {
         eofOnUnclosedQuote(true);
         eofOnEscapedNewLine(true);
       } else {
