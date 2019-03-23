@@ -45,7 +45,7 @@ Bugs and functional changes:
     Set `incremental` property to false by default (Cheng Lian)
 * [<a href="https://github.com/julianhyde/sqlline/issues/239">SQLLINE-239</a>]
   Confirm before executing 'dangerous' SQL commands such as `DROP` and
-  `DELETE`; controlled by new properties `confirm` and `confirmPattern`
+  `DELETE`; controlled by new properties `confirm` and `confirmPattern` (Swaroopa Kadam)
 * [<a href="https://github.com/julianhyde/sqlline/issues/258">SQLLINE-258</a>]
   Correct highlighting of numbers followed by `]`, `!`, `*`, `|`, `&`, `^`
 * [<a href="https://github.com/julianhyde/sqlline/issues/260">SQLLINE-260</a>]
