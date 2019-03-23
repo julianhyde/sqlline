@@ -1264,15 +1264,10 @@ public class Commands {
     sqlLine.debug("Connecting to " + url);
 
     if (username == null) {
-      username = sqlLine.withPrompting(() ->
-          sqlLine.getLineReader()
-              .readLine("Enter username for " + url + ": "));
+      username = readUsername(url);
     }
     if (password == null) {
-      password = sqlLine.withPrompting(() ->
-          sqlLine.getLineReader()
-              .readLine("Enter password for " + url + ": ",
-                  null, new MaskingCallbackImpl('*'), null));
+      password = readPassword(url);
     }
 
     Properties info = (Properties) props.get(CONNECT_PROPERTY);
@@ -1289,6 +1284,17 @@ public class Commands {
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  String readUsername(String url) {
+    return sqlLine.withPrompting(() -> sqlLine.getLineReader()
+        .readLine("Enter username for " + url + ": "));
+  }
+
+  String readPassword(String url) {
+    return sqlLine.withPrompting(() -> sqlLine.getLineReader()
+        .readLine("Enter password for " + url + ": ",
+            null, new MaskingCallbackImpl('*'), null));
   }
 
   public void rehash(String line, DispatchCallback callback) {
