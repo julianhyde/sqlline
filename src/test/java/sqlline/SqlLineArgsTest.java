@@ -166,9 +166,11 @@ public class SqlLineArgsTest {
 
   private File createTempFile(String prefix, String suffix, Path directory) {
     try {
-      return directory == null
+      final File file = directory == null
           ? Files.createTempFile(prefix, suffix).toFile()
           : Files.createTempFile(directory, prefix, suffix).toFile();
+      file.deleteOnExit();
+      return file;
     } catch (IOException e) {
       // fail
       throw new RuntimeException(e);
@@ -605,6 +607,7 @@ public class SqlLineArgsTest {
           Files.createTempDirectory(
               Paths.get(System.getProperty("user.home")),
               "tmpdir" + System.nanoTime());
+      tmpDir.toFile().deleteOnExit();
 
       File tmpFile = createTempFile("test", ".sql", tmpDir);
       try (Writer fw = new OutputStreamWriter(
@@ -619,9 +622,6 @@ public class SqlLineArgsTest {
             equalTo(SqlLine.Status.OK),
             allOf(containsString("!set outputformat csv"),
                 containsString("values (1, 2, 3, 4, 5);")));
-      } finally {
-        // will remove tmpFile as well
-        tmpDir.toFile().delete();
       }
     } catch (Exception e) {
       // fail
