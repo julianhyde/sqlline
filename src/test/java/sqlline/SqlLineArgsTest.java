@@ -1375,6 +1375,42 @@ public class SqlLineArgsTest {
   }
 
   /**
+   * Tests the {@code !connect} command with interactive password submission.
+   */
+  @Test
+  public void testConnectWithoutPassword() {
+    new MockUp<sqlline.Commands>() {
+      @Mock
+      String readPassword(String url) {
+        return "";
+      }
+    };
+    SqlLine beeLine = new SqlLine();
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      SqlLine.Status status =
+          begin(beeLine, os, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      DispatchCallback dc = new DispatchCallback();
+      beeLine.runCommands(dc,
+          "!set maxwidth 80",
+          "!set incremental true");
+      beeLine.runCommands(dc, "!connect "
+          + ConnectionSpec.H2.url + " "
+          + ConnectionSpec.H2.username);
+      beeLine.runCommands(dc, "!tables");
+      String output = os.toString("UTF8");
+      final String expected = "| TABLE_CAT | TABLE_SCHEM | "
+          + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
+      assertThat(output, containsString(expected));
+      beeLine.runCommands(new DispatchCallback(), "!quit");
+      assertTrue(beeLine.isExit());
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
+    }
+  }
+
+  /**
    * Tests the {@code !connect} command passing in the password in as a hash,
    * and using h2's {@code PASSWORD_HASH} property outside of the URL:
    *
