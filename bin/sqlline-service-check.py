@@ -42,9 +42,9 @@ class Load(nagiosplugin.Resource):
 		if self.auth_mode == "kerberos":
 			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port \
 				+ '/;AuthMech=1;KrbHostFQDN=' + self.adserver + ';KrbServiceName=hive;KrbHostFQDN=' \
-				+ self.hostname + ';KrbRealm=' + self.realm + ';SocketTimeout=0"'
+				+ self.hostname + ';KrbRealm=' + self.realm + ';SocketTimeout=300"'
 		elif self.auth_mode == "ssl":
-			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port + '/;ssl=1;AuthMech=3;SocketTimeout=0"'
+			jdbc = '"jdbc:hive2://' + self.hostname + ':' + self.port + '/;ssl=1;AuthMech=3;SocketTimeout=300"'
 
 		logging.debug("JDBC used: " + str(jdbc))
 
