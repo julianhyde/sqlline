@@ -59,6 +59,11 @@ class Load(nagiosplugin.Resource):
 		else:
 			sys.exit("Invalid execution type specified")	
 
+        logging.debug("Contents of built query file:")
+        with open(queryfile, 'r') as f:
+            entire_file = f.read()
+            logging.debug(entire_file)
+
 		# Execute sqlline
 		logging.debug("Execute sqlline")
 		sqlline_cmd_stream = subprocess.Popen([self.sqlline_bin, "-u", jdbc, "-f", \
