@@ -11,8 +11,8 @@ Capitalization is tricky:
 ## How to make a release (for committers)
 
 Make sure `mvn clean install`, `mvn site`, and
-`mvn javadoc:javadoc javadoc:test-javadoc` pass under JDK 8, 9, 10 and
-11.
+`mvn javadoc:javadoc javadoc:test-javadoc` pass under JDK 8, 9, 10,
+11 and 12.
 
 Write release notes. Run the
 [relNotes](https://github.com/julianhyde/share/blob/master/tools/relNotes)
@@ -21,7 +21,7 @@ script and append the output to [HISTORY.md](HISTORY.md).
 Update version numbers in README, README.md, src/docbkx/manual.xml,
 and the copyright date in NOTICE.
 
-Switch to JDK 11.
+Switch to JDK 12.
 
 Check that the sandbox is clean:
 

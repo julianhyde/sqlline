@@ -125,7 +125,7 @@ Use the following definition to use `sqlline` in your maven project:
 Prerequisites:
 
 * Maven 3.2.5 or higher
-* Java 8 or higher (10 preferred)
+* Java 8 or higher (12 preferred)
 
 Check out and build:
 
