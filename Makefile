@@ -22,7 +22,7 @@ build: clean
 	$(MVN_BINARY) package
 	# Until repo is up, we need to make sure the drivers are pushed manually
 	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
-	cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
+	cd $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip SimbaHiveJDBC*.zip
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
