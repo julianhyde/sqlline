@@ -12,7 +12,7 @@ SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002
 MAVEN_DL = "http://www.trieuvan.com/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz"
 MVN_BINARY = "$(CURDIR)/maven/bin/mvn"
 
-all: build install
+all: build
 
 build: clean
 	# download required maven version

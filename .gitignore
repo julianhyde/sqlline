@@ -7,3 +7,4 @@ target
 *.jar
 bin/sqlline
 maven/*
+hivejars/*
