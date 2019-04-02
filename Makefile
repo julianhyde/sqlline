@@ -7,14 +7,11 @@
 # This can be installed/built from the rpm GitHub repo -> simba-hive-jdbc
 
 CURRENT_USER = $(shell echo $whoami)
-SIMBA_DRIVERS = 'https://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/hive-jdbc4/1.0.42.1054/Simba_HiveJDBC41_1.0.42.1054.zip'
+SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002/SimbaHiveJDBC41-2.6.2.1002.zip"
 
 all: build install
 
 build: clean
-	mvn package
-
-install: build
 	mvn package
 	# Until repo is up, we need to make sure the drivers are pushed manually
 	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
