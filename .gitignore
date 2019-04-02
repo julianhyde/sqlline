@@ -6,3 +6,4 @@ target
 .idea/
 *.jar
 bin/sqlline
+maven/*

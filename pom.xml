@@ -94,7 +94,32 @@
     </mailingList>
   </mailingLists>
 
-  <repositories />
+  <repositories>    
+    <!-- Begin Hortonworks repositories --> 
+    <repository>    
+      <releases>    
+        <enabled>true</enabled> 
+       </releases>  
+       <snapshots>  
+        <enabled>true</enabled> 
+       </snapshots> 
+       <id>hortonworks.extrepo</id> 
+       <name>Hortonworks HDP</name> 
+       <url>http://repo.hortonworks.com/content/repositories/releases</url> 
+    </repository>   
+    <repository>    
+      <releases>    
+        <enabled>true</enabled> 
+       </releases>  
+       <snapshots>  
+         <enabled>true</enabled>    
+       </snapshots> 
+       <id>hortonworks.other</id>   
+       <name>Hortonworks Other Dependencies</name>  
+       <url>http://repo.hortonworks.com/content/groups/public</url> 
+    </repository>   
+    <!-- End Hortonworks repositories -->   
+  </repositories>
 
   <build>
     <plugins>

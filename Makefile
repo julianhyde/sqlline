@@ -5,14 +5,21 @@
 #
 # NOTE: For Hive functionality, you will need the Simba Hive JDBC drivers
 # This can be installed/built from the rpm GitHub repo -> simba-hive-jdbc
+# REQUIRES: maven > 3.2.1
 
 CURRENT_USER = $(shell echo $whoami)
 SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002/SimbaHiveJDBC41-2.6.2.1002.zip"
+MAVEN_DL = "http://www.trieuvan.com/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz"
+MVN_BINARY = "$(CURDIR)/maven/bin/mvn"
 
 all: build install
 
 build: clean
-	mvn package
+	# download required maven version
+	rm -rf maven && mkdir maven
+	cd maven && curl -O $(MAVEN_DL) && tar -xzf apache-maven*.tar.gz --strip-components=1
+	$(MVN_BINARY) -version
+	$(MVN_BINARY) package
 	# Until repo is up, we need to make sure the drivers are pushed manually
 	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
 	cd  $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip Simba_HiveJDBC*.zip
@@ -40,4 +47,5 @@ clean:
 	rm -f /usr/local/bin/sqlline
 	rm -f /usr/lib64/nagios/plugins/sqlline-service-check
 	rm -f /usr/local/bin/sqlline-service-check
+	rm -rf maven
 
