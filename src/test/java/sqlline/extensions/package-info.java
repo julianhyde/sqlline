@@ -9,23 +9,15 @@
 //
 // http://opensource.org/licenses/BSD-3-Clause
 */
-package sqlline;
 
 /**
- * Quoting strategy.
+ * A different package for
+ * Unit tests for SQLLine, the JDBC shell
+ * to check methods visibility between packages.
+ * (required for command handlers,
+ * output formats, application, session options
+ * extensions etc).
  */
-class Quoting {
-  final char start;
-  final char end;
-  final boolean upper;
+package sqlline.extensions;
 
-  Quoting(char start, char end, boolean upper) {
-    this.start = start;
-    this.end = end;
-    this.upper = upper;
-  }
-
-  public static final Quoting DEFAULT = new Quoting('"', '"', true);
-}
-
-// End Quoting.java
+// End package-info.java

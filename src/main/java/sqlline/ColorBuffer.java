@@ -45,16 +45,16 @@ final class ColorBuffer implements Comparable {
     }
   }
 
-  private final List<Object> parts = new LinkedList<Object>();
+  private final List<Object> parts = new LinkedList<>();
 
   private final boolean useColor;
 
-  public ColorBuffer(boolean useColor) {
+  ColorBuffer(boolean useColor) {
     this.useColor = useColor;
     append("");
   }
 
-  public ColorBuffer(String str, boolean useColor) {
+  ColorBuffer(String str, boolean useColor) {
     this.useColor = useColor;
     append(str);
   }

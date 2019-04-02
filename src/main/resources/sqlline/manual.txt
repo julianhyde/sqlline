@@ -1,6 +1,7 @@
-SQLLine 1.0.9
+SQLLine 1.7.0
 
 Copyright © 2002, 2003, 2004, 2005 Marc Prud'hommeaux
+Copyright 2006-2019 Julian Hyde
 
 SQLLine Manual
 Introduction
@@ -17,6 +18,8 @@ Command Completion
 Command Reference
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -27,6 +30,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -63,6 +68,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -95,6 +102,13 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
+confirm
+confirmPattern
+csvDelimiter
+csvQuoteCharacter
+dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -102,16 +116,26 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
+mode
+nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
 showtime
 showwarnings
+strictJdbc
 silent
+timeformat
+timestampformat
 trimscripts
+uselinecontinuation
 verbose
 JDBC Driver Support
 Project Information
@@ -133,6 +157,8 @@ Command Completion
 Command Reference
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -143,6 +169,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -177,6 +205,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -209,6 +239,13 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
+confirm
+confirmPattern
+csvDelimiter
+csvQuoteCharacter
+dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -216,16 +253,26 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
+mode
+nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
 showtime
 showwarnings
 silent
+strictJdbc
+timeformat
+timestampformat
 trimscripts
+uselinecontinuation
 verbose
 JDBC Driver Support
 Introduction
@@ -288,7 +335,7 @@ Once you have started SQLLine, you will a prompt that reads "sqlline> ". From he
 
 Connecting to a database
 
-SQLLine is only useful once you are connected to a database. In order to do so, you need to use the "!connect" command, with the JDBC URL of the database you are going to connect to, followed by the username and password (followed optionally by the driver class name). The JDBC URL is specific to the JDBC driver that you are using for your database, but will always start with "jdbc:", and usually has the machine name of the database and the name of the database itself as part of the string. Consult your driver's documentation for details on the URL to use.
+SQLLine is only useful once you are connected to a database. In order to do so, you need to use the "!connect" command, with the JDBC URL of the database you are going to connect to, followed by the username and password (followed optionally by the driver class name). The JDBC URL is specific to the JDBC driver that you are using for your database, but will always start with "jdbc:", and usually has the machine name of the database and the name of the database itself as part of the string. Quotes (both single and double) could be used in case of url, username, password contain spaces. Consult your driver's documentation for details on the URL to use.
 
 For example, to connect to an Oracle database, you might enter:
 
@@ -337,6 +384,8 @@ Command Reference
 
 all
 all — Execute SQL against all active connections
+appconfig
+appconfig - Sets application configuration class name
 autocommit
 autocommit — Enable or disable automatic transaction commit mode
 batch
@@ -347,6 +396,8 @@ close
 close — Close the active connection
 columns
 columns — Display columns of a table
+commandhandler
+commandhandler — Adds command handlers with commands
 commit
 commit — Commit the current transaction
 connect
@@ -381,6 +432,8 @@ primarykeys
 primarykeys — Display the primary key columns for a table
 procedures
 procedures — List stored procedures
+prompthandler
+prompthandler - Set custom prompt handler class name
 properties
 properties — Connect to the database defined in the specified properties file.
 quit
@@ -612,6 +665,31 @@ Example of "columns" command
 
 0: jdbc:oracle:thin:@localhost:1521:mydb>
 
+
+commandhandler
+
+Name
+
+commandhandler — Adds command handlers with commands
+
+Synopsis
+
+!commandhandler {command handler} {command handler}*
+
+Description
+
+Adds command handlers with commands.
+Command handler class must have a constructor accepting Sqlline and implement sqlline.CommandHandler
+
+Example of "commandhandler" command
+
+sqlline> !hello
+Unknown command: hello
+sqlline> !commandhandler sqlline.extensions.HelloWorldCommandHandler
+sqlline> !hello
+HELLO WORLD
+
+
 commit
 
 Name
@@ -658,13 +736,13 @@ connect — Connect to a database
 
 Synopsis
 
-!connect {url} {username} {password} [driver class]
+!connect [ -p property value ]* {url} [username password] [driver class]
 
 Description
 
-Connect to a database.
+Connect to a database. Quotes could be used in case of having spaces
 
-Example of "commit" command
+Example of "connect" command
 
 sqlline> !connect jdbc:oracle:thin:@localhost:1521:mydb scott tiger oracle.jdbc.driver.OracleDriver
 
@@ -982,48 +1060,152 @@ Display information about allowed commands.
 Example of "help" command
 
 sqlline> !help
+!all                Execute the specified SQL against all the current
+                    connections
+!appconfig          Set custom application configuration class name
+!autocommit         Set autocommit mode on or off
+!batch              Start or execute a batch of statements
+!brief              Set verbose mode off
+!call               Execute a callable statement
+!close              Close the current connection to the database
+!closeall           Close all current open connections
+!columns            List all the columns for the specified table
+!commandhandler     Add a command handler
+!commit             Commit the current transaction (if autocommit is off)
+!connect            Open a new connection to the database
+!dbinfo             Give metadata information about the database
+!describe           Describe a table
+!dropall            Drop all tables in the current database
+!exportedkeys       List all the exported keys for the specified table
+!go                 Select the current connection
+!help               Print a summary of command usage
+!history            Display the command history
+!importedkeys       List all the imported keys for the specified table
+!indexes            List all the indexes for the specified table
+!isolation          Set the transaction isolation for this connection
+!list               List the current connections
+!manual             Display the SQLLine manual
+!metadata           Obtain metadata information
+!nativesql          Show the native SQL for the specified statement
+!nickname           Create a friendly name for the connection (updates command
+                    prompt)
+!outputformat       Set the output format for displaying results (table,
+                    vertical, csv, tsv, xmlattrs, xmlelements, json)
+!primarykeys        List all the primary keys for the specified table
+!procedures         List all the procedures
+!prompthandler      Set custom prompt handler class name
+!properties         Connect to the database specified in the properties file(s)
+!quit               Exits the program
+!reconnect          Reconnect to the database
+!record             Record all output to the specified file
+!rehash             Fetch table and column names for command completion
+!rollback           Roll back the current transaction (if autocommit is off)
+!run                Run a script from the specified file
+!save               Save the current variables and aliases
+!scan               Scan for installed JDBC drivers
+!script             Start saving a script to a file
+!set                Set a sqlline variable
+!sql                Execute a SQL command
+!tables             List all the tables in the database
+!typeinfo           Display the type map for the current connection
+!verbose            Set verbose mode on
 
-!all              Execute the specified SQL against all the current connections
-!autocommit       Set autocommit mode on or off
-!batch            Start or execute a batch of statements
-!brief            Set verbose mode off
-!close            Close the current connection to the database
-!columns          List all the columns for the specified table
-!commit           Commit the current transaction (if autocommit is off)
-!connect          Open a new connection to the database.
-!dbinfo           Give metadata information about the database
-!describe         Describe a table
-!dropall          Drop all tables in the current database
-!exportedkeys     List all the exported keys for the specified table
-!go               Select the current connection
-!help             Print a summary of command usage
-!history          Display the command history
-!importedkeys     List all the imported keys for the specified table
-!indexes          List all the indexes for the specified table
-!isolation        Set the transaction isolation for this connection
-!list             List the current connections
-!metadata         Obtain metadata information
-!outputformat     Set the output format for displaying results
-                  (table,vertical,csv,tsv,xmlattrs,xmlelements)
-!properties       Connect to the database specified in the properties file(s)
-!primarykeys      List all the primary keys for the specified table
-!procedures       List all the procedures
-!quit             Exits the program
-!reconnect        Reconnect to the database
-!record           Record all output to the specified file
-!rehash           Fetch table and column names for command completion
-!rollback         Roll back the current transaction (if autocommit is off)
-!run              Run a script from the specified file
-!save             Save the current variabes and aliases
-!scan             Scan for installed JDBC drivers
-!script           Start saving a script to a file
-!set              Set a sqlline variable
-!sql              Execute a SQL command
-!tables           List all the tables in the database
-!verbose          Set verbose mode on
 
-Comments, bug reports, and patches go to mwp1@cornell.edu
+Variables:
 
+Variable        Value      Description
+=============== ========== ==================================================
+autoCommit      true/false Enable/disable automatic transaction commit
+autoSave        true/false Automatically save preferences
+color           true/false Control whether color is used for display
+colorScheme     chester/dark/dracula/light/obsidian/solarized/vs2010
+                           Syntax highlight schema
+confirm         true/false Prompts for confirmation before running
+                           commands specified in confirmPattern
+confirmPattern  pattern    Pattern commands to issue prompt before execution
+csvDelimiter    String     Delimiter in csv outputFormat
+csvQuoteCharacter char     Quote character in csv outputFormat
+dateFormat      pattern    Format dates using SimpleDateFormat pattern
+escapeOutput    true/false Escape control symbols in output
+fastConnect     true/false Skip building table/column list for tab-completion
+force           true/false Continue running script even after errors
+headerInterval  integer    The interval between which headers are displayed
+historyFile     path       File in which to save command history. Default is
+                           $HOME/.sqlline/history (UNIX, Linux, Mac OS),
+                           $HOME/sqlline/history (Windows)
+incremental     true/false Do not receive all rows from server before
+                           printing the first row; uses fewer resources,
+                           especially for long-running queries, but column
+                           widths may be incorrect
+incrementalBufferRows integer Enter incremental mode if a query returns more
+                              than "incrementalBufferRows".
+isolation       LEVEL      Set transaction isolation level
+maxColumnWidth  integer    The maximum width to use when displaying columns
+maxHeight       integer    The maximum height of the terminal
+maxWidth        integer    The maximum width of the terminal
+maxHistoryFileRows integer The maximum number of history rows
+                           to store in history file
+maxHistoryRows  integer    The maximum number of history rows
+                           to store in memory
+mode            emacs/vi   The editing mode
+nullValue       String     Use String in place of  NULL values
+numberFormat    pattern    Format numbers using DecimalFormat pattern
+outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json
+                           Format mode for result display
+prompt          pattern    Format prompt
+propertiesFile  path       File from which SQLLine reads properties on
+                           startup; default is
+                           $HOME/.sqlline/sqlline.properties (UNIX, Linux,
+                           macOS), $HOME/sqlline/sqlline.properties (Windows)
+rightPrompt     pattern    Format right prompt
+rowLimit        integer    Maximum number of rows returned from a query; zero
+                           means no limit
+showElapsedTime true/false Display execution time when verbose
+showHeader      true/false Show column names in query results
+showNestedErrs  true/false Display nested errors
+showWarnings    true/false Display connection warnings
+silent          true/false Be more silent
+strictJdbc      true/false Use strict JDBC
+timeFormat      pattern    Format times using SimpleDateFormat pattern
+timeout         integer    Query timeout in seconds; less than zero means no
+                           timeout
+timestampFormat pattern    Format timestamps using SimpleDateFormat pattern
+trimScripts     true/false Remove trailing spaces from lines read from script
+                           files
+useLineContinuation true/false Use line continuation
+verbose         true/false Show verbose error messages and debug info
+
+Key-strokes:
+alt-b           Backward word
+alt-c           Capitalize word
+alt-d           Kill word
+alt-f           Forward word
+alt-h           Next color scheme
+alt-l           Lowercase word
+alt-n           History search forward
+alt-p           History search backward
+alt-t           Transpose words
+alt-u           Uppercase word
+
+ctrl-a          To the beginning of line
+ctrl-b          Backward char
+ctrl-d          Delete char
+ctrl-e          To the end of line
+ctrl-f          Forward char
+ctrl-h          Backward delete char
+ctrl-i          Complete
+ctrl-j          Enter
+ctrl-k          Kill the line
+ctrl-m          Enter
+ctrl-n          Down line or history
+ctrl-p          Up line or history
+ctrl-r          History incremental search backward
+ctrl-s          History incremental search forward
+ctrl-t          Transpose chars
+ctrl-u          Kill the whole line
+ctrl-w          Backward kill the line
+
+Comments, bug reports, and patches go to ???
 sqlline>
 
 
@@ -1122,6 +1304,7 @@ Synopsis
 Description
 
 Set the isolation level for the current transaction. For a description of the different isolation levels, see http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail.
+If the specified isolation level is not supported or DEFAULT is specified then there will be used level returned by java.sql.DatabaseMetaData#getDefaultTransactionIsolation
 
 Example of "isolation" command
 
@@ -1302,7 +1485,7 @@ Example of XML attribute output formatting
 Example of XML element output formatting
 
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlelements
-0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
 <resultset>
   <result>
     <COMPANY_ID>1</COMPANY_ID>
@@ -1323,6 +1506,19 @@ Example of XML element output formatting
 </resultset>
 4 rows selected (0.02 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+
+Example of JSON output formatting
+
+0: jdbc:calcite:model=target/test-classes/mod> !outputformat json
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+{"resultset":[
+{"COMPANY_ID":1,"NAME":"Apple"},
+{"COMPANY_ID":2,"NAME":"Sun"},
+{"COMPANY_ID":3,"NAME":"IBM"},
+{"COMPANY_ID":4,"NAME":"Microsoft"}
+]}
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod>
 
 primarykeys
 
@@ -1889,6 +2085,13 @@ Parameter Reference
 autocommit
 autosave
 color
+colorScheme
+confirm
+confirmPattern
+csvDelimiter
+csvQuoteCharacter
+dateformat
+escapeOutput
 fastconnect
 force
 headerinterval
@@ -1896,32 +2099,70 @@ historyfile
 incremental
 isolation
 maxcolumnwidth
+maxHistoryFileRows
+maxHistoryRows
 maxwidth
+mode
+nullValue
 numberformat
 outputformat
+prompt
+rightprompt
 rowlimit
 showheader
 shownestederrs
 showtime
 showwarnings
 silent
+strictJdbc
+timeformat
+timestampformat
 trimscripts
+uselinecontinuation
 verbose
 autocommit
 
-If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitely committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
+If true, then new connections will have autocommit set, otherwise, transactions will need to be explicitly committed or rolled back. Defaults to true. To change the autocommit status for a connection that is already open and active, use the autocommit command instead.
 
 autosave
 
-When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitely saved using the save command. Defaults to false.
+When set to true, any changes to preferences using the set command will cause the preferences to be saved. Otherwise, preferences will need to be explicitly saved using the save command. Defaults to false.
 
 color
 
 If true, then output to the terminal will use color for a more pleasing visual experience. Requires that the terminal support ANSI control codes (most do). Defaults to false.
 
+colorScheme
+
+If chester/dark/dracula/light/obsidian/solarized/vs2010, then this scheme will be used for command/sql syntax highlighting. If default then there is no syntax highlighting.
+
+confirm
+
+If true, then user will be prompted for confirmation if commands matching with confirmPattern are executed.
+
+confirmPattern
+
+If default with confirm = true, user will be prompted for DROP and DELETE commands, otherwise, for the commands as matched in the pattern.
+
+csvDelimiter
+
+Sets the delimiter in csv outputFormat. Setting to default causes usage of "," as a delimiter.
+
+csvQuoteCharacter
+
+Sets the quote character in csv outputFormat. Setting to default causes usage of '\'' as a delimiter.
+
+dateformat
+
+The format for how date values are displayed. Setting to default causes date values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "YYYY_MM_dd" yields values like "1970_01_01".
+
+escapeOutput
+
+When set to true, control symbols in output will be escaped. Otherwise they will be printed as is. Default is false.
+
 fastconnect
 
-When false, any new connection will cause SQLLine to access information about the available tables and columns in order to provide them as candidates for tab-completion. This can be a very slow operation for some databases, do by default it is off. Table and column information can always be explicitely retrieved using the rehash command.
+When false, any new connection will cause SQLLine to access information about the available tables and columns in order to provide them as candidates for tab-completion. This can be a very slow operation for some databases, do by default it is off. Table and column information can always be explicitly retrieved using the rehash command.
 
 force
 
@@ -1939,25 +2180,63 @@ incremental
 
 When set to false, the entire result set is fetched and buffered before being displayed, yielding optimal display column sizing. When set to true, result rows are displayed immediately as they are fetched, yielding lower latency and memory usage at the price of extra display column padding. Defaults to false.
 
+incrementalBufferRows
+
+When incremental set to false and the entire result set has more rows than value of incrementalBufferRows, sqlline will enter incremental mode. In that case, result rows are displayed by batches of size incrementalBufferRows. If value is negative, sqlline never enters incremental mode. Defaults to 1000.
+
 isolation
 
 The default transaction isolation that will be used for new connections. To change the isolation level of the currently active connection, use the isolation command instead.
 
 maxcolumnwidth
 
-The maximum column width to display for each colummn before truncating data when using the "table" outputformat. Defaults to 15.
+The maximum column width to display for each column before truncating data when using the "table" outputformat. Defaults to 15.
+
+maxHistoryFileRows
+
+The maximum number of history rows to store in history file. Defaults to 10000 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_FILE_SIZE).
+
+maxHistoryRows
+
+The maximum number of history rows to store in memory. Defaults to 500 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_SIZE).
 
 maxwidth
 
 The maximum width to display before truncating data when using the "table" outputformat. Defaults to attempting to query the terminal for the current width, falls back to 80.
 
+mode
+
+The editing mode to use in sqlline. Defaults to "emacs".
+
+nullvalue
+
+The value which will be used instead of null values. Setting to default causes 'null' for numbers/dates/times and empty strings for others. For example, the setting *** yields null values like '***'
+
 numberformat
 
-The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits.
+The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits, values like "6.022E23".
 
 outputformat
 
 The format for how results are displayed. For details, see the information on the outputformat command.
+
+prompt
+
+The tcsh-like format for how prompt is displayed. For example, the setting '%[\033[1;33m%]sqlline%[\033[m%]>' yields yellow sqlline and normal angle bracket. Defaults to 'sqlline>'. If for the specific database connection nickname is set then nickname will be used.
+
+rightprompt
+
+The tcsh-like format for how right prompt is displayed. The same patterns are applied as for prompt but it does not care if nickname is set or not. Defaults to ''.
+
+promptscript
+
+A JavaScript program that is evaluated to generate a prompt. If specified, prompt is ignored.
+
+The following variables are pre-defined for use in the JavaScript: connectionIndex
+currentSchema, databaseProductName, url, userName. For example:
+
+sqlline> !set promptscript ' databaseProductName.toLowerCase() + ":" + connectionIndex + "> " '
+hsql database engine:0>
 
 rowlimit
 
@@ -1983,9 +2262,25 @@ silent
 
 If true, then reduce the amount of informational messages displayed. Useful for redirecting a sqlline command to a file for later parsing. Defaults to false.
 
+strictJdbc
+
+If false, then use default values defined by java.sql.DatabaseMetaData in case an implementation of this interface fails with e.g. "Method not supported", otherwise it also fails. Defaults to false.
+
+timeformat
+
+The format for how time values are displayed. Setting to default causes time values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "HH:mm:ss" yields values like "14:12:11".
+
+timestampformat
+
+The format for how timestamp values are displayed. Setting to default causes timestamp values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
+
 trimscripts
 
 If true, then trim leading and trailing whitespace from lines as they are processed in scripts; otherwise, preserve whitespace. Defaults to true.
+
+uselinecontinuation
+
+Use line continuation if true. Defaults to true.
 
 verbose
 

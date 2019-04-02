@@ -4,7 +4,7 @@
 [
     <!-- "http://www.docbook.org/xml/4.2/docbookx.dtd" -->
     <!-- "file:/sw/share/xml/dtd/docbookx/4.2.0/docbookx.dtd" -->
-    <!ENTITY VERSION "1.4">
+    <!ENTITY VERSION "1.7.0">
 ]>
 <book>
   <bookinfo>
@@ -12,8 +12,12 @@
       SQLLine &VERSION;
     </title>
     <copyright>
-         <year>2002, 2003, 2004, 2005</year>
+      <year>2002, 2003, 2004, 2005</year>
       <holder>Marc Prud'hommeaux</holder>
+    </copyright>
+    <copyright>
+      <year>2006-2019</year>
+      <holder>Julian Hyde</holder>
     </copyright>
   </bookinfo>
   <part id="manual">
@@ -24,11 +28,11 @@
       <para>
       SQLLine is a pure-Java console based utility for connecting
       to relational databases and executing SQL commands. It is
-      similiar to other command-line database access utilities like
+      similar to other command-line database access utilities like
       <filename>sqlplus</filename> for Oracle, <filename>mysql</filename>
       for MySQL, and <filename>isql</filename> for Sybase/SQL Server.
       Since it is pure Java, it is platform independent, and will
-      run on any platform that can run Java 1.6 or higher.
+      run on any platform that can run Java 8 or higher.
       </para>
     </chapter>
 
@@ -53,10 +57,11 @@
     <chapter id="obtaining">
       <title>Obtaining SQLLine</title>
       <para>
-        SQLLine is hosted on SourceForge, and is located at
-        <ulink url="http://sqlline.sf.net"/>.
-        The latest release can be downloaded from
-        <ulink url="http://sqlline.sf.net/download.html"/>.
+        SQLLine could be found at <ulink url="http://search.maven.org/">Maven Central</ulink>.
+        SQLLine's source could be found at
+        <ulink url="https://github.com/julianhyde/sqlline/">SQLLine source</ulink>.
+        SQLLine's releases could be found at
+        <ulink url="https://julianhyde.github.io/sqlline/">SQLLine releases</ulink>.
       </para>
     </chapter>
 
@@ -70,16 +75,20 @@
             <listitem><para>
             <trademark>Java</trademark> Virtual Machine -
             SQLLine is a pure
-            java program, and requires Java version 1.6 or higher
+            java program, and requires Java version 8 or higher
             in order to run. The latest JVM can be downloaded from
             <ulink url="http://java.sun.com"/>.
             </para></listitem>
             <listitem><para>
-            JLine - SQLLine uses the JLine console reader for
-            command line editing, tab-completion, and command
-            history. It can be downloaded from
-            <ulink url="http://jline.sf.net"/>. Version
-            0.8.1 or higher is required.
+            JLine3 - SQLLine uses the JLine3 console reader for
+            command line editing, tab-completion, command
+            history, highlighting and prompting. It can be downloaded from
+            <ulink url="http://search.maven.org/">Maven Central</ulink>. Version
+            3.9.0 or higher is required.
+            Jline3's source could be found at
+            <ulink url="https://github.com/jline/jline3">JLine3 source</ulink>.
+            JLine3's releases could be found at maven central
+            <ulink url="https://repo1.maven.org/maven2/org/jline/">JLine3 releases</ulink>.
             </para></listitem>
             <listitem><para>
             <trademark>JDBC</trademark> Driver(s) - Since
@@ -112,9 +121,17 @@
           <filename>sqllinedir</filename>.
           </para></listitem>
           <listitem><para>
-          Download the latest <filename>jline.jar</filename> from
-          <ulink url="http://jline.sf.net"/> into
+          Download the latest <filename>jline-terminal.jar</filename>,
+          <filename>jline-reader.jar</filename>,
+          <filename>jline-builtins.jar</filename> from
+          <ulink url="http://search.maven.org/">Maven Central</ulink> into
           <filename>sqllinedir</filename>.
+          For the case of Windows OS additionally it is required to download
+          into <filename>sqllinedir</filename>
+          the latest <filename>jline-terminal-jna.jar</filename>,
+          <filename>jline-terminal-jansi.jar</filename>,
+          <filename>jansi.jar</filename>,
+          and version 4.2.2 <filename>jna.jar</filename>
           </para></listitem>
           <listitem><para>
           Download your database's JDBC driver files into
@@ -135,8 +152,8 @@
         SQLLine can be run with the following command:
           <cmdsynopsis>
           <command>java</command>
-          <arg choice="req">-Djava.ext.dirs=<replaceable>sqllinedir</replaceable></arg>
-          <arg choice="req"><replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
+          <arg choice="req">-cp <replaceable>"sqllinedir/*"</replaceable></arg>
+          <arg choice="req">-jar <replaceable>sqllinedir</replaceable>/sqlline.jar</arg>
           <arg rep="repeat" choice="opt"><replaceable>options</replaceable></arg>
           <arg rep="repeat" choice="opt"><replaceable>properties files</replaceable></arg>
           </cmdsynopsis>
@@ -145,7 +162,7 @@
         <filename>/usr/share/java/</filename> (this is typical for
         Debian Linux), then you might run:
         <screen>
-java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
+java -cp "/usr/share/java/*" -jar /usr/share/java/sqlline.jar
         </screen>
         </para>
 
@@ -163,6 +180,7 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
         <para>
         SQLLine is only useful once you are connected to a database.
         In order to do so, you need to use the "!connect" command,
+        with an optional list of properties definition
         with the JDBC URL of the database you are going to
         connect to, followed by the username and password (followed
         optionally by the driver class name). The JDBC URL
@@ -170,6 +188,8 @@ java -Djava.ext.dirs=/usr/share/java/ /usr/share/java/sqlline.jar
         your database, but will always start with "jdbc:", and
         usually has the machine name of the database and the
         name of the database itself as part of the string.
+        Quotes (both single and double) could be used in
+        case of url, username, password contain spaces.
         Consult your driver's documentation for details on the
         URL to use.
         </para>
@@ -239,15 +259,272 @@ Autocommit status: true
         </example>
         </para>
       </sect1>
+      <sect1 id="issuing_multiline_sql">
+        <title>Issuing multiline commands</title>
+        <para>
+          A query or command need not be given all on a single line,
+          so lengthy queries that require several lines are not a problem.
+          SQLLine determines where the statement ends by looking for
+          the terminating semicolon (SQL command) or newline (SQLLine command),
+          not by looking for the end of the input line.
+          (In other words, SQLLine accepts free-format input:
+          it collects input lines but does not execute them until it sees the terminating symbol.)
+        <example id="simple_multiline">
+          <title>Multiline SQL</title>
+          <screen>
+0: jdbc:calcite:model=example/csv/target/test> select 'multiline ;
+. . . . . . . . . . . . . . . . . . . . quote> value'
+. . . . . . . . . . . . . . . . . . semicolon> /*
+. . . . . . . . . . . . . . . . . . . . . .*/> "just 'a'
+. . . . . . . . . . . . . . . . . . . . . .*/> comment";
+. . . . . . . . . . . . . . . . . . . . . .*/> */
+. . . . . . . . . . . . . . . . . . semicolon> ;
++-------------------+
+|      EXPR$0       |
++-------------------+
+| multiline ;
+value |
++-------------------+
+1 row selected (0.035 seconds)
+0: jdbc:calcite:model=example/csv/target/test>
+          </screen>
+        </example>
+        The prompt provides valuable feedback showing what SQLLine is waiting for.
+        The following table shows each of the prompts one may see
+        and summarizes what they mean about the state that SQLLine is in
+          <table frame='all'>
+            <tgroup cols='2' align='left' colsep='1' rowsep='1'>
+              <colspec colname='Prompt'/>
+              <colspec colname='Meaning'/>
+              <thead>
+                <row>
+                  <entry align="center">Prompt</entry>
+                  <entry align="center">Meaning</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>sqlline></entry>
+                  <entry>Ready for a new query</entry>
+                </row>
+                <row>
+                  <entry>semicolon></entry>
+                  <entry>Waiting for next line of multiple-line query,
+                    waiting for completion of query with semicolon (;)</entry>
+                </row>
+                <row>
+                  <entry>quote></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a single quote (')</entry>
+                </row>
+                <row>
+                  <entry>dquote></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a double quote (")</entry>
+                </row>
+                <row>
+                  <entry>`></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with (`)</entry>
+                </row>
+                <row>
+                  <entry>*/></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a multi-line comment that began with "/*"</entry>
+                </row>
+                <row>
+                  <entry>(></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a round bracket, "("</entry>
+                </row>
+                <row>
+                  <entry>[></entry>
+                  <entry>Waiting for next line, waiting for completion of
+                    a string that began with a square bracket, "["</entry>
+                </row>
+                <row>
+                  <entry>extra ')'></entry>
+                  <entry>There is an extra round bracket ")", that is
+                    not opened with "("</entry>
+                </row>
+                <row>
+                  <entry>extra ']'></entry>
+                  <entry>There is an extra square bracket "]", that is
+                    not opened with "["</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
+        </para>
+      </sect1>
       <sect1 id="completion">
         <title>Command Completion</title>
         <para>
-        On UNIX systems, SQLLine allows command-line completion
+        SQLLine allows command-line completion
         using the tab key. This will be familiar for users of such
         popular shells as bash and tcsh. In general, hitting
         the TAB key when part of the way through typing a command
         will fill in the rest of the command, or else will display
         a selection of appropriate possibilities.
+        </para>
+      </sect1>
+    </chapter>
+
+    <chapter id="options">
+      <title>Option Reference</title>
+
+      <sect1 id="-u">
+        <title>-u</title>
+        <para>
+          <cmdsynopsis>
+            <command>-u</command>
+            <arg choice="req">&lt;database url></arg>
+          </cmdsynopsis>
+          The JDBC URL to connect to. In case of having spaces,
+          semicolumns inside url please use quotes (double or single) e.g.
+          <screen>./sqlline -u "jdbc:calcite:schemaFactory=org.apache.calcite.adapter.druid.DruidSchemaFactory; schema.url=http://localhost:8082; schema.coordinatorUrl=http://localhost:8081"</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-n">
+        <title>-n</title>
+        <para>
+          <cmdsynopsis>
+            <command>-n</command>
+            <arg choice="req">&lt;username></arg>
+          </cmdsynopsis>
+          The username to connect as
+        </para>
+      </sect1>
+
+      <sect1 id="-p">
+        <title>-p</title>
+        <para>
+          <cmdsynopsis>
+            <command>-p</command>
+            <arg choice="req">&lt;password></arg>
+          </cmdsynopsis>
+          The password to connect as
+        </para>
+      </sect1>
+
+
+      <sect1 id="-d">
+        <title>-d</title>
+        <para>
+          <cmdsynopsis>
+            <command>-d</command>
+            <arg choice="req">&lt;driver class></arg>
+          </cmdsynopsis>
+          The driver class to use. For instance
+          <screen>./sqlline -u jdbc:mysql://localhost:3306/scott -n user -p password -d com.mysql.jdbc.Driver</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-e">
+        <title>-e</title>
+        <para>
+          <cmdsynopsis>
+            <command>-e</command>
+            <arg choice="req">&lt;command></arg>
+          </cmdsynopsis>
+          The command to execute, for instance
+          <screen>./sqlline -e "!set maxwidth 80"</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-nn">
+        <title>-nn</title>
+        <para>
+          <cmdsynopsis>
+            <command>-nn</command>
+            <arg choice="req">&lt;nickname></arg>
+          </cmdsynopsis>
+          Nickname for the connection
+        </para>
+      </sect1>
+
+      <sect1 id="-ch">
+        <title>-ch</title>
+        <para>
+          <cmdsynopsis>
+            <command>-ch</command>
+            <arg choice="req">&lt;command handler>[,&lt;command handler>]*</arg>
+          </cmdsynopsis>
+          A custom command handler to use.
+          In case of several command handlers use comma as separator, for instance
+          <screen>./sqlline -ch sqlline.commandhandler.HelloWorldCommandHandler,org.apache.calcite.HelloWorld2CommandHandler</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-f">
+        <title>-f</title>
+        <para>
+          <cmdsynopsis>
+            <command>-f</command>
+            <arg choice="req">&lt;file></arg>
+          </cmdsynopsis>
+          Script file to execute (same as --run), e.g.
+          <screen>./sqlline -f fileToExecute</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-log">
+        <title>-log</title>
+        <para>
+          <cmdsynopsis>
+            <command>-log</command>
+            <arg choice="req">&lt;file></arg>
+          </cmdsynopsis>
+          File to write output, e.g.
+          <screen>./sqlline -log output</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="-ac">
+        <title>-ac</title>
+        <para>
+          <cmdsynopsis>
+            <command>-ac</command>
+            <arg choice="req">&lt;class name></arg>
+          </cmdsynopsis>
+          Application configuration class name, for instance
+          <screen>./sqlline -ac sqlline.extensions.CustomApplication</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="--run">
+        <title>--run</title>
+        <para>
+          <cmdsynopsis>
+            <command>--run=</command>
+            <arg choice="req">/path/to/file</arg>
+          </cmdsynopsis>
+          Run one script and then exit, e.g.
+          <screen>./sqlline --run=fileToRun</screen>
+        </para>
+      </sect1>
+
+      <sect1 id="--help">
+        <title>--help</title>
+        <para>
+          <cmdsynopsis>
+            <command>--help</command>
+          </cmdsynopsis>
+          Display help
+        </para>
+      </sect1>
+
+      <sect1 id="--&lt;property_name>">
+        <title>--&lt;property_name></title>
+        <para>
+          <cmdsynopsis>
+            <command>--&lt;property_name>=[value]</command>
+          </cmdsynopsis>
+          Set the specified value for property_name. For instance
+          <screen>./sqlline --verbose=true --mode=vi --nullValue=123</screen>
+          For details, see the <link linkend="sect_command_properties">
+          properties command</link> documentation.
         </para>
       </sect1>
     </chapter>
@@ -576,6 +853,48 @@ sqlline>
 0: jdbc:oracle:thin:@localhost:1521:mydb>
           </screen>
           </refsect1>
+      </refentry>
+      </section>
+
+      <section id="sect_command_command_handler">
+      <title>commandhandler</title>
+      <refentry id="command_command_handler">
+        <refmeta>
+        <refentrytitle>commandhandler</refentrytitle>
+        <manvolnum>1</manvolnum>
+        </refmeta>
+
+
+        <refnamediv>
+          <refname>commandhandler</refname>
+          <refpurpose>
+          Adds command handlers with commands
+          </refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+          <cmdsynopsis>
+          <command>!commandhandler</command>
+          <arg choice="req"><replaceable>command handler</replaceable></arg>
+          </cmdsynopsis>
+        </refsynopsisdiv>
+        <refsect1>
+          <title>Description</title>
+          <para>
+          Adds command handlers with commands.
+          </para>
+        </refsect1>
+        <refsect1>
+        <title>Example of "commandhandler" command</title>
+        <screen>
+sqlline> !hello
+Unknown command: hello
+sqlline> !commandhandler sqlline.extensions.HelloWorldCommandHandler
+sqlline> !hello
+HELLO WORLD
+sqlline>
+        </screen>
+        </refsect1>
       </refentry>
       </section>
 
@@ -1106,6 +1425,7 @@ Really drop every table in the database? (y/n) y
 sqlline> !help
 
 !all              Execute the specified SQL against all the current connections
+!appconfig        Sets application configuration class name
 !autocommit       Set autocommit mode on or off
 !batch            Start or execute a batch of statements
 !brief            Set verbose mode off
@@ -1127,7 +1447,8 @@ sqlline> !help
 !metadata         Obtain metadata information
 !nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
-                  (table, vertical, csv, tsv, xmlattrs, xmlelements)
+                  (table, vertical, csv, tsv, xmlattrs, xmlelements, json)
+!prompthandler    Set custom prompt handler class name
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
 !procedures       List all the procedures
@@ -1136,14 +1457,45 @@ sqlline> !help
 !record           Record all output to the specified file
 !rehash           Fetch table and column names for command completion
 !rollback         Roll back the current transaction (if autocommit is off)
+!reset            Reset a sqlline variable
 !run              Run a script from the specified file
 !save             Save the current variables and aliases
 !scan             Scan for installed JDBC drivers
 !script           Start saving a script to a file
-!set              Set a sqlline variable
+!set              Set a sqlline variable, or show its value
 !sql              Execute a SQL command
 !tables           List all the tables in the database
 !verbose          Set verbose mode on
+
+Key-strokes:
+alt-b           Backward word
+alt-c           Capitalize word
+alt-d           Kill word
+alt-f           Forward word
+alt-h           Next color scheme
+alt-l           Lowercase word
+alt-n           History search forward
+alt-p           History search backward
+alt-t           Transpose words
+alt-u           Uppercase word
+
+ctrl-a          To the beginning of line
+ctrl-b          Backward char
+ctrl-d          Delete char
+ctrl-e          To the end of line
+ctrl-f          Forward char
+ctrl-h          Backward delete char
+ctrl-i          Complete
+ctrl-j          Enter
+ctrl-k          Kill the line
+ctrl-m          Enter
+ctrl-n          Down line or history
+ctrl-p          Up line or history
+ctrl-r          History incremental search backward
+ctrl-s          History incremental search forward
+ctrl-t          Transpose chars
+ctrl-u          Kill the whole line
+ctrl-w          Backward kill the line
 
 Comments, bug reports, and patches go to mwp1@cornell.edu
 
@@ -1408,8 +1760,8 @@ Transaction isolation: TRANSACTION_SERIALIZABLE
           <refsect1>
           <title>Description</title>
           <para>
-          Execute an arbitrary metadata method agains the current
-            connection. refpurpose are separated by spaces.
+          Execute an arbitrary metadata method against the current
+            connection. Parameters are separated by spaces.
 
           Use "" for a blank String, and null for a null parameter.
           For information on available metadata methods, see
@@ -1533,7 +1885,7 @@ true
           Set the mode for displaying results from statements.
           This is useful for saving output from SQL statements to
           either a visually pleasing format or an easily
-          parseable format.
+          parsable format.
           </para>
         </refsect1>
         <refsect1>
@@ -1586,6 +1938,21 @@ NAME        Microsoft
           </screen>
         </refsect1>
         <refsect1>
+          <title>Example of CSV output formatting with different csv delimiter and quote character</title>
+          <screen>
+0: jdbc:calcite:model=target/test-classes/mod> !set csvDelimiter ###
+0: jdbc:calcite:model=target/test-classes/mod> !set csvQuoteCharacter @
+0: jdbc:calcite:model=target/test-classes/mod> !set outputFormat csv
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+@COMPANY_ID@###@NAME@
+@1@###@Apple@
+@2@###@Sun@
+@3@###@IBM@
+@4@###@Microsoft@
+4 rows selected (0.014 seconds)
+          </screen>
+        </refsect1>
+        <refsect1>
           <title>Example of TSV output formatting</title>
           <screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat tsv
@@ -1616,7 +1983,7 @@ NAME        Microsoft
           <title>Example of XML element output formatting</title>
           <screen>
 0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat xmlelements
-0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY
+0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
 &lt;resultset>
   &lt;result>
     &lt;COMPANY_ID>1&lt;/COMPANY_ID>
@@ -1637,6 +2004,21 @@ NAME        Microsoft
 &lt;/resultset>
 4 rows selected (0.02 seconds)
 0: jdbc:oracle:thin:@localhost:1521:mydb>
+          </screen>
+        </refsect1>
+        <refsect1>
+          <title>Example of JSON output formatting</title>
+          <screen>
+0: jdbc:calcite:model=target/test-classes/mod> !outputformat json
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+{"resultset":[
+{"COMPANY_ID":1,"NAME":"Apple"},
+{"COMPANY_ID":2,"NAME":"Sun"},
+{"COMPANY_ID":3,"NAME":"IBM"},
+{"COMPANY_ID":4,"NAME":"Microsoft"}
+]}
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod>
           </screen>
         </refsect1>
       </refentry>
@@ -1770,7 +2152,7 @@ NAME        Microsoft
             </para></listitem>
             <listitem><para>
               driver: the driver class that handles the URL. If
-                unspecifed, SQLLine with automatically
+                unspecified, SQLLine will automatically
                 scan the CLASSPATH for an appropriate driver
             </para></listitem>
             <listitem><para>
@@ -2024,6 +2406,54 @@ Done
         </caution>
           </refsect1>
       </refentry>
+      </section>
+
+      <section id="sect_command_reset">
+        <title>set</title>
+        <refentry id="command_reset">
+          <refmeta>
+            <refentrytitle>reset</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+
+          <refnamediv>
+            <refname>reset</refname>
+            <refpurpose>
+              Reset a preference
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!reset</command>
+              <arg choice="req"><replaceable>all</replaceable></arg>
+            </cmdsynopsis>
+            <cmdsynopsis>
+              <command>!reset</command>
+              <arg choice="req"><replaceable>preference</replaceable></arg>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+          <refsect1>
+            <title>Description</title>
+            <para>
+              Reset preference current value to default. When resetting a preference
+              if <link linkend="setting_autosave">autosave</link> is
+              on, then this will cause preferences to be
+              immediately saved. Otherwise, changed setting can be
+              saved for future SQLLine session with the
+              <link linkend="command_save">save</link> command.
+              With all keyword reset all preferences.
+            </para>
+          </refsect1>
+          <refsect1>
+            <title>Example of "reset" command</title>
+            <screen>
+              0: jdbc:hsqldb:db-hypersonic> !reset timeout
+              [timeout] was reset to [-1]
+            </screen>
+          </refsect1>
+        </refentry>
       </section>
 
       <section id="sect_command_rollback">
@@ -2390,11 +2820,22 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
         <refnamediv>
           <refname>set</refname>
           <refpurpose>
-          Set a preference
+          Set a preference, or show its value
           </refpurpose>
         </refnamediv>
 
         <refsynopsisdiv>
+          <cmdsynopsis>
+            <command>!set</command>
+          </cmdsynopsis>
+          <cmdsynopsis>
+            <command>!set</command>
+            <arg choice="req"><replaceable>all</replaceable></arg>
+          </cmdsynopsis>
+          <cmdsynopsis>
+            <command>!set</command>
+            <arg choice="req"><replaceable>preference</replaceable></arg>
+          </cmdsynopsis>
           <cmdsynopsis>
           <command>!set</command>
           <arg choice="req"><replaceable>preference</replaceable></arg>
@@ -2407,8 +2848,12 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           Set the specified preference to the specified value. If
           <link linkend="setting_autosave">autosave</link> is
           on, then this will cause preferences to be
-          immediately saved. Otherwise, changed setting can be
-          saved for future SQLLine session eith the
+          immediately saved. Otherwise, changed settings can be
+          saved for future SQLLine sessions with the "save" command.
+          The forms of the command without a "{value}" argument show the
+          current value of the specified preference, or all preferences.
+          "!set" and "!set all" commands are equivalent
+          and list all preferences.
           <link linkend="command_save">save</link> command.
           </para>
         </refsect1>
@@ -2578,11 +3023,18 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 
     <chapter id="settings">
       <title>Parameter Reference</title>
+      <sect1 id="setting_appconfig">
+        <title>appconfig</title>
+        <para>
+          Sets application configuration class name in order to customize
+          output formats, commands, application information message.
+        </para>
+      </sect1>
       <sect1 id="setting_autocommit">
         <title>autocommit</title>
         <para>
           If <literal>true</literal>, then new connections will have autocommit
-          set, otherwise, transactions will need to be explicitely
+          set, otherwise, transactions will need to be explicitly
           <link linkend="command_commit">committed</link> or
           <link linkend="command_rollback">rolled back</link>.
           Defaults to <literal>true</literal>.
@@ -2599,7 +3051,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           to preferences using the
           <link linkend="command_set">set</link> command will cause
           the preferences to be saved. Otherwise, preferences will
-          need to be explicitely saved using the
+          need to be explicitly saved using the
           <link linkend="command_save">save</link> command.
           Defaults to <literal>false</literal>.
         </para>
@@ -2614,6 +3066,37 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Defaults to <literal>false</literal>.
         </para>
       </sect1>
+      <sect1 id="setting_colorscheme">
+        <title>colorscheme</title>
+        <para>
+            If <literal>chester</literal>/<literal>dark</literal>
+            /<literal>dracula</literal>/<literal>light</literal>
+            /<literal>obsidian</literal>/<literal>solarized</literal>
+            /<literal>vs2010</literal>,
+            then this scheme will be used for command/sql syntax highlighting.
+            If <literal>default</literal> then there is no syntax highlighting.
+        </para>
+      </sect1>
+      <sect1 id="setting_dateformat">
+        <title>dateformat</title>
+        <para>
+          The format for how date values are displayed. Setting
+          to <literal>default</literal> causes date values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting "YYYY_MM_dd" yields values like "1970_01_01".
+        </para>
+      </sect1>
+      <sect1 id="setting_escapeOutput">
+        <title>escapeOutput</title>
+        <para>
+            When set to true, control symbols
+            in output will be escaped.
+            Otherwise they will be printed as is. Default is false..
+        </para>
+      </sect1>
       <sect1 id="setting_fastconnect">
         <title>fastconnect</title>
         <para>
@@ -2623,7 +3106,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           in order to provide them as candidates for tab-completion.
           This can be a very slow operation for some databases, do
           by default it is off. Table and column information can
-          always be explicitely retrieved using the
+          always be explicitly retrieved using the
           <link linkend="command_rehash">rehash</link> command.
         </para>
       </sect1>
@@ -2664,11 +3147,26 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           When set to <literal>false</literal>,
           the entire result set is fetched and buffered
           before being displayed, yielding optimal display
-          column sizing.  When set to <literal>true</literal>,
+          column sizing. When set to <literal>true</literal>,
           result rows are displayed immediately as they are
           fetched, yielding lower latency and memory usage
           at the price of extra display column padding.
           Defaults to <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_incrementalbufferrows">
+        <title>incrementalbufferrows</title>
+        <para>
+          When <literal>incremental</literal> set
+          to <literal>false</literal> and the entire result set
+          has more rows than value of
+          <literal>incrementalBufferRows</literal>
+          sqlline will enter <literal>incremental</literal> mode.
+          In that case result rows are displayed by batches
+          of <literal>incrementalbufferrows</literal> size.
+          Negative value means no entering
+          <literal>incremental</literal> mode.
+          Defaults to <literal>1000</literal>.
         </para>
       </sect1>
       <sect1 id="setting_isolation">
@@ -2684,12 +3182,27 @@ java.sql.SQLException: ORA-00942: table or view does not exist
       <sect1 id="setting_maxcolumnwidth">
         <title>maxcolumnwidth</title>
         <para>
-          The maximum column width to display for each colummn
+          The maximum column width to display for each column
           before truncating data when using the "table"
           <link linkend="setting_outputformat">outputformat</link>.
           Defaults to 15.
         </para>
       </sect1>
+      <sect1 id="setting_maxhistoryfilerows">
+        <title>maxhistoryfilerows</title>
+        <para>
+            The maximum number of history rows to store
+            in history file. Defaults to 10000
+            (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_FILE_SIZE).
+        </para>
+    </sect1>
+    <sect1 id="setting_maxhistoryrows">
+        <title>maxhistoryrows</title>
+        <para>
+            The maximum number of history rows to store in memory.
+            Defaults to 500 (org.jline.reader.impl.history.DefaultHistory.DEFAULT_HISTORY_SIZE).
+        </para>
+    </sect1>
       <sect1 id="setting_maxwidth">
         <title>maxwidth</title>
         <para>
@@ -2698,6 +3211,21 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           <link linkend="setting_outputformat">outputformat</link>.
           Defaults to attempting to query the terminal for the
           current width, falls back to 80.
+        </para>
+      </sect1>
+      <sect1 id="setting_mode">
+        <title>mode</title>
+        <para>
+          The editing mode to use in sqlline. Defaults to "emacs".
+        </para>
+      </sect1>
+      <sect1 id="setting_nullvalue">
+        <title>nullvalue</title>
+        <para>
+          The value which will be used instead of null values. Setting
+          to default causes 'null' for numbers/dates/times
+          and empty strings for others. For example,
+          the setting *** yields null values like '***'.
         </para>
       </sect1>
       <sect1 id="setting_numberformat">
@@ -2710,7 +3238,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/DecimalFormat.html">
           java.text.DecimalFormat</ulink>.  For example,
           the setting "0.###E0" yields scientific notation
-          with up to three fractional digits.
+          with up to three fractional digits, such as "6.022E23".
         </para>
       </sect1>
       <sect1 id="setting_outputformat">
@@ -2720,6 +3248,55 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           see the information on the
           <link linkend="command_outputformat">outputformat
           command</link>.
+        </para>
+      </sect1>
+      <sect1 id="setting_prompthandler">
+        <title>prompthandler</title>
+        <para>
+          Sets prompt handler class name in order to customize prompts default
+          configuration.
+        </para>
+      </sect1>
+      <sect1 id="setting_prompt">
+        <title>prompt</title>
+        <para>
+            The tcsh-like format for how prompt is displayed.
+            For example, the setting
+            <literal>%[\033[1;33m%]sqlline%[\033[m%]></literal> yields
+            yellow sqlline and normal angle bracket.
+            Defaults to <literal>sqlline></literal>. If for the specific
+            database connection nickname is set, then nickname will be used.
+            For details, see the
+            <link linkend="prompting">Prompting</link> documentation.
+        </para>
+      </sect1>
+      <sect1 id="setting_rightprompt">
+        <title>rightprompt</title>
+        <para>
+            The tcsh-like format for how right prompt is displayed.
+            The same patterns are applied as for prompt but it
+            does not care if nickname is set or not. Defaults to ''.
+            For details, see the
+            <link linkend="prompting">Prompting</link> documentation.
+        </para>
+      </sect1>
+      <sect1 id="setting_promptscript">
+        <title>promptscript</title>
+        <para>
+          Sets a JavaScript program that is evaluated to
+          generate a prompt. If specified, <literal>prompt</literal>
+          is ignored. The following variables are pre-defined for use in the
+          JavaScript:
+          <literal>connectionIndex</literal>,
+          <literal>currentSchema</literal>,
+          <literal>databaseProductName</literal>,
+          <literal>url</literal>,
+          <literal>userName</literal>.
+          For instance <screen>
+          sqlline> !set promptscript ' databaseProductName.toLowerCase() + ":" + connectionIndex + "> " '
+          hsql database engine:0>
+        </screen>
+
         </para>
       </sect1>
       <sect1 id="setting_rowlimit">
@@ -2769,10 +3346,44 @@ java.sql.SQLException: ORA-00942: table or view does not exist
       <sect1 id="setting_silent">
         <title>silent</title>
         <para>
+            If <literal>false</literal>, then use default values
+            defined by <literal>java.sql.DatabaseMetaData</literal>
+            in case an implementation of this interface fails with
+            e.g. "Method not supported", otherwise it also fails.
+            Defaults to <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_silent">
+        <title>silent</title>
+        <para>
           If <literal>true</literal>, then reduce the amount
           of informational messages displayed. Useful for redirecting
           a sqlline command to a file for later parsing. Defaults to
           <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_timeformat">
+        <title>timeformat</title>
+        <para>
+          The format for how time values are displayed. Setting
+          to <literal>default</literal> causes time values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting <literal>HH:mm:ss</literal> yields values like <literal>14:12:11</literal>.
+          </para>
+      </sect1>
+      <sect1 id="setting_timestampformat">
+        <title>timestampformat</title>
+        <para>
+          The format for how date values are displayed. Setting
+          to <literal>default</literal> causes date values
+          to be fetched and rendered via ResultSet.getString.
+          Any other setting results in fetch via ResultSet.getObject
+          and rendering via <ulink url="https://docs.oracle.com/javase/9/docs/api/java/text/SimpleDateFormat.html">
+          java.text.SimpleDateFormat</ulink>. For example,
+          the setting <literal>dd/MM/YYYY'T'HH:mm:ss</literal> yields values like <literal>01/01/1970T12:32:12</literal>.
         </para>
       </sect1>
       <sect1 id="setting_trimscripts">
@@ -2791,6 +3402,177 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           entire java stack trace whenever an error occurs,
           as well as displaying debugging information.
           Defaults to <literal>false</literal>.
+        </para>
+      </sect1>
+      <sect1 id="setting_version">
+        <title>version</title>
+        <para>
+          Show the current sqlline version. The property is read only.
+        </para>
+        </sect1>
+    </chapter>
+
+    <chapter id="prompting">
+      <title>Prompting</title>
+      SQLLine supports 3 types of prompts:
+      prompt, right prompt and secondary prompt.
+      Prompt - prompt on the left side with
+      default value <literal>sqlline></literal>.
+      Right prompt - prompt on the right side with empty default value.
+      Secondary prompt - prompt which appears while multiline editing.
+      SQLLine supports customization of prompt and right prompt via
+      <literal>!set prompt</literal> and <literal>!set rightPrompt</literal>.
+      The value of the selected prompt variable is printed literally,
+      except where a percent sign (%) is encountered.
+      Depending on the next character,
+      certain other text is substituted instead. Defined substitutions are:
+      <sect1 id="%c">
+        <title>%c</title>
+        <para>
+          Connection index (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%d">
+        <title>%d</title>
+        <para>
+          Database product name in case there is a database connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%D">
+        <title>%D</title>
+        <para>
+          Current date in format <literal>yyyy-MM-dd HH:mm:ss.SSS</literal>
+        </para>
+        For instance <screen>
+sqlline> !set prompt 'time: %D sqlline>'
+time: 2019-01-07 13:11:13.221 sqlline>
+      </screen>
+      </sect1>
+      <sect1 id="%m">
+        <title>%m</title>
+        <para>
+          Minutes of the current time
+        </para>
+      </sect1>
+      <sect1 id="%o">
+        <title>%o</title>
+        <para>
+          The current month in numeric format
+        </para>
+      </sect1>
+      <sect1 id="%O">
+        <title>%O</title>
+        <para>
+          The current month in three-letter format (Jan, Feb, …)
+        </para>
+      </sect1>
+      <sect1 id="%n">
+        <title>%n</title>
+        <para>
+          User name for the current connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%P">
+        <title>%P</title>
+        <para>
+          am/pm
+        </para>
+      </sect1>
+      <sect1 id="%r">
+        <title>%r</title>
+        <para>
+          The current time, standard 12-hour time (1–12)
+        </para>
+      </sect1>
+      <sect1 id="%R">
+        <title>%R</title>
+        <para>
+          The current time, in 24-hour military time (0–23)
+        </para>
+      </sect1>
+      <sect1 id="%s">
+        <title>%s</title>
+        <para>
+          Seconds of the current time
+        </para>
+      </sect1>
+      <sect1 id="%u">
+        <title>%u</title>
+        <para>
+          Url of the current connection (empty in case of no connection)
+        </para>
+      </sect1>
+      <sect1 id="%w">
+        <title>%w</title>
+        <para>
+          The current day in a month
+        </para>
+      </sect1>
+      <sect1 id="%W">
+        <title>%W</title>
+        <para>
+          The current day of the week in three-letter format (Mon, Tue, …)
+        </para>
+      </sect1>
+      <sect1 id="%y">
+        <title>%y</title>
+        <para>
+          The current year, two digits
+        </para>
+      </sect1>
+      <sect1 id="%Y">
+        <title>%Y</title>
+        <para>
+          The current year, four digits
+        </para>
+      </sect1>
+      <sect1 id="%:property_name:">
+        <title>%:property_name:</title>
+        <para>
+          The value of the specified sqlline property (case insensitive).
+          For instance
+          For details, see the <link linkend="sect_command_properties">
+          properties command</link> documentation.
+        </para>
+        For instance, <screen>
+sqlline> !set prompt %:verbose::sqlline>
+false:sqlline>!set verbose true
+true:sqlline>
+      </screen>
+      </sect1>
+      <sect1 id="%[...%]">
+        <title>%[...%]</title>
+        <para>
+          Prompts can contain terminal control characters which,
+          for example, change the color, background,
+          or style of the prompt text. Both ansi and
+          constants or its shortcuts for styles could be used here, e.g.
+          <screen>
+!set prompt %[f:m%]sqlline%[default%]>
+!set prompt %[foreground:magenta%]sqlline%[default%]>
+!set prompt %[35%]sqlline%[%]>
+          </screen>
+          All three commands are identical.
+          SQLLine supports styles <literal>default</literal>,
+          <literal>bold</literal>, <literal>italic</literal>,
+          <literal>faint</literal>, <literal>underline</literal>,
+          <literal>blink</literal>, <literal>inverse</literal>,
+          <literal>inverse-neg</literal> (<literal>inverseneg</literal>),
+          <literal>conceal</literal>, <literal>crossed-out</literal>
+          (<literal>crossedout</literal>), <literal>hidden</literal>.
+          There are two styles for coloring <literal>foreground</literal>
+          (short options <literal>f</literal> and <literal>fg</literal>) and
+          <literal>background</literal>
+          (short options <literal>b</literal> and <literal>bg</literal>).
+          The short options for colors are available like
+          <literal>k</literal> for <literal>black</literal>,
+          <literal>r</literal> for <literal>red</literal>,
+          <literal>g</literal> for <literal>green</literal>,
+          <literal>y</literal> for <literal>yellow</literal>,
+          <literal>b</literal> for <literal>blue</literal>,
+          <literal>m</literal> for <literal>magenta</literal>,
+          <literal>c</literal> for <literal>cyan</literal>,
+          <literal>w</literal> for <literal>white</literal>.
         </para>
       </sect1>
     </chapter>

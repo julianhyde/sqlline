@@ -12,137 +12,148 @@
 package sqlline;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import jline.console.UserInterruptException;
-import jline.console.history.History;
+import org.jline.reader.EOFError;
+import org.jline.reader.History;
+import org.jline.reader.MaskingCallback;
+import org.jline.reader.Parser;
+import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.LineReaderImpl;
+import org.jline.terminal.Terminal;
 
 /**
  * Collection of available commands.
  */
 public class Commands {
   private static final String[] METHODS = {
-    "allProceduresAreCallable",
-    "allTablesAreSelectable",
-    "dataDefinitionCausesTransactionCommit",
-    "dataDefinitionIgnoredInTransactions",
-    "doesMaxRowSizeIncludeBlobs",
-    "getCatalogSeparator",
-    "getCatalogTerm",
-    "getDatabaseProductName",
-    "getDatabaseProductVersion",
-    "getDefaultTransactionIsolation",
-    "getDriverMajorVersion",
-    "getDriverMinorVersion",
-    "getDriverName",
-    "getDriverVersion",
-    "getExtraNameCharacters",
-    "getIdentifierQuoteString",
-    "getMaxBinaryLiteralLength",
-    "getMaxCatalogNameLength",
-    "getMaxCharLiteralLength",
-    "getMaxColumnNameLength",
-    "getMaxColumnsInGroupBy",
-    "getMaxColumnsInIndex",
-    "getMaxColumnsInOrderBy",
-    "getMaxColumnsInSelect",
-    "getMaxColumnsInTable",
-    "getMaxConnections",
-    "getMaxCursorNameLength",
-    "getMaxIndexLength",
-    "getMaxProcedureNameLength",
-    "getMaxRowSize",
-    "getMaxSchemaNameLength",
-    "getMaxStatementLength",
-    "getMaxStatements",
-    "getMaxTableNameLength",
-    "getMaxTablesInSelect",
-    "getMaxUserNameLength",
-    "getNumericFunctions",
-    "getProcedureTerm",
-    "getSchemaTerm",
-    "getSearchStringEscape",
-    "getSQLKeywords",
-    "getStringFunctions",
-    "getSystemFunctions",
-    "getTimeDateFunctions",
-    "getURL",
-    "getUserName",
-    "isCatalogAtStart",
-    "isReadOnly",
-    "nullPlusNonNullIsNull",
-    "nullsAreSortedAtEnd",
-    "nullsAreSortedAtStart",
-    "nullsAreSortedHigh",
-    "nullsAreSortedLow",
-    "storesLowerCaseIdentifiers",
-    "storesLowerCaseQuotedIdentifiers",
-    "storesMixedCaseIdentifiers",
-    "storesMixedCaseQuotedIdentifiers",
-    "storesUpperCaseIdentifiers",
-    "storesUpperCaseQuotedIdentifiers",
-    "supportsAlterTableWithAddColumn",
-    "supportsAlterTableWithDropColumn",
-    "supportsANSI92EntryLevelSQL",
-    "supportsANSI92FullSQL",
-    "supportsANSI92IntermediateSQL",
-    "supportsBatchUpdates",
-    "supportsCatalogsInDataManipulation",
-    "supportsCatalogsInIndexDefinitions",
-    "supportsCatalogsInPrivilegeDefinitions",
-    "supportsCatalogsInProcedureCalls",
-    "supportsCatalogsInTableDefinitions",
-    "supportsColumnAliasing",
-    "supportsConvert",
-    "supportsCoreSQLGrammar",
-    "supportsCorrelatedSubqueries",
-    "supportsDataDefinitionAndDataManipulationTransactions",
-    "supportsDataManipulationTransactionsOnly",
-    "supportsDifferentTableCorrelationNames",
-    "supportsExpressionsInOrderBy",
-    "supportsExtendedSQLGrammar",
-    "supportsFullOuterJoins",
-    "supportsGroupBy",
-    "supportsGroupByBeyondSelect",
-    "supportsGroupByUnrelated",
-    "supportsIntegrityEnhancementFacility",
-    "supportsLikeEscapeClause",
-    "supportsLimitedOuterJoins",
-    "supportsMinimumSQLGrammar",
-    "supportsMixedCaseIdentifiers",
-    "supportsMixedCaseQuotedIdentifiers",
-    "supportsMultipleResultSets",
-    "supportsMultipleTransactions",
-    "supportsNonNullableColumns",
-    "supportsOpenCursorsAcrossCommit",
-    "supportsOpenCursorsAcrossRollback",
-    "supportsOpenStatementsAcrossCommit",
-    "supportsOpenStatementsAcrossRollback",
-    "supportsOrderByUnrelated",
-    "supportsOuterJoins",
-    "supportsPositionedDelete",
-    "supportsPositionedUpdate",
-    "supportsSchemasInDataManipulation",
-    "supportsSchemasInIndexDefinitions",
-    "supportsSchemasInPrivilegeDefinitions",
-    "supportsSchemasInProcedureCalls",
-    "supportsSchemasInTableDefinitions",
-    "supportsSelectForUpdate",
-    "supportsStoredProcedures",
-    "supportsSubqueriesInComparisons",
-    "supportsSubqueriesInExists",
-    "supportsSubqueriesInIns",
-    "supportsSubqueriesInQuantifieds",
-    "supportsTableCorrelationNames",
-    "supportsTransactions",
-    "supportsUnion",
-    "supportsUnionAll",
-    "usesLocalFilePerTable",
-    "usesLocalFiles",
+      "allProceduresAreCallable",
+      "allTablesAreSelectable",
+      "dataDefinitionCausesTransactionCommit",
+      "dataDefinitionIgnoredInTransactions",
+      "doesMaxRowSizeIncludeBlobs",
+      "getCatalogSeparator",
+      "getCatalogTerm",
+      "getDatabaseProductName",
+      "getDatabaseProductVersion",
+      "getDefaultTransactionIsolation",
+      "getDriverMajorVersion",
+      "getDriverMinorVersion",
+      "getDriverName",
+      "getDriverVersion",
+      "getExtraNameCharacters",
+      "getIdentifierQuoteString",
+      "getMaxBinaryLiteralLength",
+      "getMaxCatalogNameLength",
+      "getMaxCharLiteralLength",
+      "getMaxColumnNameLength",
+      "getMaxColumnsInGroupBy",
+      "getMaxColumnsInIndex",
+      "getMaxColumnsInOrderBy",
+      "getMaxColumnsInSelect",
+      "getMaxColumnsInTable",
+      "getMaxConnections",
+      "getMaxCursorNameLength",
+      "getMaxIndexLength",
+      "getMaxProcedureNameLength",
+      "getMaxRowSize",
+      "getMaxSchemaNameLength",
+      "getMaxStatementLength",
+      "getMaxStatements",
+      "getMaxTableNameLength",
+      "getMaxTablesInSelect",
+      "getMaxUserNameLength",
+      "getNumericFunctions",
+      "getProcedureTerm",
+      "getSchemaTerm",
+      "getSearchStringEscape",
+      "getSQLKeywords",
+      "getStringFunctions",
+      "getSystemFunctions",
+      "getTimeDateFunctions",
+      "getURL",
+      "getUserName",
+      "isCatalogAtStart",
+      "isReadOnly",
+      "nullPlusNonNullIsNull",
+      "nullsAreSortedAtEnd",
+      "nullsAreSortedAtStart",
+      "nullsAreSortedHigh",
+      "nullsAreSortedLow",
+      "storesLowerCaseIdentifiers",
+      "storesLowerCaseQuotedIdentifiers",
+      "storesMixedCaseIdentifiers",
+      "storesMixedCaseQuotedIdentifiers",
+      "storesUpperCaseIdentifiers",
+      "storesUpperCaseQuotedIdentifiers",
+      "supportsAlterTableWithAddColumn",
+      "supportsAlterTableWithDropColumn",
+      "supportsANSI92EntryLevelSQL",
+      "supportsANSI92FullSQL",
+      "supportsANSI92IntermediateSQL",
+      "supportsBatchUpdates",
+      "supportsCatalogsInDataManipulation",
+      "supportsCatalogsInIndexDefinitions",
+      "supportsCatalogsInPrivilegeDefinitions",
+      "supportsCatalogsInProcedureCalls",
+      "supportsCatalogsInTableDefinitions",
+      "supportsColumnAliasing",
+      "supportsConvert",
+      "supportsCoreSQLGrammar",
+      "supportsCorrelatedSubqueries",
+      "supportsDataDefinitionAndDataManipulationTransactions",
+      "supportsDataManipulationTransactionsOnly",
+      "supportsDifferentTableCorrelationNames",
+      "supportsExpressionsInOrderBy",
+      "supportsExtendedSQLGrammar",
+      "supportsFullOuterJoins",
+      "supportsGroupBy",
+      "supportsGroupByBeyondSelect",
+      "supportsGroupByUnrelated",
+      "supportsIntegrityEnhancementFacility",
+      "supportsLikeEscapeClause",
+      "supportsLimitedOuterJoins",
+      "supportsMinimumSQLGrammar",
+      "supportsMixedCaseIdentifiers",
+      "supportsMixedCaseQuotedIdentifiers",
+      "supportsMultipleResultSets",
+      "supportsMultipleTransactions",
+      "supportsNonNullableColumns",
+      "supportsOpenCursorsAcrossCommit",
+      "supportsOpenCursorsAcrossRollback",
+      "supportsOpenStatementsAcrossCommit",
+      "supportsOpenStatementsAcrossRollback",
+      "supportsOrderByUnrelated",
+      "supportsOuterJoins",
+      "supportsPositionedDelete",
+      "supportsPositionedUpdate",
+      "supportsSchemasInDataManipulation",
+      "supportsSchemasInIndexDefinitions",
+      "supportsSchemasInPrivilegeDefinitions",
+      "supportsSchemasInProcedureCalls",
+      "supportsSchemasInTableDefinitions",
+      "supportsSelectForUpdate",
+      "supportsStoredProcedures",
+      "supportsSubqueriesInComparisons",
+      "supportsSubqueriesInExists",
+      "supportsSubqueriesInIns",
+      "supportsSubqueriesInQuantifieds",
+      "supportsTableCorrelationNames",
+      "supportsTransactions",
+      "supportsUnion",
+      "supportsUnionAll",
+      "usesLocalFilePerTable",
+      "usesLocalFiles",
   };
 
+  private static final String CONNECT_PROPERTY = "#CONNECT_PROPERTY#.";
   private final SqlLine sqlLine;
 
   Commands(SqlLine sqlLine) {
@@ -158,7 +169,13 @@ public class Commands {
       return;
     }
 
-    List<Object> params = new LinkedList<Object>(Arrays.asList(parts));
+    if (parts.length == 1) {
+      sqlLine.error("Usage: metadata <methodname> <params...>");
+      callback.setToFailure();
+      return;
+    }
+
+    List<Object> params = new LinkedList<>(Arrays.asList(parts));
     params.remove(0);
     params.remove(0);
     sqlLine.debug(params.toString());
@@ -173,15 +190,21 @@ public class Commands {
     }
 
     try {
-      Method[] methods = sqlLine.getDatabaseMetaData().getClass().getMethods();
-      Set<String> methodNames = new TreeSet<String>();
-      Set<String> methodNamesUpper = new TreeSet<String>();
+      Method[] methods =
+          sqlLine.getDatabaseMetaData().getClass().getDeclaredMethods();
+      Set<String> methodNames = new TreeSet<>();
+      Set<String> methodNamesUpper = new TreeSet<>();
       for (Method method : methods) {
+        final int modifiers = method.getModifiers();
+        if (!Modifier.isPublic(modifiers)
+            || Modifier.isStatic(modifiers)) {
+          continue;
+        }
         methodNames.add(method.getName());
-        methodNamesUpper.add(method.getName().toUpperCase());
+        methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
       }
 
-      if (!methodNamesUpper.contains(cmd.toUpperCase())) {
+      if (!methodNamesUpper.contains(cmd.toUpperCase(Locale.ROOT))) {
         sqlLine.error(sqlLine.loc("no-such-method", cmd));
         sqlLine.error(sqlLine.loc("possible-methods"));
         for (String methodName : methodNames) {
@@ -191,14 +214,12 @@ public class Commands {
         return;
       }
 
-      Object res = sqlLine.getReflector().invoke(sqlLine.getDatabaseMetaData(),
-          DatabaseMetaData.class, cmd, argList);
+      final Object res = sqlLine.getReflector()
+          .invoke(sqlLine.getDatabaseMetaData(), DatabaseMetaDataWrapper.class,
+              cmd, argList);
       if (res instanceof ResultSet) {
-        ResultSet rs = (ResultSet) res;
-        try {
+        try (ResultSet rs = (ResultSet) res) {
           sqlLine.print(rs, callback);
-        } finally {
-          rs.close();
         }
       } else if (res != null) {
         sqlLine.output(res.toString());
@@ -211,14 +232,78 @@ public class Commands {
   }
 
   public void history(String line, DispatchCallback callback) {
-    int index = 1;
-    for (History.Entry entry : sqlLine.getConsoleReader().getHistory()) {
-      index++;
-      sqlLine.output(
-          sqlLine.getColorBuffer().pad(index + ".", 6)
-              .append(entry.toString()));
+    try {
+      String argsLine = line.substring("history".length());
+      org.jline.builtins.Commands.history(
+          sqlLine.getLineReader(),
+          sqlLine.getOutputStream(),
+          sqlLine.getErrorStream(),
+          argsLine.isEmpty()
+              ? new String[]{"-d"}
+              : sqlLine.split(argsLine, " "));
+    } catch (IOException e) {
+      callback.setToFailure();
     }
     callback.setToSuccess();
+  }
+
+  public void rerun(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    History history = sqlLine.getLineReader().getHistory();
+    int size = history.size();
+    if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+      if (size == 0) {
+        sqlLine.error("Usage: rerun <offset>, history should not be empty");
+      } else {
+        sqlLine.error("Usage: rerun <offset>, available range of offset is -"
+            + (size - 1) + ".." + size);
+      }
+      callback.setToFailure();
+      return;
+    }
+
+    int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
+    if (size < offset || size - 1 < -offset || offset == 0) {
+      if (offset == 0) {
+        sqlLine.error(
+            "Usage: rerun <offset>, offset should be positive or negative");
+      }
+      if (size == 0) {
+        sqlLine.error("Usage: rerun <offset>, history should not be empty");
+      } else {
+        sqlLine.error("Usage: rerun <offset>, available range of offset is -"
+            + (size - 1) + ".." + size);
+      }
+      callback.setToFailure();
+      return;
+    }
+
+    sqlLine.dispatch(calculateCommand(offset, new HashSet<>()), callback);
+  }
+
+  private String calculateCommand(int currentOffset, Set<Integer> offsets) {
+    if (!offsets.add(currentOffset)) {
+      throw new IllegalArgumentException(
+          "Cycled rerun of commands from history " + offsets);
+    }
+
+    History history = sqlLine.getLineReader().getHistory();
+    Iterator<History.Entry> iterator = currentOffset > 0
+        ? history.iterator(currentOffset - 1)
+        : history.reverseIterator(history.size() - 1 + currentOffset);
+    String command = iterator.next().line();
+    if (command.trim().startsWith("!/") || command.startsWith("!rerun")) {
+      String[] cmd = sqlLine.split(command);
+      if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+        return command;
+      }
+      int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);
+      if (history.size() < offset || history.size() - 1 < -offset) {
+        return command;
+      }
+      return calculateCommand(offset, offsets);
+    }
+    return command;
   }
 
   String arg1(String line, String paramName) {
@@ -241,17 +326,16 @@ public class Commands {
 
   /**
    * Constructs a list of string parameters for a metadata call.
-   * <p/>
-   * <p>The number of items is equal to the number of items in the
-   * <tt>strings</tt> parameter, typically three (catalog, schema, table
-   * name).
-   * <p/>
+   *
+   * <p>The number of items is equal to the number of arguments once
+   * the command line (the {@code line} parameter) has been parsed,
+   * typically three (catalog, schema, table name).
+   *
    * <p>Parses the command line, and assumes that the the first word is
    * a compound identifier. If the compound identifier has fewer parts
    * than required, fills from the right.
-   * <p/>
-   * <p>The result is a mutable list of strings.
    *
+   * <p>The result is a mutable list of strings.
    *
    * @param line          Command line
    * @param paramName     Name of parameter being read from command line
@@ -262,7 +346,7 @@ public class Commands {
       String line,
       String paramName,
       String[] defaultValues) {
-    final List<Object> list = new ArrayList<Object>();
+    final List<Object> list = new ArrayList<>();
     final String[][] ret = sqlLine.splitCompound(line);
     String[] compound;
     if (ret == null || ret.length != 2) {
@@ -332,8 +416,7 @@ public class Commands {
     metadata("getTables", args, callback);
   }
 
-  public void typeinfo(String line, DispatchCallback callback)
-      throws Exception {
+  public void typeinfo(String line, DispatchCallback callback) {
     metadata("getTypeInfo", Collections.emptyList(), callback);
   }
 
@@ -369,13 +452,13 @@ public class Commands {
     }
     try {
       String question = sqlLine.loc("really-drop-all");
-      if (!sqlLine.getConsoleReader().readLine(question).equals("y")) {
+      if (!sqlLine.getLineReader().readLine(question).equals("y")) {
         sqlLine.error("abort-drop-all");
         callback.setToFailure();
         return;
       }
 
-      List<String> cmds = new LinkedList<String>();
+      List<String> cmds = new LinkedList<>();
       ResultSet rs = sqlLine.getTables();
       try {
         while (rs.next()) {
@@ -402,6 +485,23 @@ public class Commands {
     }
   }
 
+  private int getUserAnswer(String question, int... allowedAnswers)
+      throws IOException {
+    final Set<Integer> allowedAnswerSet =
+        IntStream.of(allowedAnswers).boxed().collect(Collectors.toSet());
+    final Terminal terminal = sqlLine.getLineReader().getTerminal();
+    final PrintWriter writer = terminal.writer();
+    writer.write(question);
+    writer.write('\n');
+    writer.flush();
+    int c;
+    // The logic to prevent reaction of SqlLineParser here
+    do {
+      c = terminal.reader().read(100);
+    } while (c != -1 && !allowedAnswerSet.contains(c));
+    return c;
+  }
+
   public void reconnect(String line, DispatchCallback callback) {
     DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
     if (databaseConnection == null || databaseConnection.getUrl() == null) {
@@ -422,44 +522,49 @@ public class Commands {
     callback.setToSuccess();
   }
 
-  public void scan(String line, DispatchCallback callback)
-      throws IOException {
-    TreeSet<String> names = new TreeSet<String>();
+  public void scan(String line, DispatchCallback callback) {
+    final Map<String, Driver> driverNames = new TreeMap<>();
 
     if (sqlLine.getDrivers() == null) {
-      sqlLine.setDrivers(sqlLine.scanDrivers(line));
+      sqlLine.setDrivers(sqlLine.scanDrivers());
     }
 
     sqlLine.info(
         sqlLine.loc("drivers-found-count", sqlLine.getDrivers().size()));
 
     // unique the list
+
     for (Driver driver : sqlLine.getDrivers()) {
-      names.add(driver.getClass().getName());
+      driverNames.put(driver.getClass().getName(), driver);
     }
 
-    final ColorBuffer colorBuffer = sqlLine.getColorBuffer();
-    sqlLine.output(colorBuffer
-        .bold(colorBuffer.pad(sqlLine.loc("compliant"), 10).getMono())
-        .bold(colorBuffer.pad(sqlLine.loc("jdbc-version"), 8).getMono())
-        .bold(sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono()));
+    String compliant =
+        sqlLine.getColorBuffer().pad(sqlLine.loc("compliant"), 10).getMono();
+    String jdbcVersion =
+        sqlLine.getColorBuffer().pad(sqlLine.loc("jdbc-version"), 8).getMono();
+    String driverClass =
+        sqlLine.getColorBuffer(sqlLine.loc("driver-class")).getMono();
+    sqlLine.output(sqlLine.getColorBuffer()
+        .bold(compliant)
+        .bold(jdbcVersion)
+        .bold(driverClass));
 
-    for (String name : names) {
+    for (Map.Entry<String, Driver> driverEntry : driverNames.entrySet()) {
+      final Driver driver = driverEntry.getValue();
+      final String name = driverEntry.getKey();
       try {
-        Driver driver = (Driver) Class.forName(name).newInstance();
-        ColorBuffer msg =
-            colorBuffer
-                .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
-                .pad(driver.getMajorVersion() + "."
-                    + driver.getMinorVersion(), 8)
-                .append(name);
+        ColorBuffer msg = sqlLine.getColorBuffer()
+            .pad(driver.jdbcCompliant() ? "yes" : "no", 10)
+            .pad(driver.getMajorVersion() + "."
+                + driver.getMinorVersion(), 8)
+            .append(name);
         if (driver.jdbcCompliant()) {
           sqlLine.output(msg);
         } else {
-          sqlLine.output(colorBuffer.red(msg.getMono()));
+          sqlLine.output(sqlLine.getColorBuffer().red(msg.getMono()));
         }
       } catch (Throwable t) {
-        sqlLine.output(colorBuffer.red(name)); // error with driver
+        sqlLine.output(sqlLine.getColorBuffer().red(name)); // error with driver
       }
     }
 
@@ -485,15 +590,11 @@ public class Commands {
   public void config(String line, DispatchCallback callback) {
     try {
       Properties props = sqlLine.getOpts().toProperties();
-      Set<String> keys = new TreeSet<String>(asMap(props).keySet());
+      Set<String> keys = new TreeSet<>(asMap(props).keySet());
       for (String key : keys) {
-        sqlLine.output(sqlLine.getColorBuffer()
-            .green(sqlLine.getColorBuffer()
-                .pad(
-                    key.substring(
-                        SqlLineOpts.PROPERTY_PREFIX.length()), 20)
-                .getMono())
-            .append(props.getProperty(key)));
+        sqlLine.outputProperty(
+            key.substring(SqlLineOpts.PROPERTY_PREFIX.length()),
+            props.getProperty(key));
       }
     } catch (Exception e) {
       callback.setToFailure();
@@ -511,26 +612,91 @@ public class Commands {
       return;
     }
 
-    String[] parts = sqlLine.split(line, 3, "Usage: set <key> <value>");
-    if (parts == null) {
+    final String[] parts = sqlLine.split(line);
+    if (parts.length > 3) {
+      sqlLine.error("Usage: set [all | <property name> [<value>]]");
       callback.setToFailure();
       return;
     }
 
-    String key = parts[1];
-    String value = parts[2];
-    boolean success = sqlLine.getOpts().set(key, value, false);
+    String propertyName = parts[1].toLowerCase(Locale.ROOT);
 
-    // if we autosave, then save
-    if (success && sqlLine.getOpts().getAutoSave()) {
-      try {
-        sqlLine.getOpts().save();
-      } catch (Exception saveException) {
-        // ignore
-      }
+    if ("all".equals(propertyName)) {
+      config(null, callback);
+      return;
     }
 
-    callback.setToSuccess();
+    if (!sqlLine.getOpts().hasProperty(propertyName)) {
+      sqlLine.error(sqlLine.loc("no-specified-prop", propertyName));
+      callback.setToFailure();
+      return;
+    }
+
+    if (parts.length == 2) {
+      try {
+        sqlLine.outputProperty(propertyName,
+            sqlLine.getOpts().get(propertyName));
+        callback.setToSuccess();
+      } catch (Exception e) {
+        sqlLine.error(e);
+        callback.setToFailure();
+      }
+    } else {
+      setProperty(propertyName, parts[2], null, callback);
+    }
+  }
+
+  public void reset(String line, DispatchCallback callback) {
+    String[] split = sqlLine.split(line, 2,
+        "Usage: reset (all | <property name>)");
+    if (split == null) {
+      callback.setToFailure();
+      return;
+    }
+
+    String propertyName = split[1].toLowerCase(Locale.ROOT);
+
+    if ("all".equals(propertyName)) {
+      sqlLine.setOpts(new SqlLineOpts(sqlLine));
+      sqlLine.output(sqlLine.loc("reset-all-props"));
+      // no need to auto save, since its off by default
+      callback.setToSuccess();
+      return;
+    }
+
+    if (!sqlLine.getOpts().hasProperty(propertyName)) {
+      sqlLine.error(sqlLine.loc("no-specified-prop", propertyName));
+      callback.setToFailure();
+      return;
+    }
+
+    try {
+      String defaultValue = new SqlLineOpts(sqlLine).get(propertyName);
+      setProperty(propertyName, defaultValue, "reset-prop", callback);
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error(e);
+    }
+  }
+
+  private void setProperty(String key, String value, String res,
+      DispatchCallback callback) {
+    boolean success = sqlLine.getOpts().set(key, value, false);
+    if (success) {
+      if (sqlLine.getOpts().getAutoSave()) {
+        try {
+          sqlLine.getOpts().save();
+        } catch (Exception saveException) {
+          // ignore
+        }
+      }
+      if (res != null) {
+        sqlLine.output(sqlLine.loc(res, key, value));
+      }
+      callback.setToSuccess();
+    } else {
+      callback.setToFailure();
+    }
   }
 
   private void reportResult(String action, long start, long end) {
@@ -541,8 +707,7 @@ public class Commands {
     }
   }
 
-  public void commit(String line, DispatchCallback callback)
-      throws SQLException {
+  public void commit(String line, DispatchCallback callback) {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -566,8 +731,7 @@ public class Commands {
     }
   }
 
-  public void rollback(String line, DispatchCallback callback)
-      throws SQLException {
+  public void rollback(String line, DispatchCallback callback) {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
@@ -653,9 +817,11 @@ public class Commands {
       return;
     }
 
-    int i;
-
-    if (line.endsWith("TRANSACTION_NONE")) {
+    final int i;
+    line = line.toUpperCase(Locale.ROOT);
+    if (line.endsWith(SqlLineProperty.DEFAULT.toUpperCase(Locale.ROOT))) {
+      i = sqlLine.getDatabaseMetaData().getDefaultTransactionIsolation();
+    } else if (line.endsWith("TRANSACTION_NONE")) {
       i = Connection.TRANSACTION_NONE;
     } else if (line.endsWith("TRANSACTION_READ_COMMITTED")) {
       i = Connection.TRANSACTION_READ_COMMITTED;
@@ -667,42 +833,49 @@ public class Commands {
       i = Connection.TRANSACTION_SERIALIZABLE;
     } else {
       callback.setToFailure();
+      sqlLine.error("Usage: isolation <TRANSACTION_NONE "
+          + "| TRANSACTION_READ_COMMITTED "
+          + "| TRANSACTION_READ_UNCOMMITTED "
+          + "| TRANSACTION_REPEATABLE_READ "
+          + "| TRANSACTION_SERIALIZABLE "
+          + "| DEFAULT>");
+      return;
+    }
+
+    if (!sqlLine.getDatabaseMetaData().supportsTransactionIsolationLevel(i)) {
+      callback.setToFailure();
+      final int defaultTransactionIsolation =
+          sqlLine.getDatabaseMetaData().getDefaultTransactionIsolation();
       sqlLine.error(
-          "Usage: isolation <TRANSACTION_NONE "
-              + "| TRANSACTION_READ_COMMITTED "
-              + "| TRANSACTION_READ_UNCOMMITTED "
-              + "| TRANSACTION_REPEATABLE_READ "
-              + "| TRANSACTION_SERIALIZABLE>");
+          sqlLine.loc("isolation-level-not-supported",
+              getTransactionIsolationName(i),
+              getTransactionIsolationName(defaultTransactionIsolation)));
       return;
     }
 
     Connection connection = sqlLine.getDatabaseConnection().getConnection();
     connection.setTransactionIsolation(i);
 
-    int isol = connection.getTransactionIsolation();
-    final String isolDesc;
+    sqlLine.debug(
+        sqlLine.loc("isolation-status", getTransactionIsolationName(i)));
+    callback.setToSuccess();
+  }
+
+  private String getTransactionIsolationName(int i) {
     switch (i) {
     case Connection.TRANSACTION_NONE:
-      isolDesc = "TRANSACTION_NONE";
-      break;
+      return "TRANSACTION_NONE";
     case Connection.TRANSACTION_READ_COMMITTED:
-      isolDesc = "TRANSACTION_READ_COMMITTED";
-      break;
+      return "TRANSACTION_READ_COMMITTED";
     case Connection.TRANSACTION_READ_UNCOMMITTED:
-      isolDesc = "TRANSACTION_READ_UNCOMMITTED";
-      break;
+      return "TRANSACTION_READ_UNCOMMITTED";
     case Connection.TRANSACTION_REPEATABLE_READ:
-      isolDesc = "TRANSACTION_REPEATABLE_READ";
-      break;
+      return "TRANSACTION_REPEATABLE_READ";
     case Connection.TRANSACTION_SERIALIZABLE:
-      isolDesc = "TRANSACTION_SERIALIZABLE";
-      break;
+      return "TRANSACTION_SERIALIZABLE";
     default:
-      isolDesc = "UNKNOWN";
+      return "UNKNOWN";
     }
-
-    sqlLine.debug(sqlLine.loc("isolation-status", isolDesc));
-    callback.setToSuccess();
   }
 
   public void batch(String line, DispatchCallback callback) {
@@ -712,7 +885,7 @@ public class Commands {
     }
 
     if (sqlLine.getBatch() == null) {
-      sqlLine.setBatch(new LinkedList<String>());
+      sqlLine.setBatch(new LinkedList<>());
       sqlLine.info(sqlLine.loc("batch-start"));
       callback.setToSuccess();
     } else {
@@ -741,40 +914,6 @@ public class Commands {
     if (line == null || line.length() == 0) {
       callback.setStatus(DispatchCallback.Status.FAILURE);
       return;
-    }
-
-    // ### FIXME:  doing the multi-line handling down here means
-    // higher-level logic never sees the extra lines.  So,
-    // for example, if a script is being saved, it won't include
-    // the continuation lines!  This is logged as sf.net
-    // bug 879518.
-
-    // use multiple lines for statements not terminated by ";"
-    try {
-      while (!(line.trim().endsWith(";"))) {
-        StringBuilder prompt = new StringBuilder(sqlLine.getPrompt());
-        for (int i = 0; i < prompt.length() - 1; i++) {
-          if (prompt.charAt(i) != '>') {
-            prompt.setCharAt(i, i % 2 == 0 ? '.' : ' ');
-          }
-        }
-
-        String extra = sqlLine.getConsoleReader().readLine(prompt.toString());
-        if (null == extra) {
-          break; // reader is at the end of data
-        }
-        if (!sqlLine.isComment(extra)) {
-          line += SqlLine.getSeparator() + extra;
-        }
-      }
-    } catch (UserInterruptException uie) {
-      // CTRL-C'd out of the command. Note it, but don't call it an
-      // error.
-      callback.setStatus(DispatchCallback.Status.CANCELED);
-      sqlLine.output(sqlLine.loc("command-canceled"));
-      return;
-    } catch (Exception e) {
-      sqlLine.handleException(e);
     }
 
     if (line.trim().endsWith(";")) {
@@ -811,8 +950,17 @@ public class Commands {
       boolean hasResults;
 
       try {
-        long start = System.currentTimeMillis();
-
+        final long start = System.currentTimeMillis();
+        if (sqlLine.getOpts().getCompiledConfirmPattern().matcher(sql).find()
+            && sqlLine.getOpts().getConfirm()) {
+          final String question = sqlLine.loc("really-perform-action");
+          final int userResponse = getUserAnswer(question, 'y', 'n', 'Y', 'N');
+          if (userResponse != 'y') {
+            sqlLine.error(sqlLine.loc("abort-action"));
+            callback.setToFailure();
+            return;
+          }
+        }
         if (call) {
           stmnt = sqlLine.getDatabaseConnection().connection.prepareCall(sql);
           callback.trackSqlQuery(stmnt);
@@ -892,11 +1040,18 @@ public class Commands {
 
   /**
    * Closes the current connection.
+   * Closes the current file writer.
    *
    * @param line Command line
    * @param callback Callback for command status
    */
   public void close(String line, DispatchCallback callback) {
+    // close file writer
+    if (sqlLine.getRecordOutputFile() != null) {
+      // instead of line could be any string
+      stopRecording(line, callback);
+    }
+
     DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
     if (databaseConnection == null) {
       callback.setToFailure();
@@ -973,17 +1128,31 @@ public class Commands {
       return;
     }
 
-    if (parts.length < 2) {
+    Properties connectProps = new Properties();
+    int offset = 1;
+    for (int i = 1; i < parts.length; i++) {
+      if ("-p".equals(parts[i])) {
+        if (parts.length - i > 2) {
+          connectProps.setProperty(parts[i + 1], parts[i + 2]);
+          i = i + 2;
+          offset += 3;
+        } else {
+          callback.setToFailure();
+          sqlLine.error(example);
+          return;
+        }
+      }
+    }
+    if (parts.length - offset < 2) {
       callback.setToFailure();
       sqlLine.error(example);
       return;
     }
 
-    String url = parts.length < 2 ? null : parts[1];
-    String user = parts.length < 3 ? null : parts[2];
-    String pass = parts.length < 4 ? null : parts[3];
-    String driver = parts.length < 5 ? null : parts[4];
-
+    String url = parts.length < offset + 1 ? null : parts[offset];
+    String user = parts.length < offset + 2 ? null : parts[offset + 1];
+    String pass = parts.length < offset + 3 ? null : parts[offset + 2];
+    String driver = parts.length < offset + 4 ? null : parts[offset + 3];
     Properties props = new Properties();
     if (url != null) {
       props.setProperty("url", url);
@@ -997,12 +1166,13 @@ public class Commands {
     if (pass != null) {
       props.setProperty("password", pass);
     }
-
+    if (!connectProps.isEmpty()) {
+      props.put(CONNECT_PROPERTY, connectProps);
+    }
     connect(props, callback);
   }
 
-  public void nickname(String line, DispatchCallback callback)
-      throws Exception {
+  public void nickname(String line, DispatchCallback callback) {
     String example = "Usage: nickname <nickname for current connection>"
         + SqlLine.getSeparator();
 
@@ -1046,8 +1216,7 @@ public class Commands {
     return null;
   }
 
-  public void connect(Properties props, DispatchCallback callback)
-      throws IOException {
+  public void connect(Properties props, DispatchCallback callback) {
     String url = getProperty(props,
         "url",
         "javax.jdo.option.ConnectionURL",
@@ -1067,39 +1236,65 @@ public class Commands {
 
     if (url == null || url.length() == 0) {
       callback.setToFailure();
-      sqlLine.error("Property \"url\" is required");
+      sqlLine.error(sqlLine.loc("no-url"));
       return;
     }
     if (driver == null || driver.length() == 0) {
-      if (!sqlLine.scanForDriver(url)) {
+      if (sqlLine.scanForDriver(url) == null) {
         callback.setToFailure();
         sqlLine.error(sqlLine.loc("no-driver", url));
         return;
+      }
+    } else {
+      try {
+        Class.forName(driver);
+      } catch (ClassNotFoundException cnfe) {
+        String specifiedDriver = driver;
+        if ((driver = sqlLine.scanForDriver(url)) == null) {
+          callback.setToFailure();
+          sqlLine.error(sqlLine.loc("no-specified-driver", specifiedDriver));
+          return;
+        }
+        sqlLine.info(
+            sqlLine.loc("no-specified-driver-use-existing", specifiedDriver,
+                driver));
       }
     }
 
     sqlLine.debug("Connecting to " + url);
 
     if (username == null) {
-      username = sqlLine.getConsoleReader()
-          .readLine("Enter username for " + url + ": ");
+      username = readUsername(url);
     }
     if (password == null) {
-      password = sqlLine.getConsoleReader()
-          .readLine("Enter password for " + url + ": ", '*');
+      password = readPassword(url);
     }
 
+    Properties info = (Properties) props.get(CONNECT_PROPERTY);
+    DatabaseConnection connection =
+        new DatabaseConnection(sqlLine, driver, url, username, password, info);
     try {
-      sqlLine.getDatabaseConnections().setConnection(
-          new DatabaseConnection(sqlLine, driver, url, username, password));
+      sqlLine.getDatabaseConnections().setConnection(connection);
       sqlLine.getDatabaseConnection().getConnection();
-
       sqlLine.setCompletions();
       callback.setToSuccess();
     } catch (Exception e) {
+      connection.close();
+      sqlLine.getDatabaseConnections().removeConnection(connection);
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  String readUsername(String url) {
+    return sqlLine.withPrompting(() -> sqlLine.getLineReader()
+        .readLine("Enter username for " + url + ": "));
+  }
+
+  String readPassword(String url) {
+    return sqlLine.withPrompting(() -> sqlLine.getLineReader()
+        .readLine("Enter password for " + url + ": ",
+            null, new MaskingCallbackImpl('*'), null));
   }
 
   public void rehash(String line, DispatchCallback callback) {
@@ -1153,7 +1348,6 @@ public class Commands {
   public void all(String line, DispatchCallback callback) {
     int index = sqlLine.getDatabaseConnections().getIndex();
     boolean success = true;
-
     for (int i = 0; i < sqlLine.getDatabaseConnections().size(); i++) {
       sqlLine.getDatabaseConnections().setIndex(i);
       sqlLine.output(
@@ -1180,9 +1374,16 @@ public class Commands {
       return;
     }
 
-    int index = Integer.parseInt(parts[1]);
-    if (!sqlLine.getDatabaseConnections().setIndex(index)) {
-      sqlLine.error(sqlLine.loc("invalid-connection", "" + index));
+    boolean isNumber;
+    int index = Integer.MIN_VALUE;
+    try {
+      index = Integer.parseInt(parts[1]);
+      isNumber = true;
+    } catch (Exception e) {
+      isNumber = false;
+    }
+    if (!isNumber || !sqlLine.getDatabaseConnections().setIndex(index)) {
+      sqlLine.error(sqlLine.loc("invalid-connection", parts[1]));
       list("", callback); // list the current connections
       callback.setToFailure();
       return;
@@ -1231,14 +1432,17 @@ public class Commands {
       return;
     }
 
-    String filename = sqlLine.dequote(line.substring("script".length() + 1));
-    if (filename == null) {
+    String filename;
+    if (line.length() == "script".length()
+        || (filename =
+            sqlLine.dequote(line.substring("script".length() + 1))) == null) {
+      sqlLine.error("Usage: script <file name>");
       callback.setToFailure();
       return;
     }
 
     try {
-      outFile = new OutputFile(filename);
+      outFile = new OutputFile(expand(filename));
       sqlLine.setScriptOutputFile(outFile);
       sqlLine.output(sqlLine.loc("script-started", outFile));
       callback.setToSuccess();
@@ -1255,61 +1459,54 @@ public class Commands {
    * @param callback Callback for command status
    */
   public void run(String line, DispatchCallback callback) {
-    String filename = sqlLine.dequote(line.substring("run".length() + 1));
-    if (filename.length() == 0) {
+    String filename;
+    if (line.length() == "run".length()
+        || (filename =
+            sqlLine.dequote(line.substring("run".length() + 1))) == null) {
+      sqlLine.error("Usage: run <file name>");
       callback.setToFailure();
       return;
     }
-    List<String> cmds = new LinkedList<String>();
+    List<String> cmds = new LinkedList<>();
 
     try {
-      BufferedReader reader =
-          new BufferedReader(new FileReader(filename));
-      try {
+      final Parser parser = sqlLine.getLineReader().getParser();
+      try (BufferedReader reader = new BufferedReader(
+          new InputStreamReader(
+              new FileInputStream(expand(filename)), StandardCharsets.UTF_8))) {
         // ### NOTE: fix for sf.net bug 879427
-        StringBuilder cmd = null;
+        final StringBuilder cmd = new StringBuilder();
+        boolean needsContinuation;
         for (;;) {
-          String scriptLine = reader.readLine();
-
+          final String scriptLine = reader.readLine();
           if (scriptLine == null) {
             break;
           }
+          // we're continuing an existing command
+          cmd.append(" \n");
+          cmd.append(scriptLine);
 
-          String trimmedLine = scriptLine.trim();
-          if (sqlLine.getOpts().getTrimScripts()) {
-            scriptLine = trimmedLine;
+          try {
+            needsContinuation = false;
+            parser.parse(cmd.toString(), cmd.length(),
+                Parser.ParseContext.ACCEPT_LINE);
+          } catch (EOFError e) {
+            needsContinuation = true;
           }
-
-          if (cmd != null) {
-            // we're continuing an existing command
-            cmd.append(" \n");
-            cmd.append(scriptLine);
-            if (trimmedLine.endsWith(";")) {
-              // this command has terminated
-              cmds.add(cmd.toString());
-              cmd = null;
-            }
-          } else {
-            // we're starting a new command
-            if (sqlLine.needsContinuation(scriptLine)) {
-              // multi-line
-              cmd = new StringBuilder(scriptLine);
-            } else {
-              // single-line
-              cmds.add(scriptLine);
-            }
+          if (!needsContinuation && !cmd.toString().trim().isEmpty()) {
+            cmds.add(maybeTrim(cmd.toString()));
+            cmd.setLength(0);
           }
         }
 
-        if (cmd != null) {
+        if (SqlLineParser.isSql(sqlLine, cmd.toString(),
+            Parser.ParseContext.ACCEPT_LINE)) {
           // ### REVIEW: oops, somebody left the last command
           // unterminated; should we fix it for them or complain?
           // For now be nice and fix it.
           cmd.append(";");
           cmds.add(cmd.toString());
         }
-      } finally {
-        reader.close();
       }
 
       // success only if all the commands were successful
@@ -1324,6 +1521,31 @@ public class Commands {
     }
   }
 
+  /** Returns a line, trimmed if the
+   * {@link BuiltInProperty#TRIM_SCRIPTS options require trimming}. */
+  private String maybeTrim(String line) {
+    return sqlLine.getOpts().getTrimScripts() ? line.trim() : line;
+  }
+
+  /** Expands "~" to the home directory.
+   *
+   * @param filename File name
+   * @return Expanded file name
+   */
+  public static String expand(String filename) {
+    if (filename.startsWith("~" + File.separator)) {
+      try {
+        String home = System.getProperty("user.home");
+        if (home != null) {
+          return home + filename.substring(1);
+        }
+      } catch (SecurityException e) {
+        // ignore
+      }
+    }
+    return filename;
+  }
+
   /**
    * Starts or stops saving all output to a file.
    *
@@ -1336,6 +1558,63 @@ public class Commands {
     } else {
       stopRecording(line, callback);
     }
+  }
+
+  public void commandhandler(String line, DispatchCallback callback) {
+    String[] cmd = sqlLine.split(line);
+    if (cmd.length < 2) {
+      sqlLine.error("Usage: commandhandler "
+          + "<commandHandler class name> [<commandHandler class name>]*");
+      callback.setToFailure();
+      return;
+    }
+
+    final List<CommandHandler> commandHandlers =
+        new ArrayList<CommandHandler>(sqlLine.getCommandHandlers());
+    final Set<String> existingNames = new HashSet<>();
+    for (CommandHandler existingCommandHandler : commandHandlers) {
+      existingNames.addAll(existingCommandHandler.getNames());
+    }
+
+    int commandHandlerUpdateCount = 0;
+    for (int i = 1; i < cmd.length; i++) {
+      try {
+        @SuppressWarnings("unchecked")
+        Class<CommandHandler> commandHandlerClass =
+            (Class<CommandHandler>) Class.forName(cmd[i]);
+        final Constructor<CommandHandler> constructor =
+            commandHandlerClass.getConstructor(SqlLine.class);
+        CommandHandler commandHandler = constructor.newInstance(sqlLine);
+        if (intersects(existingNames, commandHandler.getNames())) {
+          sqlLine.error("Could not add command handler " + cmd[i] + " as one "
+              + "of commands " + commandHandler.getNames() + " is already present");
+        } else {
+          commandHandlers.add(commandHandler);
+          existingNames.addAll(commandHandler.getNames());
+          ++commandHandlerUpdateCount;
+        }
+      } catch (Exception e) {
+        sqlLine.error(e);
+        callback.setToFailure();
+      }
+    }
+
+    if (commandHandlerUpdateCount > 0) {
+      sqlLine.updateCommandHandlers(commandHandlers);
+    }
+
+    if (!callback.isFailure()) {
+      callback.setToSuccess();
+    }
+  }
+
+  private static <E> boolean intersects(Collection<E> c1, Collection<E> c2) {
+    for (E e : c2) {
+      if (c1.contains(e)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1364,14 +1643,17 @@ public class Commands {
       return;
     }
 
-    String filename = sqlLine.dequote(line.substring("record".length() + 1));
-    if (filename == null) {
+    String filename;
+    if (line.length() == "record".length()
+        || (filename =
+            sqlLine.dequote(line.substring("record".length() + 1))) == null) {
+      sqlLine.error("Usage: record <file name>");
       callback.setToFailure();
       return;
     }
 
     try {
-      outputFile = new OutputFile(filename);
+      outputFile = new OutputFile(expand(filename));
       sqlLine.setRecordOutputFile(outputFile);
       sqlLine.output(sqlLine.loc("record-started", outputFile));
       callback.setToSuccess();
@@ -1402,15 +1684,15 @@ public class Commands {
   public void help(String line, DispatchCallback callback) {
     String[] parts = sqlLine.split(line);
     String cmd = parts.length > 1 ? parts[1] : "";
-    TreeSet<ColorBuffer> clist = new TreeSet<ColorBuffer>();
+    TreeSet<ColorBuffer> clist = new TreeSet<>();
 
-    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
+    for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       if (cmd.length() == 0
           || commandHandler.getNames().contains(cmd)) {
         String help = commandHandler.getHelpText();
-        if (!help.contains("\n ")) {
-          // Do not wrap if text appears to be pre-formatted (e.g. '!help set')
-          help = sqlLine.wrap(help, 60, 20);
+        help = sqlLine.wrap(help, 60, 20);
+        if (cmd.equals("set")) {
+          help += sqlLine.loc("variables");
         }
         clist.add(sqlLine.getColorBuffer()
             .pad("!" + commandHandler.getName(), 20)
@@ -1423,6 +1705,7 @@ public class Commands {
     }
 
     if (cmd.length() == 0) {
+      sqlLine.output(sqlLine.loc("variables"));
       sqlLine.output("");
       sqlLine.output(
           sqlLine.loc("comments", SqlLine.getApplicationContactInformation()));
@@ -1440,32 +1723,138 @@ public class Commands {
       return;
     }
 
-    BufferedReader breader =
-        new BufferedReader(new InputStreamReader(in));
+    // Workaround for windows because of
+    // https://github.com/jline/jline3/issues/304
+    if (System.getProperty("os.name")
+        .toLowerCase(Locale.ROOT).contains("windows")) {
+      sillyLess(in);
+    } else {
+      try {
+        org.jline.builtins.Commands.less(sqlLine.getLineReader().getTerminal(),
+            in, sqlLine.getOutputStream(), sqlLine.getErrorStream(),
+            null, new String[]{});
+      } catch (InterruptedException e) {
+        callback.setToFailure();
+        sqlLine.error(e);
+        return;
+      }
+    }
+
+    callback.setToSuccess();
+  }
+
+  private void sillyLess(InputStream in) throws IOException {
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     String man;
     int index = 0;
-    while ((man = breader.readLine()) != null) {
+    while ((man = reader.readLine()) != null) {
       index++;
       sqlLine.output(man);
 
       // silly little pager
       if (index % (sqlLine.getOpts().getMaxHeight() - 1) == 0) {
-        String prompt = sqlLine.loc("enter-for-more");
-        String ret = sqlLine.getConsoleReader().readLine(prompt);
-        if (ret != null && ret.startsWith("q")) {
+        final int userInput =
+            getUserAnswer(sqlLine.loc("enter-for-more"), 'q', 13);
+        if (userInput == -1 || userInput == 'q') {
+          sqlLine.getLineReader().getTerminal().writer().write('\n');
           break;
         }
       }
     }
 
-    breader.close();
+    reader.close();
+  }
 
+  public void appconfig(String line, DispatchCallback callback) {
+    String example =
+        "Usage: appconfig <class name for application configuration>"
+        + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 2) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    try {
+      Application appConfig = (Application) Class.forName(parts[1])
+          .getConstructor().newInstance();
+      sqlLine.setAppConfig(appConfig);
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error("Could not initialize " + parts[1]);
+    }
+  }
+
+  public void prompthandler(String line, DispatchCallback callback) {
+    String example =
+        "Usage: prompthandler <prompt handler class name>"
+          + SqlLine.getSeparator();
+
+    String[] parts = sqlLine.split(line);
+    if (parts == null || parts.length != 2) {
+      callback.setToFailure();
+      sqlLine.error(example);
+      return;
+    }
+
+    String className = parts[1];
+
+    PromptHandler promptHandler;
+    if ("default".equalsIgnoreCase(className)) {
+      promptHandler = new PromptHandler(sqlLine);
+    } else {
+      try {
+        promptHandler = (PromptHandler) Class.forName(className)
+          .getConstructor(SqlLine.class).newInstance(sqlLine);
+      } catch (Exception e) {
+        callback.setToFailure();
+        sqlLine.error("Could not initialize " + className);
+        return;
+      }
+    }
+
+    sqlLine.updatePromptHandler(promptHandler);
     callback.setToSuccess();
   }
 
   static Map<String, String> asMap(Properties properties) {
     //noinspection unchecked
     return (Map) properties;
+  }
+
+  /**
+   * Callback that masks input while reading a password.
+   */
+  private static class MaskingCallbackImpl implements MaskingCallback {
+    private final Character mask;
+
+    MaskingCallbackImpl(Character mask) {
+      this.mask = Objects.requireNonNull(mask);
+    }
+
+    @Override public String display(String line) {
+      if (mask.equals(LineReaderImpl.NULL_MASK)) {
+        return "";
+      } else {
+        final StringBuilder sb = new StringBuilder(line.length());
+        for (char c : line.toCharArray()) {
+          if (c == '\n') {
+            sb.append(c);
+          } else {
+            sb.append((char) mask);
+          }
+        }
+        return sb.toString();
+      }
+    }
+
+    @Override public String history(String line) {
+      return null;
+    }
   }
 }
 

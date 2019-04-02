@@ -94,10 +94,6 @@
     </module>
       <!-- Switch statements should be complete and with independent cases -->
     <module name="FallThrough"/>
-    <!-- For hadoop_yarn profile, some YARN exceptions aren't loading in checkstyle -->
-    <module name="RedundantThrows">
-        <property name="suppressLoadErrors" value="true" />
-    </module>
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
       <!-- Only one statement per line allowed -->
@@ -258,26 +254,23 @@
       <!-- No extra whitespace around types -->
     <module name="GenericWhitespace"/>
 
-    <!-- Required for SuppressionCommentFilter below -->
-    <module name="FileContentsHolder"/>
-  </module>
+    <!-- Setup special comments to suppress specific checks from source files -->
+    <module name="SuppressionCommentFilter">
+      <property name="offCommentFormat" value="CHECKSTYLE\: stop ([\w\|]+)"/>
+      <property name="onCommentFormat"  value="CHECKSTYLE\: resume ([\w\|]+)"/>
+      <property name="checkFormat"      value="$1"/>
+    </module>
 
-  <!-- Setup special comments to suppress specific checks from source files -->
-  <module name="SuppressionCommentFilter">
-    <property name="offCommentFormat" value="CHECKSTYLE\: stop ([\w\|]+)"/>
-    <property name="onCommentFormat"  value="CHECKSTYLE\: resume ([\w\|]+)"/>
-    <property name="checkFormat"      value="$1"/>
-  </module>
+    <!-- Turn off all checks between OFF and ON -->
+    <module name="SuppressionCommentFilter">
+      <property name="offCommentFormat" value="CHECKSTYLE\: OFF"/>
+      <property name="onCommentFormat"  value="CHECKSTYLE\: ON"/>
+    </module>
 
-  <!-- Turn off all checks between OFF and ON -->
-  <module name="SuppressionCommentFilter">
-    <property name="offCommentFormat" value="CHECKSTYLE\: OFF"/>
-    <property name="onCommentFormat"  value="CHECKSTYLE\: ON"/>
-  </module>
-
-  <!-- Turn off checks for the next N lines. -->
-  <module name="SuppressWithNearbyCommentFilter">
-    <property name="commentFormat" value="CHECKSTYLE: +IGNORE (\d+)"/>
-    <property name="influenceFormat" value="$1"/>
+    <!-- Turn off checks for the next N lines. -->
+    <module name="SuppressWithNearbyCommentFilter">
+      <property name="commentFormat" value="CHECKSTYLE: +IGNORE (\d+)"/>
+      <property name="influenceFormat" value="$1"/>
+    </module>
   </module>
 </module>

@@ -13,8 +13,11 @@ package sqlline;
 
 import java.util.List;
 
-import jline.console.completer.Completer;
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.Candidate;
+import org.jline.reader.Completer;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Suggests completions for table names.
@@ -22,18 +25,18 @@ import jline.console.completer.StringsCompleter;
 class TableNameCompleter implements Completer {
   private SqlLine sqlLine;
 
-  public TableNameCompleter(SqlLine sqlLine) {
+  TableNameCompleter(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 
-  public int complete(String buf, int pos, List<CharSequence> candidates) {
+  @Override public void complete(LineReader lineReader, ParsedLine parsedLine,
+      List<Candidate> list) {
     if (sqlLine.getDatabaseConnection() == null) {
-      return -1;
+      return;
     }
 
-    return new StringsCompleter(
-          sqlLine.getDatabaseConnection().getTableNames(true))
-        .complete(buf, pos, candidates);
+    new StringsCompleter(sqlLine.getDatabaseConnection().getTableNames(true))
+        .complete(lineReader, parsedLine, list);
   }
 }
 

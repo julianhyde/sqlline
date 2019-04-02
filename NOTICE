@@ -2,7 +2,7 @@ SQLLine - Shell for issuing SQL to relational databases via JDBC
 
 Copyright (c) 2002,2003,2004,2005,2006,2007 Marc Prud'hommeaux
 Copyright (c) 2004-2010 The Eigenbase Project
-Copyright (c) 2013-2018 Julian Hyde
+Copyright (c) 2013-2019 Julian Hyde
 All rights reserved.
 
 ===============================================================================
