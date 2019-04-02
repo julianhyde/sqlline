@@ -11,16 +11,21 @@
 */
 package sqlline;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.Format;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,23 +33,56 @@ import java.util.Set;
  * Abstract base class representing a set of rows to be displayed.
  */
 abstract class Rows implements Iterator<Rows.Row> {
+  static final Map<Character, String> ESCAPING_MAP = createEscapeMap();
+
   protected final SqlLine sqlLine;
   final ResultSetMetaData rsMeta;
   final Boolean[] primaryKeys;
-  final Map<TableKey, Set<String>> tablePrimaryKeysCache =
-      new HashMap<TableKey, Set<String>>();
+  final Map<TableKey, Set<String>> tablePrimaryKeysCache = new HashMap<>();
   final NumberFormat numberFormat;
+  final DateFormat dateFormat;
+  final DateFormat timeFormat;
+  final DateFormat timestampFormat;
+  final String nullValue;
+  final boolean escapeOutput;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     this.sqlLine = sqlLine;
     rsMeta = rs.getMetaData();
     int count = rsMeta.getColumnCount();
     primaryKeys = new Boolean[count];
-    if (sqlLine.getOpts().getNumberFormat().equals("default")) {
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.NUMBER_FORMAT)) {
       numberFormat = null;
     } else {
-      numberFormat = new DecimalFormat(sqlLine.getOpts().getNumberFormat());
+      final String pattern =
+          sqlLine.getOpts().get(BuiltInProperty.NUMBER_FORMAT);
+      numberFormat = new DecimalFormat(pattern,
+          DecimalFormatSymbols.getInstance(Locale.ROOT));
     }
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.DATE_FORMAT)) {
+      dateFormat = null;
+    } else {
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.DATE_FORMAT);
+      dateFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+    }
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.TIME_FORMAT)) {
+      timeFormat = null;
+    } else {
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIME_FORMAT);
+      timeFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+    }
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.TIMESTAMP_FORMAT)) {
+      timestampFormat = null;
+    } else {
+      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIMESTAMP_FORMAT);
+      timestampFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+    }
+    if (sqlLine.getOpts().isDefault(BuiltInProperty.NULL_VALUE)) {
+      nullValue = null;
+    } else {
+      nullValue = sqlLine.getOpts().get(BuiltInProperty.NULL_VALUE);
+    }
+    escapeOutput = sqlLine.getOpts().getEscapeOutput();
   }
 
   public void remove() {
@@ -54,8 +92,10 @@ abstract class Rows implements Iterator<Rows.Row> {
   /**
    * Update all of the rows to have the same size, set to the
    * maximum length of each column in the Rows.
+   *
+   * @param maxColumnWidth max allowed column width
    */
-  abstract void normalizeWidths();
+  abstract void normalizeWidths(int maxColumnWidth);
 
   /**
    * Return whether the specified column (0-based index) is
@@ -89,7 +129,8 @@ abstract class Rows implements Iterator<Rows.Row> {
 
       // Retrieve the catalog and schema name for this connection.
       // Either or both may be null.
-      DatabaseMetaData dbMeta = sqlLine.getDatabaseConnection().meta;
+      final DatabaseMetaDataWrapper dbMeta =
+          sqlLine.getDatabaseConnection().meta;
       String catalog = dbMeta.getConnection().getCatalog();
       String schema = rsMeta.getSchemaName(colNum);
 
@@ -107,6 +148,56 @@ abstract class Rows implements Iterator<Rows.Row> {
       // isn't a primary key for display purposes.
       return primaryKeys[col] = false;
     }
+  }
+
+  private static Map<Character, String> createEscapeMap() {
+    final Map<Character, String> map = new HashMap<>();
+    map.put('\\', "\\\\");
+    map.put('\"', "\\\"");
+    map.put('\b', "\\b");
+    map.put('\f', "\\f");
+    map.put('\n', "\\n");
+    map.put('\r', "\\r");
+    map.put('\t', "\\t");
+    map.put('/', "\\/");
+    map.put('\u0000', "\\u0000");
+    map.put('\u0001', "\\u0001");
+    map.put('\u0002', "\\u0002");
+    map.put('\u0003', "\\u0003");
+    map.put('\u0004', "\\u0004");
+    map.put('\u0005', "\\u0005");
+    map.put('\u0006', "\\u0006");
+    map.put('\u0007', "\\u0007");
+    // ESCAPING_MAP.put('\u0008', "\\u0008");
+    // covered by ESCAPING_MAP.put('\b', "\\b");
+    // ESCAPING_MAP.put('\u0009', "\\u0009");
+    // covered by ESCAPING_MAP.put('\t', "\\t");
+    // ESCAPING_MAP.put((char) 10, "\\u000A");
+    // covered by ESCAPING_MAP.put('\n', "\\n");
+    map.put('\u000B', "\\u000B");
+    // ESCAPING_MAP.put('\u000C', "\\u000C");
+    // covered by ESCAPING_MAP.put('\f', "\\f");
+    // ESCAPING_MAP.put((char) 13, "\\u000D");
+    // covered by ESCAPING_MAP.put('\r', "\\r");
+    map.put('\u000E', "\\u000E");
+    map.put('\u000F', "\\u000F");
+    map.put('\u0010', "\\u0010");
+    map.put('\u0011', "\\u0011");
+    map.put('\u0012', "\\u0012");
+    map.put('\u0013', "\\u0013");
+    map.put('\u0014', "\\u0014");
+    map.put('\u0015', "\\u0015");
+    map.put('\u0016', "\\u0016");
+    map.put('\u0017', "\\u0017");
+    map.put('\u0018', "\\u0018");
+    map.put('\u0019', "\\u0019");
+    map.put('\u001A', "\\u001A");
+    map.put('\u001B', "\\u001B");
+    map.put('\u001C', "\\u001C");
+    map.put('\u001D', "\\u001D");
+    map.put('\u001E', "\\u001E");
+    map.put('\u001F', "\\u001F");
+    return Collections.unmodifiableMap(map);
   }
 
   /** Row from a result set. */
@@ -154,7 +245,6 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
 
       for (int i = 0; i < size; i++) {
-        final Object o;
         switch (rs.getMetaData().getColumnType(i + 1)) {
         case Types.TINYINT:
         case Types.SMALLINT:
@@ -165,14 +255,7 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.DOUBLE:
         case Types.DECIMAL:
         case Types.NUMERIC:
-          o = rs.getObject(i + 1);
-          if (o == null) {
-            values[i] = "null";
-          } else if (numberFormat != null) {
-            values[i] = numberFormat.format(o);
-          } else {
-            values[i] = o.toString();
-          }
+          setFormat(rs.getObject(i + 1), numberFormat, i);
           break;
         case Types.BIT:
         case Types.CLOB:
@@ -183,20 +266,69 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.ROWID:
         case Types.NCLOB:
         case Types.SQLXML:
-          o = rs.getObject(i + 1);
-          if (o == null) {
-            values[i] = "null";
-          } else {
-            values[i] = o.toString();
-          }
+          setFormat(rs.getObject(i + 1), null, i);
+          break;
+        case Types.TIME:
+          setFormat(rs.getObject(i + 1), timeFormat, i);
+          break;
+        case Types.DATE:
+          setFormat(rs.getObject(i + 1), dateFormat, i);
+          break;
+        case Types.TIMESTAMP:
+          setFormat(rs.getObject(i + 1), timestampFormat, i);
           break;
         default:
           values[i] = rs.getString(i + 1);
           break;
         }
+        values[i] = values[i] == null
+            ? nullValue
+            : escapeOutput
+                ? escapeControlSymbols(values[i])
+                : values[i];
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
     }
+
+    private void setFormat(Object o, Format format, int i) {
+      if (o == null) {
+        values[i] = String.valueOf(nullValue);
+      } else if (format != null) {
+        values[i] = format.format(o);
+      } else {
+        values[i] = o.toString();
+      }
+    }
+  }
+
+  /**
+   * Escapes control symbols (Character.getType(ch) == Character.CONTROL).
+   *
+   * @param value String to be escaped
+   *
+   * @return escaped string if input value contains control symbols
+   * otherwise returns the input value
+   */
+  static String escapeControlSymbols(String value) {
+    if (value == null || value.isEmpty()) {
+      return value;
+    }
+    StringBuilder result = null;
+    for (int i = 0; i < value.length(); i++) {
+      char ch = value.charAt(i);
+      if (Character.getType(ch) == Character.CONTROL) {
+        if (result == null) {
+          result = new StringBuilder();
+          if (i != 0) {
+            result.append(value, 0, i);
+          }
+        }
+        result.append(ESCAPING_MAP.get(ch));
+      } else if (result != null) {
+        result.append(ch);
+      }
+    }
+    return result == null ? value : result.toString();
   }
 
   /**
@@ -212,7 +344,7 @@ abstract class Rows implements Iterator<Rows.Row> {
    *         never be null.
    */
   private Set<String> loadAndCachePrimaryKeysForTable(TableKey tableKey) {
-    Set<String> primaryKeys = new HashSet<String>();
+    Set<String> primaryKeys = new HashSet<>();
     try {
       ResultSet pks = sqlLine.getDatabaseConnection().meta.getPrimaryKeys(
           tableKey.catalog, tableKey.schema, tableKey.table);
@@ -236,7 +368,7 @@ abstract class Rows implements Iterator<Rows.Row> {
    * schema and table name).  The returned set may be cached as a result of
    * previous requests for the same table key.
    *
-   * The result cannot be considered authoritative as since it depends on
+   * <p>The result cannot be considered authoritative as since it depends on
    * whether the JDBC driver property implements
    * {@link java.sql.ResultSetMetaData#getTableName} and many drivers/databases
    * do not.

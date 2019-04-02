@@ -17,10 +17,12 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import jline.console.completer.StringsCompleter;
+import org.jline.reader.Candidate;
+import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.utils.AttributedString;
 
 /**
- * An implementation of {@link jline.console.completer.Completer} that completes
+ * An implementation of {@link org.jline.reader.Completer} that completes
  * java class names. By default, it scans the java class path to locate all the
  * classes.
  */
@@ -33,11 +35,13 @@ public class ClassNameCompleter extends StringsCompleter {
    */
   public ClassNameCompleter() throws IOException {
     super(getClassNames());
-    getStrings().add(".");
+    candidates.add(
+        new Candidate(AttributedString.stripAnsi("."),
+            ".", null, null, null, null, true));
   }
 
   public static Set<String> getClassNames() throws IOException {
-    Set<URL> urls = new HashSet<URL>();
+    Set<URL> urls = new HashSet<>();
 
     for (ClassLoader loader = ClassNameCompleter.class.getClassLoader();
          loader != null;
@@ -53,7 +57,7 @@ public class ClassNameCompleter extends StringsCompleter {
     // some JVMs do not report the core classes jar in the list of
     // class loaders.
     Class[] systemClasses = {
-      String.class, javax.swing.JFrame.class
+        String.class, javax.swing.JFrame.class
     };
 
     for (Class systemClass : systemClasses) {
@@ -68,13 +72,13 @@ public class ClassNameCompleter extends StringsCompleter {
       }
     }
 
-    Set<String> classes = new HashSet<String>();
+    Set<String> classes = new HashSet<>();
     for (URL url : urls) {
       File file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
 
       if (file.isDirectory()) {
         Set<String> files = getClassFiles(file.getAbsolutePath(),
-            new HashSet<String>(),
+            new HashSet<>(),
             file,
             new int[]{200});
         classes.addAll(files);
@@ -112,7 +116,7 @@ public class ClassNameCompleter extends StringsCompleter {
 
     // now filter classes by changing "/" to "." and trimming the
     // trailing ".class"
-    Set<String> classNames = new TreeSet<String>();
+    Set<String> classNames = new TreeSet<>();
 
     for (String name : classes) {
       classNames.add(name.replace('/', '.').substring(0, name.length() - 6));

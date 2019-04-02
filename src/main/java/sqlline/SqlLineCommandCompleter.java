@@ -14,23 +14,36 @@ package sqlline;
 import java.util.LinkedList;
 import java.util.List;
 
-import jline.console.completer.*;
+import org.jline.builtins.Completers;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.AggregateCompleter;
+import org.jline.reader.impl.completer.ArgumentCompleter;
+import org.jline.reader.impl.completer.NullCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * Suggests completions for a command.
  */
 class SqlLineCommandCompleter extends AggregateCompleter {
-  public SqlLineCommandCompleter(SqlLine sqlLine) {
-    List<ArgumentCompleter> completers = new LinkedList<ArgumentCompleter>();
+  SqlLineCommandCompleter(SqlLine sqlLine) {
+    super(new LinkedList<>());
+    List<Completer> completers = new LinkedList<>();
 
-    for (CommandHandler commandHandler : sqlLine.commandHandlers) {
+    for (CommandHandler commandHandler : sqlLine.getCommandHandlers()) {
       for (String cmd : commandHandler.getNames()) {
-        List<Completer> compl = new LinkedList<Completer>();
-        compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
-        compl.addAll(commandHandler.getParameterCompleters());
-        compl.add(new NullCompleter()); // last param no complete
-
-        completers.add(new ArgumentCompleter(compl));
+        List<Completer> compl = new LinkedList<>();
+        final List<Completer> parameterCompleters =
+            commandHandler.getParameterCompleters();
+        if (parameterCompleters.size() == 1
+            && parameterCompleters.iterator().next()
+                instanceof Completers.RegexCompleter) {
+          completers.add(parameterCompleters.iterator().next());
+        } else {
+          compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
+          compl.addAll(parameterCompleters);
+          compl.add(new NullCompleter()); // last param no complete
+          completers.add(new ArgumentCompleter(compl));
+        }
       }
     }
 

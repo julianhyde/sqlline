@@ -13,7 +13,7 @@ package sqlline;
 
 import java.util.List;
 
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
 
 /**
  * A generic command to be executed. Execution of the command should be
@@ -22,7 +22,7 @@ import jline.console.completer.Completer;
  * determining that the command is appropriate with the
  * {@link #matches(String)} method.
  */
-interface CommandHandler {
+public interface CommandHandler {
   /**
    * @return the name of the command
    */
@@ -61,6 +61,17 @@ interface CommandHandler {
    * @return Completers that can handle parameters
    */
   List<Completer> getParameterCompleters();
+
+  /**
+   * Returns whether the command should be written to the output file of the
+   * {@code !script} command.
+   *
+   * <p>Returns {@code true} by default, but the {@code !script} command hides
+   * itself by returning {@code false}.
+   *
+   * @return true if command should be written to file
+   */
+  boolean echoToFile();
 }
 
 // End CommandHandler.java

@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import jline.console.completer.Completer;
-import jline.console.completer.NullCompleter;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.NullCompleter;
 
 /**
  * An abstract implementation of CommandHandler.
@@ -37,32 +37,30 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     this.helpText = helpText;
     if (completers == null || completers.size() == 0) {
       this.parameterCompleters =
-          Collections.singletonList((Completer) new NullCompleter());
+          Collections.singletonList(new NullCompleter());
     } else {
-      List<Completer> c = new ArrayList<Completer>(completers);
-      c.add(new NullCompleter());
-      this.parameterCompleters = c;
+      this.parameterCompleters = new ArrayList<>(completers);
     }
   }
 
-  public String getHelpText() {
+  @Override public String getHelpText() {
     return helpText;
   }
 
-  public String getName() {
+  @Override public String getName() {
     return this.name;
   }
 
-  public List<String> getNames() {
+  @Override public List<String> getNames() {
     return this.names;
   }
 
-  public String matches(String line) {
+  @Override public String matches(String line) {
     if (line == null || line.length() == 0) {
       return null;
     }
 
-    String[] parts = sqlLine.split(line);
+    String[] parts = sqlLine.split(line, 1);
     if (parts == null || parts.length == 0) {
       return null;
     }
@@ -76,8 +74,12 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     return null;
   }
 
-  public List<Completer> getParameterCompleters() {
+  @Override public List<Completer> getParameterCompleters() {
     return parameterCompleters;
+  }
+
+  @Override public boolean echoToFile() {
+    return true;
   }
 }
 
