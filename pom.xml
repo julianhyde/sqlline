@@ -94,46 +94,11 @@
     </mailingList>
   </mailingLists>
 
-<<<<<<< HEAD
-  <prerequisites>
-    <maven>3.2.1</maven><!-- prerequisite of some plugins -->
-  </prerequisites>
-
-  <repositories>
-    <!-- Begin Hortonworks repositories -->
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-       </releases>
-       <snapshots>
-        <enabled>true</enabled>
-       </snapshots>
-       <id>hortonworks.extrepo</id>
-       <name>Hortonworks HDP</name>
-       <url>http://repo.hortonworks.com/content/repositories/releases</url>
-    </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-       </releases>
-       <snapshots>
-         <enabled>true</enabled>
-       </snapshots>
-       <id>hortonworks.other</id>
-       <name>Hortonworks Other Dependencies</name>
-       <url>http://repo.hortonworks.com/content/groups/public</url>
-    </repository>
-    <!-- End Hortonworks repositories -->
-  </repositories>
-=======
   <repositories />
->>>>>>> 196b28aa898f62187be66fc0e2658a2124d26c37
 
   <build>
     <plugins>
       <plugin>
-<<<<<<< HEAD
-=======
         <!-- Generate manual.html from manual.xml. Then you must manually
              generate manual.txt by copy-pasting from manual.html in a web
              browser. -->
@@ -194,7 +159,6 @@
         </executions>
       </plugin>
       <plugin>
->>>>>>> 196b28aa898f62187be66fc0e2658a2124d26c37
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${maven-checkstyle-plugin.version}</version>
@@ -355,6 +319,7 @@
       </plugins>
     </pluginManagement>
   </build>
+
   <dependencies>
     <dependency>
       <groupId>org.jline</groupId>
