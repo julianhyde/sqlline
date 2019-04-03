@@ -9,6 +9,7 @@
 
 CURRENT_USER = $(shell echo $whoami)
 SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002/SimbaHiveJDBC41-2.6.2.1002.zip"
+SQLLINE_VER = $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 MAVEN_DL = "http://www.trieuvan.com/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz"
 MVN_BINARY = "$(CURDIR)/maven/bin/mvn"
 
@@ -26,6 +27,7 @@ build: clean
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
+	sed -i "s|@sqlline_ver@|$(SQLLINE_VER)|g" $(CURDIR)/bin/sqlline
 
 install-icinga: build
 	# Build pipenv environment for python wrapper
@@ -49,3 +51,6 @@ clean:
 	rm -f /usr/local/bin/sqlline-service-check
 	rm -rf maven
 
+verify:
+	@# verify project version via mvn
+	$(info SQLLINE_VER is [${SQLLINE_VER}])
