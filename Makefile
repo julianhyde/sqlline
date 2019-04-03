@@ -27,7 +27,7 @@ build: clean
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
 
-install-icinga: build install
+install-icinga: build
 	# Build pipenv environment for python wrapper
 	# TODO,this needs to be adjusted or removed entirely for icing
 	export HOME=/home/icinga && \
