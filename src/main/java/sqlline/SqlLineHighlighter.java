@@ -207,7 +207,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     return buffer.length();
   }
 
-  private void handleSqlSyntax(String buffer,
+  void handleSqlSyntax(String buffer,
       BitSet keywordBitSet,
       BitSet quoteBitSet,
       BitSet sqlIdentifierQuotesBitSet,

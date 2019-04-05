@@ -939,8 +939,8 @@ public class SqlLineArgsTest {
       // If sqlline is not initialized, handleSQLException will print
       // the entire stack trace.
       // To prevent that, forcibly set init to true.
-      FieldReflection
-          .setField(sqlLine.getClass(), sqlLine, "initComplete", true);
+      FieldReflection.setFieldValue(
+          sqlLine.getClass().getDeclaredField("initComplete"), sqlLine, true);
       sqlLine.getConnection();
       sqlLine.runCommands(callback,
           "CREATE TABLE rsTest ( a int);",
@@ -1377,8 +1377,8 @@ public class SqlLineArgsTest {
       };
       DispatchCallback callback = new DispatchCallback();
       sqlLine.initArgs(args, callback);
-      FieldReflection
-          .setField(sqlLine.getClass(), sqlLine, "initComplete", true);
+      FieldReflection.setFieldValue(
+          sqlLine.getClass().getDeclaredField("initComplete"), sqlLine, true);
       sqlLine.getConnection();
       sqlLine.runCommands(callback,
           "!set incremental true",
@@ -2383,7 +2383,7 @@ public class SqlLineArgsTest {
   public void testConfirmFlagEffects() {
     new MockUp<sqlline.Commands>() {
       @Mock
-      public int getUserAnswer(String question, int... allowedAnswers) {
+      int getUserAnswer(String question, int... allowedAnswers) {
         return 'n';
       }
     };
