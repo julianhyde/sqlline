@@ -697,7 +697,7 @@ public class SqlLineHighlighterTest {
   public void testHighlightWithException() {
     new MockUp<SqlLineHighlighter>() {
       @Mock
-      private void handleSqlSyntax(String buffer, BitSet keywordBitSet,
+      void handleSqlSyntax(String buffer, BitSet keywordBitSet,
           BitSet quoteBitSet, BitSet sqlIdentifierQuotesBitSet,
           BitSet commentBitSet, BitSet numberBitSet, boolean isCommandPresent) {
         throw new RuntimeException("Highlight exception");

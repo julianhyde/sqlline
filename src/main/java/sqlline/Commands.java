@@ -485,7 +485,7 @@ public class Commands {
     }
   }
 
-  private int getUserAnswer(String question, int... allowedAnswers)
+  int getUserAnswer(String question, int... allowedAnswers)
       throws IOException {
     final Set<Integer> allowedAnswerSet =
         IntStream.of(allowedAnswers).boxed().collect(Collectors.toSet());
