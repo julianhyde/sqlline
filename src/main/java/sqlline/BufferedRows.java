@@ -62,7 +62,7 @@ class BufferedRows extends Rows {
         iterator = list.iterator();
         return iterator.hasNext();
       } catch (SQLException ex) {
-        throw new WrappedSqlException(ex);
+        return false;
       }
     }
   }
