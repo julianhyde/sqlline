@@ -11,18 +11,38 @@
 */
 package sqlline;
 
+import java.sql.*;
+
+import org.jline.terminal.Terminal;
+
 /**
- * A signal handler interface for SQLLine. The interface is decoupled from the
- * implementation since signal handlers are not portable across JVMs, so we use
- * dynamic class-loading.
+ * A signal handler for SQLLine that interprets Ctrl-C as a request to cancel
+ * the currently executing query.
  */
-public interface SqlLineSignalHandler {
+public class SqlLineSignalHandler implements Terminal.SignalHandler {
+  private DispatchCallback dispatchCallback;
+
   /**
-   * Sets the dispatchCallback to be alerted of by signals.
+   * Sets the dispatch callback to be alerted by signals.
    *
    * @param dispatchCallback statement affected
    */
-  void setCallback(DispatchCallback dispatchCallback);
+  public void setCallback(DispatchCallback dispatchCallback) {
+    this.dispatchCallback = dispatchCallback;
+  }
+
+  public void handle(Terminal.Signal sig) {
+    try {
+      synchronized (this) {
+        if (dispatchCallback != null) {
+          dispatchCallback.forceKillSqlQuery();
+          dispatchCallback.setToCancel();
+        }
+      }
+    } catch (SQLException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 }
 
 // End SqlLineSignalHandler.java

@@ -145,9 +145,6 @@
           <signaturesFiles>
             <signaturesFile>${top.dir}/src/main/config/forbidden-apis/signatures.txt</signaturesFile>
           </signaturesFiles>
-          <excludes>
-            <exclude>**/sqlline/SunSignalHandler.class</exclude>
-          </excludes>
         </configuration>
         <executions>
           <execution>

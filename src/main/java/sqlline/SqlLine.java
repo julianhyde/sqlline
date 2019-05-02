@@ -87,7 +87,7 @@ public class SqlLine {
 
   private static boolean initComplete = false;
 
-  private SqlLineSignalHandler signalHandler = null;
+  private final SqlLineSignalHandler signalHandler;
   private final Completer sqlLineCommandCompleter;
 
   static {
@@ -235,15 +235,7 @@ public class SqlLine {
     reflector = new Reflector(this);
     getOpts().loadProperties(System.getProperties());
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
-
-    // attempt to dynamically load signal handler
-    try {
-      Class handlerClass = Class.forName("sqlline.SunSignalHandler");
-      signalHandler =
-          (SqlLineSignalHandler) handlerClass.getConstructor().newInstance();
-    } catch (Throwable t) {
-      handleException(t);
-    }
+    signalHandler = new SqlLineSignalHandler();
   }
 
   /**
@@ -600,15 +592,13 @@ public class SqlLine {
     if (getLineReader() != null) {
       return getLineReader();
     }
-    TerminalBuilder terminalBuilder = TerminalBuilder.builder();
+    final TerminalBuilder terminalBuilder =
+        TerminalBuilder.builder().signalHandler(signalHandler);
     final Terminal terminal;
     if (inputStream != null) {
-      terminalBuilder =
-          terminalBuilder.streams(inputStream, System.out);
-      terminal = terminalBuilder.build();
+      terminal = terminalBuilder.streams(inputStream, System.out).build();
     } else {
-      terminalBuilder = terminalBuilder.system(true);
-      terminal = terminalBuilder.build();
+      terminal = terminalBuilder.system(true).build();
       getOpts().set(BuiltInProperty.MAX_WIDTH, terminal.getWidth());
       getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
     }
