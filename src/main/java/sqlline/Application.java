@@ -181,6 +181,7 @@ public class Application {
     final Map<String, OutputFormat> outputFormats = new HashMap<>();
     outputFormats.put("vertical", new VerticalOutputFormat(sqlLine));
     outputFormats.put("table", new TableOutputFormat(sqlLine));
+    outputFormats.put("ansiconsole", new AnsiConsoleOutputFormat(sqlLine));
     outputFormats.put("csv", new SeparatedValuesOutputFormat(sqlLine, ","));
     outputFormats.put("tsv", new SeparatedValuesOutputFormat(sqlLine, "\t"));
     XmlAttributeOutputFormat xmlAttrs = new XmlAttributeOutputFormat(sqlLine);
