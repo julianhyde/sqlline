@@ -1447,7 +1447,7 @@ sqlline> !help
 !metadata         Obtain metadata information
 !nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
-                  (table, vertical, csv, tsv, xmlattrs, xmlelements, json)
+                  (table, vertical, csv, tsv, xmlattrs, xmlelements, json, ansiconsole)
 !prompthandler    Set custom prompt handler class name
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
@@ -2021,6 +2021,20 @@ NAME        Microsoft
 {"COMPANY_ID":3,"NAME":"IBM"},
 {"COMPANY_ID":4,"NAME":"Microsoft"}
 ]}
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod>
+          </screen>
+        </refsect1>
+        <refsect1>
+          <title>Example of AnsiConsole output formatting</title>
+          <screen>
+0: jdbc:calcite:model=target/test-classes/mod> !outputformat ansiconsole
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+COMPANY_ID NAME
+1          Apple
+2          Sun
+3          IBM
+4          Microsoft
 4 rows selected (0.03 seconds)
 0: jdbc:calcite:model=target/test-classes/mod>
           </screen>

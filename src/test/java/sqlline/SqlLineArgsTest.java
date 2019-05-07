@@ -1841,6 +1841,23 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testAnsiConsoleOutputFormat() {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
+        + "!set outputformat ansiconsole \n"
+        + "!all \n"
+        + "values \n"
+        + "(1, '2') \n"
+        + ";\n";
+    final String line1 = ""
+        + "C1          C2\n"
+        + "1           2 \n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
   public void testAllMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
