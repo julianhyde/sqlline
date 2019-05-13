@@ -102,7 +102,10 @@ class BufferedRows extends Rows {
       // Add a row of column names as the first row of the first batch.
       list.add(columnNames);
     }
-    if (limit > 0) {
+    if (rs.isClosed()) {
+      // Result set is closed. Perhaps the driver closed it automatically
+      // because we reached the end. Do nothing.
+    } else if (limit > 0) {
       // Obey the limit if the limit is non-negative and this is the first
       // batch.
       int counter = 0;
