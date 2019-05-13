@@ -114,9 +114,11 @@ class BufferedRows extends Rows {
         list.add(new Row(columnCount, rs));
       }
     } else {
-      while (rs.next()) {
-        final Row row = new Row(columnCount, rs);
-        list.add(row);
+      if (!rs.isClosed()) {
+        while (rs.next()) {
+          final Row row = new Row(columnCount, rs);
+          list.add(row);
+        }
       }
     }
     ++batch;
