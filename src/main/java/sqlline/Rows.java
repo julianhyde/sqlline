@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -405,20 +406,23 @@ abstract class Rows implements Iterator<Rows.Row> {
     }
 
     public int hashCode() {
-      return catalog == null ? 13 : catalog.hashCode()
-          + schema == null ? 17 : schema.hashCode()
-          + table == null ? 19 : table.hashCode();
+      return (catalog == null ? 13 : catalog.hashCode())
+          + (schema == null ? 17 : schema.hashCode())
+          + (table == null ? 19 : table.hashCode());
     }
 
     public boolean equals(Object obj) {
-      TableKey that = obj instanceof TableKey ? (TableKey) obj : null;
-      return that != null && this.toString().equals(that.toString());
+      return this == obj
+          || obj instanceof TableKey
+          && Objects.equals(catalog, ((TableKey) obj).catalog)
+          && Objects.equals(schema, ((TableKey) obj).schema)
+          && Objects.equals(table, ((TableKey) obj).table);
     }
 
     public String toString() {
-      return catalog == null ? "" : catalog + ":"
-          + schema == null ? "" : schema + ":"
-          + table == null ? "" : table;
+      return (catalog == null ? "" : catalog) + ":"
+          + (schema == null ? "" : schema) + ":"
+          + (table == null ? "" : table);
     }
   }
 
