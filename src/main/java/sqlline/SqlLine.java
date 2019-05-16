@@ -666,7 +666,7 @@ public class SqlLine {
       return;
     }
 
-    if (isComment(line)) {
+    if (isOneLineComment(line)) {
       callback.setStatus(DispatchCallback.Status.SUCCESS);
       return;
     }
@@ -740,7 +740,21 @@ public class SqlLine {
    * @param line the line to be tested
    * @return true if a comment
    */
-  boolean isComment(String line, boolean trim) {
+  boolean isOneLineComment(String line, boolean trim) {
+    String[] inputLines = line.split("\n");
+    for (String inputLine: inputLines) {
+      if (!isComment(inputLine, trim)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  boolean isOneLineComment(String line) {
+    return isOneLineComment(line, true);
+  }
+
+  private boolean isComment(String line, boolean trim) {
     final String trimmedLine = trim ? line.trim() : line;
     for (String comment: getDialect().getSqlLineOneLineComments()) {
       if (trimmedLine.startsWith(comment)) {
@@ -748,10 +762,6 @@ public class SqlLine {
       }
     }
     return false;
-  }
-
-  boolean isComment(String line) {
-    return isComment(line, true);
   }
 
   /**
@@ -1394,8 +1404,8 @@ public class SqlLine {
    * @return the wrapped string
    */
   String wrap(String toWrap, int len, int start) {
-    StringBuilder buff = new StringBuilder();
-    StringBuilder line = new StringBuilder();
+    final StringBuilder buff = new StringBuilder();
+    final StringBuilder line = new StringBuilder();
 
     char[] head = new char[start];
     Arrays.fill(head, ' ');

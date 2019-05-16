@@ -19,7 +19,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -231,6 +233,19 @@ public class SqlLineTest {
     }
     assertNotEquals(limit, counter);
     assertEquals(initialScheme, currentScheme);
+  }
+
+  @Test
+  public void testOneLineComment() {
+    final SqlLine sqlLine = new SqlLine();
+    // one line comments only
+    assertTrue(sqlLine.isOneLineComment("-- comment"));
+    assertTrue(sqlLine.isOneLineComment("-- comment\n-- comment2"));
+
+    // not only one line comments
+    assertFalse(sqlLine.isOneLineComment("-- comment\n-- comment2\nselect 1;"));
+    assertFalse(sqlLine.isOneLineComment("-- comment\nselect 1-- comment2\n"));
+    assertFalse(sqlLine.isOneLineComment("/*comment*/\n-- comment2\n"));
   }
 }
 

@@ -57,7 +57,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       final boolean isCommandPresent =
           trimmed.startsWith(SqlLine.COMMAND_PREFIX);
       final boolean isComment =
-          !isCommandPresent && sqlLine.isComment(trimmed, false);
+          !isCommandPresent && sqlLine.isOneLineComment(trimmed, false);
       final boolean isSql = !isComment
           && isSqlQuery(trimmed, isCommandPresent);
 

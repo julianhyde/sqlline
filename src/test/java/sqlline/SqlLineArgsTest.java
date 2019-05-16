@@ -193,7 +193,7 @@ public class SqlLineArgsTest {
 
     final String script2Text =
         "!set incremental true\n"
-        + "--comment \n values (';\n' /* comment */, '\"'"
+        + "--comment \n --comment2 \nvalues (';\n' /* comment */, '\"'"
         + "/*multiline;\n ;\n comment*/)\n -- ; \n; -- comment";
 
     checkScriptFile(script2Text, true,
@@ -289,6 +289,45 @@ public class SqlLineArgsTest {
         allOf(containsString("multiline2;"), containsString("; string2")));
   }
 
+  @Test
+  public void testScriptWithMultilineStatementsInARow() {
+    final String scriptText = "!set incremental false\n"
+        + "--comment\n\n"
+        + "values 1;values 2;";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("+----+\n"
+                + "| C1 |\n"
+                + "+----+\n"
+                + "| 1  |\n"
+                + "+----+"),
+            containsString("+----+\n"
+                + "| C1 |\n"
+                + "+----+\n"
+                + "| 2  |\n"
+                + "+----+")));
+  }
+
+  @Test
+  public void testScriptWithMultilineStatementsAndCommentsInARow() {
+    final String scriptText = "!set incremental false\n"
+        + "--comment;;\n\n"
+        + "select * from (values ';') t (\";\");/*;select 1;*/values 2;";
+    checkScriptFile(scriptText, true,
+        equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("+---+\n"
+                + "| ; |\n"
+                + "+---+\n"
+                + "| ; |\n"
+                + "+---+"),
+            containsString("+----+\n"
+                + "| C1 |\n"
+                + "+----+\n"
+                + "| 2  |\n"
+                + "+----+")));
+  }
   /**
    * Tests sql with H2 specific one-line comment '//'
    */
@@ -386,7 +425,7 @@ public class SqlLineArgsTest {
   @Test
   public void testNull() {
     final String script = "!set incremental true\n"
-        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString(
@@ -413,7 +452,7 @@ public class SqlLineArgsTest {
   public void testTableOutputNullWithoutHeader() {
     final String script = "!set showHeader false\n"
         + "!set incremental true\n"
-        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString("| 1           | null        |     |\n"));
@@ -426,7 +465,7 @@ public class SqlLineArgsTest {
   public void testCsvNullWithoutHeader() {
     final String script = "!set showHeader false\n"
         + "!set outputformat csv\n"
-        + "values (1, cast(null as integer), cast(null as varchar(3));\n";
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString("'1','null',''\n"));

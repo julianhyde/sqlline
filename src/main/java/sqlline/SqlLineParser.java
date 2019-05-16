@@ -13,10 +13,13 @@ package sqlline;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.jline.reader.EOFError;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.DefaultParser;
+
+import static sqlline.Commands.flush;
 
 /**
  * SqlLineParser implements multi-line
@@ -153,8 +156,7 @@ public class SqlLineParser extends DefaultParser {
             // In a quote block
             if (line.charAt(quoteStart) == currentChar && !isEscaped(line, i)) {
               // End the block; arg could be empty, but that's fine
-              words.add(current.toString());
-              current.setLength(0);
+              words.add(flush(current));
               quoteStart = -1;
               if (rawWordCursor >= 0 && rawWordLength < 0) {
                 rawWordLength = i - rawWordStart + 1;
@@ -173,8 +175,7 @@ public class SqlLineParser extends DefaultParser {
           } else if (multiLineCommentStart >= 0) {
             if (currentChar == '/' && line.charAt(i - 1) == '*') {
               // End the block; arg could be empty, but that's fine
-              words.add(current.toString());
-              current.setLength(0);
+              words.add(flush(current));
               multiLineCommentStart = -1;
               if (rawWordCursor >= 0 && rawWordLength < 0) {
                 rawWordLength = i - rawWordStart + 1;
@@ -272,6 +273,13 @@ public class SqlLineParser extends DefaultParser {
         }
       }
 
+      if (line.endsWith("\n")
+          && sqlLine.getLineReader() != null
+          && !Objects.equals(line,
+              sqlLine.getLineReader().getBuffer().toString())) {
+        throw new EOFError(-1, -1, "Line continues",
+            getPaddedPrompt(""));
+      }
       String openingQuote = quoteStart >= 0
           ? line.substring(quoteStart, quoteStart + 1) : null;
       return new ArgumentList(line, words, wordIndex, wordCursor,
@@ -321,8 +329,7 @@ public class SqlLineParser extends DefaultParser {
       int rawWordStart,
       int i) {
     if (current.length() > 0) {
-      words.add(current.toString());
-      current.setLength(0); // reset the arg
+      words.add(flush(current));
       if (rawWordCursor >= 0 && rawWordLength < 0) {
         rawWordLength = i - rawWordStart;
       }
@@ -333,7 +340,7 @@ public class SqlLineParser extends DefaultParser {
   static boolean isSql(SqlLine sqlLine, String line, ParseContext context) {
     String trimmedLine = trimLeadingSpacesIfPossible(line, context);
     return !trimmedLine.isEmpty()
-        && !sqlLine.isComment(trimmedLine, false)
+        && !sqlLine.isOneLineComment(trimmedLine, false)
         && (trimmedLine.charAt(0) != '!'
             || trimmedLine.regionMatches(0, "!sql", 0, "!sql".length())
             || trimmedLine.regionMatches(0, "!all", 0, "!all".length()));

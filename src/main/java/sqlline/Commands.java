@@ -929,32 +929,53 @@ public class Commands {
       return;
     }
 
-    if (line.trim().endsWith(";")) {
-      line = line.trim();
-      line = line.substring(0, line.length() - 1);
-    }
-
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
 
-    String sql = line;
-
-    if (sql.startsWith(SqlLine.COMMAND_PREFIX)) {
-      sql = sql.substring(1);
+    String fullLine = line;
+    if (fullLine.startsWith(SqlLine.COMMAND_PREFIX)) {
+      fullLine = fullLine.substring(1);
     }
 
-    String prefix = call ? "call" : "sql";
-
-    if (sql.startsWith(prefix)) {
-      sql = sql.substring(prefix.length());
+    final String prefix = call ? "call" : "sql";
+    if (fullLine.startsWith(prefix)) {
+      fullLine = fullLine.substring(prefix.length());
     }
 
+    final StringBuilder sql2execute = new StringBuilder();
+    for (String sqlItem : fullLine.split(";")) {
+      sql2execute.append(sqlItem).append(";");
+      if (sqlLine.isOneLineComment(sql2execute.toString())
+          || isSqlContinuationRequired(sql2execute.toString())) {
+        continue;
+      }
+      final String sql = skipLast(flush(sql2execute));
+      executeSingleQuery(sql, call, callback);
+    }
+    if (!callback.isFailure()) {
+      callback.setToSuccess();
+    }
+  }
+
+  /** Returns the contents of a {@link StringBuilder} and clears the builder. */
+  static String flush(StringBuilder buf) {
+    final String s = buf.toString();
+    buf.setLength(0);
+    return s;
+  }
+
+  /** Returns a string with the last character removed. */
+  private static String skipLast(String s) {
+    return s.substring(0, s.length() - 1);
+  }
+
+  private void executeSingleQuery(String sql, boolean call,
+      DispatchCallback callback) {
     // batch statements?
     if (sqlLine.getBatch() != null) {
       sqlLine.getBatch().add(sql);
-      callback.setToSuccess();
       return;
     }
 
@@ -967,7 +988,8 @@ public class Commands {
         if (sqlLine.getOpts().getCompiledConfirmPattern().matcher(sql).find()
             && sqlLine.getOpts().getConfirm()) {
           final String question = sqlLine.loc("really-perform-action");
-          final int userResponse = getUserAnswer(question, 'y', 'n', 'Y', 'N');
+          final int userResponse =
+              getUserAnswer(question, 'y', 'n', 'Y', 'N');
           if (userResponse != 'y') {
             sqlLine.error(sqlLine.loc("abort-action"));
             callback.setToFailure();
@@ -982,7 +1004,6 @@ public class Commands {
           stmnt = sqlLine.createStatement();
           callback.trackSqlQuery(stmnt);
           hasResults = stmnt.execute(sql);
-          callback.setToSuccess();
         }
 
         sqlLine.showWarnings();
@@ -1017,11 +1038,9 @@ public class Commands {
     } catch (Exception e) {
       callback.setToFailure();
       sqlLine.error(e);
-      return;
     }
 
     sqlLine.showWarnings();
-    callback.setToSuccess();
   }
 
   public void quit(String line, DispatchCallback callback) {
@@ -1478,7 +1497,6 @@ public class Commands {
     List<String> cmds = new LinkedList<>();
 
     try {
-      final Parser parser = sqlLine.getLineReader().getParser();
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(
               new FileInputStream(expand(filename)), StandardCharsets.UTF_8))) {
@@ -1494,16 +1512,9 @@ public class Commands {
           cmd.append(" \n");
           cmd.append(scriptLine);
 
-          try {
-            needsContinuation = false;
-            parser.parse(cmd.toString(), cmd.length(),
-                Parser.ParseContext.ACCEPT_LINE);
-          } catch (EOFError e) {
-            needsContinuation = true;
-          }
+          needsContinuation = isSqlContinuationRequired(cmd.toString());
           if (!needsContinuation && !cmd.toString().trim().isEmpty()) {
-            cmds.add(maybeTrim(cmd.toString()));
-            cmd.setLength(0);
+            cmds.add(maybeTrim(flush(cmd)));
           }
         }
 
@@ -1831,6 +1842,19 @@ public class Commands {
   static Map<String, String> asMap(Properties properties) {
     //noinspection unchecked
     return (Map) properties;
+  }
+
+  private boolean isSqlContinuationRequired(String sql) {
+    if (sqlLine.getLineReader() == null) {
+      return false;
+    }
+    try {
+      sqlLine.getLineReader().getParser().parse(sql, sql.length(),
+          Parser.ParseContext.ACCEPT_LINE);
+    } catch (EOFError e) {
+      return true;
+    }
+    return false;
   }
 
   /**
