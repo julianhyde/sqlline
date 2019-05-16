@@ -13,6 +13,7 @@ package sqlline;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.jline.reader.EOFError;
 import org.jline.reader.ParsedLine;
@@ -272,6 +273,13 @@ public class SqlLineParser extends DefaultParser {
         }
       }
 
+      if (line.endsWith("\n")
+          && sqlLine.getLineReader() != null
+          && !Objects.equals(line,
+              sqlLine.getLineReader().getBuffer().toString())) {
+        throw new EOFError(-1, -1, "Line continues",
+            getPaddedPrompt(""));
+      }
       String openingQuote = quoteStart >= 0
           ? line.substring(quoteStart, quoteStart + 1) : null;
       return new ArgumentList(line, words, wordIndex, wordCursor,
@@ -333,7 +341,7 @@ public class SqlLineParser extends DefaultParser {
   static boolean isSql(SqlLine sqlLine, String line, ParseContext context) {
     String trimmedLine = trimLeadingSpacesIfPossible(line, context);
     return !trimmedLine.isEmpty()
-        && !sqlLine.isComment(trimmedLine, false)
+        && !sqlLine.isOneLineComment(trimmedLine, false)
         && (trimmedLine.charAt(0) != '!'
             || trimmedLine.regionMatches(0, "!sql", 0, "!sql".length())
             || trimmedLine.regionMatches(0, "!all", 0, "!all".length()));

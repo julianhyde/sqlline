@@ -505,6 +505,15 @@ public class SqlLineHighlighterTest {
     expectedStyle.defaults.set(line.indexOf(" dual"), line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
+    //one line comment first
+    line = "-- \nselect 1;";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.comments.set(0, line.indexOf("select"));
+    expectedStyle.keywords.set(line.indexOf("select"), line.indexOf(" 1"));
+    expectedStyle.defaults.set(line.indexOf(" 1"), line.indexOf("1;"));
+    expectedStyle.numbers.set(line.indexOf("1"));
+    expectedStyle.defaults.set(line.length() - 1);
+    checkLineAgainstAllHighlighters(line, expectedStyle);
   }
 
   /**

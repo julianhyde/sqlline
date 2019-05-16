@@ -916,32 +916,44 @@ public class Commands {
       return;
     }
 
-    if (line.trim().endsWith(";")) {
-      line = line.trim();
-      line = line.substring(0, line.length() - 1);
-    }
-
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
       return;
     }
 
-    String sql = line;
+    String fullSqlLine = line;
 
-    if (sql.startsWith(SqlLine.COMMAND_PREFIX)) {
-      sql = sql.substring(1);
+    if (fullSqlLine.startsWith(SqlLine.COMMAND_PREFIX)) {
+      fullSqlLine = fullSqlLine.substring(1);
     }
 
     String prefix = call ? "call" : "sql";
 
-    if (sql.startsWith(prefix)) {
-      sql = sql.substring(prefix.length());
+    if (fullSqlLine.startsWith(prefix)) {
+      fullSqlLine = fullSqlLine.substring(prefix.length());
     }
+    StringBuilder sql2execute = new StringBuilder();
+    for (String sqlItem: fullSqlLine.split(";")) {
+      sql2execute.append(sqlItem).append(";");
+      if (sqlLine.isOneLineComment(sql2execute.toString())
+          || isSqlContinuationRequired(sql2execute.toString())) {
+        continue;
+      }
+      final String sql =
+          sql2execute.toString().substring(0, sql2execute.length() - 1);
+      executeSingleQuery(sql, call, callback);
+      sql2execute = new StringBuilder();
+    }
+    if (!callback.isFailure()) {
+      callback.setToSuccess();
+    }
+  }
 
+  private void executeSingleQuery(
+      String sql, boolean call, DispatchCallback callback) {
     // batch statements?
     if (sqlLine.getBatch() != null) {
       sqlLine.getBatch().add(sql);
-      callback.setToSuccess();
       return;
     }
 
@@ -954,7 +966,8 @@ public class Commands {
         if (sqlLine.getOpts().getCompiledConfirmPattern().matcher(sql).find()
             && sqlLine.getOpts().getConfirm()) {
           final String question = sqlLine.loc("really-perform-action");
-          final int userResponse = getUserAnswer(question, 'y', 'n', 'Y', 'N');
+          final int userResponse =
+              getUserAnswer(question, 'y', 'n', 'Y', 'N');
           if (userResponse != 'y') {
             sqlLine.error(sqlLine.loc("abort-action"));
             callback.setToFailure();
@@ -969,7 +982,6 @@ public class Commands {
           stmnt = sqlLine.createStatement();
           callback.trackSqlQuery(stmnt);
           hasResults = stmnt.execute(sql);
-          callback.setToSuccess();
         }
 
         sqlLine.showWarnings();
@@ -977,14 +989,11 @@ public class Commands {
 
         if (hasResults) {
           do {
-            ResultSet rs = stmnt.getResultSet();
-            try {
+            try (ResultSet rs = stmnt.getResultSet()) {
               int count = sqlLine.print(rs, callback);
               long end = System.currentTimeMillis();
 
               reportResult(sqlLine.loc("rows-selected", count), start, end);
-            } finally {
-              rs.close();
             }
           } while (SqlLine.getMoreResults(stmnt));
         } else {
@@ -1007,11 +1016,9 @@ public class Commands {
     } catch (Exception e) {
       callback.setToFailure();
       sqlLine.error(e);
-      return;
     }
 
     sqlLine.showWarnings();
-    callback.setToSuccess();
   }
 
   public void quit(String line, DispatchCallback callback) {
@@ -1470,7 +1477,6 @@ public class Commands {
     List<String> cmds = new LinkedList<>();
 
     try {
-      final Parser parser = sqlLine.getLineReader().getParser();
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(
               new FileInputStream(expand(filename)), StandardCharsets.UTF_8))) {
@@ -1486,13 +1492,7 @@ public class Commands {
           cmd.append(" \n");
           cmd.append(scriptLine);
 
-          try {
-            needsContinuation = false;
-            parser.parse(cmd.toString(), cmd.length(),
-                Parser.ParseContext.ACCEPT_LINE);
-          } catch (EOFError e) {
-            needsContinuation = true;
-          }
+          needsContinuation = isSqlContinuationRequired(cmd.toString());
           if (!needsContinuation && !cmd.toString().trim().isEmpty()) {
             cmds.add(maybeTrim(cmd.toString()));
             cmd.setLength(0);
@@ -1824,6 +1824,19 @@ public class Commands {
   static Map<String, String> asMap(Properties properties) {
     //noinspection unchecked
     return (Map) properties;
+  }
+
+  private boolean isSqlContinuationRequired(String sql) {
+    if (sqlLine.getLineReader() == null) {
+      return false;
+    }
+    try {
+      sqlLine.getLineReader().getParser().parse(sql, sql.length(),
+          Parser.ParseContext.ACCEPT_LINE);
+    } catch (EOFError e) {
+      return true;
+    }
+    return false;
   }
 
   /**
