@@ -1149,6 +1149,24 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testCsvOneLiner() {
+    final String script = "!outputformat csv \"'\" @\n"
+        + "values ('#', '@#@', 1, date '1969-07-20', null, ' 1''2\"3\t4');\n"
+        + "!outputformat csv & default\n"
+        + "values ('#', '@#@', 1, date '1969-07-20', null, ' 1''2\"3\t4');\n";
+    final String line1 = "@C1@'@C2@'@C3@'@C4@'@C5@'@C6@";
+    final String line2 =
+        "@#@'@@@#@@@'@1@'@1969-07-20@'@@'@ 1'2\"3\t4@";
+    final String line3 = "'C1'&'C2'&'C3'&'C4'&'C5'&'C6'";
+    final String line4 =
+        "'#'&'@#@'&'1'&'1969-07-20'&''&' 1''2\"3\t4'";
+
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line1), containsString(line2),
+            containsString(line3), containsString(line4)));
+  }
+
+  @Test
   public void testSetForNulls() {
     final String script = "!set numberFormat null\n"
         + "!set\n";

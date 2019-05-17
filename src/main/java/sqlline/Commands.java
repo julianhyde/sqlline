@@ -797,7 +797,25 @@ public class Commands {
   }
 
   public void outputformat(String line, DispatchCallback callback) {
-    set("set " + line, callback);
+    try {
+      String[] lines = sqlLine.split(line);
+      sqlLine.getOpts().setOutputFormat(lines[1]);
+      if ("csv".equals(lines[1])) {
+        if (lines.length > 2) {
+          sqlLine.getOpts().set(BuiltInProperty.CSV_DELIMITER, lines[2]);
+        }
+        if (lines.length > 3) {
+          sqlLine.getOpts().setCsvQuoteCharacter(lines[3]);
+        }
+      } else if ("table".equals(lines[1])) {
+        if (lines.length > 2) {
+          sqlLine.getOpts().set(BuiltInProperty.MAX_COLUMN_WIDTH, lines[2]);
+        }
+      }
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+    }
   }
 
   public void brief(String line, DispatchCallback callback) {

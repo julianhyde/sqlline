@@ -1885,7 +1885,12 @@ true
           Set the mode for displaying results from statements.
           This is useful for saving output from SQL statements to
           either a visually pleasing format or an easily
-          parsable format.
+          parsable format. In the case of csv or table outputformat
+          there could be specified additional parameters like
+          csv delimiter, csv quote character, max column width.
+          Such settings will change corresponding properties'
+          values. If the parameters not specified then properties
+          are left as is.
           </para>
         </refsect1>
         <refsect1>
@@ -1940,9 +1945,7 @@ NAME        Microsoft
         <refsect1>
           <title>Example of CSV output formatting with different csv delimiter and quote character</title>
           <screen>
-0: jdbc:calcite:model=target/test-classes/mod> !set csvDelimiter ###
-0: jdbc:calcite:model=target/test-classes/mod> !set csvQuoteCharacter @
-0: jdbc:calcite:model=target/test-classes/mod> !set outputFormat csv
+0: jdbc:calcite:model=target/test-classes/mod> !set outputFormat csv ### @
 0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
 @COMPANY_ID@###@NAME@
 @1@###@Apple@

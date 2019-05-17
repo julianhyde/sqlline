@@ -670,7 +670,8 @@ public class SqlLineOpts implements Completer {
 
   public void setCsvQuoteCharacter(String csvQuoteCharacter) {
     if (DEFAULT.equals(csvQuoteCharacter)) {
-      propertiesMap.put(CSV_QUOTE_CHARACTER, CSV_DELIMITER.defaultValue());
+      propertiesMap.put(
+          CSV_QUOTE_CHARACTER, CSV_QUOTE_CHARACTER.defaultValue());
       return;
     } else if (csvQuoteCharacter != null) {
       if (csvQuoteCharacter.length() == 1) {
@@ -683,7 +684,7 @@ public class SqlLineOpts implements Completer {
       }
     }
     sqlLine.error("CsvQuoteCharacter is '"
-        + csvQuoteCharacter + "'; it must be a character of default");
+        + csvQuoteCharacter + "'; it must be a character or default");
   }
 
   public boolean getShowHeader() {
