@@ -1415,6 +1415,8 @@ Synopsis
 Description
 
 Set the mode for displaying results from statements. This is useful for saving output from SQL statements to either a visually pleasing format or an easily parseable format.
+In case of csv or table outputformat there could be specified additional parameters like csv delimiter, csv quote character, max column width.
+Such settings will change corresponding property's values. If the parameters not specified then property's will be left as is.
 
 Example of table output formatting
 
@@ -1450,14 +1452,14 @@ NAME        Microsoft
 
 Example of CSV output formatting
 
-0: jdbc:oracle:thin:@localhost:1521:mydb> !outputformat csv
-0: jdbc:oracle:thin:@localhost:1521:mydb> SELECT * FROM COMPANY;
-'COMPANY_ID','NAME'
-'1','Apple'
-'2','Sun'
-'3','IBM'
-'4','Microsoft'
-4 rows selected (0.012 seconds)
+0: jdbc:calcite:model=target/test-classes/mod> !set outputFormat csv ### @
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+@COMPANY_ID@###@NAME@
+@1@###@Apple@
+@2@###@Sun@
+@3@###@IBM@
+@4@###@Microsoft@
+4 rows selected (0.014 seconds)
 
 Example of TSV output formatting
 
