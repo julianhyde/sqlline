@@ -291,7 +291,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScriptWithMultilineStatementsInARow() {
-    final String scriptText = "--comment\n\n"
+    final String scriptText = "!set incremental false\n"
+        + "--comment\n\n"
         + "values 1;values 2;";
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
@@ -310,7 +311,8 @@ public class SqlLineArgsTest {
 
   @Test
   public void testScriptWithMultilineStatementsAndCommentsInARow() {
-    final String scriptText = "--comment;;\n\n"
+    final String scriptText = "!set incremental false\n"
+        + "--comment;;\n\n"
         + "select * from (values ';') t (\";\");/*;select 1;*/values 2;";
     checkScriptFile(scriptText, true,
         equalTo(SqlLine.Status.OK),
