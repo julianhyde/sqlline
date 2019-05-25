@@ -34,7 +34,7 @@ public enum BuiltInProperty implements SqlLineProperty {
       new Application().getName2HighlightStyle().keySet()),
   COLOR("color", Type.BOOLEAN, false),
   CONFIRM("confirm", Type.BOOLEAN, false),
-  CONFIRM_PATTERN("confirmPattern", Type.STRING, DEFAULT),
+  CONFIRM_PATTERN("confirmPattern", Type.STRING, "^(?i:(DROP|DELETE))"),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
   CSV_QUOTE_CHARACTER("csvQuoteCharacter", Type.CHAR, '\''),
@@ -70,6 +70,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   OUTPUT_FORMAT("outputFormat", Type.STRING, "table"),
   PROMPT("prompt", Type.STRING, "sqlline> "),
   PROMPT_SCRIPT("promptScript", Type.STRING, ""),
+  PROPERTIES_FILE("propertiesFile", Type.STRING,
+      new File(SqlLineOpts.saveDir(), "sqlline.properties").getAbsolutePath()),
   RIGHT_PROMPT("rightPrompt", Type.STRING, ""),
   ROW_LIMIT("rowLimit", Type.INTEGER, 0),
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),
