@@ -19,6 +19,7 @@ import java.util.Locale;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,6 +31,15 @@ import static sqlline.SqlLineArgsTest.begin;
  * Test cases for prompt and right prompt.
  */
 public class PromptTest {
+  private static final String DEV_NULL = "/dev/null";
+  private SqlLine sqlLine;
+
+  @BeforeEach
+  private void init() {
+    sqlLine = new SqlLine();
+    sqlLine.getOpts().setPropertiesFile(DEV_NULL);
+  }
+
   @Test
   public void testPromptWithoutConnection() {
     SqlLine sqlLine = new SqlLine();
@@ -118,7 +128,6 @@ public class PromptTest {
   @Test
   public void testPromptWithNickname() {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    SqlLine sqlLine = new SqlLine();
     try {
       final SqlLine.Status status =
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
