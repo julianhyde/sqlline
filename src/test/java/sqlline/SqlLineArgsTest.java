@@ -31,6 +31,8 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hsqldb.jdbc.CustomDatabaseMetadata;
+import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 import org.hsqldb.jdbc.JDBCResultSetMetaData;
@@ -1721,6 +1723,38 @@ public class SqlLineArgsTest {
             not(containsString("toString")),
             not(containsString("hashCode")),
             not(containsString("notifyAll"))));
+  }
+
+  @Test
+  public void testMetadataForClassHierarchy() {
+    final SqlLine beeLine = new SqlLine();
+
+    new MockUp<JDBCConnection>() {
+      @Mock
+      public DatabaseMetaData getMetaData() throws SQLException {
+        return new CustomDatabaseMetadata(
+            (JDBCConnection) beeLine.getConnection());
+      }
+    };
+
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      SqlLine.Status status =
+          begin(beeLine, os, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      DispatchCallback dc = new DispatchCallback();
+      beeLine.runCommands(dc, "!connect "
+          + ConnectionSpec.HSQLDB.url + " \""
+          + ConnectionSpec.HSQLDB.username + "\" \""
+          + ConnectionSpec.HSQLDB.password + "\"");
+      os.reset();
+      beeLine.runCommands(dc, "!tables");
+      String output = os.toString("UTF8");
+      assertThat(output,
+          allOf(containsString("TABLE_CAT"),
+              not(containsString("No such method \"getTables\""))));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Test
