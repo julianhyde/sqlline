@@ -27,10 +27,10 @@
 
   The documentation for checkstyle is available at
 
-  http://checkstyle.sourceforge.net
+  https://checkstyle.sourceforge.net
 -->
 
-<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.1//EN" "http://www.puppycrawl.com/dtds/configuration_1_1.dtd">
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.1//EN" "https://www.puppycrawl.com/dtds/configuration_1_1.dtd">
 
 <!-- Optiq customization of default Checkstyle behavior -->
 <module name="Checker">

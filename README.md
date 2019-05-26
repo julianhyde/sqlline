@@ -5,7 +5,7 @@ Command-line shell for issuing SQL to relational databases via JDBC.
 ## History
 
 A fork of [Marc Prud'hommeaux](https://github.com/mprudhom)'s
-[sqlline](http://sourceforge.net/projects/sqlline/) project, also
+[sqlline](https://sourceforge.net/projects/sqlline/) project, also
 incorporating changes made by the
 [LucidDB](https://github.com/LucidDB/luciddb) project,
 now modernized, mavenized and forkable in github.
@@ -14,12 +14,12 @@ See also [release history](HISTORY.md).
 ## License and distribution
 
 SQLLine is distributed under the
-[3-clause BSD License](http://opensource.org/licenses/BSD-3-Clause),
+[3-clause BSD License](https://opensource.org/licenses/BSD-3-Clause),
 meaning that you are free to redistribute, modify, or sell it with
 almost no restrictions.
 
 It is distributed via the
-[Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Csqlline).
+[Maven Central Repository](https://search.maven.org/#search%7Cga%7C1%7Csqlline).
 
 ## Quick start
 
@@ -106,7 +106,7 @@ single-quote ('`'`'),
 bang ('`!`') and
 percent ('`%`') are some common examples.
 
-Read [the manual](http://julianhyde.github.io/sqlline/manual.html).
+Read [the manual](https://julianhyde.github.io/sqlline/manual.html).
 
 ## Maven Usage
 

@@ -426,8 +426,8 @@ Other:
 No bug fixes or other functional changes
 
 Other:
-* Publish releases to <a href="http://search.maven.org/">Maven Central</a>
-  (previous releases are in <a href="http://www.conjars.org/">Conjars</a>)
+* Publish releases to <a href="https://search.maven.org/">Maven Central</a>
+  (previous releases are in <a href="https://www.conjars.org/">Conjars</a>)
 * Sign jars
 * Use <a href="https://github.com/julianhyde/hydromatic-parent">net.hydromatic parent POM</a>,
   upgrading several maven plugins

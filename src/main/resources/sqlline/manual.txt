@@ -287,7 +287,7 @@ For information on obtaining the software under another license, contact the cop
 
 Obtaining SQLLine
 
-SQLLine is hosted on SourceForge, and is located at http://sqlline.sf.net. The latest release can be downloaded from http://sqlline.sf.net/download.html.
+SQLLine is hosted on SourceForge, and is located at https://sqlline.sf.net. The latest release can be downloaded from https://sqlline.sf.net/download.html.
 
 Installation
 
@@ -297,9 +297,9 @@ Required software
 
 SQLLine depends on the following software:
 
-Java™ Virtual Machine - SQLLine is a pure java program, and requires Java version 1.3 or higher in order to run. The latest JVM can be downloaded from http://java.sun.com.
+Java™ Virtual Machine - SQLLine is a pure java program, and requires Java version 1.3 or higher in order to run. The latest JVM can be downloaded from https://java.sun.com.
 
-JLine - SQLLine uses the JLine console reader for command line editing, tab-completion, and command history. It can be downloaded from http://jline.sf.net. Version 0.8.1 or higher is required.
+JLine - SQLLine uses the JLine console reader for command line editing, tab-completion, and command history. It can be downloaded from https://jline.sf.net. Version 0.8.1 or higher is required.
 
 JDBC™ Driver(s) - Since SQLLine uses the Java Database Connectivity package to connect to your database, you need to obtain the correct JDBC driver libraries for your database. Any JDBC compliant driver can be used for this purpose. Drivers can be located by referring to the section on known JDBC drivers, or else by referring to your database vendor's web site.
 
@@ -311,7 +311,7 @@ Create a new directory/folder where you like. This will be referred to as sqllin
 
 Download sqlline.jar into sqllinedir.
 
-Download the latest jline.jar from http://jline.sf.net into sqllinedir.
+Download the latest jline.jar from https://jline.sf.net into sqllinedir.
 
 Download your database's JDBC driver files into sqllinedir. Note that some JDBC drivers require some installation, such as uncompressing or unzipping.
 
@@ -1303,7 +1303,7 @@ Synopsis
 
 Description
 
-Set the isolation level for the current transaction. For a description of the different isolation levels, see http://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail.
+Set the isolation level for the current transaction. For a description of the different isolation levels, see https://java.sun.com/j2se/1.3/docs/api/java/sql/Connection.html#field_detail.
 If the specified isolation level is not supported or DEFAULT is specified then there will be used level returned by java.sql.DatabaseMetaData#getDefaultTransactionIsolation
 
 Example of "isolation" command
@@ -1354,7 +1354,7 @@ Synopsis
 
 Description
 
-Execute an arbitrary metadata method agains the current connection. refpurpose are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see http://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
+Execute an arbitrary metadata method agains the current connection. refpurpose are separated by spaces. Use "" for a blank String, and null for a null parameter. For information on available metadata methods, see https://java.sun.com/j2se/1.3/docs/api/java/sql/DatabaseMetaData.html.
 
 Example of "metadata" command
 

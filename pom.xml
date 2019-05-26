@@ -13,11 +13,11 @@
   <version>1.8.0-SNAPSHOT</version>
   <name>sqlline</name>
   <description>Shell for issuing SQL to relational databases via JDBC</description>
-  <url>http://github.com/julianhyde/sqlline</url>
+  <url>https://github.com/julianhyde/sqlline</url>
   <inceptionYear>2002</inceptionYear>
   <organization>
     <name>Julian Hyde</name>
-    <url>http://www.hydromatic.net</url>
+    <url>https://github.com/julianhyde</url>
   </organization>
 
   <properties>
@@ -51,7 +51,7 @@
   <licenses>
     <license>
       <name>Modified BSD License</name>
-      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+      <url>https://opensource.org/licenses/BSD-3-Clause</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -80,17 +80,17 @@
   <scm>
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
     <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
-    <url>http://github.com/julianhyde/sqlline/tree/master</url>
+    <url>https://github.com/julianhyde/sqlline/tree/master</url>
     <tag>HEAD</tag>
   </scm>
 
   <mailingLists>
     <mailingList>
       <name>sqlline-dev</name>
-      <archive>http://groups.google.com/group/sqlline-dev/topics</archive>
-      <subscribe>http://groups.google.com/group/sqlline-dev/subscribe</subscribe>
-      <unsubscribe>http://groups.google.com/group/sqlline-dev/subscribe</unsubscribe>
-      <post>http://groups.google.com/group/sqlline-dev/post</post>
+      <archive>https://groups.google.com/group/sqlline-dev/topics</archive>
+      <subscribe>https://groups.google.com/group/sqlline-dev/subscribe</subscribe>
+      <unsubscribe>https://groups.google.com/group/sqlline-dev/subscribe</unsubscribe>
+      <post>https://groups.google.com/group/sqlline-dev/post</post>
     </mailingList>
   </mailingLists>
 
@@ -237,6 +237,11 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.9</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

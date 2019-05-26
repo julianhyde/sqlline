@@ -44,7 +44,7 @@ mvn -Prelease -DskipTests release:perform
 ```
 
 Stage the release:
-* Go to http://oss.sonatype.org and log in.
+* Go to https://oss.sonatype.org and log in.
 * Under "Build Promotion", click on "Staging Repositories".
 * Select the line "sqlline-nnnn", and click "Close". You might need to
   click "Refresh" a couple of times before it closes.
@@ -59,7 +59,7 @@ If the vote is successful, send an email with subject
 "[RESULT] [VOTE] Release sqlline-X.Y.0 (release candidate N)".
 
 Publish the release:
-* Go to http://oss.sonatype.org and log in.
+* Go to https://oss.sonatype.org and log in.
 * Under "Build Promotion", click on "Staging Repositories".
 * Select the line "sqlline-nnnn", and click "Release".
 

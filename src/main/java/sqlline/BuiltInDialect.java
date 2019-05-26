@@ -32,7 +32,7 @@ public enum BuiltInDialect implements Dialect {
   DEFAULT("SQLLineDefaultDialect", '"', '"', "--"),
 
   /** HyperSQL dialect.
-   * See <a href="http://www.h2database.com/html/grammar.html#comment">HyperSQL
+   * See <a href="https://www.h2database.com/html/grammar.html#comment">HyperSQL
    * grammar.</a>. */
   H2("H2", '"', '"', "--", "//"),
 
