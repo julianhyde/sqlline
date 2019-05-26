@@ -195,19 +195,21 @@ public class Commands {
     }
 
     try {
-      Method[] methods = sqlLine.getConnection()
-          .getMetaData().getClass().getDeclaredMethods();
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
-      for (Method method : methods) {
-        final int modifiers = method.getModifiers();
-        if (!Modifier.isPublic(modifiers)
-            || Modifier.isStatic(modifiers)) {
-          continue;
+      Class currentClass = sqlLine.getConnection().getMetaData().getClass();
+      do {
+        for (Method method: currentClass.getDeclaredMethods()) {
+          final int modifiers = method.getModifiers();
+          if (!Modifier.isPublic(modifiers)
+              || Modifier.isStatic(modifiers)) {
+            continue;
+          }
+          methodNames.add(method.getName());
+          methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
         }
-        methodNames.add(method.getName());
-        methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
-      }
+        currentClass = currentClass.getSuperclass();
+      } while (DatabaseMetaData.class.isAssignableFrom(currentClass));
 
       if (!methodNamesUpper.contains(cmd.toUpperCase(Locale.ROOT))) {
         sqlLine.error(sqlLine.loc("no-such-method", cmd));
