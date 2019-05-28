@@ -10,7 +10,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-  <version>1.8.0</version>
+  <version>1.9.0-SNAPSHOT</version>
   <name>sqlline</name>
   <description>Shell for issuing SQL to relational databases via JDBC</description>
   <url>https://github.com/julianhyde/sqlline</url>
@@ -81,7 +81,7 @@
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
     <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
     <url>https://github.com/julianhyde/sqlline/tree/master</url>
-    <tag>sqlline-1.8.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <mailingLists>
