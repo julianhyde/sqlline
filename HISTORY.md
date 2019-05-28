@@ -2,6 +2,45 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.8.0">1.8.0</a> (2019-05-29)
+
+1.8 comes quite soon after 1.7, and the most significant change is
+<a href="https://github.com/julianhyde/sqlline/issues/292">fixing Ctrl-C to abort the current statement, not crash SQLLine</a>.
+Among the improvements are 
+<a href="https://github.com/julianhyde/sqlline/issues/237">allowing multiple statements on the same line</a>,
+a more powerful
+<a href="https://github.com/julianhyde/sqlline/issues/298">!set outputformat</a> command,
+and allowing null values to be
+<a href="https://github.com/julianhyde/sqlline/issues/288">output as "null"</a>.
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/295">SQLLINE-295</a>]
+  Find all db metadata methods including class hierarchy cases
+* [<a href="https://github.com/julianhyde/sqlline/issues/284">SQLLINE-284</a>]
+  Use proxy for `DatabaseMetaData`
+* [<a href="https://github.com/julianhyde/sqlline/issues/237">SQLLINE-237</a>]
+  Allow several SQL statements on the same line, separated by ';'
+* [<a href="https://github.com/julianhyde/sqlline/issues/288">SQLLINE-288</a>]
+  Output null value as `null`
+* [<a href="https://github.com/julianhyde/sqlline/issues/298">SQLLINE-298</a>]
+  Optional extra parameters for `!set outputformat` command
+* Improve the `hashCode` of the key used in the internal table cache
+* [<a href="https://github.com/julianhyde/sqlline/issues/292">SQLLINE-292</a>]
+  `Ctrl-C` causes SQLLine to quit, but should just cancel current query
+* Upgrades:
+  * [<a href="https://github.com/julianhyde/sqlline/issues/301">SQLLINE-301</a>]
+    Upgrade checkstyle to 8.20, jmockit to 1.46 and junit to 5.4.2
+  * [<a href="https://github.com/julianhyde/sqlline/issues/287">SQLLINE-287</a>]
+    Support JDK 12
+
+Other:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/296">SQLLINE-296</a>]
+  Replace class `ColorBuffer` with Jline3's class `AttributedString`
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.7.0">1.7.0</a> (2019-03-27)
 
 Continuing the major changes in the previous release, this release
