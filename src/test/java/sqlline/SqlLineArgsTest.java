@@ -18,12 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.h2.util.StringUtils;
@@ -2521,6 +2516,65 @@ public class SqlLineArgsTest {
     } catch (Throwable e) {
       // fail
       throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testInitArgsForUserNameAndPasswordWithSpaces() {
+    try {
+      final SqlLine sqlLine = new SqlLine();
+      final DatabaseConnection[] databaseConnection = new DatabaseConnection[1];
+      new MockUp<sqlline.DatabaseConnections>() {
+        @Mock
+        public void setConnection(DatabaseConnection connection) {
+          databaseConnection[0] = connection;
+        }
+      };
+
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      String[] connectionArgs = new String[]{
+          "-u", ConnectionSpec.H2.url, "-n", "user name",
+          "-p", "user password",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+
+      assertEquals(ConnectionSpec.H2.url, databaseConnection[0].getUrl());
+      Properties infoProperties =
+          FieldReflection.getField(
+              DatabaseConnection.class, "info", databaseConnection[0]);
+      assertEquals("user name", infoProperties.getProperty("user"));
+      assertEquals("user password", infoProperties.getProperty("password"));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsForSuccessConnection() {
+    try {
+      final String[] nicknames = new String[1];
+      new MockUp<sqlline.DatabaseConnection>() {
+        @Mock
+        void setNickname(String nickname) {
+          nicknames[0] = nickname;
+        }
+      };
+      final SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url,
+          "-n", ConnectionSpec.H2.username,
+          "-p", ConnectionSpec.H2.password,
+          "-nn", "nickname with spaces",
+          "-log", "target/file with spaces",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+
+      assertThat("file with spaces",
+          Files.exists(Paths.get("target", "file with spaces")));
+      assertEquals("nickname with spaces", nicknames[0]);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
     }
   }
 

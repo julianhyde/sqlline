@@ -399,20 +399,22 @@ public class SqlLine {
     if (url != null || user != null || pass != null || driver != null) {
       String com =
           COMMAND_PREFIX + "connect "
-              + (url == null ? "\"\"" : url) + " "
-              + (user == null || user.length() == 0 ? "''" : user) + " "
-              + (pass == null || pass.length() == 0 ? "''" : pass) + " "
+              + "\"" + (url == null ? "" : url) + "\" "
+              + "'" + (user == null || user.length() == 0 ? "" : user) + "' "
+              + "'" + (pass == null || pass.length() == 0 ? "" : pass) + "' "
               + (driver == null ? "" : driver);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
     }
 
     if (nickname != null) {
-      dispatch(COMMAND_PREFIX + "nickname " + nickname, new DispatchCallback());
+      dispatch(COMMAND_PREFIX
+          + "nickname '" + nickname + "'", new DispatchCallback());
     }
 
     if (logFile != null) {
-      dispatch(COMMAND_PREFIX + "record " + logFile, new DispatchCallback());
+      dispatch(COMMAND_PREFIX
+          + "record '" + logFile + "'", new DispatchCallback());
     }
 
     if (commandHandler != null) {
