@@ -1667,15 +1667,14 @@ public class Commands {
       sqlLine.error(sqlLine.loc("record-already-running", outputFile));
       return;
     }
-
-    String filename;
-    if (line.length() == "record".length()
-        || (filename =
-            sqlLine.dequote(line.substring("record".length() + 1))) == null) {
+    String[] cmd = sqlLine.split(line);
+    if (cmd.length != 2) {
       sqlLine.error("Usage: record <file name>");
       callback.setToFailure();
       return;
     }
+
+    final String filename = cmd[1];
 
     try {
       outputFile = new OutputFile(expand(filename));

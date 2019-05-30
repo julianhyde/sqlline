@@ -168,6 +168,15 @@ public class SqlLineTest {
     strings = line.split("#", " ");
     assertArrayEquals(new String[]{"#"}, strings);
 
+    strings = line.split("set \"sec\\\"ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"ret"}, strings);
+
+    strings = line.split("set \"sec\\\"'ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"'ret"}, strings);
+
+    strings = line.split("set \"sec\\\"ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"ret"}, strings);
+
     try {
       line.split("set csvdelimiter '", " ");
       fail("Non-paired quote is not allowed");
@@ -246,6 +255,44 @@ public class SqlLineTest {
     assertFalse(sqlLine.isOneLineComment("-- comment\n-- comment2\nselect 1;"));
     assertFalse(sqlLine.isOneLineComment("-- comment\nselect 1-- comment2\n"));
     assertFalse(sqlLine.isOneLineComment("/*comment*/\n-- comment2\n"));
+  }
+
+  @Test
+  public void testIsCharEscaped() {
+    final SqlLine sqlLine = new SqlLine();
+    assertTrue(sqlLine.isCharEscaped("\\'", 1));
+    assertFalse(sqlLine.isCharEscaped("\\\\\'", 3));
+  }
+
+  @Test
+  public void testEscapeAndQuote() {
+    final SqlLine sqlLine = new SqlLine();
+    assertEquals("\"\"", sqlLine.escapeAndQuote(""));
+    assertEquals("\"\"", sqlLine.escapeAndQuote(null));
+    assertEquals("\"a\"", sqlLine.escapeAndQuote("a"));
+    assertEquals("\"a b\"", sqlLine.escapeAndQuote("a b"));
+    assertEquals("\"\\\\\"", sqlLine.escapeAndQuote("\\"));
+    assertEquals("\"\\\"\"", sqlLine.escapeAndQuote("\""));
+    assertEquals("\"'\"", sqlLine.escapeAndQuote("'"));
+    assertEquals("\"a\\\\ b\"", sqlLine.escapeAndQuote("a\\ b"));
+    assertEquals("\"a\\\\ ' b\"", sqlLine.escapeAndQuote("a\\ ' b"));
+    assertEquals("\"a\\\\ ' \\\"b\"", sqlLine.escapeAndQuote("a\\ ' \"b"));
+  }
+
+  @Test
+  public void testUnescape() {
+    final SqlLine sqlLine = new SqlLine();
+    assertEquals("\"\"", sqlLine.unescape(sqlLine.escapeAndQuote("")));
+    assertEquals("\"\"", sqlLine.unescape(sqlLine.escapeAndQuote(null)));
+    assertEquals("\"a\"", sqlLine.unescape(sqlLine.escapeAndQuote("a")));
+    assertEquals("\"a b\"", sqlLine.unescape(sqlLine.escapeAndQuote("a b")));
+    assertEquals("\"\\\"", sqlLine.unescape(sqlLine.escapeAndQuote("\\")));
+    assertEquals("\"\"\"", sqlLine.unescape(sqlLine.escapeAndQuote("\"")));
+    assertEquals("\"'\"", sqlLine.unescape(sqlLine.escapeAndQuote("'")));
+    assertEquals("\"a\\ b\"",
+        sqlLine.unescape(sqlLine.escapeAndQuote("a\\ b")));
+    assertEquals("\"a\\\\ ' b\"", sqlLine.escapeAndQuote("a\\ ' b"));
+    assertEquals("\"a\\\\ ' \\\"b\"", sqlLine.escapeAndQuote("a\\ ' \"b"));
   }
 }
 

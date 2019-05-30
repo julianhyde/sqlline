@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -779,39 +780,49 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testRecordFilenameWithSpace() {
-    File file = createTempFile("sqlline file with spaces", ".log");
+    final String fileNameWithSpaces = "sqlline' file\" with\\ spaces";
+    File file = createTempFile(fileNameWithSpaces, ".log");
+    final SqlLine sqlLine = new SqlLine();
     final String script = "!set incremental true\n"
         + "values 1;\n"
-        + "!record " + file.getAbsolutePath() + "\n"
+        + "!record " + sqlLine.escapeAndQuote(file.getAbsolutePath()) + "\n"
         + "!set outputformat csv\n"
         + "values 2;\n"
         + "!record\n"
         + "!set outputformat csv\n"
         + "values 3;\n";
+
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
-        RegexMatcher.of("(?s)1/8          !set incremental true\n"
-            + "2/8          values 1;\n"
-            + "\\+-------------\\+\n"
-            + "\\|     C1      \\|\n"
-            + "\\+-------------\\+\n"
-            + "\\| 1           \\|\n"
-            + "\\+-------------\\+\n"
-            + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "3/8          !record .*.log\n"
-            + "Saving all output to \".*.log\". Enter \"record\" with no arguments to stop it.\n"
-            + "4/8          !set outputformat csv\n"
-            + "5/8          values 2;\n"
-            + "'C1'\n"
-            + "'2'\n"
-            + "1 row selected \\([0-9.,]+ seconds\\)\n"
-            + "6/8          !record\n"
-            + "Recording stopped.\n"
-            + "7/8          !set outputformat csv\n"
-            + "8/8          values 3;\n"
-            + "'C1'\n"
-            + "'3'\n"
-            + "1 row selected \\([0-9.,]+ seconds\\)\n.*"));
+            allOf(containsString("!set incremental true\n"),
+                containsString("values 1;\n"),
+                containsString("+-------------+\n"),
+                containsString("|     C1      |\n"),
+                containsString("+-------------+\n"),
+                containsString("| 1           |\n"),
+                containsString("+-------------+\n"),
+                containsString("1 row selected ("),
+                containsString(
+                    "3/8          !record "
+                        + sqlLine.escapeAndQuote(file.getAbsolutePath())),
+                containsString(
+                    "Saving all output to \"" + file.getAbsolutePath() + "\""),
+                containsString(
+                    "Enter \"record\" with no arguments to stop it.\n"),
+                containsString("4/8          !set outputformat csv\n"),
+                containsString("'C1'\n"),
+                containsString("'2'\n"),
+                containsString("1 row selected ("),
+                containsString("6/8          !record\n"),
+                containsString("Recording stopped.\n"),
+                containsString("7/8          !set outputformat csv\n"),
+                containsString("8/8          values 3;\n"),
+                containsString("'C1'\n"),
+                containsString("'3'\n"),
+                containsString("1 row selected (")
+            )
+    );
+
 
     // Now check that the right stuff got into the file.
     assertFileContains(file,
@@ -2544,6 +2555,69 @@ public class SqlLineArgsTest {
     } catch (Throwable e) {
       // fail
       throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testInitArgsForUserNameAndPasswordWithSpaces() {
+    try {
+      final SqlLine sqlLine = new SqlLine();
+      final DatabaseConnection[] databaseConnection = new DatabaseConnection[1];
+      new MockUp<sqlline.DatabaseConnections>() {
+        @Mock
+        public void setConnection(DatabaseConnection connection) {
+          databaseConnection[0] = connection;
+        }
+      };
+
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      String[] connectionArgs = new String[]{
+          "-u", ConnectionSpec.H2.url, "-n", "\"user'\\\" name\"",
+          "-p", "\"user \\\"'\\\"password\"",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+
+      assertEquals(ConnectionSpec.H2.url, databaseConnection[0].getUrl());
+      Properties infoProperties =
+          FieldReflection.getFieldValue(
+              databaseConnection[0].getClass().getDeclaredField("info"),
+              databaseConnection[0]);
+      assertNotNull(infoProperties);
+      assertEquals("user'\" name", infoProperties.getProperty("user"));
+      assertEquals("user \"'\"password",
+          infoProperties.getProperty("password"));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsForSuccessConnection() {
+    try {
+      final String[] nicknames = new String[1];
+      new MockUp<sqlline.DatabaseConnection>() {
+        @Mock
+        void setNickname(String nickname) {
+          nicknames[0] = nickname;
+        }
+      };
+      final SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String filename = "file' with\\\" spaces";
+      String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url,
+          "-n", ConnectionSpec.H2.username,
+          "-p", ConnectionSpec.H2.password,
+          "-nn", "nickname with spaces",
+          "-log", "target/" + filename,
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+
+      assertThat("file with spaces",
+          Files.exists(Paths.get("target", filename)));
+      assertEquals("nickname with spaces", nicknames[0]);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
     }
   }
 
