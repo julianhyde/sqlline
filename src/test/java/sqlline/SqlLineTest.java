@@ -168,6 +168,15 @@ public class SqlLineTest {
     strings = line.split("#", " ");
     assertArrayEquals(new String[]{"#"}, strings);
 
+    strings = line.split("set \"sec\\\"ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"ret"}, strings);
+
+    strings = line.split("set \"sec\\\"'ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"'ret"}, strings);
+
+    strings = line.split("set \"sec\\\"ret\"", " ");
+    assertArrayEquals(new String[] {"set", "sec\"ret"}, strings);
+
     try {
       line.split("set csvdelimiter '", " ");
       fail("Non-paired quote is not allowed");
@@ -246,6 +255,13 @@ public class SqlLineTest {
     assertFalse(sqlLine.isOneLineComment("-- comment\n-- comment2\nselect 1;"));
     assertFalse(sqlLine.isOneLineComment("-- comment\nselect 1-- comment2\n"));
     assertFalse(sqlLine.isOneLineComment("/*comment*/\n-- comment2\n"));
+  }
+
+  @Test
+  public void testIsCharEscape() {
+    final SqlLine sqlLine = new SqlLine();
+    assertTrue(sqlLine.isCharEscaped("\\'", 1));
+    assertFalse(sqlLine.isCharEscaped("\\\\\'", 3));
   }
 }
 

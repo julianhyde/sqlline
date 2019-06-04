@@ -399,9 +399,7 @@ public class SqlLine {
     if (url != null || user != null || pass != null || driver != null) {
       String com =
           COMMAND_PREFIX + "connect "
-              + "\"" + (url == null ? "" : url) + "\" "
-              + "'" + (user == null || user.length() == 0 ? "" : user) + "' "
-              + "'" + (pass == null || pass.length() == 0 ? "" : pass) + "' "
+              + escape(url) + " " + escape(user) + " " + escape(pass) + " "
               + (driver == null ? "" : driver);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
@@ -409,12 +407,12 @@ public class SqlLine {
 
     if (nickname != null) {
       dispatch(COMMAND_PREFIX
-          + "nickname '" + nickname + "'", new DispatchCallback());
+          + "nickname " + escape(nickname), new DispatchCallback());
     }
 
     if (logFile != null) {
       dispatch(COMMAND_PREFIX
-          + "record '" + logFile + "'", new DispatchCallback());
+          + "record " + escape(logFile), new DispatchCallback());
     }
 
     if (commandHandler != null) {
@@ -605,6 +603,7 @@ public class SqlLine {
           .build()
         : lineReaderBuilder.build();
 
+    lineReader.setOpt(LineReader.Option.MENU_COMPLETE);
     addWidget(lineReader,
         this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
     fileHistory.attach(lineReader);
@@ -1265,6 +1264,9 @@ public class SqlLine {
         break;
       }
       if (line.charAt(i) == '\'' || line.charAt(i) == '"') {
+        if (isCharEscaped(line, i)) {
+          continue;
+        }
         if (inQuotes) {
           if (line.charAt(tokenStart) == line.charAt(i)) {
             inQuotes = false;
@@ -1276,6 +1278,7 @@ public class SqlLine {
           inQuotes = true;
         }
       } else if (line.regionMatches(i, delim, 0, delim.length())) {
+
         if (inQuotes) {
           i += delim.length() - 1;
           continue;
@@ -1303,10 +1306,64 @@ public class SqlLine {
     }
     String[] ret = new String[tokens.size()];
     for (int i = 0; i < tokens.size(); i++) {
-      ret[i] = dequote(tokens.get(i));
+      final String token = tokens.get(i);
+      if (token != null && token.charAt(0) == '"') {
+        ret[i] = unescape(dequote(tokens.get(i)));
+      } else {
+        ret[i] = dequote(tokens.get(i));
+      }
     }
-
     return ret;
+  }
+
+  String unescape(String input) {
+    final String escapingSymbols = "\\\"";
+    StringBuilder builder = new StringBuilder();
+    boolean escaping = true;
+    for (int i = 0; i < input.length(); i++) {
+      if (escaping
+          && input.charAt(i) == '\\'
+          && i < input.length() - 1
+          && escapingSymbols.indexOf(input.charAt(i + 1)) != -1) {
+        escaping = false;
+        continue;
+      }
+      escaping = true;
+      builder.append(input.charAt(i));
+    }
+    return builder.toString();
+  }
+
+  String escape(String input) {
+    if (input == null || input.isEmpty()) {
+      return "\"\"";
+    }
+    if (input.charAt(0) == input.charAt(input.length() - 1)
+        && input.charAt(0) == '"' || input.charAt(0) == '\'') {
+      return input;
+    }
+    final String escapingSymbols = "\\\"";
+    StringBuilder builder = new StringBuilder("\"");
+    for (int i = 0; i < input.length(); i++) {
+      if (escapingSymbols.indexOf(input.charAt(i)) != -1) {
+        builder.append("\\");
+      }
+      builder.append(input.charAt(i));
+    }
+    builder.append("\"");
+    return builder.toString();
+  }
+
+  boolean isCharEscaped(String input, int charAt) {
+
+    if (charAt < 0 || charAt >= input.length()) {
+      return false;
+    }
+    int current = charAt;
+    while (current > 0 && input.charAt(current - 1) == '\\') {
+      current--;
+    }
+    return (charAt - current) % 2 != 0;
   }
 
   static <K, V> Map<K, V> map(K key, V value, Object... obs) {
@@ -1693,7 +1750,6 @@ public class SqlLine {
 
   public int runCommands(List<String> cmds, DispatchCallback callback) {
     int successCount = 0;
-
     try {
       int index = 1;
       int size = cmds.size();
