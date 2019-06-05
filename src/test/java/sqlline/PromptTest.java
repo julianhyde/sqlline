@@ -19,6 +19,7 @@ import java.util.Locale;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,9 +41,13 @@ public class PromptTest {
     sqlLine.getOpts().setPropertiesFile(DEV_NULL);
   }
 
+  @AfterEach
+  private void finish() {
+    sqlLine.setExit(true);
+  }
+
   @Test
   public void testPromptWithoutConnection() {
-    SqlLine sqlLine = new SqlLine();
     // default prompt
     assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
         is(BuiltInProperty.PROMPT.defaultValue()));
@@ -159,7 +164,6 @@ public class PromptTest {
   @Test
   public void testPromptWithConnection() {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    SqlLine sqlLine = new SqlLine();
     try {
       final SqlLine.Status status =
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
@@ -186,7 +190,6 @@ public class PromptTest {
 
   @Test
   public void testPromptWithSchema() {
-    SqlLine sqlLine = new SqlLine();
     sqlLine.getOpts().set(BuiltInProperty.PROMPT, "%u%S>");
 
     sqlLine.runCommands(new DispatchCallback(),
@@ -207,7 +210,6 @@ public class PromptTest {
 
   @Test
   public void testPromptScript() {
-    SqlLine sqlLine = new SqlLine();
     sqlLine.getOpts().set(BuiltInProperty.PROMPT_SCRIPT, "'hel' + 'lo'");
 
     sqlLine.runCommands(new DispatchCallback(),
@@ -228,7 +230,6 @@ public class PromptTest {
 
   @Test
   public void testCustomPromptHandler() {
-    SqlLine sqlLine = new SqlLine();
     sqlLine.runCommands(new DispatchCallback(),
         "!connect "
             + SqlLineArgsTest.ConnectionSpec.H2.url + " "
