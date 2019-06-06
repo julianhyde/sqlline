@@ -325,6 +325,20 @@ public class SqlLineHighlighterTest {
         .sqlIdentifierQuotes.set(line.indexOf("\"'\n\""), line.length());
     checkLineAgainstAllHighlighters(line, expectedStyle);
 
+    // !connect command with quoted arguments
+    line = "!connect \"jdbc:string\" admin 'pass \"word' driver";
+    expectedStyle = new ExpectedHighlightStyle(line.length());
+    expectedStyle.commands.set(0, "!connect".length());
+    expectedStyle.defaults.set(line.indexOf(" \"jdbc:string"));
+    expectedStyle.sqlIdentifierQuotes.set(
+        line.indexOf("\"jdbc:string"), line.indexOf(" admin"));
+    expectedStyle.defaults.set(
+        line.indexOf(" admin"), line.indexOf("'pass \"word'"));
+    expectedStyle.singleQuotes.set(
+        line.indexOf("'pass \"word'"), line.indexOf(" driver"));
+    expectedStyle.defaults.set(line.indexOf(" driver"), line.length());
+    checkLineAgainstAllHighlighters(line, expectedStyle);
+
     // sql with !sql command
     line = "!sql select '1'";
     expectedStyle = new ExpectedHighlightStyle(line.length());
@@ -548,8 +562,6 @@ public class SqlLineHighlighterTest {
     for (Map.Entry<SqlLine, SqlLineHighlighter> sqlLine2HighLighterEntry
         : sqlLine2Highlighter.entrySet()) {
       SqlLine sqlLine = sqlLine2HighLighterEntry.getKey();
-      SqlLineHighlighter sqlLineHighlighter =
-          sqlLine2HighLighterEntry.getValue();
       sqlLine.runCommands(dc, "!connect "
           + SqlLineArgsTest.ConnectionSpec.H2.url + " "
           + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"");

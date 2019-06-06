@@ -116,38 +116,45 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       final int commandStart = command
           ? buffer.indexOf(SqlLine.COMMAND_PREFIX) : -1;
       final int commandEnd = command
-          ? buffer.indexOf(' ', commandStart) : -1;
-
+          ? commandStart > -1 && buffer.indexOf(' ', commandStart) == -1
+              ? buffer.length()
+              : buffer.indexOf(' ', commandStart)
+          : -1;
 
       final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
       for (int i = 0; i < buffer.length(); i++) {
         if (i < startingPoint) {
           sb.style(highlightStyle.getDefaultStyle());
-        } else if (isSql) {
-          if (keywordBitSet.get(i)) {
-            sb.style(highlightStyle.getKeywordStyle());
-          } else if (quoteBitSet.get(i)) {
-            sb.style(highlightStyle.getQuotedStyle());
-          } else if (sqlIdentifierQuotesBitSet.get(i)) {
-            sb.style(highlightStyle.getIdentifierStyle());
-          } else if (commentBitSet.get(i)) {
-            sb.style(highlightStyle.getCommentStyle());
-          } else if (numberBitSet.get(i)) {
-            sb.style(highlightStyle.getNumberStyle());
-          } else if (i == 0 || (i > commandEnd
-              && (i < underlineStart || i > underlineEnd)
-              && (i < negativeStart || i > negativeEnd))) {
-
-            sb.style(highlightStyle.getDefaultStyle());
-          }
         } else {
-          if (quoteBitSet != null && quoteBitSet.get(i)) {
-            sb.style(highlightStyle.getQuotedStyle());
-          } else if (sqlIdentifierQuotesBitSet != null
-              && sqlIdentifierQuotesBitSet.get(i)) {
-            sb.style(highlightStyle.getIdentifierStyle());
-          } else if (commentBitSet.get(i)) {
-            sb.style(highlightStyle.getCommentStyle());
+          final boolean defaultStyleStart =
+              (i == 0 && commandEnd == -1 && commandStart == -1)
+                  || (i > Math.max(commandEnd, commandStart)
+                      && (i < underlineStart || i > underlineEnd)
+                      && (i < negativeStart || i > negativeEnd));
+          if (isSql) {
+            if (keywordBitSet.get(i)) {
+              sb.style(highlightStyle.getKeywordStyle());
+            } else if (quoteBitSet.get(i)) {
+              sb.style(highlightStyle.getQuotedStyle());
+            } else if (sqlIdentifierQuotesBitSet.get(i)) {
+              sb.style(highlightStyle.getIdentifierStyle());
+            } else if (commentBitSet.get(i)) {
+              sb.style(highlightStyle.getCommentStyle());
+            } else if (numberBitSet.get(i)) {
+              sb.style(highlightStyle.getNumberStyle());
+            } else if (defaultStyleStart) {
+              sb.style(highlightStyle.getDefaultStyle());
+            }
+          } else {
+            if (quoteBitSet.get(i)) {
+              sb.style(highlightStyle.getQuotedStyle());
+            } else if (sqlIdentifierQuotesBitSet.get(i)) {
+              sb.style(highlightStyle.getIdentifierStyle());
+            } else if (commentBitSet.get(i)) {
+              sb.style(highlightStyle.getCommentStyle());
+            } else if (defaultStyleStart) {
+              sb.style(highlightStyle.getDefaultStyle());
+            }
           }
         }
 
