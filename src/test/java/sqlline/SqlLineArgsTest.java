@@ -1629,6 +1629,25 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testSchemas() {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set maxcolumnwidth 15\n"
+        + "!set incremental true\n"
+        + "!schemas\n";
+    final String line0 =
+        "|   TABLE_SCHEM   |  TABLE_CATALOG  | IS_DEFAULT |";
+    final String line1 = "| INFORMATION_SCHEMA | PUBLIC          | FALSE";
+    final String line2 = "| PUBLIC          | PUBLIC          | TRUE       |";
+    final String line3 = "| SCOTT           | PUBLIC          | FALSE      |";
+    final String line4 = "| SYSTEM_LOBS     | PUBLIC          | FALSE      |";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line0), containsString(line1),
+            containsString(line2), containsString(line3),
+            containsString(line4)));
+  }
+
+  @Test
   public void testTables() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"

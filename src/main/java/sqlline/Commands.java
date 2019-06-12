@@ -423,6 +423,10 @@ public class Commands {
     metadata("getTables", args, callback);
   }
 
+  public void schemas(String line, DispatchCallback callback) {
+    metadata("getSchemas", Collections.emptyList(), callback);
+  }
+
   public void typeinfo(String line, DispatchCallback callback) {
     metadata("getTypeInfo", Collections.emptyList(), callback);
   }

@@ -1461,6 +1461,7 @@ sqlline> !help
 !run              Run a script from the specified file
 !save             Save the current variables and aliases
 !scan             Scan for installed JDBC drivers
+!schemas          List all the schemas in the database
 !script           Start saving a script to a file
 !set              Set a sqlline variable, or show its value
 !sql              Execute a SQL command
@@ -2733,6 +2734,52 @@ sqlline>
       </refentry>
       </section>
 
+      <section id="sect_command_schemas">
+        <title>schemas</title>
+        <refentry id="command_schemas">
+          <refmeta>
+            <refentrytitle>schemas</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+
+          <refnamediv>
+            <refname>schemas</refname>
+            <refpurpose>
+              List all the schemas in the database
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!schemas</command>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+          <refsect1>
+            <title>Description</title>
+            <para>
+              List all the schemas in the database of the
+              current connection.
+            </para>
+          </refsect1>
+          <refsect1>
+            <title>Example of "schemas" command</title>
+            <screen>
+              0: jdbc:postgresql:thin:@localhost:5432:mydb> !schemas
+
+              +--------------------+---------------+
+              |    table_schem     | table_catalog |
+              +--------------------+---------------+
+              | information_schema |               |
+              | pg_catalog         |               |
+              | public             |               |
+              +--------------------+---------------+
+
+              0: jdbc:postgresql:thin:@localhost:5432:mydb>
+            </screen>
+          </refsect1>
+        </refentry>
+      </section>
       <section id="sect_command_script">
       <title>script</title>
       <refentry id="command_script">
