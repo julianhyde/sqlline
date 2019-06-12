@@ -18,7 +18,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.h2.util.StringUtils;

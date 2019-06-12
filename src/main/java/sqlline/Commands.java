@@ -1497,6 +1497,7 @@ public class Commands {
       return;
     }
     List<String> cmds = new LinkedList<>();
+
     try {
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(

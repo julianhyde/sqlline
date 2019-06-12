@@ -1277,7 +1277,6 @@ public class SqlLine {
           inQuotes = true;
         }
       } else if (line.regionMatches(i, delim, 0, delim.length())) {
-
         if (inQuotes) {
           i += delim.length() - 1;
           continue;
@@ -1312,6 +1311,7 @@ public class SqlLine {
         ret[i] = dequote(tokens.get(i));
       }
     }
+
     return ret;
   }
 
@@ -1749,6 +1749,7 @@ public class SqlLine {
 
   public int runCommands(List<String> cmds, DispatchCallback callback) {
     int successCount = 0;
+
     try {
       int index = 1;
       int size = cmds.size();
