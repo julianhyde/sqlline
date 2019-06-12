@@ -1149,7 +1149,7 @@ public class Commands {
     }
   }
 
-  public void connect(String line, DispatchCallback callback) {
+  public void connect(String line, DispatchCallback callback) throws Exception {
     String example = "Usage: connect <url> <username> <password> [driver]"
         + SqlLine.getSeparator();
 

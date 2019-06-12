@@ -603,7 +603,6 @@ public class SqlLine {
           .build()
         : lineReaderBuilder.build();
 
-    lineReader.setOpt(LineReader.Option.MENU_COMPLETE);
     addWidget(lineReader,
         this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
     fileHistory.attach(lineReader);
