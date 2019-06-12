@@ -556,7 +556,6 @@ public class SqlLineOpts implements Completer {
   }
 
   public void setShowCompletionDesc(String setShowCompletionDesc) {
-    sqlLine.setCommandCompleter(new SqlLineCommandCompleter(sqlLine));
     set(SHOW_COMPLETION_DESCR, setShowCompletionDesc);
   }
 
