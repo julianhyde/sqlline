@@ -239,6 +239,7 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "manual"),
         new ReflectiveCommandHandler(sqlLine, tableCompleter, "importedkeys"),
         new ReflectiveCommandHandler(sqlLine, empty, "procedures"),
+        new ReflectiveCommandHandler(sqlLine, empty, "schemas"),
         new ReflectiveCommandHandler(sqlLine, empty, "tables"),
         new ReflectiveCommandHandler(sqlLine, empty, "typeinfo"),
         new ReflectiveCommandHandler(sqlLine, empty, "commandhandler"),

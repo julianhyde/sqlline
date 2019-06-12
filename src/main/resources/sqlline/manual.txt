@@ -88,6 +88,8 @@ save
 save — Save the current preferences
 scan
 scan — Scan class path for JDBC drivers
+schemas
+schemas — List all the schemas in the database
 script
 script — Save executed commands to a file
 set
@@ -223,6 +225,8 @@ run
 run — Execute a command script
 save
 save — Save the current preferences
+schemas
+schemas — List all the schemas in the database
 scan
 scan — Scan class path for JDBC drivers
 script
@@ -450,6 +454,8 @@ run
 run — Execute a command script
 save
 save — Save the current preferences
+schemas
+schemas — List all the schemas in the database
 scan
 scan — Scan class path for JDBC drivers
 script
@@ -1102,6 +1108,7 @@ sqlline> !help
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
 !save               Save the current variables and aliases
+!schemas            List all the schemas in the database
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
 !set                Set a sqlline variable
@@ -1920,6 +1927,34 @@ no        7.3     org.postgresql.Driver
 yes       0.9     org.sourceforge.jxdbcon.JXDBConDriver
 
 sqlline>
+
+schemas
+
+Name
+
+schemas — List all the schemas in the database
+
+Synopsis
+
+!schemas
+
+Description
+
+List all the schemas in the database of the current connection.
+
+Example of "schemas" command
+
+0: jdbc:postgresql:thin:@localhost:5432:mydb> !schemas
+
++--------------------+---------------+
+|    table_schem     | table_catalog |
++--------------------+---------------+
+| information_schema |               |
+| pg_catalog         |               |
+| public             |               |
++--------------------+---------------+
+
+0: jdbc:postgresql:thin:@localhost:5432:mydb>
 
 script
 
