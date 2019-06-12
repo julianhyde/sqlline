@@ -15,8 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Invokes methods via reflection.
@@ -44,38 +46,38 @@ class Reflector {
       throws InvocationTargetException, IllegalAccessException,
       ClassNotFoundException {
     Class c = defClass != null ? defClass : on.getClass();
-    List<Method> candidateMethods = new LinkedList<>();
+    List<Method> candidateMethods = Stream.of(c.getMethods())
+        .filter(m -> m.getName().equalsIgnoreCase(methodName))
+        .filter(m -> Modifier.isPublic(m.getModifiers()))
+        .collect(Collectors.toList());
 
-    for (Method method : c.getMethods()) {
-      if (method.getName().equalsIgnoreCase(methodName)) {
-        candidateMethods.add(method);
-      }
-    }
-
-    if (candidateMethods.size() == 0) {
+    if (candidateMethods.isEmpty()) {
       throw new IllegalArgumentException(
           sqlLine.loc("no-method", methodName, c.getName()));
     }
 
+    String arguments = "";
     for (Method method : candidateMethods) {
-      Class[] ptypes = method.getParameterTypes();
-      if (ptypes.length != args.size()) {
+      if (method.getParameterCount() != args.size()) {
+        StringJoiner methodTypes = new StringJoiner(", ");
+        for (Class type: method.getParameterTypes()) {
+          methodTypes.add(type.getTypeName());
+        }
+        arguments = methodTypes.toString();
         continue;
       }
+      Class[] ptypes = method.getParameterTypes();
 
       Object[] converted = convert(args, ptypes);
       if (converted == null) {
         continue;
       }
 
-      if (!Modifier.isPublic(method.getModifiers())) {
-        continue;
-      }
-
       return method.invoke(on, converted);
     }
 
-    return null;
+    throw new IllegalArgumentException(
+        sqlLine.loc("method-requires-arguments", methodName, arguments));
   }
 
   public static Object[] convert(List objects, Class[] toTypes)

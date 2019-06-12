@@ -198,6 +198,7 @@ public class Commands {
       Set<String> methodNames = new TreeSet<>();
       Set<String> methodNamesUpper = new TreeSet<>();
       Class currentClass = sqlLine.getConnection().getMetaData().getClass();
+      Object res = null;
       do {
         for (Method method : currentClass.getDeclaredMethods()) {
           final int modifiers = method.getModifiers();
@@ -207,9 +208,24 @@ public class Commands {
           }
           methodNames.add(method.getName());
           methodNamesUpper.add(method.getName().toUpperCase(Locale.ROOT));
+          if (methodNamesUpper.contains(cmd.toUpperCase(Locale.ROOT))) {
+            try {
+              res = sqlLine.getReflector().invoke(
+                  sqlLine.getDatabaseMetaData(),
+                  sqlLine.getDatabaseMetaData().getClass(), cmd, argList);
+            } catch (Exception e) {
+              sqlLine.handleException(e);
+              callback.setToFailure();
+              return;
+            }
+            if (res != null) {
+              break;
+            }
+          }
         }
         currentClass = currentClass.getSuperclass();
-      } while (DatabaseMetaData.class.isAssignableFrom(currentClass));
+      } while (res == null
+          && DatabaseMetaData.class.isAssignableFrom(currentClass));
 
       if (!methodNamesUpper.contains(cmd.toUpperCase(Locale.ROOT))) {
         sqlLine.error(sqlLine.loc("no-such-method", cmd));
@@ -221,9 +237,6 @@ public class Commands {
         return;
       }
 
-      final Object res = sqlLine.getReflector()
-          .invoke(sqlLine.getDatabaseMetaData(), DatabaseMetaData.class,
-              cmd, argList);
       if (res instanceof ResultSet) {
         try (ResultSet rs = (ResultSet) res) {
           sqlLine.print(rs, callback);
