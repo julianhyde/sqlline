@@ -15,11 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jline.builtins.Completers;
+import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.NullCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.utils.AttributedString;
 
 /**
  * Suggests completions for a command.
@@ -39,7 +41,9 @@ class SqlLineCommandCompleter extends AggregateCompleter {
                 instanceof Completers.RegexCompleter) {
           completers.add(parameterCompleters.iterator().next());
         } else {
-          compl.add(new StringsCompleter(SqlLine.COMMAND_PREFIX + cmd));
+          final String commandName = SqlLine.COMMAND_PREFIX + cmd;
+          compl.add(new CommandNameSqlLineCompleter(
+              sqlLine, commandHandler.getHelpText(), commandName));
           compl.addAll(parameterCompleters);
           compl.add(new NullCompleter()); // last param no complete
           completers.add(new ArgumentCompleter(compl));
@@ -48,6 +52,47 @@ class SqlLineCommandCompleter extends AggregateCompleter {
     }
 
     getCompleters().addAll(completers);
+  }
+
+  /**
+   * Command name completer with possibility to show description.
+   */
+  static class CommandNameSqlLineCompleter extends StringsCompleter {
+    CommandNameSqlLineCompleter(
+            SqlLine sqlLine, String helpText, String... strings) {
+      super();
+      for (String string : strings) {
+        final String commandName = AttributedString.stripAnsi(string);
+        candidates.add(new SqlLineCandidate(sqlLine, commandName,
+            string, "Command name", helpText,
+            // there could be whatever else instead helpText
+            // which is the same for commands with theirs aliases
+            null, helpText, true));
+      }
+    }
+  }
+
+  /**
+   * Sqlline candidate showing description depending on
+   * showCompletionDescr's property value.
+   */
+  static class SqlLineCandidate extends Candidate {
+    private final SqlLine sqlLine;
+
+    SqlLineCandidate(SqlLine sqlLine, String value, String displ,
+        String group, String descr, String suffix,
+        String key, boolean complete) {
+      super(value, displ, group, descr, suffix, key, complete);
+      this.sqlLine = sqlLine;
+    }
+
+    @Override
+    public String descr() {
+      if (sqlLine.getOpts().getShowCompletionDescr()) {
+        return super.descr();
+      }
+      return null;
+    }
   }
 }
 
