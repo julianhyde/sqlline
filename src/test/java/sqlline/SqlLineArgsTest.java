@@ -774,7 +774,7 @@ public class SqlLineArgsTest {
     final SqlLine sqlLine = new SqlLine();
     final String script = "!set incremental true\n"
         + "values 1;\n"
-        + "!record " + sqlLine.escape(file.getAbsolutePath()) + "\n"
+        + "!record " + sqlLine.escapeAndQuote(file.getAbsolutePath()) + "\n"
         + "!set outputformat csv\n"
         + "values 2;\n"
         + "!record\n"
@@ -793,7 +793,7 @@ public class SqlLineArgsTest {
                 containsString("1 row selected ("),
                 containsString(
                     "3/8          !record "
-                        + sqlLine.escape(file.getAbsolutePath()) + "\n"),
+                        + sqlLine.escapeAndQuote(file.getAbsolutePath())),
                 containsString(
                     "Saving all output to \"" + file.getAbsolutePath() + "\""),
                 containsString(

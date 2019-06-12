@@ -399,7 +399,8 @@ public class SqlLine {
     if (url != null || user != null || pass != null || driver != null) {
       String com =
           COMMAND_PREFIX + "connect "
-              + escape(url) + " " + escape(user) + " " + escape(pass) + " "
+              + escapeAndQuote(url) + " " + escapeAndQuote(user)
+              + " " + escapeAndQuote(pass) + " "
               + (driver == null ? "" : driver);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
@@ -407,12 +408,12 @@ public class SqlLine {
 
     if (nickname != null) {
       dispatch(COMMAND_PREFIX
-          + "nickname " + escape(nickname), new DispatchCallback());
+          + "nickname " + escapeAndQuote(nickname), new DispatchCallback());
     }
 
     if (logFile != null) {
       dispatch(COMMAND_PREFIX
-          + "record " + escape(logFile), new DispatchCallback());
+          + "record " + escapeAndQuote(logFile), new DispatchCallback());
     }
 
     if (commandHandler != null) {
@@ -1333,12 +1334,14 @@ public class SqlLine {
     return builder.toString();
   }
 
-  String escape(String input) {
+  // escape and quote if first and last symbols are not equal quotes
+  String escapeAndQuote(String input) {
     if (input == null || input.isEmpty()) {
       return "\"\"";
     }
-    if (input.charAt(0) == input.charAt(input.length() - 1)
-        && input.charAt(0) == '"' || input.charAt(0) == '\'') {
+    if (input.length() > 1
+        && input.charAt(0) == input.charAt(input.length() - 1)
+        && (input.charAt(0) == '"' || input.charAt(0) == '\'')) {
       return input;
     }
     final String escapingSymbols = "\\\"";
