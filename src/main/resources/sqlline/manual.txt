@@ -1167,6 +1167,7 @@ propertiesFile  path       File from which SQLLine reads properties on
 rightPrompt     pattern    Format right prompt
 rowLimit        integer    Maximum number of rows returned from a query; zero
                            means no limit
+showCompletionDesc true/false Display help for completions
 showElapsedTime true/false Display execution time when verbose
 showHeader      true/false Show column names in query results
 showNestedErrs  true/false Display nested errors

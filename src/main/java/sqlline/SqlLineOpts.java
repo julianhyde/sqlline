@@ -65,6 +65,7 @@ import static sqlline.BuiltInProperty.PROMPT;
 import static sqlline.BuiltInProperty.PROPERTIES_FILE;
 import static sqlline.BuiltInProperty.RIGHT_PROMPT;
 import static sqlline.BuiltInProperty.ROW_LIMIT;
+import static sqlline.BuiltInProperty.SHOW_COMPLETION_DESCR;
 import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
 import static sqlline.BuiltInProperty.SHOW_HEADER;
 import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
@@ -113,6 +114,8 @@ public class SqlLineOpts implements Completer {
               put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
               put(OUTPUT_FORMAT, SqlLineOpts.this::setOutputFormat);
               put(PROPERTIES_FILE, SqlLineOpts.this::setPropertiesFile);
+              put(SHOW_COMPLETION_DESCR,
+                  SqlLineOpts.this::setShowCompletionDesc);
               put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
             }
@@ -148,7 +151,10 @@ public class SqlLineOpts implements Completer {
       Map<BuiltInProperty, Collection<String>> customCompletions) {
     Map<String, Completer> comp = new HashMap<>();
     final String start = "START";
-    comp.put(start, new StringsCompleter("!set"));
+    comp.put(start,
+        new StringsCompleter(new SqlLineCommandCompleter.SqlLineCandidate(
+            sqlLine, "!set", "!set", sqlLine.loc("command-name"),
+            sqlLine.loc("help-set"), null,  "!set", true)));
     Collection<BuiltInProperty> booleanProperties = new ArrayList<>();
     Collection<BuiltInProperty> withDefinedAvailableValues = new ArrayList<>();
     StringBuilder sb = new StringBuilder(start + " (");
@@ -502,6 +508,10 @@ public class SqlLineOpts implements Completer {
     return getBoolean(SHOW_WARNINGS);
   }
 
+  public boolean getShowCompletionDescr() {
+    return getBoolean(SHOW_COMPLETION_DESCR);
+  }
+
   public boolean getShowNestedErrs() {
     return getBoolean(SHOW_NESTED_ERRS);
   }
@@ -552,6 +562,10 @@ public class SqlLineOpts implements Completer {
   public void setTimestampFormat(String timestampFormat) {
     set(TIMESTAMP_FORMAT,
         getValidDateTimePatternOrThrow(timestampFormat));
+  }
+
+  public void setShowCompletionDesc(String setShowCompletionDesc) {
+    set(SHOW_COMPLETION_DESCR, setShowCompletionDesc);
   }
 
   public String getNullValue() {

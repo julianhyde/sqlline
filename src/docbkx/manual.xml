@@ -3356,6 +3356,14 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           Defaults to 0, which is interpreted as fetching all rows.
         </para>
       </sect1>
+      <sect1 id="setting_showcompletiondesc">
+        <title>showcompletiondesc</title>
+        <para>
+          If <literal>true</literal>, display help description for each
+          completion candidate. Defaults to
+          <literal>true</literal>.
+        </para>
+      </sect1>
       <sect1 id="setting_showheader">
         <title>showheader</title>
         <para>
