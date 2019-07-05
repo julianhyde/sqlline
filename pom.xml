@@ -25,26 +25,26 @@
     <top.dir>${project.basedir}</top.dir>
 
     <!-- The following list is sorted. -->
-    <checkstyle.version>8.20</checkstyle.version>
+    <checkstyle.version>8.22</checkstyle.version>
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
     <forbiddenapis.version>2.6</forbiddenapis.version>
     <h2.version>1.4.197</h2.version>
     <hamcrest.version>2.1</hamcrest.version>
     <hsqldb.version>2.4.1</hsqldb.version>
-    <jline.version>3.10.0</jline.version>
-    <jmockit.version>1.46</jmockit.version>
-    <junit.version>5.4.2</junit.version>
+    <jline.version>3.12.1</jline.version>
+    <jmockit.version>1.47</jmockit.version>
+    <junit.version>5.5.0</junit.version>
     <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
-    <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-    <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+    <maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
     <maven-javadoc-plugin.additionalOptions>-html5</maven-javadoc-plugin.additionalOptions>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
   </properties>
 
