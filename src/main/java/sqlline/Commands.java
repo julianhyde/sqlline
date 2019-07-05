@@ -248,7 +248,7 @@ public class Commands {
           argsLine.isEmpty()
               ? new String[]{"-d"}
               : sqlLine.split(argsLine, " "));
-    } catch (IOException e) {
+    } catch (Exception e) {
       callback.setToFailure();
     }
     callback.setToSuccess();
@@ -1753,7 +1753,7 @@ public class Commands {
         org.jline.builtins.Commands.less(sqlLine.getLineReader().getTerminal(),
             in, sqlLine.getOutputStream(), sqlLine.getErrorStream(),
             null, new String[]{});
-      } catch (InterruptedException e) {
+      } catch (Exception e) {
         callback.setToFailure();
         sqlLine.error(e);
         return;
