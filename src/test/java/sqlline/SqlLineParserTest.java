@@ -56,6 +56,7 @@ public class SqlLineParserTest {
       "select 1 --; --;",
       "select /*--\n\n--\n--;",
       "select /* \n ;",
+      "select /*/;",
       "select --\n/*\n--\n--;",
       "select ' ''\n '' '\n /* ;",
       "select ` ``\n `` `\n /* ;",
@@ -182,7 +183,7 @@ public class SqlLineParserTest {
     for (String line : WRONG_LINES) {
       try {
         parser.parse(line, line.length(), acceptLine);
-        fail("Missing closing quote or semicolon for line " + line);
+        fail("Missing closing comment, quote or semicolon for line " + line);
       } catch (EOFError eofError) {
         //ok
       }

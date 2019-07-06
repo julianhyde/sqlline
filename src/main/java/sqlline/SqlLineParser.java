@@ -173,7 +173,8 @@ public class SqlLineParser extends DefaultParser {
                 rawWordLength, rawWordStart, i);
             rawWordStart = i + 1;
           } else if (multiLineCommentStart >= 0) {
-            if (currentChar == '/' && line.charAt(i - 1) == '*') {
+            if (i - multiLineCommentStart > 2
+                && currentChar == '/' && line.charAt(i - 1) == '*') {
               // End the block; arg could be empty, but that's fine
               words.add(flush(current));
               multiLineCommentStart = -1;
