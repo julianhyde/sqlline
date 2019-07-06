@@ -152,6 +152,7 @@ public class SqlLineHighlighterTest {
         "--select",
         "/* \"''\"",
         "/*",
+        "/*/ should be a comment",
         "--",
         "--\n/*",
         "/* kh\n'asd'ad*/",

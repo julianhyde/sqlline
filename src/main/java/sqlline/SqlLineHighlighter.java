@@ -464,7 +464,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
     if (startingPoint + 1 < line.length()
         && ch == '/'
         && line.charAt(startingPoint + 1) == '*') {
-      int end = line.indexOf("*/", startingPoint);
+      int end = startingPoint + 2 < line.length()
+          ? line.indexOf("*/", startingPoint + 2) : -1;
       end = end == -1 ? line.length() - 1 : end + 1;
       commentBitSet.set(startingPoint, end + 1);
       startingPoint = end;

@@ -166,6 +166,7 @@ public class SqlLineHighlighterLowLevelTest {
         "--select",
         "/* \"''\"",
         "/*",
+        "/*/ should be a comment",
         "--",
         "/* kh\n'asd'ad*/",
         "/*\"-- \"values*/"
