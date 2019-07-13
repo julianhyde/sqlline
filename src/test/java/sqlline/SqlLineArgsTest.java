@@ -780,7 +780,7 @@ public class SqlLineArgsTest {
    */
   @Test
   public void testRecordFilenameWithSpace() {
-    final String fileNameWithSpaces = "sqlline' file\" with\\ spaces";
+    final String fileNameWithSpaces = "sqlline' file with spaces";
     File file = createTempFile(fileNameWithSpaces, ".log");
     final SqlLine sqlLine = new SqlLine();
     final String script = "!set incremental true\n"
@@ -2603,7 +2603,7 @@ public class SqlLineArgsTest {
       };
       final SqlLine sqlLine = new SqlLine();
       ByteArrayOutputStream os = new ByteArrayOutputStream();
-      final String filename = "file' with\\\" spaces";
+      final String filename = "file' with spaces";
       String[] connectionArgs = new String[] {
           "-u", ConnectionSpec.H2.url,
           "-n", ConnectionSpec.H2.username,
