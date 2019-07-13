@@ -1096,7 +1096,7 @@ sqlline> !help
 !nickname           Create a friendly name for the connection (updates command
                     prompt)
 !outputformat       Set the output format for displaying results (table,
-                    vertical, csv, tsv, xmlattrs, xmlelements, json)
+                    vertical, csv, tsv, xmlattrs, xmlelements, json, ansiconsole)
 !primarykeys        List all the primary keys for the specified table
 !procedures         List all the procedures
 !prompthandler      Set custom prompt handler class name
@@ -1157,7 +1157,7 @@ maxHistoryRows  integer    The maximum number of history rows
 mode            emacs/vi   The editing mode
 nullValue       String     Use String in place of  NULL values
 numberFormat    pattern    Format numbers using DecimalFormat pattern
-outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json
+outputFormat    table/vertical/csv/tsv/xmlattrs/xmlelements/json/ansiconsole
                            Format mode for result display
 prompt          pattern    Format prompt
 propertiesFile  path       File from which SQLLine reads properties on
@@ -1527,6 +1527,18 @@ Example of JSON output formatting
 {"COMPANY_ID":3,"NAME":"IBM"},
 {"COMPANY_ID":4,"NAME":"Microsoft"}
 ]}
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod>
+
+Example of AnsiConsole output formatting
+
+0: jdbc:calcite:model=target/test-classes/mod> !outputformat ansiconsole
+0: jdbc:calcite:model=target/test-classes/mod> SELECT * FROM COMPANY;
+COMPANY_ID NAME
+1          Apple
+2          Sun
+3          IBM
+4          Microsoft
 4 rows selected (0.03 seconds)
 0: jdbc:calcite:model=target/test-classes/mod>
 
