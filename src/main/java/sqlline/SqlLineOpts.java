@@ -68,6 +68,7 @@ import static sqlline.BuiltInProperty.ROW_LIMIT;
 import static sqlline.BuiltInProperty.SHOW_COMPLETION_DESCR;
 import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
 import static sqlline.BuiltInProperty.SHOW_HEADER;
+import static sqlline.BuiltInProperty.SHOW_LINE_NUMBERS;
 import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
 import static sqlline.BuiltInProperty.SHOW_WARNINGS;
 import static sqlline.BuiltInProperty.SILENT;
@@ -748,6 +749,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getAutoSave() {
     return getBoolean(AUTO_SAVE);
+  }
+
+  public boolean getShowLineNumbers() {
+    return getBoolean(SHOW_LINE_NUMBERS);
   }
 
   public String getOutputFormat() {

@@ -39,6 +39,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 
 import static org.jline.keymap.KeyMap.alt;
+import static org.jline.keymap.KeyMap.ctrl;
 
 /**
  * A console SQL shell with command completion.
@@ -595,6 +596,7 @@ public class SqlLine {
         .terminal(terminal)
         .parser(new SqlLineParser(this))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
+        .variable(LineReader.LINE_OFFSET, 1)  // start line numbers with 1
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
     final LineReader lineReader = inputStream == null
         ? lineReaderBuilder
@@ -606,6 +608,8 @@ public class SqlLine {
 
     addWidget(lineReader,
         this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
+    addWidget(lineReader,
+        this::toggleLineNumbersWidget, "TOGGLE_LINE_NUMBERS", alt(ctrl('n')));
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;
@@ -643,6 +647,13 @@ public class SqlLine {
       }
     }
     getOpts().setColorScheme(BuiltInProperty.DEFAULT);
+    return true;
+  }
+
+  boolean toggleLineNumbersWidget() {
+    getOpts().set(BuiltInProperty.SHOW_LINE_NUMBERS,
+        !getOpts().getShowLineNumbers());
+    getLineReader().callWidget(LineReader.REDISPLAY);
     return true;
   }
 

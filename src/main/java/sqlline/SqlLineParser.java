@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Objects;
 
 import org.jline.reader.EOFError;
+import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.DefaultParser;
+import org.jline.reader.impl.LineReaderImpl;
 
 import static sqlline.Commands.flush;
 
@@ -446,13 +448,25 @@ public class SqlLineParser extends DefaultParser {
   }
 
   private String getPaddedPrompt(String waitingPattern) {
-    int length = sqlLine.getPromptHandler().getPrompt().columnLength();
-    StringBuilder prompt = new StringBuilder(length);
-    for (int i = 0; i < length - "> ".length() - waitingPattern.length(); i++) {
-      prompt.append(i % 2 == 0 ? '.' : ' ');
+    if (sqlLine.getOpts().getShowLineNumbers()
+        && sqlLine.getLineReader() != null) {
+      sqlLine.getLineReader()
+          .setVariable(LineReader.SECONDARY_PROMPT_PATTERN, "%N%P.%M> ");
+      return waitingPattern;
+    } else {
+      if (sqlLine.getLineReader() != null) {
+        sqlLine.getLineReader().setVariable(LineReader.SECONDARY_PROMPT_PATTERN,
+            LineReaderImpl.DEFAULT_SECONDARY_PROMPT_PATTERN);
+      }
+      int length = sqlLine.getPromptHandler().getPrompt().columnLength();
+      StringBuilder prompt = new StringBuilder(length);
+      for (int i = 0;
+           i < length - "> ".length() - waitingPattern.length(); i++) {
+        prompt.append(i % 2 == 0 ? '.' : ' ');
+      }
+      prompt.append(waitingPattern);
+      return prompt.toString();
     }
-    prompt.append(waitingPattern);
-    return prompt.toString();
   }
 }
 
