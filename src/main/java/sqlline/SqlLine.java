@@ -595,6 +595,8 @@ public class SqlLine {
         .terminal(terminal)
         .parser(new SqlLineParser(this))
         .variable(LineReader.HISTORY_FILE, getOpts().getHistoryFile())
+        .option(LineReader.Option.AUTO_LIST, false)
+        .option(LineReader.Option.AUTO_MENU, true)
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
     final LineReader lineReader = inputStream == null
         ? lineReaderBuilder
