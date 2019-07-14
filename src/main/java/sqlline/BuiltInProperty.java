@@ -77,6 +77,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),
   SHOW_COMPLETION_DESCR("showCompletionDesc", Type.BOOLEAN, true),
   SHOW_HEADER("showHeader", Type.BOOLEAN, true),
+  SHOW_LINE_NUMBERS("showLineNumbers", Type.BOOLEAN, false),
   SHOW_NESTED_ERRS("showNestedErrs", Type.BOOLEAN, false),
   SHOW_WARNINGS("showWarnings", Type.BOOLEAN, true),
   STRICT_JDBC("strictJdbc", Type.BOOLEAN, false),
