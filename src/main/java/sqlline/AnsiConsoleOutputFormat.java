@@ -16,8 +16,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 
 /**
- * Implementation of {@link OutputFormat}
- * that formats rows as ansiconsole sqlcl like format.
+ * OutputFormat for a table-like but borderless format.
  */
 public class AnsiConsoleOutputFormat implements OutputFormat {
   private final SqlLine sqlLine;
