@@ -2621,6 +2621,94 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testDropAll() {
+    try {
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        int getUserAnswer(String question, int... allowedAnswers) {
+          return 'y';
+        }
+      };
+      assertThat(sqlLine.getOpts().getConfirm(), is(false));
+      assertThat(sqlLine.getOpts().getConfirmPattern(),
+          is(BuiltInProperty.CONFIRM_PATTERN.defaultValue()));
+      final String createScript = "CREATE SCHEMA TESTDROPALL_1;\n"
+          + "CREATE SCHEMA TESTDROPALL_2;\n"
+          + "CREATE SCHEMA TESTDROPALL_3;\n"
+          + "CREATE TABLE TESTDROPALL_1.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_1.TABLE_2(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_2.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_2.TABLE_2(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_3.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_3.TABLE_2(pk int);\n";
+      checkScriptFile(createScript, true,
+          equalTo(SqlLine.Status.OK),
+          containsString(" "));
+      final String showTables = "!tables";
+      checkScriptFile(showTables, true, equalTo(SqlLine.Status.OK),
+          allOf(containsString("TESTDROPALL_1"),
+              containsString("TESTDROPALL_2"),
+              containsString("TESTDROPALL_3")));
+      String dropScript = "!dropall TESTDROPALL%\n";
+      checkScriptFile(dropScript, true,
+          equalTo(SqlLine.Status.OK),
+          containsString(" "));
+
+      checkScriptFile(showTables, true, equalTo(SqlLine.Status.OK),
+          allOf(containsString("INFORMATION_SCHEMA"),
+              not(containsString("TESTDROPALL_1")),
+              not(containsString("TESTDROPALL_2")),
+              not(containsString("TESTDROPALL_3"))));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testDropAllForSpecificSchema() {
+    try {
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        int getUserAnswer(String question, int... allowedAnswers) {
+          return 'y';
+        }
+      };
+      assertThat(sqlLine.getOpts().getConfirm(), is(false));
+      assertThat(sqlLine.getOpts().getConfirmPattern(),
+          is(BuiltInProperty.CONFIRM_PATTERN.defaultValue()));
+      final String createScript = "CREATE SCHEMA TESTDROPALL_SPECIFIC_1;\n"
+          + "CREATE SCHEMA TESTDROPALL_SPECIFIC_2;\n"
+          + "CREATE SCHEMA TESTDROPALL_SPECIFIC_3;\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_1.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_1.TABLE_2(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_2.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_2.TABLE_2(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_3.TABLE_1(pk int);\n"
+          + "CREATE TABLE TESTDROPALL_SPECIFIC_3.TABLE_2(pk int);\n";
+      checkScriptFile(createScript, true,
+          equalTo(SqlLine.Status.OK),
+          containsString(" "));
+      final String showTables = "!tables";
+      checkScriptFile(showTables, true, equalTo(SqlLine.Status.OK),
+          allOf(containsString("TESTDROPALL_SPECIFIC_1"),
+              containsString("TESTDROPALL_SPECIFIC_2"),
+              containsString("TESTDROPALL_SPECIFIC_3")));
+      String dropScript = "!dropall TESTDROPALL_SPECIFIC_1\n";
+      checkScriptFile(dropScript, true,
+          equalTo(SqlLine.Status.OK),
+          containsString(" "));
+
+      checkScriptFile(showTables, true, equalTo(SqlLine.Status.OK),
+          allOf(containsString("INFORMATION_SCHEMA"),
+              containsString("TESTDROPALL_SPECIFIC_2"),
+              containsString("TESTDROPALL_SPECIFIC_3"),
+              not(containsString("TESTDROPALL_SPECIFIC_1"))));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {

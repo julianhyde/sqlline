@@ -41,7 +41,7 @@ dbinfo — Provide information about the current database
 describe
 describe — Describe a table
 dropall
-dropall — Drop all tables in the database
+dropall — Drop all tables in the database or in the schema
 exportedkeys
 exportedkeys — List exported foreign keys for a database
 go
@@ -182,7 +182,7 @@ dbinfo — Provide information about the current database
 describe
 describe — Describe a table
 dropall
-dropall — Drop all tables in the database
+dropall — Drop all tables in the database or in the schema
 exportedkeys
 exportedkeys — List exported foreign keys for a database
 go
@@ -411,7 +411,7 @@ dbinfo — Provide information about the current database
 describe
 describe — Describe a table
 dropall
-dropall — Drop all tables in the database
+dropall — Drop all tables in the database or in the schema
 exportedkeys
 exportedkeys — List exported foreign keys for a database
 go
@@ -964,11 +964,11 @@ dropall
 
 Name
 
-dropall — Drop all tables in the database
+dropall — Drop all tables in the database or in the schema
 
 Synopsis
 
-!dropall
+!dropall [schema_pattern]
 
 Description
 
