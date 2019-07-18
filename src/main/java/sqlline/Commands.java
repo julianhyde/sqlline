@@ -1324,7 +1324,6 @@ public class Commands {
     try {
       sqlLine.getDatabaseConnections().setConnection(connection);
       sqlLine.getDatabaseConnection().getConnection();
-      sqlLine.setCompletions();
       callback.setToSuccess();
     } catch (Exception e) {
       connection.close();
