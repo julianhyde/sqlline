@@ -151,7 +151,6 @@ public class CompletionTest {
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertEquals(status, SqlLine.Status.OK);
       sqlLine.runCommands(new DispatchCallback(),
-          "!set maxwidth 80",
           "!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "
               + SqlLineArgsTest.ConnectionSpec.H2.username + " "
@@ -187,7 +186,6 @@ public class CompletionTest {
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertEquals(status, SqlLine.Status.OK);
       sqlLine.runCommands(new DispatchCallback(),
-          "!set maxwidth 80",
           "!set fastconnect false",
           "!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "
@@ -222,7 +220,6 @@ public class CompletionTest {
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertEquals(status, SqlLine.Status.OK);
       sqlLine.runCommands(new DispatchCallback(),
-          "!set maxwidth 80",
           "!set fastconnect true",
           "!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "
