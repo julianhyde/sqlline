@@ -988,14 +988,14 @@ public class SqlLine {
         "%");
   }
 
-  ResultSet getTables() throws SQLException {
+  ResultSet getTables(String schemaTemplate) throws SQLException {
     if (!assertConnection()) {
       return null;
     }
 
     return getDatabaseConnection().meta.getTables(
         getDatabaseConnection().meta.getConnection().getCatalog(),
-        null,
+        schemaTemplate,
         "%",
         new String[] {"TABLE"});
   }

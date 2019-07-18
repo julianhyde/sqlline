@@ -468,6 +468,12 @@ public class Commands {
   }
 
   public void dropall(String line, DispatchCallback callback) {
+    String[] parts = sqlLine.split(line);
+    if (parts.length > 2) {
+      sqlLine.error("Usage: !dropall [schema_pattern]");
+      callback.setToFailure();
+      return;
+    }
     DatabaseConnection databaseConnection = sqlLine.getDatabaseConnection();
     if (databaseConnection == null || databaseConnection.getUrl() == null) {
       sqlLine.error(sqlLine.loc("no-current-connection"));
@@ -476,17 +482,23 @@ public class Commands {
     }
     try {
       String question = sqlLine.loc("really-drop-all");
-      if (!sqlLine.getLineReader().readLine(question).equals("y")) {
+      final int userResponse =
+          getUserAnswer(question, 'y', 'n', 'Y', 'N');
+      if (userResponse != 'y' && userResponse != 'Y') {
         sqlLine.error("abort-drop-all");
         callback.setToFailure();
         return;
       }
 
       List<String> cmds = new LinkedList<>();
-      try (ResultSet rs = sqlLine.getTables()) {
+      final char openQuote = sqlLine.getDialect().getOpenQuote();
+      final char closeQuote = sqlLine.getDialect().getOpenQuote();
+      try (ResultSet rs =
+               sqlLine.getTables(parts.length > 1 ? parts[1] : null)) {
         while (rs.next()) {
-          cmds.add("DROP TABLE "
-              + rs.getString("TABLE_NAME") + ";");
+          cmds.add("DROP TABLE " + openQuote + rs.getString("TABLE_SCHEM")
+              + closeQuote + "." + openQuote
+              + rs.getString("TABLE_NAME")  + closeQuote + ";");
         }
       }
 
@@ -1009,7 +1021,7 @@ public class Commands {
           final String question = sqlLine.loc("really-perform-action");
           final int userResponse =
               getUserAnswer(question, 'y', 'n', 'Y', 'N');
-          if (userResponse != 'y') {
+          if (userResponse != 'y' && userResponse != 'Y') {
             sqlLine.error(sqlLine.loc("abort-action"));
             callback.setToFailure();
             return;
