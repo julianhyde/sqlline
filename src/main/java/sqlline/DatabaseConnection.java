@@ -180,7 +180,7 @@ class DatabaseConnection {
     }
 
     connect();
-
+    sqlLine.setCompletions();
     return connection;
   }
 

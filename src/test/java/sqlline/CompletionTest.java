@@ -37,6 +37,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test cases for Completions.
@@ -149,7 +151,6 @@ public class CompletionTest {
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
       assertEquals(status, SqlLine.Status.OK);
       sqlLine.runCommands(new DispatchCallback(),
-          "!set maxwidth 80",
           "!connect "
               + SqlLineArgsTest.ConnectionSpec.H2.url + " "
               + SqlLineArgsTest.ConnectionSpec.H2.username + " "
@@ -170,6 +171,78 @@ public class CompletionTest {
           getLineReaderCompletedSet(lineReaderCompletion, "SEL");
       assertEquals(1, upperCaseActual.size());
       assertEquals("SELECT", upperCaseActual.iterator().next());
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testSqlCompletionsWithoutFastConnect() {
+    try {
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertEquals(status, SqlLine.Status.OK);
+      sqlLine.runCommands(new DispatchCallback(),
+          "!set fastconnect false",
+          "!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " "
+              + "\"\"");
+      os.reset();
+
+      LineReaderCompletionImpl lineReaderCompletion =
+          new LineReaderCompletionImpl(sqlLine.getLineReader().getTerminal());
+      lineReaderCompletion.setCompleter(new SqlLineCompleter(sqlLine));
+      final String tableStartName = "FUNCTION_ALIASE";
+      final String tableStartNameExpected = "FUNCTION_ALIASES";
+      final Set<String> tableAndColumns =
+          getLineReaderCompletedSet(lineReaderCompletion, tableStartName);
+      assertFalse(tableAndColumns.isEmpty());
+      assertTrue(tableAndColumns.stream()
+          .allMatch(t -> t.startsWith(tableStartNameExpected)));
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testSqlCompletionsWithAndWithoutFastConnect() {
+    try {
+      SqlLine sqlLine = new SqlLine();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertEquals(status, SqlLine.Status.OK);
+      sqlLine.runCommands(new DispatchCallback(),
+          "!set fastconnect true",
+          "!connect "
+              + SqlLineArgsTest.ConnectionSpec.H2.url + " "
+              + SqlLineArgsTest.ConnectionSpec.H2.username + " "
+              + "\"\"");
+      os.reset();
+
+      LineReaderCompletionImpl lineReaderCompletion =
+          new LineReaderCompletionImpl(sqlLine.getLineReader().getTerminal());
+      lineReaderCompletion.setCompleter(new SqlLineCompleter(sqlLine));
+      final String tableStartNameInput = "FUNCTION_ALIASE";
+      final String tableStartNameExpected = "FUNCTION_ALIASES";
+      final Set<String> tableAndColumns =
+          getLineReaderCompletedSet(lineReaderCompletion, tableStartNameInput);
+      assertFalse(tableAndColumns.stream()
+          .allMatch(t -> t.startsWith(tableStartNameExpected)));
+
+      sqlLine.runCommands(new DispatchCallback(),
+          "!set fastconnect false",
+          "!reconnect");
+      os.reset();
+      final Set<String> tableAndColumnsAfterReconnect =
+          getLineReaderCompletedSet(lineReaderCompletion, tableStartNameInput);
+      assertTrue(tableAndColumnsAfterReconnect.stream()
+          .allMatch(t -> t.startsWith(tableStartNameExpected)));
     } catch (Exception e) {
       // fail
       throw new RuntimeException(e);
