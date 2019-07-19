@@ -21,6 +21,9 @@ almost no restrictions.
 It is distributed via the
 [Maven Central Repository](https://search.maven.org/#search%7Cga%7C1%7Csqlline).
 
+## Demos
+[demos](https://github.com/julianhyde/sqlline/wiki/Demos)
+
 ## Quick start
 
 If you have [Coursier](https://github.com/coursier/coursier) installed, you
