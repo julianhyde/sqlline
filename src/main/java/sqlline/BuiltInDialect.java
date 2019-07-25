@@ -52,6 +52,7 @@ public enum BuiltInDialect implements Dialect {
   private final Set<String> oneLineComments;
   private final Set<String> keywords;
   private final boolean storesUpperCaseIdentifier;
+  private final boolean storesLowerCaseIdentifier;
   private final char openQuote;
   private final char closeQuote;
 
@@ -63,6 +64,7 @@ public enum BuiltInDialect implements Dialect {
     this.oneLineComments = Collections.unmodifiableSet(
         Stream.of(comments).collect(Collectors.toSet()));
     this.storesUpperCaseIdentifier = false;
+    this.storesLowerCaseIdentifier = false;
     this.keywords = Collections.emptySet();
   }
 
@@ -81,6 +83,10 @@ public enum BuiltInDialect implements Dialect {
 
   @Override public char getCloseQuote() {
     return closeQuote;
+  }
+
+  @Override public boolean isLower() {
+    return storesLowerCaseIdentifier;
   }
 
   @Override public boolean isUpper() {

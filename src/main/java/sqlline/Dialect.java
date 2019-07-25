@@ -41,6 +41,8 @@ interface Dialect {
 
   char getCloseQuote();
 
+  boolean isLower();
+
   boolean isUpper();
 }
 
