@@ -1004,45 +1004,6 @@ public class SqlLine {
         new String[] {"TABLE"});
   }
 
-  Set<String> getColumnNames(DatabaseMetaData meta) {
-    Set<String> names = new HashSet<>();
-    info(loc("building-tables"));
-
-    try {
-      ResultSet columns = getColumns("%");
-
-      try {
-        int total = getSize(columns);
-        int index = 0;
-
-        while (columns.next()) {
-          // add the following strings:
-          // 1. column name
-          // 2. table name
-          // 3. tablename.columnname
-
-          progress(index++, total);
-          final String tableName = columns.getString("TABLE_NAME");
-          final String columnName = columns.getString("COLUMN_NAME");
-          names.add(tableName);
-          names.add(columnName);
-          names.add(tableName + "." + columnName);
-        }
-
-        progress(index, index);
-      } finally {
-        columns.close();
-      }
-
-      info(loc("done"));
-
-      return names;
-    } catch (Throwable t) {
-      handleException(t);
-      return Collections.emptySet();
-    }
-  }
-
   /**
    * Splits the line into an array, tokenizing on space characters.
    *
@@ -1082,7 +1043,8 @@ public class SqlLine {
    * @param line the line to break up
    * @return an array of compound words
    */
-  public String[][] splitCompound(String line) {
+  public String[][] splitCompound(
+      String line, boolean keepSqlIdentifierQuotes) {
     final Dialect dialect = getDialect();
 
     int state = SPACE;
@@ -1145,7 +1107,9 @@ public class SqlLine {
             state = SPACE;
             final String word =
                 String.copyValueOf(chars, idStart, i - idStart - 1);
-            current.add(word);
+            current.add(keepSqlIdentifierQuotes
+                ? dialect.getOpenQuote() + word + dialect.getCloseQuote()
+                : word);
           }
         }
         break;
@@ -1159,6 +1123,8 @@ public class SqlLine {
             word = null;
           } else if (dialect.isUpper()) {
             word = word.toUpperCase(Locale.ROOT);
+          } else if (dialect.isLower()) {
+            word = word.toLowerCase(Locale.ROOT);
           }
           current.add(word);
           state = c == '.' ? DOT_SPACE : SPACE;
@@ -1183,6 +1149,8 @@ public class SqlLine {
           word = null;
         } else if (dialect.isUpper()) {
           word = word.toUpperCase(Locale.ROOT);
+        } else if (dialect.isLower()) {
+          word = word.toLowerCase(Locale.ROOT);
         }
       }
       current.add(word);
@@ -1196,6 +1164,10 @@ public class SqlLine {
     }
 
     return words.toArray(new String[0][]);
+  }
+
+  public String[][] splitCompound(String line) {
+    return splitCompound(line, false);
   }
 
   Dialect getDialect() {
@@ -1533,39 +1505,6 @@ public class SqlLine {
       buf.append(' ');
     }
     return buf.toString();
-  }
-
-  /**
-   * Output a progress indicator to the console.
-   *
-   * @param cur the current progress
-   * @param max the maximum progress, or -1 if unknown
-   */
-  void progress(int cur, int max) {
-    StringBuilder out = new StringBuilder();
-
-    if (lastProgress != null) {
-      char[] back = new char[lastProgress.length()];
-      Arrays.fill(back, '\b');
-      out.append(back);
-    }
-
-    String progress =
-        cur + "/" + (max == -1 ? "?" : "" + max) + " "
-            + (max == -1 ? "(??%)"
-            : "(" + cur * 100 / (max == 0 ? 1 : max) + "%)");
-
-    if (cur >= max && max != -1) {
-      progress += " " + loc("done") + SEPARATOR;
-      lastProgress = null;
-    } else {
-      lastProgress = progress;
-    }
-
-    out.append(progress);
-
-    getOutputStream().print(out.toString());
-    getOutputStream().flush();
   }
 
   ///////////////////////////////
