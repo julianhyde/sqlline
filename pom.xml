@@ -46,6 +46,7 @@
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>
+    <skip.docbkx>false</skip.docbkx>
   </properties>
 
   <licenses>
@@ -124,6 +125,7 @@
             </entity>
           </entities>
           <includes>manual.xml</includes>
+          <skip>${skip.docbkx}</skip>
         </configuration>
       </plugin>
       <plugin>
@@ -432,6 +434,12 @@
       <properties>
         <!-- Javadoc only has a "-html5" flag in JDK 9 and higher. -->
         <maven-javadoc-plugin.additionalOptions />
+      </properties>
+    </profile>
+    <profile>
+      <id>skipDoc</id>
+      <properties>
+        <skip.docbkx>true</skip.docbkx>
       </properties>
     </profile>
   </profiles>
