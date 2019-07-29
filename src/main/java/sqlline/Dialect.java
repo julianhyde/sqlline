@@ -44,6 +44,8 @@ interface Dialect {
   boolean isLower();
 
   boolean isUpper();
+
+  String getExtraNameCharacters();
 }
 
 // End Dialect.java

@@ -25,6 +25,10 @@ import org.jline.reader.impl.completer.StringsCompleter;
  * Suggests completions for SQL statements.
  */
 class SqlCompleter extends StringsCompleter {
+  private static final String ALLOWED_UPPER_CHARACTERS =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+  private static final String ALLOWED_LOWER_CHARACTERS =
+      "abcdefghijklmnopqrstuvwxyz0123456789_";
   private final SqlLine sqlLine;
   SqlCompleter(SqlLine sqlLine) {
     super(getCompletions(sqlLine));
@@ -35,49 +39,52 @@ class SqlCompleter extends StringsCompleter {
     Set<Candidate> completions = new TreeSet<>();
 
     // now add the keywords from the current connection
-
     final DatabaseMetaData meta = sqlLine.getDatabaseConnection().meta;
     try {
       for (String sqlKeyWord: meta.getSQLKeywords().split(",")) {
+        final String keyWord = sqlKeyWord.trim();
         completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            sqlKeyWord, sqlKeyWord, null,
-            sqlLine.loc("keyword"), null, null, true));
+            keyWord, keyWord, null, sqlLine.loc("keyword"), null, null, true));
       }
     } catch (Throwable t) {
       // ignore
     }
     try {
       for (String numericFunction: meta.getNumericFunctions().split(",")) {
+        final String function = numericFunction.trim();
         completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            numericFunction, numericFunction, null,
-            sqlLine.loc("function"), null, null, true));
+            function, function, null,
+            sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
     }
     try {
       for (String stringFunction: meta.getStringFunctions().split(",")) {
+        final String function = stringFunction.trim();
         completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            stringFunction, stringFunction, null,
-            sqlLine.loc("function"), null, null, true));
+            function, function, null,
+            sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
     }
     try {
       for (String systemFunction: meta.getSystemFunctions().split(",")) {
+        final String function = systemFunction.trim();
         completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            systemFunction, systemFunction, null,
-            sqlLine.loc("function"), null, null, true));
+            function, function, null,
+            sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
     }
     try {
       for (String timeDateFunction: meta.getTimeDateFunctions().split(",")) {
+        final String function = timeDateFunction.trim();
         completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            timeDateFunction, timeDateFunction, null,
-            sqlLine.loc("function"), null, null, true));
+            function, function, null,
+            sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
@@ -88,18 +95,19 @@ class SqlCompleter extends StringsCompleter {
         sqlLine.getDatabaseConnection()
         .getSchema(true).getSchema2tables();
     for (String schemaName: schema2tables.keySet()) {
-      String value = schemaName.chars().anyMatch(Character::isWhitespace)
-          ? dialect.getOpenQuote() + schemaName + dialect.getCloseQuote()
-          : schemaName;
+      // mariadb/mysql case of connection without specific db like
+      // under user without grants to read any db
+      if (schemaName == null) {
+        continue;
+      }
+      String value = writeAsDialectSpecificValue(dialect, false, schemaName);
       completions.add(
           generateCandidate(schemaName, value, sqlLine, "schema", false));
     }
 
     for (String tableName: schema2tables.values().stream()
         .flatMap(t -> t.keySet().stream()).collect(Collectors.toSet())) {
-      String value = tableName.chars().anyMatch(Character::isWhitespace)
-          ? dialect.getOpenQuote() + tableName + dialect.getCloseQuote()
-          : tableName;
+      String value = writeAsDialectSpecificValue(dialect, false, tableName);
       completions.add(
           generateCandidate(tableName, value, sqlLine, "table", false));
     }
@@ -128,13 +136,10 @@ class SqlCompleter extends StringsCompleter {
     }
 
     Deque<String> lastWords = getSchemaTableColumn(argumentList.word());
-    Collection<Candidate> schemaBasedCandidates =
-        getSchemaBasedCandidates(new ArrayDeque<>(lastWords));
-    candidates.addAll(schemaBasedCandidates);
-
-    Collection<Candidate> tableBasedCandidates =
-        getTableBasedCandidates(new ArrayDeque<>(lastWords));
-    candidates.addAll(tableBasedCandidates);
+    candidates.addAll(getSchemaBasedCandidates(new ArrayDeque<>(lastWords)));
+    candidates.addAll(getTableBasedCandidates(new ArrayDeque<>(lastWords)));
+    // suggest other candidates if not quoted
+    // and previous word not finished with '.'
     if (argumentList.getState() != SqlLineParser.SqlParserState.QUOTED
         && (argumentList.getState()
             != SqlLineParser.SqlParserState.SEMICOLON_REQUIRED
@@ -159,7 +164,8 @@ class SqlCompleter extends StringsCompleter {
 
     final String schemaName =
         readAsDialectSpecificName(dialect, originalSchemaName);
-    final boolean need2Quote = needToQuote(dialect, originalSchemaName);
+    final boolean need2Quote =
+        isOriginalNameStartedQuoted(dialect, originalSchemaName);
     if (schemaName == null || schema2tables.get(schemaName) == null) {
       for (String sName: schema2tables.keySet()) {
         // without quotes covered in getCompletions
@@ -177,7 +183,8 @@ class SqlCompleter extends StringsCompleter {
     final String originalTableName = schemaTableColumn.pollFirst();
     final String tableName =
         readAsDialectSpecificName(dialect, originalTableName);
-    final boolean need2QuoteTableName = needToQuote(dialect, originalTableName);
+    final boolean need2QuoteTableName =
+        isOriginalNameStartedQuoted(dialect, originalTableName);
     if (tableName == null
         || !schema2tables.get(schemaName).containsKey(tableName)) {
       for (String tName: schema2tables.get(schemaName).keySet()) {
@@ -193,7 +200,7 @@ class SqlCompleter extends StringsCompleter {
           .getSchema().getColumnNames(schemaName, tableName);
       String userWrittenColumnName = schemaTableColumn.pollFirst();
       final boolean need2QuoteColumnName =
-          needToQuote(dialect, userWrittenColumnName);
+          isOriginalNameStartedQuoted(dialect, userWrittenColumnName);
       for (String columnName: columnNames) {
         String value =
             writeAsDialectSpecificValue(dialect, need2Quote, schemaName)
@@ -228,7 +235,8 @@ class SqlCompleter extends StringsCompleter {
     final String originalTableName = tableColumn.pollFirst();
     final String tableName =
         readAsDialectSpecificName(dialect, originalTableName);
-    final boolean need2QuoteTableName = needToQuote(dialect, originalTableName);
+    final boolean need2QuoteTableName =
+        isOriginalNameStartedQuoted(dialect, originalTableName);
     if (!tables2columns.containsKey(tableName)) {
       for (String tName: tables2columns.keySet()) {
         // covered in getCompletions
@@ -246,7 +254,7 @@ class SqlCompleter extends StringsCompleter {
         .getSchema().getColumnNames(null, tableName);
     String userWrittenColumnName = tableColumn.pollFirst();
     final boolean need2QuoteColumnName =
-        needToQuote(dialect, userWrittenColumnName);
+        isOriginalNameStartedQuoted(dialect, userWrittenColumnName);
     for (String columnName: columnNames) {
       String value =
           writeAsDialectSpecificValue(dialect, need2QuoteTableName, tableName)
@@ -331,15 +339,39 @@ class SqlCompleter extends StringsCompleter {
     }
   }
 
-  String writeAsDialectSpecificValue(
+  static String writeAsDialectSpecificValue(
       Dialect dialect, boolean forceQuote, String name2Write) {
-    final boolean needToQuote = name2Write != null
-        && (forceQuote
-          || name2Write.chars().anyMatch(Character::isWhitespace)
-          || (dialect.isUpper()
-              && name2Write.chars().anyMatch(Character::isLowerCase))
-          || (dialect.isLower()
-              && name2Write.chars().anyMatch(Character::isUpperCase)));
+    if (name2Write == null) {
+      return null;
+    }
+    boolean needToQuote = false;
+    if (forceQuote) {
+      needToQuote = true;
+    } else {
+      boolean isUpper = dialect.isUpper();
+      boolean isLower = dialect.isLower();
+      String extraChars = dialect.getExtraNameCharacters();
+      for (int i = 0; i < name2Write.length(); i++) {
+        if (isLower
+            && ALLOWED_LOWER_CHARACTERS.indexOf(name2Write.charAt(i)) == -1
+            && extraChars.indexOf(name2Write.charAt(i)) == -1) {
+          needToQuote = true;
+          break;
+        } else if (isUpper
+            && ALLOWED_UPPER_CHARACTERS.indexOf(name2Write.charAt(i)) == -1
+            && extraChars.indexOf(name2Write.charAt(i)) == -1) {
+          needToQuote = true;
+          break;
+        } else if (!isLower
+            && !isUpper
+            && ALLOWED_LOWER_CHARACTERS.indexOf(name2Write.charAt(i)) == -1
+            && ALLOWED_UPPER_CHARACTERS.indexOf(name2Write.charAt(i)) == -1
+            && extraChars.indexOf(name2Write.charAt(i)) == -1) {
+          needToQuote = true;
+          break;
+        }
+      }
+    }
     if (needToQuote) {
       StringBuilder result = new StringBuilder();
       result.append(dialect.getOpenQuote());
@@ -356,7 +388,8 @@ class SqlCompleter extends StringsCompleter {
     }
   }
 
-  private boolean needToQuote(Dialect dialect, String originalName) {
+  private boolean isOriginalNameStartedQuoted(
+      Dialect dialect, String originalName) {
     return originalName != null
         && !originalName.isEmpty()
         && originalName.charAt(0) == dialect.getOpenQuote();

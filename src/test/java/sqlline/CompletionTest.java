@@ -242,9 +242,9 @@ public class CompletionTest {
   private static Stream<Arguments> dialectSpecificNameProvider() {
     Dialect def = DialectImpl.getDefault();
     final Dialect storesLowerDialect = DialectImpl.create(
-        def.DEFAULT_KEYWORD_SET, "\"\"", "storesLower", true, false);
+        def.DEFAULT_KEYWORD_SET, "\"\"", "storesLower", true, false, "");
     final Dialect storesUpperDialect = DialectImpl.create(
-        def.DEFAULT_KEYWORD_SET, "[]", "storesUpper", false, true);
+        def.DEFAULT_KEYWORD_SET, "[]", "storesUpper", false, true, "");
     return Stream.of(
         of("SCHEMA", BuiltInDialect.DEFAULT, "SCHEMA"),
         of("", BuiltInDialect.DEFAULT, ""),
@@ -269,17 +269,16 @@ public class CompletionTest {
   @MethodSource("nameProvider")
   public void testWriteAsDialectSpecificValue(
       String expected, Dialect dialect, boolean forceQuote, String input) {
-    final SqlCompleter sqlCompleter = new SqlCompleter(sqlLine);
     assertEquals(expected,
-        sqlCompleter.writeAsDialectSpecificValue(dialect, forceQuote, input));
+        SqlCompleter.writeAsDialectSpecificValue(dialect, forceQuote, input));
   }
 
   private static Stream<Arguments> nameProvider() {
     Dialect dialect = DialectImpl.getDefault();
-    final Dialect dialectLow = DialectImpl.create(
-        dialect.DEFAULT_KEYWORD_SET, "\"\"", "storesLower", true, false);
+    final Dialect dialectLowWithExtra = DialectImpl.create(
+        dialect.DEFAULT_KEYWORD_SET, "\"\"", "storesLower", true, false, "@#");
     final Dialect dialectUp = DialectImpl.create(
-        dialect.DEFAULT_KEYWORD_SET, "[]", "storesUpper", false, true);
+        dialect.DEFAULT_KEYWORD_SET, "[]", "storesUpper", false, true, "");
     return Stream.of(
         of("SCHEMA", BuiltInDialect.DEFAULT, false, "SCHEMA"),
         of("\"SCHEMA\"", BuiltInDialect.DEFAULT, true, "SCHEMA"),
@@ -289,9 +288,10 @@ public class CompletionTest {
         of("ScHeMA", BuiltInDialect.DEFAULT, false, "ScHeMA"),
         of("`SCHEMA`", BuiltInDialect.MYSQL, true, "SCHEMA"),
         of("``", BuiltInDialect.MYSQL, true, ""),
-        of("\"schema with spaces\"", dialectLow, true, "schema with spaces"),
-        of("schema", dialectLow, false, "schema"),
-        of("\"ScHeMA\"", dialectLow, false, "ScHeMA"),
+        of("\"schema with spaces\"", dialectLowWithExtra, true, "schema with spaces"),
+        of("@schema#", dialectLowWithExtra, false, "@schema#"),
+        of("[@SCHEMA#]", dialectUp, false, "@SCHEMA#"),
+        of("\"ScHeMA\"", dialectLowWithExtra, false, "ScHeMA"),
         of("[schema]", dialectUp, false, "schema"),
         of("SCHEMA", dialectUp, false, "SCHEMA"),
         of("[SCHEMA]", dialectUp, true, "SCHEMA"),

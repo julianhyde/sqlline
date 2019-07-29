@@ -79,7 +79,7 @@ class DatabaseConnection {
             .collect(Collectors.toSet());
     dialect = DialectImpl.create(keywords, identifierQuoteString,
         productName, meta.storesLowerCaseIdentifiers(),
-        meta.storesUpperCaseIdentifiers());
+        meta.storesUpperCaseIdentifiers(), meta.getExtraNameCharacters());
   }
 
   /**

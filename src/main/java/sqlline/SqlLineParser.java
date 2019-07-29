@@ -360,7 +360,7 @@ public class SqlLineParser extends DefaultParser {
           SqlParserState.NEW_LINE, () -> getPaddedPrompt(""));
     }
 
-    return new SqlLineArgumentList(SqlParserState.OK, null,
+    return new SqlLineArgumentList(SqlParserState.OK, () -> "",
         line, words, wordIndex, wordCursor,
         cursor, openingQuote, rawWordCursor, rawWordLength);
   }

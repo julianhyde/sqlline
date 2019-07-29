@@ -29,24 +29,24 @@ import java.util.stream.Stream;
 public enum BuiltInDialect implements Dialect {
   /** Default built-in dialect. Does not correspond to any particular database,
    * but behaves similarly to Oracle and PostgreSQL. */
-  DEFAULT("SQLLineDefaultDialect", '"', '"', "--"),
+  DEFAULT("SQLLineDefaultDialect", '"', '"', "", "--"),
 
   /** HyperSQL dialect.
    * See <a href="https://www.h2database.com/html/grammar.html#comment">HyperSQL
    * grammar.</a>. */
-  H2("H2", '"', '"', "--", "//"),
+  H2("H2", '"', '"', "", "--", "//"),
 
   /** MySQL dialect.
    * See <a href="https://dev.mysql.com/doc/refman/8.0/en/comments.html">MySQL
    * grammar</a>
    * and <a href="https://mariadb.com/kb/en/library/comment-syntax/">MariaDB
    * grammar</a>. */
-  MYSQL("MySQL", '`', '`', "-- ", "--\t", "--\n", "#"),
+  MYSQL("MySQL", '`', '`', "#@", "-- ", "--\t", "--\n", "#"),
 
   /** Apache Phoenix dialect.
    * See <a href="https://phoenix.apache.org/language/index.html#comments">
    * Phoenix grammar</a>. */
-  PHOENIX("Phoenix", '"', '"', "--", "//");
+  PHOENIX("Phoenix", '"', '"', "", "--", "//");
 
   private final String databaseName;
   private final Set<String> oneLineComments;
@@ -55,9 +55,10 @@ public enum BuiltInDialect implements Dialect {
   private final boolean storesLowerCaseIdentifier;
   private final char openQuote;
   private final char closeQuote;
+  private final String extraNameCharacters;
 
   BuiltInDialect(String databaseName, char openQuote, char closeQuote,
-      String... comments) {
+      String extraNameCharacters, String... comments) {
     this.databaseName = Objects.requireNonNull(databaseName);
     this.openQuote = openQuote;
     this.closeQuote = closeQuote;
@@ -65,6 +66,7 @@ public enum BuiltInDialect implements Dialect {
         Stream.of(comments).collect(Collectors.toSet()));
     this.storesUpperCaseIdentifier = false;
     this.storesLowerCaseIdentifier = false;
+    this.extraNameCharacters = extraNameCharacters;
     this.keywords = Collections.emptySet();
   }
 
@@ -91,6 +93,10 @@ public enum BuiltInDialect implements Dialect {
 
   @Override public boolean isUpper() {
     return storesUpperCaseIdentifier;
+  }
+
+  @Override public String getExtraNameCharacters() {
+    return extraNameCharacters;
   }
 
   static Set<String> initDefaultKeywordSet() {

@@ -28,15 +28,16 @@ class DialectImpl implements Dialect {
   private final char closeQuote;
   private final boolean storesUpperCaseIdentifier;
   private final boolean storesLowerCaseIdentifier;
+  private final String extraNameCharacters;
 
   static DialectImpl create(Set<String> keywords, String identifierQuote,
       String productName) {
-    return create(keywords, identifierQuote, productName, false, true);
+    return create(keywords, identifierQuote, productName, false, true, "");
   }
 
   static DialectImpl create(Set<String> keywords, String identifierQuote,
       String productName, boolean storesLowerCaseIdentifier,
-      boolean storesUpperCaseIdentifier) {
+      boolean storesUpperCaseIdentifier, String extraNameCharacters) {
     final Set<String> keywords2 = keywords == null
         ? Collections.emptySet()
         : Collections.unmodifiableSet(keywords);
@@ -62,18 +63,19 @@ class DialectImpl implements Dialect {
     }
     return new DialectImpl(keywords2, storesLowerCaseIdentifier,
         storesUpperCaseIdentifier, dialect.getOneLineComments(),
-        openQuote, closeQuote);
+        openQuote, closeQuote, extraNameCharacters);
   }
 
   private DialectImpl(Set<String> keywords, boolean storesLowerCaseIdentifier,
       boolean storesUpperCaseIdentifier, Set<String> oneLineComments,
-      char openQuote, char closeQuote) {
+      char openQuote, char closeQuote, String extraNameCharacters) {
     this.keywords = Objects.requireNonNull(keywords);
     this.storesLowerCaseIdentifier = storesLowerCaseIdentifier;
     this.storesUpperCaseIdentifier = storesUpperCaseIdentifier;
     this.oneLineComments = oneLineComments;
     this.openQuote = openQuote;
     this.closeQuote = closeQuote;
+    this.extraNameCharacters = extraNameCharacters;
   }
 
   public static Dialect getDefault() {
@@ -103,6 +105,10 @@ class DialectImpl implements Dialect {
 
   @Override public boolean isUpper() {
     return storesUpperCaseIdentifier;
+  }
+
+  @Override public String getExtraNameCharacters() {
+    return extraNameCharacters;
   }
 }
 
