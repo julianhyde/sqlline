@@ -48,7 +48,7 @@ interface Dialect {
   /**
    * Retrieves all the "extra" characters that can be used
    * in unquoted identifier names (those beyond a-z, A-Z, 0-9 and _).
-   * 
+   *
    * @return the string containing the extra characters
    */
   String getExtraNameCharacters();
