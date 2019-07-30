@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.JarURLConnection;
@@ -398,6 +399,20 @@ public class SqlLine {
     }
 
     if (url != null || user != null || pass != null || driver != null) {
+      final int semicolonPosition;
+      if ((user == null || pass == null)
+          && url != null && (semicolonPosition = url.indexOf(';')) > -1) {
+        Properties properties = new Properties();
+        try {
+          properties.load(
+              new StringReader(url.substring(semicolonPosition)
+                  .replaceAll(";", "\n")));
+          user = user == null ? properties.getProperty("user") : user;
+          pass = pass == null ? properties.getProperty("password") : pass;
+        } catch (IOException e) {
+          handleException(e);
+        }
+      }
       String com =
           COMMAND_PREFIX + "connect "
               + escapeAndQuote(url) + " " + escapeAndQuote(user)
