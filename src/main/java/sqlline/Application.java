@@ -100,6 +100,15 @@ public class Application {
   private static final List<String> ISOLATION_LEVEL_LIST =
       Collections.unmodifiableList(Arrays.asList(ISOLATION_LEVELS));
 
+  private static final String[] CONNECT_MODES = {
+      "askCredentials",
+      "notAskCredentials",
+      "useNPTogetherOrEmpty",
+  };
+
+  private static final List<String> CONNECT_INTERACTIVE_MODES =
+      Collections.unmodifiableList(Arrays.asList(CONNECT_MODES));
+
   /** Creates an Application. */
   public Application() {
   }
@@ -337,6 +346,14 @@ public class Application {
 
   public Map<String, HighlightStyle> getName2HighlightStyle() {
     return BuiltInHighlightStyle.BY_NAME;
+  }
+
+  public Collection<String> getConnectInteractiveModes() {
+    return CONNECT_INTERACTIVE_MODES;
+  }
+
+  public String getDefaultInteractiveMode() {
+    return "askCredentials";
   }
 }
 

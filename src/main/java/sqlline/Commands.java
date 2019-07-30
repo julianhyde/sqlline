@@ -1195,10 +1195,10 @@ public class Commands {
     }
   }
 
-  public void connect(String line, DispatchCallback callback) throws Exception {
-    String example = "Usage: connect <url> <username> <password> [driver]"
+  public void connect(String line, DispatchCallback callback) {
+    String example =
+        "Usage: connect [-p property value]* <url> [username] [password] [driver]"
         + SqlLine.getSeparator();
-
     String[] parts = sqlLine.split(line);
     if (parts == null) {
       callback.setToFailure();
@@ -1219,11 +1219,6 @@ public class Commands {
           return;
         }
       }
-    }
-    if (parts.length - offset < 2) {
-      callback.setToFailure();
-      sqlLine.error(example);
-      return;
     }
 
     String url = parts.length < offset + 1 ? null : parts[offset];
@@ -1310,7 +1305,20 @@ public class Commands {
         "password",
         "javax.jdo.option.ConnectionPassword",
         "ConnectionPassword");
-
+    Properties info = (Properties) props.get(CONNECT_PROPERTY);
+    if (info != null) {
+      url = url == null ? info.getProperty("url") : url;
+      driver = driver == null ? info.getProperty("driver") : driver;
+      username = username == null ? info.getProperty("user") : username;
+      password = password == null ? info.getProperty("password") : password;
+    }
+    final String connectInteractionMode =
+        sqlLine.getOpts().get(BuiltInProperty.CONNECT_INTERACTION_MODE);
+    if (isBlank(username)
+        && isBlank(password)
+        && "useNPTogetherOrEmpty".equals(connectInteractionMode)) {
+      username = password = "";
+    }
     if (url == null || url.length() == 0) {
       callback.setToFailure();
       sqlLine.error(sqlLine.loc("no-url"));
@@ -1339,15 +1347,16 @@ public class Commands {
     }
 
     sqlLine.debug("Connecting to " + url);
-
-    if (username == null) {
-      username = readUsername(url);
+    if (!"notAskCredentials".equals(connectInteractionMode)) {
+      if (username == null) {
+        username = readUsername(url);
+        username = isBlank(username) ? null : username;
+      }
+      if (password == null) {
+        password = readPassword(url);
+        password = isBlank(password) ? null : password;
+      }
     }
-    if (password == null) {
-      password = readPassword(url);
-    }
-
-    Properties info = (Properties) props.get(CONNECT_PROPERTY);
     DatabaseConnection connection =
         new DatabaseConnection(sqlLine, driver, url, username, password, info);
     try {
@@ -1360,6 +1369,11 @@ public class Commands {
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  /** Returns whether a string is null or empty. */
+  private boolean isBlank(String s) {
+    return s == null || s.isEmpty();
   }
 
   String readUsername(String url) {

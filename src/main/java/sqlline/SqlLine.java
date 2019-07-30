@@ -400,9 +400,12 @@ public class SqlLine {
     if (url != null || user != null || pass != null || driver != null) {
       String com =
           COMMAND_PREFIX + "connect "
-              + escapeAndQuote(url) + " " + escapeAndQuote(user)
-              + " " + escapeAndQuote(pass) + " "
-              + (driver == null ? "" : driver);
+              + (driver == null || driver.trim().isEmpty()
+                  ? "" : "-p driver " + driver + " ")
+              + (user == null ? "" : "-p user " + escapeAndQuote(user) + " ")
+              + (pass == null
+                  ? "" : "-p password " + escapeAndQuote(pass) + " ")
+              + escapeAndQuote(url);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
     }
@@ -1198,8 +1201,8 @@ public class SqlLine {
   private static final int UNQUOTED = 3;
 
   String dequote(String str) {
-    if (str == null) {
-      return null;
+    if (str == null || str.isEmpty()) {
+      return str;
     }
 
     if ((str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"'))
