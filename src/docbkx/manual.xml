@@ -444,6 +444,19 @@ value |
         </para>
       </sect1>
 
+      <sect1 id="-no-np">
+        <title>-no-np</title>
+        <para>
+          <cmdsynopsis>
+            <command>-no-np</command>
+            <arg choice="req"></arg>
+          </cmdsynopsis>
+          Without arguments. Indicates that sqlline should use only arguments
+          from the command line without interactive asking for them to connect
+          to db even if -n or -p missed.
+        </para>
+      </sect1>
+
       <sect1 id="-ch">
         <title>-ch</title>
         <para>

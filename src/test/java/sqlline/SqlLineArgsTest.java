@@ -373,6 +373,7 @@ public class SqlLineArgsTest {
           begin(sqlLine, os, false,
               "-u", ConnectionSpec.H2.url,
               "-n", ConnectionSpec.H2.username,
+              "-p", ConnectionSpec.H2.password,
               "--run=" + tmpHistoryFile.getAbsolutePath());
       assertThat(status, equalTo(SqlLine.Status.OK));
       String output = os.toString("UTF8");
@@ -2578,7 +2579,6 @@ public class SqlLineArgsTest {
   @Test
   public void testInitArgsForUserNameAndPasswordWithSpaces() {
     try {
-      final SqlLine sqlLine = new SqlLine();
       final DatabaseConnection[] databaseConnection = new DatabaseConnection[1];
       new MockUp<sqlline.DatabaseConnections>() {
         @Mock
@@ -2618,7 +2618,6 @@ public class SqlLineArgsTest {
           nicknames[0] = nickname;
         }
       };
-      final SqlLine sqlLine = new SqlLine();
       ByteArrayOutputStream os = new ByteArrayOutputStream();
       final String filename = "file' with spaces";
       String[] connectionArgs = new String[] {
@@ -2626,13 +2625,49 @@ public class SqlLineArgsTest {
           "-n", ConnectionSpec.H2.username,
           "-p", ConnectionSpec.H2.password,
           "-nn", "nickname with spaces",
-          "-log", "target/" + filename,
+          "-log", "target" + File.separator + filename,
           "-e", "!set maxwidth 80"};
       begin(sqlLine, os, false, connectionArgs);
 
       assertThat("file with spaces",
           Files.exists(Paths.get("target", filename)));
       assertEquals("nickname with spaces", nicknames[0]);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsForSuccessConnectionWithUserPassInUrl() {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url
+              + ";user=" + ConnectionSpec.H2.username
+              + ";password=" + ConnectionSpec.H2.password
+              + " -no-np",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          not(containsString("Duplicate property")));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsForSuccessConnectionWithUserInUrl() {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url
+              + ";user=" + ConnectionSpec.H2.username
+              + "-p " + ConnectionSpec.H2.password
+              + " -no-np",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          not(containsString("Duplicate property")));
     } catch (Throwable t) {
       throw new RuntimeException(t);
     }

@@ -159,6 +159,7 @@ public class Commands {
   };
 
   private static final String CONNECT_PROPERTY = "#CONNECT_PROPERTY#.";
+  private static final String SKIP_INTERACTIVE_MODE_PROPERTY = "-no-np";
   private final SqlLine sqlLine;
 
   Commands(SqlLine sqlLine) {
@@ -1178,10 +1179,10 @@ public class Commands {
     }
   }
 
-  public void connect(String line, DispatchCallback callback) throws Exception {
-    String example = "Usage: connect <url> <username> <password> [driver]"
+  public void connect(String line, DispatchCallback callback) {
+    String example =
+        "Usage: connect [-no-np] [-p property value]* <url> [username] [password] [driver]"
         + SqlLine.getSeparator();
-
     String[] parts = sqlLine.split(line);
     if (parts == null) {
       callback.setToFailure();
@@ -1201,9 +1202,12 @@ public class Commands {
           sqlLine.error(example);
           return;
         }
+      } else if (SKIP_INTERACTIVE_MODE_PROPERTY.equals(parts[i])) {
+        connectProps.setProperty(parts[i], Boolean.TRUE.toString());
+        offset++;
       }
     }
-    if (parts.length - offset < 2) {
+    if ((connectProps.isEmpty() ? 2 : 1) > parts.length - offset) {
       callback.setToFailure();
       sqlLine.error(example);
       return;
@@ -1293,7 +1297,12 @@ public class Commands {
         "password",
         "javax.jdo.option.ConnectionPassword",
         "ConnectionPassword");
-
+    Properties info = (Properties) props.get(CONNECT_PROPERTY);
+    if (info != null) {
+      driver = driver == null ? info.getProperty("driver") : driver;
+      username = username == null ? info.getProperty("user") : username;
+      password = password == null ? info.getProperty("password") : password;
+    }
     if (url == null || url.length() == 0) {
       callback.setToFailure();
       sqlLine.error(sqlLine.loc("no-url"));
@@ -1323,14 +1332,17 @@ public class Commands {
 
     sqlLine.debug("Connecting to " + url);
 
-    if (username == null) {
-      username = readUsername(url);
+    if (info == null
+        || info.getProperty(SKIP_INTERACTIVE_MODE_PROPERTY) == null) {
+      if (username == null) {
+        username = readUsername(url);
+        username = username == null || username.isEmpty() ? null : username;
+      }
+      if (password == null) {
+        password = readPassword(url);
+        password = password == null || password.isEmpty() ? null : password;
+      }
     }
-    if (password == null) {
-      password = readPassword(url);
-    }
-
-    Properties info = (Properties) props.get(CONNECT_PROPERTY);
     DatabaseConnection connection =
         new DatabaseConnection(sqlLine, driver, url, username, password, info);
     try {
