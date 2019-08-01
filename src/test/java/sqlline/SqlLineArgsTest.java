@@ -373,6 +373,7 @@ public class SqlLineArgsTest {
           begin(sqlLine, os, false,
               "-u", ConnectionSpec.H2.url,
               "-n", ConnectionSpec.H2.username,
+              "-p", ConnectionSpec.H2.password,
               "--run=" + tmpHistoryFile.getAbsolutePath());
       assertThat(status, equalTo(SqlLine.Status.OK));
       String output = os.toString("UTF8");
@@ -2643,7 +2644,26 @@ public class SqlLineArgsTest {
       final String[] connectionArgs = new String[] {
           "-u", ConnectionSpec.H2.url
               + ";user=" + ConnectionSpec.H2.username
-              + ";password=" + ConnectionSpec.H2.password,
+              + ";password=" + ConnectionSpec.H2.password
+              + " -no-np",
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          not(containsString("Duplicate property")));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsForSuccessConnectionWithUserInUrl() {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url
+              + ";user=" + ConnectionSpec.H2.username
+              + "-p " + ConnectionSpec.H2.password
+              + " -no-np",
           "-e", "!set maxwidth 80"};
       begin(sqlLine, os, false, connectionArgs);
       assertThat(os.toString("UTF8"),

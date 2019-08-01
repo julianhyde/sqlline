@@ -41,8 +41,12 @@ class DatabaseConnection {
     this.driver = driver;
     this.url = url;
     this.info = properties == null ? new Properties() : properties;
-    this.info.put("user", username);
-    this.info.put("password", password);
+    if (username != null) {
+      this.info.put("user", username);
+    }
+    if (password != null) {
+      this.info.put("password", password);
+    }
   }
 
   @Override public String toString() {

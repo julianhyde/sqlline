@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.JarURLConnection;
@@ -332,6 +331,7 @@ public class SqlLine {
     String commandHandler = null;
     String appConfig = null;
     String promptHandler = null;
+    boolean interactivelyAskUserPasswordIfAbsent = true;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -360,7 +360,7 @@ public class SqlLine {
       }
 
       if (args[i].charAt(0) == '-') {
-        if (i == args.length - 1) {
+        if (i == args.length - 1 && !"-no-np".equals(args[i])) {
           return Status.ARGS;
         }
         if (args[i].equals("-d")) {
@@ -385,6 +385,8 @@ public class SqlLine {
           appConfig = args[++i];
         } else if (args[i].equals("-ph")) {
           promptHandler = args[++i];
+        } else if (args[i].equals("-no-np")) {
+          interactivelyAskUserPasswordIfAbsent = false;
         } else {
           return Status.ARGS;
         }
@@ -399,25 +401,15 @@ public class SqlLine {
     }
 
     if (url != null || user != null || pass != null || driver != null) {
-      final int semicolonPosition;
-      if ((user == null || pass == null)
-          && url != null && (semicolonPosition = url.indexOf(';')) > -1) {
-        Properties properties = new Properties();
-        try {
-          properties.load(
-              new StringReader(url.substring(semicolonPosition)
-                  .replaceAll(";", "\n")));
-          user = user == null ? properties.getProperty("user") : user;
-          pass = pass == null ? properties.getProperty("password") : pass;
-        } catch (IOException e) {
-          handleException(e);
-        }
-      }
       String com =
           COMMAND_PREFIX + "connect "
-              + escapeAndQuote(url) + " " + escapeAndQuote(user)
-              + " " + escapeAndQuote(pass) + " "
-              + (driver == null ? "" : driver);
+              + (driver == null || driver.trim().isEmpty()
+                  ? "" : "-p driver " + driver + " ")
+              + (interactivelyAskUserPasswordIfAbsent ? "" : "-no-np ")
+              + (user == null ? "" : "-p user " + escapeAndQuote(user) + " ")
+              + (pass == null
+                  ? "" : "-p password " + escapeAndQuote(pass) + " ")
+              + escapeAndQuote(url);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
     }
@@ -1237,8 +1229,8 @@ public class SqlLine {
   private static final int UNQUOTED = 3;
 
   String dequote(String str) {
-    if (str == null) {
-      return null;
+    if (str == null || str.isEmpty()) {
+      return str;
     }
 
     if ((str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"'))
