@@ -1140,11 +1140,11 @@ public class Commands {
     try {
       Connection connection = databaseConnection.getConnection();
       if (connection != null && !connection.isClosed()) {
-        sqlLine.info(
+        sqlLine.debug(
             sqlLine.loc("closing", connection.getClass().getName()));
         connection.close();
       } else {
-        sqlLine.info(sqlLine.loc("already-closed"));
+        sqlLine.debug(sqlLine.loc("already-closed"));
       }
     } catch (Exception e) {
       callback.setToFailure();
