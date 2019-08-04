@@ -498,8 +498,8 @@ public class SqlLineArgsTest {
   public void testClose() {
     final String expected = "!close\n"
         + "Closing: org.hsqldb.jdbc.JDBCConnection";
-    checkScriptFile("!close\n", false, equalTo(SqlLine.Status.OK),
-        containsString(expected));
+    checkScriptFile("!verbose true;\n!close\n", false,
+        equalTo(SqlLine.Status.OK), containsString(expected));
   }
 
   /**
@@ -567,7 +567,6 @@ public class SqlLineArgsTest {
     final String expected = "1/1          !help all\n"
         + "!all                Execute the specified SQL against all the current\n"
         + "                    connections\n"
-        + "Closing: org.hsqldb.jdbc.JDBCConnection\n"
         + "sqlline version ???\n";
     checkScriptFile("!help all\n", false, equalTo(SqlLine.Status.OK),
         is(expected));
@@ -596,7 +595,6 @@ public class SqlLineArgsTest {
     for (String c : new String[] {"go", "#"}) {
       final String expected = "1/1          !help " + c + "\n"
           + "!go                 Select the current connection\n"
-          + "Closing: org.hsqldb.jdbc.JDBCConnection\n"
           + "sqlline version ???\n";
       checkScriptFile("!help " + c + "\n", false, equalTo(SqlLine.Status.OK),
           is(expected));
@@ -1632,7 +1630,7 @@ public class SqlLineArgsTest {
 
   @Test
   public void testReconnect() {
-    final String script = "!reconnect";
+    final String script = "!verbose true;\n!reconnect";
     final String expected = "Reconnecting to \"jdbc:hsqldb:res:scott\"...\n"
         + "Closing: org.hsqldb.jdbc.JDBCConnection";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
