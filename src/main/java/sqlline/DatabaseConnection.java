@@ -199,7 +199,7 @@ class DatabaseConnection {
     try {
       try {
         if (connection != null && !connection.isClosed()) {
-          sqlLine.output(
+          sqlLine.debug(
               sqlLine.loc("closing", connection.getClass().getName()));
           connection.close();
         }
