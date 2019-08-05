@@ -275,6 +275,7 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine,
             new StringsCompleter(outputFormats.keySet()), "outputformat"),
         new ReflectiveCommandHandler(sqlLine, empty, "autocommit"),
+        new ReflectiveCommandHandler(sqlLine, empty, "readonly"),
         new ReflectiveCommandHandler(sqlLine, empty, "commit"),
         new ReflectiveCommandHandler(sqlLine, new FileNameCompleter(),
             "properties"),
