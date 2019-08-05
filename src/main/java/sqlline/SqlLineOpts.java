@@ -35,6 +35,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 import sqlline.SqlLineProperty.Type;
 
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.READ_ONLY;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
 import static sqlline.BuiltInProperty.COLOR;
 import static sqlline.BuiltInProperty.COLOR_SCHEME;
@@ -495,6 +496,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getAutoCommit() {
     return getBoolean(AUTO_COMMIT);
+  }
+
+  public boolean getReadOnly() {
+    return getBoolean(READ_ONLY);
   }
 
   public boolean getVerbose() {

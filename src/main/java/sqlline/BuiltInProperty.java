@@ -72,6 +72,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   PROMPT_SCRIPT("promptScript", Type.STRING, ""),
   PROPERTIES_FILE("propertiesFile", Type.STRING,
       new File(SqlLineOpts.saveDir(), "sqlline.properties").getAbsolutePath()),
+  READ_ONLY("readOnly", Type.BOOLEAN, false),
   RIGHT_PROMPT("rightPrompt", Type.STRING, ""),
   ROW_LIMIT("rowLimit", Type.INTEGER, 0),
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),
