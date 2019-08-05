@@ -163,6 +163,12 @@ class DatabaseConnection {
     }
 
     try {
+      connection.setReadOnly(sqlLine.getOpts().getReadOnly());
+    } catch (Exception e) {
+      sqlLine.handleException(e);
+    }
+
+    try {
       // nothing is done off of this command beyond the handle so no
       // need to use the callback.
       sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()

@@ -74,6 +74,8 @@ properties
 properties — Connect to the database defined in the specified properties file.
 quit
 quit — Exit SQLLine
+readonly
+readonly - Enable or disable readonly connection
 reconnect
 reconnect — Reconnect to the current database
 record

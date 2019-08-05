@@ -871,6 +871,10 @@ public class SqlLine {
     }
   }
 
+  void readonlyStatus(Connection c) throws SQLException {
+    debug(loc("readonly-status", c.isReadOnly() + ""));
+  }
+
   void autocommitStatus(Connection c) throws SQLException {
     debug(loc("autocommit-status", c.getAutoCommit() + ""));
   }

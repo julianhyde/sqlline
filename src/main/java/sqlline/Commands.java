@@ -796,6 +796,24 @@ public class Commands {
     callback.setToSuccess();
   }
 
+  public void readonly(String line, DispatchCallback callback)
+      throws SQLException {
+    if (!sqlLine.assertConnection()) {
+      callback.setToFailure();
+      return;
+    }
+
+    if (line.endsWith("on")) {
+      sqlLine.getDatabaseConnection().connection.setReadOnly(true);
+    } else if (line.endsWith("off")) {
+      sqlLine.getDatabaseConnection().connection.setReadOnly(false);
+    }
+
+    sqlLine.showWarnings();
+    sqlLine.readonlyStatus(sqlLine.getDatabaseConnection().connection);
+    callback.setToSuccess();
+  }
+
   public void dbinfo(String line, DispatchCallback callback) {
     if (!sqlLine.assertConnection()) {
       callback.setToFailure();
