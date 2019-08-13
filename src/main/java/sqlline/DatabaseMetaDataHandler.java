@@ -14,6 +14,7 @@ package sqlline;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ class DatabaseMetaDataHandler implements InvocationHandler {
       if (methodWithDefault != null) {
         return methodWithDefault.defaultValue;
       }
-      throw e;
+      throw e.getCause() instanceof SQLException ? e.getCause() : e;
     }
   }
 
