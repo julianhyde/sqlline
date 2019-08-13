@@ -11,6 +11,7 @@
 */
 package sqlline;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -552,7 +553,7 @@ public class SqlLineParser extends DefaultParser {
     // constructor for negative states
     public SqlLineArgumentList(
         SqlParserState state, Supplier<String> supplier) {
-      super(null, null, -1, -1, -1, null, -1, -1);
+      super(null, Collections.emptyList(), -1, -1, -1, null, -1, -1);
       assert state != SqlParserState.OK;
       this.state = state;
       this.supplier = supplier;

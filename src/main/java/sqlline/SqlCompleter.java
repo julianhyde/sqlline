@@ -90,28 +90,32 @@ class SqlCompleter extends StringsCompleter {
       // ignore
     }
 
-    final Dialect dialect = sqlLine.getDialect();
-    Map<String, Map<String, Set<String>>> schema2tables =
-        sqlLine.getDatabaseConnection()
-        .getSchema(true).getSchema2tables();
-    for (String schemaName: schema2tables.keySet()) {
-      // mariadb/mysql case of connection without specific db like
-      // under user without grants to read any db
-      if (schemaName == null) {
-        continue;
+    try {
+      final Dialect dialect = sqlLine.getDialect();
+      Map<String, Map<String, Set<String>>> schema2tables =
+          sqlLine.getDatabaseConnection()
+              .getSchema(true).getSchema2tables();
+      for (String schemaName : schema2tables.keySet()) {
+        // mariadb/mysql case of connection without specific db like
+        // under user without grants to read any db
+        if (schemaName == null) {
+          continue;
+        }
+        String value = writeAsDialectSpecificValue(dialect, false, schemaName);
+        completions.add(
+            generateCandidate(schemaName, value, sqlLine, "schema", false));
       }
-      String value = writeAsDialectSpecificValue(dialect, false, schemaName);
-      completions.add(
-          generateCandidate(schemaName, value, sqlLine, "schema", false));
-    }
 
-    for (String tableName: schema2tables.values().stream()
-        .flatMap(t -> t.keySet().stream()).collect(Collectors.toSet())) {
-      String value = writeAsDialectSpecificValue(dialect, false, tableName);
-      completions.add(
-          generateCandidate(tableName, value, sqlLine, "table", false));
+      for (String tableName : schema2tables.values().stream()
+          .flatMap(t -> t.keySet().stream()).collect(Collectors.toSet())) {
+        String value = writeAsDialectSpecificValue(dialect, false, tableName);
+        completions.add(
+            generateCandidate(tableName, value, sqlLine, "table", false));
+      }
+    } catch (Throwable t) {
+      // ignore
     }
-    for (String keyWord: Dialect.DEFAULT_KEYWORD_SET) {
+    for (String keyWord : Dialect.DEFAULT_KEYWORD_SET) {
       completions.add(generateCandidate(
           keyWord, keyWord, sqlLine, "keyword", true));
     }
