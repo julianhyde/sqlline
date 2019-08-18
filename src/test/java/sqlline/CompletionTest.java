@@ -48,6 +48,7 @@ import mockit.Mock;
 import mockit.MockUp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.of;
@@ -122,7 +123,7 @@ public class CompletionTest {
       final Set<String> expectedSubSet =
           filterSet(commandSet, SqlLine.COMMAND_PREFIX + c);
       final List<Candidate> actualCandidates =
-          getLineReaderCompletedSet(lineReader, input + c);
+          getLineReaderCompletedList(lineReader, input + c);
       assertEquals(expectedSubSet.size(), actualCandidates.size());
       for (Candidate candidate : actualCandidates) {
         assertTrue(expectedSubSet.contains(candidate.value()));
@@ -134,7 +135,8 @@ public class CompletionTest {
   @ValueSource(strings = {"!quit", "!set", "!outputformat"})
   public void testCompletionAgainstCompletedCommands(String input) {
     final LineReaderCompletionImpl lineReader = getDummyLineReader();
-    final List<Candidate> actual = getLineReaderCompletedSet(lineReader, input);
+    final List<Candidate> actual =
+        getLineReaderCompletedList(lineReader, input);
     assertEquals(1, actual.size());
     assertEquals(input, actual.iterator().next().value());
   }
@@ -147,7 +149,7 @@ public class CompletionTest {
       final String command = resetCommand
           + property.propertyName().toLowerCase(Locale.ROOT);
       final List<Candidate> actual =
-          getLineReaderCompletedSet(lineReader, command + " ");
+          getLineReaderCompletedList(lineReader, command + " ");
       assertEquals(1, actual.size());
       assertEquals(command, actual.iterator().next().value(),
           "Completion for command '"
@@ -161,7 +163,7 @@ public class CompletionTest {
   public void testSetPropertyCompletions(String input, String expected) {
     final LineReaderCompletionImpl lineReader = getDummyLineReader();
     final Collection<Candidate> actual =
-        getLineReaderCompletedSet(lineReader, input);
+        getLineReaderCompletedList(lineReader, input);
     assertEquals(1, actual.size());
     assertEquals(expected, actual.iterator().next().value());
   }
@@ -189,7 +191,7 @@ public class CompletionTest {
       lineReaderCompletion.setCompleter(
           sqlLine.getDatabaseConnection().getSqlCompleter());
       final List<Candidate> actual =
-          getLineReaderCompletedSet(lineReaderCompletion, input);
+          getLineReaderCompletedList(lineReaderCompletion, input);
       assertEquals(1, actual.size());
       assertEquals(expected, actual.iterator().next().value());
     } catch (Exception e) {
@@ -211,7 +213,7 @@ public class CompletionTest {
   @ParameterizedTest
   @MethodSource("schemaTableColumnProvider")
   public void testGetSchemaTableColumn(String input, List<String> expected) {
-    final SqlCompleter sqlCompleter = new SqlCompleter(sqlLine);
+    final SqlCompleter sqlCompleter = new SqlCompleter(sqlLine, false);
     assertIterableEquals(expected, sqlCompleter.getSchemaTableColumn(input));
   }
 
@@ -234,7 +236,7 @@ public class CompletionTest {
   @MethodSource("dialectSpecificNameProvider")
   public void testReadAsDialectSpecificName(
       String expected, Dialect dialect, String input) {
-    final SqlCompleter sqlCompleter = new SqlCompleter(sqlLine);
+    final SqlCompleter sqlCompleter = new SqlCompleter(sqlLine, false);
     assertEquals(expected,
         sqlCompleter.readAsDialectSpecificName(dialect, input));
   }
@@ -306,13 +308,13 @@ public class CompletionTest {
   public void testSchemaTableColumnCompletions(String expected, String input) {
     try {
       final LineReaderCompletionImpl lineReader = getDummyLineReader();
-      lineReader.setCompleter(new SqlCompleter(sqlLine));
+      lineReader.setCompleter(new SqlCompleter(sqlLine, false));
       // need for rehash as test data created after sql completer init
       sqlLine.runCommands(new DispatchCallback(), "!rehash");
       os.reset();
 
       final Collection<String> actual =
-          getLineReaderCompletedSet(lineReader, input).stream()
+          getLineReaderCompletedList(lineReader, input).stream()
           .map(Candidate::value).collect(Collectors.toList());
       assertIterableEquals(Collections.singleton(expected), actual);
       assertEquals(1, actual.size());
@@ -387,13 +389,13 @@ public class CompletionTest {
         }
       };
       final LineReaderCompletionImpl lineReader = getDummyLineReader();
-      lineReader.setCompleter(new SqlCompleter(sqlLine));
+      lineReader.setCompleter(new SqlCompleter(sqlLine, false));
       // need for rehash as test data created after sql completer init
       sqlLine.runCommands(new DispatchCallback(), "!rehash");
       os.reset();
 
       final Collection<String> actual =
-          getLineReaderCompletedSet(lineReader, input).stream()
+          getLineReaderCompletedList(lineReader, input).stream()
               .map(Candidate::value).collect(Collectors.toList());
       assertIterableEquals(Collections.singleton(expected), actual);
       assertEquals(1, actual.size());
@@ -465,13 +467,13 @@ public class CompletionTest {
         }
       };
       final LineReaderCompletionImpl lineReader = getDummyLineReader();
-      lineReader.setCompleter(new SqlCompleter(sqlLine));
+      lineReader.setCompleter(new SqlCompleter(sqlLine, false));
       // need for rehash as test data created after sql completer init
       sqlLine.runCommands(new DispatchCallback(), "!rehash");
       os.reset();
 
       final Collection<String> actual =
-          getLineReaderCompletedSet(lineReader, input).stream()
+          getLineReaderCompletedList(lineReader, input).stream()
               .map(Candidate::value).collect(Collectors.toList());
       assertIterableEquals(Collections.singleton(expected), actual);
       assertEquals(1, actual.size());
@@ -528,6 +530,37 @@ public class CompletionTest {
     );
   }
 
+  @ParameterizedTest
+  @MethodSource("noSchemaSqlCompletionsWithFastConnect")
+  public void testNoSchemaSqlCompletionsWithFastConnect(
+      String expected, String input) {
+    try {
+      final LineReaderCompletionImpl lineReader = getDummyLineReader();
+      lineReader.setCompleter(new SqlCompleter(sqlLine, true));
+      // need for rehash as test data created after sql completer init
+      sqlLine.runCommands(new DispatchCallback(), "!set fastconnect true");
+      sqlLine.runCommands(new DispatchCallback(), "!rehash");
+      os.reset();
+
+      final Collection<String> actual =
+          getLineReaderCompletedList(lineReader, input).stream()
+              .map(Candidate::value).collect(Collectors.toList());
+      assertFalse(actual.stream().allMatch(t -> t.startsWith(expected)));
+      sqlLine.runCommands(new DispatchCallback(), "!set fastconnect false");
+      sqlLine.runCommands(new DispatchCallback(), "!rehash");
+    } catch (Exception e) {
+      // fail
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static Stream<Arguments> noSchemaSqlCompletionsWithFastConnect() {
+    return Stream.of(
+        of("TEST_SCHEMA_FIRST", "TEST_SCHEMA_F"),
+        of("TABLE_FIRST", "TABLE_F")
+    );
+  }
+
   private LineReaderCompletionImpl getDummyLineReader() {
     try {
       TerminalBuilder terminalBuilder = TerminalBuilder.builder();
@@ -554,7 +587,7 @@ public class CompletionTest {
     return commandSet;
   }
 
-  private List<Candidate> getLineReaderCompletedSet(
+  private List<Candidate> getLineReaderCompletedList(
       LineReaderCompletionImpl lineReader, String s) {
     return lineReader.complete(s);
   }

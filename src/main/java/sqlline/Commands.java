@@ -21,7 +21,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.jline.reader.EOFError;
 import org.jline.reader.History;
 import org.jline.reader.MaskingCallback;
 import org.jline.reader.Parser;
@@ -1877,13 +1876,10 @@ public class Commands {
     if (sqlLine.getLineReader() == null) {
       return false;
     }
-    try {
-      sqlLine.getLineReader().getParser().parse(sql, sql.length(),
-          Parser.ParseContext.ACCEPT_LINE);
-    } catch (EOFError e) {
-      return true;
-    }
-    return false;
+    return SqlLineParser.SqlParserState.OK
+        != ((SqlLineParser) sqlLine.getLineReader().getParser())
+            .parseState(sql, sql.length(), Parser.ParseContext.ACCEPT_LINE)
+            .getState();
   }
 
   /**

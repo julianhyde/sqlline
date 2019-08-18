@@ -51,7 +51,7 @@ class DatabaseConnection {
 
   void setCompletions(boolean skipmeta) {
     // setup the completer for the database
-    sqlCompleter = new ArgumentCompleter(new SqlCompleter(sqlLine));
+    sqlCompleter = new ArgumentCompleter(new SqlCompleter(sqlLine, skipmeta));
     // not all argument elements need to hold true
     ((ArgumentCompleter) sqlCompleter).setStrict(false);
   }

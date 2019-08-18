@@ -30,12 +30,15 @@ class SqlCompleter extends StringsCompleter {
   private static final String ALLOWED_LOWER_CHARACTERS =
       "abcdefghijklmnopqrstuvwxyz0123456789_";
   private final SqlLine sqlLine;
-  SqlCompleter(SqlLine sqlLine) {
-    super(getCompletions(sqlLine));
+  private final boolean skipMeta;
+
+  SqlCompleter(SqlLine sqlLine, boolean skipMeta) {
+    super(getCompletions(sqlLine, skipMeta));
     this.sqlLine = sqlLine;
+    this.skipMeta = skipMeta;
   }
 
-  private static Candidate[] getCompletions(SqlLine sqlLine) {
+  private static Candidate[] getCompletions(SqlLine sqlLine, boolean skipMeta) {
     Set<Candidate> completions = new TreeSet<>();
 
     // now add the keywords from the current connection
@@ -90,30 +93,33 @@ class SqlCompleter extends StringsCompleter {
       // ignore
     }
 
-    try {
-      final Dialect dialect = sqlLine.getDialect();
-      Map<String, Map<String, Set<String>>> schema2tables =
-          sqlLine.getDatabaseConnection()
-              .getSchema(true).getSchema2tables();
-      for (String schemaName : schema2tables.keySet()) {
-        // mariadb/mysql case of connection without specific db like
-        // under user without grants to read any db
-        if (schemaName == null) {
-          continue;
+    if (!skipMeta) {
+      try {
+        final Dialect dialect = sqlLine.getDialect();
+        Map<String, Map<String, Set<String>>> schema2tables =
+            sqlLine.getDatabaseConnection()
+                .getSchema(true).getSchema2tables();
+        for (String schemaName : schema2tables.keySet()) {
+          // mariadb/mysql case of connection without specific db like
+          // under user without grants to read any db
+          if (schemaName == null) {
+            continue;
+          }
+          String value =
+              writeAsDialectSpecificValue(dialect, false, schemaName);
+          completions.add(
+              generateCandidate(schemaName, value, sqlLine, "schema", false));
         }
-        String value = writeAsDialectSpecificValue(dialect, false, schemaName);
-        completions.add(
-            generateCandidate(schemaName, value, sqlLine, "schema", false));
-      }
 
-      for (String tableName : schema2tables.values().stream()
-          .flatMap(t -> t.keySet().stream()).collect(Collectors.toSet())) {
-        String value = writeAsDialectSpecificValue(dialect, false, tableName);
-        completions.add(
-            generateCandidate(tableName, value, sqlLine, "table", false));
+        for (String tableName : schema2tables.values().stream()
+            .flatMap(t -> t.keySet().stream()).collect(Collectors.toSet())) {
+          String value = writeAsDialectSpecificValue(dialect, false, tableName);
+          completions.add(
+              generateCandidate(tableName, value, sqlLine, "table", false));
+        }
+      } catch (Throwable t) {
+        // ignore
       }
-    } catch (Throwable t) {
-      // ignore
     }
     for (String keyWord : Dialect.DEFAULT_KEYWORD_SET) {
       completions.add(generateCandidate(
@@ -128,20 +134,22 @@ class SqlCompleter extends StringsCompleter {
     String sql = commandLine.line().substring(0, commandLine.cursor());
     SqlLineParser.SqlLineArgumentList argumentList =
         ((SqlLineParser) sqlLine.getLineReader().getParser())
-        .parseState(sql, sql.length(), Parser.ParseContext.UNSPECIFIED);
+            .parseState(sql, sql.length(), Parser.ParseContext.UNSPECIFIED);
     final String supplierMsg = argumentList.getSupplier().get();
     final char openQuote = sqlLine.getDialect().getOpenQuote();
     if (argumentList.getState()
         == SqlLineParser.SqlParserState.MULTILINE_COMMENT
         || (argumentList.getState() == SqlLineParser.SqlParserState.QUOTED
-            && ((openQuote == '"' && !supplierMsg.endsWith("dquote"))
-                || (openQuote == '`' && !supplierMsg.endsWith("`"))))) {
+        && ((openQuote == '"' && !supplierMsg.endsWith("dquote"))
+        || (openQuote == '`' && !supplierMsg.endsWith("`"))))) {
       return;
     }
 
-    Deque<String> lastWords = getSchemaTableColumn(argumentList.word());
-    candidates.addAll(getSchemaBasedCandidates(new ArrayDeque<>(lastWords)));
-    candidates.addAll(getTableBasedCandidates(new ArrayDeque<>(lastWords)));
+    if (!skipMeta) {
+      Deque<String> lastWords = getSchemaTableColumn(argumentList.word());
+      candidates.addAll(getSchemaBasedCandidates(new ArrayDeque<>(lastWords)));
+      candidates.addAll(getTableBasedCandidates(new ArrayDeque<>(lastWords)));
+    }
     // suggest other candidates if not quoted
     // and previous word not finished with '.'
     if (argumentList.getState() != SqlLineParser.SqlParserState.QUOTED
