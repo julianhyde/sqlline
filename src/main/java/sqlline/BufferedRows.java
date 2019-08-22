@@ -102,12 +102,15 @@ class BufferedRows extends Rows {
       // Add a row of column names as the first row of the first batch.
       list.add(columnNames);
     }
-
-    if (limit >= 0 && batch == 0) {
+    if (limit > 0) {
       // Obey the limit if the limit is non-negative and this is the first
       // batch.
       int counter = 0;
       while (counter++ < limit && rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
+    } else if (limit == 0) {
+      if (rs.next()) {
         list.add(new Row(columnCount, rs));
       }
     } else {
