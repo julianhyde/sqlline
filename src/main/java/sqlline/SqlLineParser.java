@@ -320,18 +320,18 @@ public class SqlLineParser extends DefaultParser {
               wordCursor, cursor, openingQuote, rawWordCursor, rawWordLength);
         }
 
-        if (roundBracketsBalance[0] != 0 || roundBracketsBalance[1] != 0) {
+        if (squareBracketsBalance[0] != 0 || squareBracketsBalance[1] != 0) {
           return new SqlLineArgumentList(
-              SqlParserState.ROUND_BRACKET_BALANCE_FAILED,
+              SqlParserState.SQUARE_BRACKET_BALANCE_FAILED,
               () -> getPaddedPrompt(
                   squareBracketsBalance[0] == 0 ? "extra ']'" : "]"),
               line, words, wordIndex, wordCursor,
               cursor, openingQuote, rawWordCursor, rawWordLength);
         }
 
-        if (squareBracketsBalance[0] != 0 || squareBracketsBalance[1] != 0) {
+        if (roundBracketsBalance[0] != 0 || roundBracketsBalance[1] != 0) {
           return new SqlLineArgumentList(
-              SqlParserState.SQUARE_BRACKET_BALANCE_FAILED,
+              SqlParserState.ROUND_BRACKET_BALANCE_FAILED,
               () -> getPaddedPrompt(
                   roundBracketsBalance[0] == 0 ? "extra ')'" : ")"),
               line, words, wordIndex, wordCursor,

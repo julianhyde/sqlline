@@ -153,8 +153,10 @@ class SqlCompleter extends StringsCompleter {
     // suggest other candidates if not quoted
     // and previous word not finished with '.'
     if (argumentList.getState() != SqlLineParser.SqlParserState.QUOTED
-        && (argumentList.getState()
+        && ((argumentList.getState()
             != SqlLineParser.SqlParserState.SEMICOLON_REQUIRED
+                && argumentList.getState()
+                   != SqlLineParser.SqlParserState.ROUND_BRACKET_BALANCE_FAILED)
             || sql.isEmpty()
             || sql.charAt(sql.length() - 1) != '.')) {
       candidates.addAll(this.candidates);
