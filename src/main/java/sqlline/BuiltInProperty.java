@@ -47,6 +47,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   HEADER_INTERVAL("headerInterval", Type.INTEGER, 100),
   HISTORY_FILE("historyFile", Type.STRING,
       new File(SqlLineOpts.saveDir(), "history").getAbsolutePath()),
+  HISTORY_FLAGS("historyFlags", Type.STRING, "-d"),
   INCREMENTAL("incremental", Type.BOOLEAN, false),
   INCREMENTAL_BUFFER_ROWS("incrementalBufferRows", Type.INTEGER, 1000),
   ISOLATION("isolation", Type.STRING, "TRANSACTION_REPEATABLE_READ",

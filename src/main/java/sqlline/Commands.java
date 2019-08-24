@@ -259,7 +259,7 @@ public class Commands {
           sqlLine.getOutputStream(),
           sqlLine.getErrorStream(),
           argsLine.isEmpty()
-              ? new String[]{"-d"}
+              ? new String[]{sqlLine.getOpts().getHistoryFlags()}
               : sqlLine.split(argsLine, " "));
     } catch (Exception e) {
       callback.setToFailure();

@@ -1471,7 +1471,18 @@ public class SqlLine {
          tok.hasMoreTokens();) {
       String next = tok.nextToken();
       final int x = line.length();
-      line.append(line.length() == 0 ? "" : " ").append(next);
+      final int index = next.indexOf('\n');
+      if (index >= 0) {
+        line.setLength(x + index);
+        buff.append(line).append(' ').append(next, 0, index)
+            .append(SEPARATOR).append(head);
+        line.setLength(0);
+        if (next.length() > index + 1) {
+          line.append(next.substring(index + 1));
+        }
+      } else {
+        line.append(line.length() == 0 ? "" : " ").append(next);
+      }
       if (line.length() > len) {
         // The line is now too long. Backtrack: remove the last word, start a
         // new line containing just that word.
