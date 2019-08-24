@@ -35,6 +35,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 import sqlline.SqlLineProperty.Type;
 
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.HISTORY_FLAGS;
 import static sqlline.BuiltInProperty.READ_ONLY;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
 import static sqlline.BuiltInProperty.COLOR;
@@ -922,6 +923,10 @@ public class SqlLineOpts implements Completer {
       compiledConfirmPattern = Pattern.compile(getConfirmPattern());
     }
     return compiledConfirmPattern;
+  }
+
+  public String getHistoryFlags() {
+    return get(HISTORY_FLAGS);
   }
 }
 

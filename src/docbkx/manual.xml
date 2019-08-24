@@ -1440,6 +1440,12 @@ sqlline> !help
 !go               Select the current connection
 !help             Print a summary of command usage
 !history          Display the command history
+                  -d Print timestamps for each event (default for !history)
+                  -f Print full time date stamps in the US format
+                  -E Print full time date stamps in the European format
+                  -i Print full time date stamps in ISO8601 format
+                  -n Suppresses command numbers
+                  -r Reverses the order of the commands
 !importedkeys     List all the imported keys for the specified table
 !indexes          List all the indexes for the specified table
 !isolation        Set the transaction isolation for this connection
@@ -1520,6 +1526,12 @@ sqlline>
           <refname>history</refname>
           <refpurpose>
           Display the command history
+            -d Print timestamps for each event (default for !history)
+            -f Print full time date stamps in the US format
+            -E Print full time date stamps in the European format
+            -i Print full time date stamps in ISO8601 format
+            -n Suppresses command numbers
+            -r Reverses the order of the commands
           </refpurpose>
         </refnamediv>
 
