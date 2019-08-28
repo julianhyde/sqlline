@@ -456,7 +456,7 @@ public class SqlLineArgsTest {
   @Test
   public void testScan() {
     final String expectedLine0 = "Compliant Version Driver Class";
-    final String expectedLine1 = "yes       2.4     org.hsqldb.jdbc.JDBCDriver";
+    final String expectedLine1 = "yes       2.5     org.hsqldb.jdbc.JDBCDriver";
     checkScriptFile("!scan\n", false,
         equalTo(SqlLine.Status.OK),
         allOf(containsString(expectedLine0), containsString(expectedLine1)));
@@ -1983,7 +1983,7 @@ public class SqlLineArgsTest {
         + " sqlline.extensions.CustomApplication\n"
         + "!scan";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        allOf(containsString("yes       2.4     org.hsqldb.jdbc.JDBCDriver"),
+        allOf(containsString("yes       2.5     org.hsqldb.jdbc.JDBCDriver"),
             not(containsString("org.h2.Driver"))));
   }
 
@@ -2117,8 +2117,8 @@ public class SqlLineArgsTest {
 
       sqlLine.runCommands(dc, "!/ 1");
       String output = os.toString("UTF8");
-      final String expected0 = "+----------------------------+";
-      final String expected1 = "|             C1             |";
+      final String expected0 = "+----------------------------";
+      final String expected1 = "C1";
       final String expected2 = "1 row selected";
       assertThat(output,
           allOf(containsString(expected0),
