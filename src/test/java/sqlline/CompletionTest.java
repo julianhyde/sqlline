@@ -177,8 +177,7 @@ public class CompletionTest {
         of("!set outputFormat js", "!set outputFormat json"),
         of("!set outputFormat xmlel", "!set outputFormat xmlelements"),
         of("!set colorScheme che", "!set colorScheme chester"),
-        of("!set colorScheme sol", "!set colorScheme solarized")
-    );
+        of("!set colorScheme sol", "!set colorScheme solarized"));
   }
 
   @ParameterizedTest
@@ -206,8 +205,7 @@ public class CompletionTest {
         of("FR", "FROM"),
         of("fr", "from"),
         of("wher", "where"),
-        of("betwe", "between")
-    );
+        of("betwe", "between"));
   }
 
   @ParameterizedTest
@@ -228,8 +226,8 @@ public class CompletionTest {
         of("\"SCHEMA WITH SPACES\".TABLE.COL",
             Arrays.asList("\"SCHEMA WITH SPACES\"", "TABLE", "COL")),
         // wrong scenario
-        of("SCHEMA WITH SPACES.TABLE.COL", Collections.singletonList("SCHEMA"))
-    );
+        of("SCHEMA WITH SPACES.TABLE.COL",
+            Collections.singletonList("SCHEMA")));
   }
 
   @ParameterizedTest
@@ -263,8 +261,7 @@ public class CompletionTest {
         of("SCHEMA", storesUpperDialect, "SCHEMA"),
         of("SCHEMA", storesUpperDialect, "[SCHEMA]"),
         of("ScHeMa", storesUpperDialect, "[ScHeMa]"),
-        of("", storesUpperDialect, "[]")
-    );
+        of("", storesUpperDialect, "[]"));
   }
 
   @ParameterizedTest
@@ -299,8 +296,7 @@ public class CompletionTest {
         of("SCHEMA", dialectUp, false, "SCHEMA"),
         of("[SCHEMA]", dialectUp, true, "SCHEMA"),
         of("[ScHeMA]", dialectUp, true, "ScHeMA"),
-        of("[]", dialectUp, true, "")
-    );
+        of("[]", dialectUp, true, ""));
   }
 
   @ParameterizedTest
@@ -370,8 +366,7 @@ public class CompletionTest {
         of("\"TEST SCHEMA WITH SPACES\".\"TABLE WITH SPACES\".PK",
             "\"TEST SCHEMA WITH SPACES\".\"TABLE WITH SPACES\".P"),
         of("\"TEST SCHEMA WITH SPACES\".\"TABLE WITH SPACES\".\"with spaces\"",
-            "\"TEST SCHEMA WITH SPACES\".\"TABLE WITH SPACES\".\"w")
-    );
+            "\"TEST SCHEMA WITH SPACES\".\"TABLE WITH SPACES\".\"w"));
   }
 
   @ParameterizedTest
@@ -448,8 +443,7 @@ public class CompletionTest {
         of("`TEST SCHEMA WITH SPACES`.`TABLE WITH SPACES`.PK",
             "`TEST SCHEMA WITH SPACES`.`TABLE WITH SPACES`.P"),
         of("`TEST SCHEMA WITH SPACES`.`TABLE WITH SPACES`.`with spaces`",
-            "`TEST SCHEMA WITH SPACES`.`TABLE WITH SPACES`.`w")
-    );
+            "`TEST SCHEMA WITH SPACES`.`TABLE WITH SPACES`.`w"));
   }
 
   @ParameterizedTest
@@ -526,8 +520,7 @@ public class CompletionTest {
         of("[TEST SCHEMA WITH SPACES].[TABLE WITH SPACES].PK",
             "[TEST SCHEMA WITH SPACES].[TABLE WITH SPACES].P"),
         of("[TEST SCHEMA WITH SPACES].[TABLE WITH SPACES].[with spaces]",
-            "[TEST SCHEMA WITH SPACES].[TABLE WITH SPACES].[w")
-    );
+            "[TEST SCHEMA WITH SPACES].[TABLE WITH SPACES].[w"));
   }
 
   @ParameterizedTest
@@ -557,8 +550,7 @@ public class CompletionTest {
   private static Stream<Arguments> noSchemaSqlCompletionsWithFastConnect() {
     return Stream.of(
         of("TEST_SCHEMA_FIRST", "TEST_SCHEMA_F"),
-        of("TABLE_FIRST", "TABLE_F")
-    );
+        of("TABLE_FIRST", "TABLE_F"));
   }
 
   private LineReaderCompletionImpl getDummyLineReader() {

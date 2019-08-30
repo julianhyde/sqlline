@@ -23,9 +23,8 @@ public class CustomDatabaseMetadata extends JDBCDatabaseMetaData {
     super(c);
   }
 
-  @Override
-  public ResultSet getPrimaryKeys(
-      String catalog, String schema, String table) throws SQLException {
+  @Override public ResultSet getPrimaryKeys(String catalog, String schema,
+      String table) throws SQLException {
     throw new SQLException("SQL Exception");
   }
 }

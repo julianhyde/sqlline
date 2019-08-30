@@ -32,7 +32,6 @@ import mockit.internal.reflection.FieldReflection;
 
 import static org.junit.jupiter.params.provider.Arguments.of;
 
-
 /**
  * Test cases for BufferedRows.
  */

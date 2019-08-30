@@ -818,9 +818,7 @@ public class SqlLineArgsTest {
                 containsString("8/8          values 3;\n"),
                 containsString("'C1'\n"),
                 containsString("'3'\n"),
-                containsString("1 row selected (")
-            )
-    );
+                containsString("1 row selected (")));
 
 
     // Now check that the right stuff got into the file.
