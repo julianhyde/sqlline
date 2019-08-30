@@ -44,15 +44,17 @@ class SqlLineCommandCompleter extends AggregateCompleter {
           final String commandName = SqlLine.COMMAND_PREFIX + cmd;
           final String helpText = commandHandler.getHelpText();
           final int firstEndOfLineIndex = helpText.indexOf('\n');
-          compl.add(new StringsCompleter(
-              new SqlLineCandidate(
-                  sqlLine, AttributedString.stripAnsi(commandName),
-                  commandName, sqlLine.loc("command-name"),
-                  firstEndOfLineIndex == -1
-                      ? helpText : helpText.substring(0, firstEndOfLineIndex),
-                  // there could be whatever else instead helpText
-                  // which is the same for commands with all theirs aliases
-                  null, helpText, true)));
+          compl.add(
+              new StringsCompleter(
+                  new SqlLineCandidate(sqlLine,
+                      AttributedString.stripAnsi(commandName), commandName,
+                      sqlLine.loc("command-name"),
+                      firstEndOfLineIndex == -1
+                          ? helpText
+                          : helpText.substring(0, firstEndOfLineIndex),
+                      // there could be whatever else instead helpText
+                      // which is the same for commands with all theirs aliases
+                      null, helpText, true)));
           compl.addAll(parameterCompleters);
           compl.add(new NullCompleter()); // last param no complete
           completers.add(new ArgumentCompleter(compl));

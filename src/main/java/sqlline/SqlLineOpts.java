@@ -155,9 +155,10 @@ public class SqlLineOpts implements Completer {
     Map<String, Completer> comp = new HashMap<>();
     final String start = "START";
     comp.put(start,
-        new StringsCompleter(new SqlLineCommandCompleter.SqlLineCandidate(
-            sqlLine, "!set", "!set", sqlLine.loc("command-name"),
-            sqlLine.loc("help-set"), null,  "!set", true)));
+        new StringsCompleter(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, "!set",
+                "!set", sqlLine.loc("command-name"), sqlLine.loc("help-set"),
+                null, "!set", true)));
     Collection<BuiltInProperty> booleanProperties = new ArrayList<>();
     Collection<BuiltInProperty> withDefinedAvailableValues = new ArrayList<>();
     StringBuilder sb = new StringBuilder(start + " (");

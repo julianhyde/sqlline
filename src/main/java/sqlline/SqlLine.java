@@ -1044,6 +1044,7 @@ public class SqlLine {
    * <blockquote>{ {"!tables"}, {"My Schema", "My Table"} }</blockquote>
    *
    * @param line the line to break up
+   * @param keepSqlIdentifierQuotes keep SQL identifiers
    * @return an array of compound words
    */
   public String[][] splitCompound(

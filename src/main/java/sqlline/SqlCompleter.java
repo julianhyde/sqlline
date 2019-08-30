@@ -46,8 +46,9 @@ class SqlCompleter extends StringsCompleter {
     try {
       for (String sqlKeyWord: meta.getSQLKeywords().split(",")) {
         final String keyWord = sqlKeyWord.trim();
-        completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            keyWord, keyWord, null, sqlLine.loc("keyword"), null, null, true));
+        completions.add(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, keyWord,
+                keyWord, null, sqlLine.loc("keyword"), null, null, true));
       }
     } catch (Throwable t) {
       // ignore
@@ -55,9 +56,9 @@ class SqlCompleter extends StringsCompleter {
     try {
       for (String numericFunction: meta.getNumericFunctions().split(",")) {
         final String function = numericFunction.trim();
-        completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            function, function, null,
-            sqlLine.loc("function"), null, null, false));
+        completions.add(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, function,
+                function, null, sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
@@ -65,9 +66,9 @@ class SqlCompleter extends StringsCompleter {
     try {
       for (String stringFunction: meta.getStringFunctions().split(",")) {
         final String function = stringFunction.trim();
-        completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            function, function, null,
-            sqlLine.loc("function"), null, null, false));
+        completions.add(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, function,
+                function, null, sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
@@ -75,9 +76,9 @@ class SqlCompleter extends StringsCompleter {
     try {
       for (String systemFunction: meta.getSystemFunctions().split(",")) {
         final String function = systemFunction.trim();
-        completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            function, function, null,
-            sqlLine.loc("function"), null, null, false));
+        completions.add(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, function,
+                function, null, sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
@@ -85,9 +86,9 @@ class SqlCompleter extends StringsCompleter {
     try {
       for (String timeDateFunction: meta.getTimeDateFunctions().split(",")) {
         final String function = timeDateFunction.trim();
-        completions.add(new SqlLineCommandCompleter.SqlLineCandidate(sqlLine,
-            function, function, null,
-            sqlLine.loc("function"), null, null, false));
+        completions.add(
+            new SqlLineCommandCompleter.SqlLineCandidate(sqlLine, function,
+                function, null, sqlLine.loc("function"), null, null, false));
       }
     } catch (Throwable t) {
       // ignore
@@ -122,8 +123,8 @@ class SqlCompleter extends StringsCompleter {
       }
     }
     for (String keyWord : Dialect.DEFAULT_KEYWORD_SET) {
-      completions.add(generateCandidate(
-          keyWord, keyWord, sqlLine, "keyword", true));
+      completions.add(
+          generateCandidate(keyWord, keyWord, sqlLine, "keyword", true));
     }
     // set the Strings that will be completed
     return completions.toArray(new Candidate[0]);

@@ -2,6 +2,85 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.9.0">1.9.0</a> (2019-10-16)
+
+There are several improvements regarding user interaction, such as
+<a href="https://github.com/julianhyde/sqlline/issues/323">line numbers support</a>,
+<a href="https://github.com/julianhyde/sqlline/issues/317">long query
+editing which take more than a screen</a>,
+and improvements for autocompletion
+(<a href="https://github.com/julianhyde/sqlline/issues/331">autocompletion
+for schema, table, column names</a>
+and <a href="https://github.com/julianhyde/sqlline/issues/314">show
+description for completion candidates</a>).
+
+Now there is also a
+<a href="https://github.com/julianhyde/sqlline/wiki/Demos">demo page</a>
+for some of sqlline's features.
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* Autocompletion improvements
+  * [<a href="https://github.com/julianhyde/sqlline/issues/331">SQLLINE-331</a>]
+    Autocompletion for schema, table, column names
+  * [<a href="https://github.com/julianhyde/sqlline/issues/314">SQLLINE-314</a>]
+    Description for command name completion candidates depending on
+    `showCompletionDesc` property value
+* [<a href="https://github.com/julianhyde/sqlline/issues/326">SQLLINE-326</a>]
+  Respect `user`, `password` properties in connection url;
+  add `connectInteractionMode` property
+* [<a href="https://github.com/julianhyde/sqlline/issues/354">SQLLINE-354</a>]
+  Use minimum possible `width` if calculated is negative
+* [<a href="https://github.com/julianhyde/sqlline/issues/332">SQLLINE-332</a>]
+  Add `historyFlags` property to customize `!history` output
+* [<a href="https://github.com/julianhyde/sqlline/issues/343">SQLLINE-343</a>]
+  Use batches accordingly
+* [<a href="https://github.com/julianhyde/sqlline/issues/337">SQLLINE-337</a>]
+  Move connection information to debug level of tracing
+* Add `setReadOnly` connection option (iconeb)
+* [<a href="https://github.com/julianhyde/sqlline/issues/248">SQLLINE-248</a>]
+  `!dropall` for specific schemas
+* [<a href="https://github.com/julianhyde/sqlline/issues/327">SQLLINE-327</a>]
+  `!reconnect` should respect `fastconnect` property value
+* [<a href="https://github.com/julianhyde/sqlline/issues/321">SQLLINE-321</a>]
+  Ansiconsole outputformat
+* [<a href="https://github.com/julianhyde/sqlline/issues/323">SQLLINE-323</a>]
+  Add line numbers support
+* [<a href="https://github.com/julianhyde/sqlline/issues/306">SQLLINE-306</a>]
+  Turn off menu because of issue mentioned in #306
+* [<a href="https://github.com/julianhyde/sqlline/issues/312">SQLLINE-312</a>]
+  Show error if there are wrong arguments for `!metadata` methods
+* [<a href="https://github.com/julianhyde/sqlline/issues/309">SQLLINE-309</a>]
+  Fix highlighting of sqlline commands with quoted arguments
+* [<a href="https://github.com/julianhyde/sqlline/issues/305">SQLLINE-305</a>]
+  Posix compatibility for double quotes to allow spaces inside command arguments
+* [<a href="https://github.com/julianhyde/sqlline/issues/310">SQLLINE-310</a>]
+  `!schemas` command
+* [<a href="https://github.com/julianhyde/sqlline/issues/318">SQLLINE-318</a>]
+  Correct highlighting and line continuation for '`/*/`'
+* [<a href="https://github.com/julianhyde/sqlline/issues/340">SQLLINE-340</a>]
+  Rethrow `SQLException` from `DatabaseMetaDataHandler` if it is the cause
+
+Other:
+* [<a href="https://github.com/julianhyde/sqlline/issues/316">SQLLINE-316</a>]
+  Link to demos page
+* [<a href="https://github.com/julianhyde/sqlline/issues/302">SQLLINE-302</a>]
+  Make tests run with their own `sqlline.properties` via `propertiesFile` property;
+  remove all instantiations of `SqlLine` from `PromptTest`
+* [<a href="https://github.com/julianhyde/sqlline/issues/210">SQLLINE-210</a>]
+  Add property to skip doc generation
+* Upgrades:
+  * Update JLine3 to 3.12.1
+  * Update Checkstyle to 8.23
+  * Update Jmockit to 1.48
+  * Update Junit to 5.5.1
+  * Update maven-jar-plugin to 3.1.2
+  * Update maven-surefire-plugin to 2.22.2
+  * Update hsqldb up to 2.5.0
+  * Update h2 up to 1.4.199
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.8.0">1.8.0</a> (2019-05-30)
 
 1.8 comes quite soon after 1.7, and the most significant change is
