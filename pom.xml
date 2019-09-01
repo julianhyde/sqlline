@@ -32,7 +32,7 @@
     <hamcrest.version>2.1</hamcrest.version>
     <hsqldb.version>2.5.0</hsqldb.version>
     <jline.version>3.12.1</jline.version>
-    <jmockit.version>1.47</jmockit.version>
+    <jmockit.version>1.48</jmockit.version>
     <junit.version>5.5.1</junit.version>
     <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
