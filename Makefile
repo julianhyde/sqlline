@@ -8,7 +8,8 @@
 # REQUIRES: maven > 3.2.1
 
 CURRENT_USER = $(shell echo $whoami)
-SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002/SimbaHiveJDBC41-2.6.2.1002.zip"
+# Now packaged as simba-hive-jdbc in Artifactory
+#SIMBA_DRIVERS = "https://public-repo-1.hortonworks.com/HDP/hive-jdbc4/2.6.2.1002/SimbaHiveJDBC41-2.6.2.1002.zip"
 SQLLINE_VER = $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 MAVEN_DL = "http://www.trieuvan.com/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz"
 MVN_BINARY = "$(CURDIR)/maven/bin/mvn"
@@ -21,19 +22,12 @@ build: clean
 	cd maven && curl -O $(MAVEN_DL) && tar -xzf apache-maven*.tar.gz --strip-components=1
 	$(MVN_BINARY) -version
 	$(MVN_BINARY) package
-	# Until repo is up, we need to make sure the drivers are pushed manually
-	rm -rf $(CURDIR)/hivejars && mkdir $(CURDIR)/hivejars
-	cd $(CURDIR)/hivejars && curl -O $(SIMBA_DRIVERS) && unzip SimbaHiveJDBC*.zip
 	# Update for install dir
 	cp $(CURDIR)/bin/sqlline.template $(CURDIR)/bin/sqlline
 	sed -i "s|@install_dir@|$(CURDIR)|g" $(CURDIR)/bin/sqlline
 	sed -i "s|@sqlline_ver@|$(SQLLINE_VER)|g" $(CURDIR)/bin/sqlline
 
 install-icinga: build
-	# Build pipenv environment for python wrapper
-	# TODO,this needs to be adjusted or removed entirely for icing
-	export HOME=/home/icinga && \
-	pipenv install
 	# Install symlinks
 	rm -f /usr/lib64/nagios/plugins/sqlline-service-check
 	ln -s $(CURDIR)/bin/sqlline-service-check /usr/local/bin/sqlline-service-check
