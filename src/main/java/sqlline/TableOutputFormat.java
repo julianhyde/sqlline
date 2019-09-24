@@ -17,7 +17,7 @@ package sqlline;
 class TableOutputFormat implements OutputFormat {
   private final SqlLine sqlLine;
 
-  public TableOutputFormat(SqlLine sqlLine) {
+  TableOutputFormat(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 
@@ -25,10 +25,15 @@ class TableOutputFormat implements OutputFormat {
     int index = 0;
     ColorBuffer header = null;
     ColorBuffer headerCols = null;
-    final int width = sqlLine.getOpts().getMaxWidth() - 4;
+    final int maxWidth =
+        sqlLine.getOpts().getMaxWidth();
+    final int width = (maxWidth == 0
+            && sqlLine.getLineReader() != null
+        ? sqlLine.getLineReader().getTerminal().getWidth()
+        : maxWidth) - 4;
 
     // normalize the columns sizes
-    rows.normalizeWidths();
+    rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
 
     for (; rows.hasNext();) {
       Rows.Row row = rows.next();
@@ -50,13 +55,15 @@ class TableOutputFormat implements OutputFormat {
                 headerCols.getVisibleLength());
       }
 
-      if ((index == 0)
-          || (sqlLine.getOpts().getHeaderInterval() > 0
-          && (index % sqlLine.getOpts().getHeaderInterval() == 0)
-          && sqlLine.getOpts().getShowHeader())) {
-        printRow(header, true);
-        printRow(headerCols, false);
-        printRow(header, true);
+      if (sqlLine.getOpts().getShowHeader()) {
+        final int headerInterval =
+            sqlLine.getOpts().getHeaderInterval();
+        if (index == 0
+            || headerInterval > 0 && index % headerInterval == 0) {
+          printRow(header, true);
+          printRow(headerCols, false);
+          printRow(header, true);
+        }
       }
 
       if (index != 0) { // don't output the header twice
@@ -101,15 +108,16 @@ class TableOutputFormat implements OutputFormat {
 
       ColorBuffer v;
 
+      final int[] sizes = row.sizes;
       if (row.isMeta) {
-        v = sqlLine.getColorBuffer().center(row.values[i], row.sizes[i]);
+        v = sqlLine.getColorBuffer().center(row.values[i], sizes[i]);
         if (rows.isPrimaryKey(i)) {
           buf.cyan(v.getMono());
         } else {
           buf.bold(v.getMono());
         }
       } else {
-        v = sqlLine.getColorBuffer().pad(row.values[i], row.sizes[i]);
+        v = sqlLine.getColorBuffer().pad(row.values[i], sizes[i]);
         if (rows.isPrimaryKey(i)) {
           buf.cyan(v.getMono());
         } else {

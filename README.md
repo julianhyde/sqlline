@@ -27,7 +27,7 @@ If you have [Coursier](https://github.com/coursier/coursier) installed, you
 can quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb) with:
 
 ```
-$ coursier launch sqlline:sqlline:1.4.0 org.hsqldb:hsqldb:2.4.1 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+$ coursier launch sqlline:sqlline:1.7.0 org.hsqldb:hsqldb:2.4.1 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
 0: jdbc:hsqldb:res:foodmart> select avg("shelf_height" * "shelf_width" * "shelf_depth") as "avg_volume" from "product";
 +-------------------------+
 |       avg_volume        |
@@ -70,7 +70,7 @@ sqlline> !quit
 To get help:
 
 ```bash
-sqlline --help
+$ sqlline --help
 ```
 
 If you prefer, you can invoke Java directly, without using the
@@ -79,6 +79,32 @@ If you prefer, you can invoke Java directly, without using the
 ```bash
 $ java -jar sqlline-VERSION-jar-with-dependencies.jar --help
 ```
+
+### Connecting using URLs
+
+A URL (or connect string) is a string that specifies the location of your
+database, and perhaps credentials and other parameters specific to your
+database's JDBC driver. It always starts with '`jdbc:`', usually followed by
+the machine name of the database and additional parameters.
+
+For example, the following
+[bash](https://en.wikipedia.org/wiki/Bash_\(Unix_shell\)) command connects to
+[Apache Drill](https://drill.apache.org), assuming that Drill is installed in
+`/opt/apache-drill-1.15.0`:
+
+```bash
+$ /opt/apache-drill-1.15.0/bin/sqlline -u "jdbc:drill:drillbit=example.com;auth=kerberos"
+```
+
+Because '`;`' is a command separator in bash, the URL is included in
+double-quotes ('`"`'). You will need to quote the URL and other arguments if
+they contain characters that are special in your shell; different shells have
+different special characters, but
+space ('<code>&nbsp;</code>'),
+dollar ('`$`'),
+single-quote ('`'`'),
+bang ('`!`') and
+percent ('`%`') are some common examples.
 
 Read [the manual](http://julianhyde.github.io/sqlline/manual.html).
 
@@ -90,7 +116,7 @@ Use the following definition to use `sqlline` in your maven project:
 <dependency>
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
-  <version>1.4.0</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -98,8 +124,8 @@ Use the following definition to use `sqlline` in your maven project:
 
 Prerequisites:
 
-* Maven 3.2.1 or higher
-* Java 1.6 or higher (9 preferred)
+* Maven 3.2.5 or higher
+* Java 8 or higher (10 preferred)
 
 Check out and build:
 
@@ -109,28 +135,31 @@ cd sqlline
 mvn package
 ```
 
-## Authors
+## Committers
 
-* Marc Prud'hommeaux (mwp1@cornell.edu)
-* John V. Sichi (jsichi@gmail.com)
-* Stephan Zuercher (stephan@zuercher.us)
-* Sunny Choi
-* John Pham
-* Steve Herskovitz
+* [Arina Ielchiieva](https://github.com/arina-ielchiieva)
 * Jack Hahn
-* [Julian Hyde](https://github.com/julianhyde)
 * [Joe Posner](https://github.com/joeposner)
+* John Pham
+* [John V. Sichi](https://github.com/jsichi)
+* [Julian Hyde](https://github.com/julianhyde)
+* [Marc Prud'hommeaux](https://github.com/marcprux)
+* [Sergey Nuyanzin](https://github.com/snuyanzin)
+* [Stephan Zuercher](https://github.com/zuercher)
+* Steve Herskovitz
+* Sunny Choi
 
 ## More information
 
 * License: Modified BSD License
-* [Home page](http://julianhyde.github.io/sqlline)
-* [API](http://www.hydromatic.net/sqlline/apidocs)
-* [Source code](http://github.com/julianhyde/sqlline)
+* [Home page](https://julianhyde.github.io/sqlline)
+* [API](https://julianhyde.github.io/sqlline/apidocs)
+* [Source code](https://github.com/julianhyde/sqlline)
 * Developers list:
   <a href="mailto:sqlline-dev@googlegroups.com">sqlline-dev at googlegroups.com</a>
-  (<a href="http://groups.google.com/group/sqlline-dev/topics">archive</a>,
-  <a href="http://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
+  (<a href="https://groups.google.com/group/sqlline-dev/topics">archive</a>,
+  <a href="https://groups.google.com/group/sqlline-dev/subscribe">subscribe</a>)
+* Twitter: [@SQLLineShell](https://twitter.com/SQLLineShell)
 * [Issues](https://github.com/julianhyde/sqlline/issues)
 * [Release notes and history](HISTORY.md)
 * [HOWTO](HOWTO.md)

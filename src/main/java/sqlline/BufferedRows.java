@@ -18,52 +18,106 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Rows implementation which buffers all rows in a linked list.
+ * Rows implementation that buffers rows in a linked list.
+ *
+ * <p>Detailed behavior depends on
+ * {@link SqlLineOpts#getIncrementalBufferRows() incrementalBufferRows},
+ * as follows:
+ *
+ * <ul>
+ * <li>If {@code incrementalBufferRows} is negative, it buffers all rows;
+ * <li>If {@code incrementalBufferRows} is zero, it buffers nothing;
+ * <li>If the number of rows in result set is more than
+ *     {@code incrementalBufferRows} and incremental property is false,
+ *     then it enters incremental mode, with buffered limit
+ *     {@code incrementalBufferRows}.
+ * </ul>
  */
 class BufferedRows extends Rows {
-  private final List<Row> list;
-
-  private final Iterator<Row> iterator;
+  private final ResultSet rs;
+  private final Row columnNames;
+  private final int columnCount;
+  private final int limit;
+  private List<Row> list;
+  private Iterator<Row> iterator;
+  private int batch = 0;
+  private int[] max = null;
 
   BufferedRows(SqlLine sqlLine, ResultSet rs) throws SQLException {
     super(sqlLine, rs);
-
-    list = new LinkedList<Row>();
-
-    int count = rsMeta.getColumnCount();
-
-    list.add(new Row(count));
-
-    while (rs.next()) {
-      list.add(new Row(count, rs));
-    }
-
+    this.rs = rs;
+    limit = sqlLine.getOpts().getIncrementalBufferRows();
+    columnCount = rsMeta.getColumnCount();
+    columnNames = new Row(columnCount);
+    list = nextList();
     iterator = list.iterator();
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    if (iterator.hasNext()) {
+      return true;
+    } else {
+      try {
+        list = nextList();
+        iterator = list.iterator();
+        return iterator.hasNext();
+      } catch (SQLException ex) {
+        throw new WrappedSqlException(ex);
+      }
+    }
   }
 
   public Row next() {
-    return iterator.next();
+    final Row row = iterator.next();
+    if (batch > 0) {
+      normalizeWidth(sqlLine.getOpts().getMaxColumnWidth(), row);
+    }
+    return row;
   }
 
-  void normalizeWidths() {
-    int[] max = null;
+  void normalizeWidths(int maxColumnWidth) {
     for (Row row : list) {
-      if (max == null) {
-        max = new int[row.values.length];
-      }
+      normalizeWidth(maxColumnWidth, row);
+    }
+  }
 
-      for (int j = 0; j < max.length; j++) {
-        max[j] = Math.max(max[j], row.sizes[j] + 1);
-      }
+  private void normalizeWidth(int maxColumnWidth, Row row) {
+    if (max == null) {
+      max = new int[row.values.length];
+    }
+    for (int j = 0; j < max.length; j++) {
+      int currentMaxWidth = Math.max(max[j], row.sizes[j]);
+      // ensure that calculated column width
+      // does not exceed max column width
+      max[j] = maxColumnWidth > 0
+              ? Math.min(currentMaxWidth, maxColumnWidth)
+              : currentMaxWidth;
+    }
+    row.sizes = max;
+  }
+
+  private List<Row> nextList() throws SQLException {
+    final List<Row> list = new LinkedList<>();
+    if (batch == 0) {
+      // Add a row of column names as the first row of the first batch.
+      list.add(columnNames);
     }
 
-    for (Row row : list) {
-      row.sizes = max;
+    if (limit >= 0 && batch == 0) {
+      // Obey the limit if the limit is non-negative and this is the first
+      // batch.
+      int counter = 0;
+      while (counter++ < limit && rs.next()) {
+        list.add(new Row(columnCount, rs));
+      }
+    } else {
+      while (rs.next()) {
+        final Row row = new Row(columnCount, rs);
+        list.add(row);
+      }
     }
+    ++batch;
+    return list;
   }
 }
 

@@ -13,47 +13,51 @@ package sqlline;
 
 /**
  * OutputFormat for values separated by a delimiter.
- *
- * <p><strong>TODO</strong>:
- * Handle character escaping
  */
-class SeparatedValuesOutputFormat implements OutputFormat {
-  private final SqlLine sqlLine;
-  private char separator;
+class SeparatedValuesOutputFormat extends AbstractOutputFormat {
+  private static final char DEFAULT_QUOTE_CHARACTER = '"';
+  final String separator;
+  final char quoteCharacter;
 
-  public SeparatedValuesOutputFormat(SqlLine sqlLine, char separator) {
-    this.sqlLine = sqlLine;
-    setSeparator(separator);
+  SeparatedValuesOutputFormat(SqlLine sqlLine,
+      String separator, char quoteCharacter) {
+    super(sqlLine);
+    this.separator = separator;
+    this.quoteCharacter = quoteCharacter;
   }
 
-  public int print(Rows rows) {
-    int count = 0;
-    while (rows.hasNext()) {
-      printRow(rows, rows.next());
-      count++;
-    }
-
-    return count - 1; // sans header row
+  SeparatedValuesOutputFormat(SqlLine sqlLine, String separator) {
+    this(sqlLine, separator, DEFAULT_QUOTE_CHARACTER);
   }
 
-  public void printRow(Rows rows, Rows.Row row) {
+  @Override void printHeader(Rows.Row header) {
+    printRow(header);
+  }
+
+  @Override void printFooter(Rows.Row header) {
+  }
+
+  @Override void printRow(Rows rows, Rows.Row header, Rows.Row row) {
+    printRow(row);
+  }
+
+  private void printRow(Rows.Row row) {
     String[] vals = row.values;
     StringBuilder buf = new StringBuilder();
     for (String val : vals) {
-      buf.append(buf.length() == 0 ? "" : "" + getSeparator())
-          .append('\'')
-          .append(val == null ? "" : val)
-          .append('\'');
+      buf.append(buf.length() == 0 ? "" : "" + separator)
+          .append(quoteCharacter);
+      if (val != null) {
+        for (char c : val.toCharArray()) {
+          if (c == quoteCharacter) {
+            buf.append(c);
+          }
+          buf.append(c);
+        }
+      }
+      buf.append(quoteCharacter);
     }
     sqlLine.output(buf.toString());
-  }
-
-  public void setSeparator(char separator) {
-    this.separator = separator;
-  }
-
-  public char getSeparator() {
-    return this.separator;
   }
 }
 

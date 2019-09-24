@@ -5,3 +5,6 @@ target
 *.ipr
 .idea/
 *.jar
+bin/sqlline
+maven/*
+hivejars/*

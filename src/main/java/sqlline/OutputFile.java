@@ -12,9 +12,11 @@
 package sqlline;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Output file.
@@ -24,24 +26,10 @@ public class OutputFile {
   final PrintWriter out;
 
   public OutputFile(String filename) throws IOException {
-    filename = expand(filename);
     file = new File(filename);
-    out = new PrintWriter(new FileWriter(file), true);
-  }
-
-  /** Expands "~" to the home directory. */
-  private static String expand(String filename) {
-    if (filename.startsWith("~" + File.separator)) {
-      try {
-        String home = System.getProperty("user.home");
-        if (home != null) {
-          return home + filename.substring(1);
-        }
-      } catch (SecurityException e) {
-        // ignore
-      }
-    }
-    return filename;
+    out = new PrintWriter(
+        new OutputStreamWriter(
+            new FileOutputStream(file), StandardCharsets.UTF_8), true);
   }
 
   @Override public String toString() {

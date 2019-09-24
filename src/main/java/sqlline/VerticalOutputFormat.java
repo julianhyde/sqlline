@@ -17,7 +17,7 @@ package sqlline;
 class VerticalOutputFormat implements OutputFormat {
   private final SqlLine sqlLine;
 
-  public VerticalOutputFormat(SqlLine sqlLine) {
+  VerticalOutputFormat(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
   }
 

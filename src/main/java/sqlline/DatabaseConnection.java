@@ -11,12 +11,13 @@
 */
 package sqlline;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import jline.console.completer.ArgumentCompleter;
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.ArgumentCompleter;
 
 /**
  * Holds a database connection, credentials, and other associated state.
@@ -24,85 +25,60 @@ import jline.console.completer.Completer;
 class DatabaseConnection {
   private final SqlLine sqlLine;
   Connection connection;
-  DatabaseMetaData meta;
-  Quoting quoting;
+  DatabaseMetaDataWrapper meta;
   private final String driver;
   private final String url;
-  private final String username;
-  private final String password;
+  private final Properties info;
   private String nickname;
   private Schema schema = null;
   private Completer sqlCompleter = null;
+  private Dialect dialect;
 
-  public DatabaseConnection(SqlLine sqlLine, String driver, String url,
-      String username, String password) throws SQLException {
+  DatabaseConnection(SqlLine sqlLine, String driver, String url,
+      String username, String password, Properties properties) {
     this.sqlLine = sqlLine;
     this.driver = driver;
     this.url = url;
-    this.username = username;
-    this.password = password;
+    this.info = properties == null ? new Properties() : properties;
+    this.info.put("user", username);
+    this.info.put("password", password);
   }
 
   @Override public String toString() {
     return getUrl() + "";
   }
 
-  void setCompletions(boolean skipmeta) throws SQLException, IOException {
+  void setCompletions(boolean skipmeta) {
+    // setup the completer for the database
+    sqlCompleter = new ArgumentCompleter(
+        new SqlCompleter(sqlLine, skipmeta));
+    // not all argument elements need to hold true
+    ((ArgumentCompleter) sqlCompleter).setStrict(false);
+  }
+
+  /**
+   * Initializes a syntax rule for a given database connection.
+   *
+   * <p>The rule is good for different highlighter and completer instances,
+   * but not necessarily for other database connections (because it
+   * depends on the set of keywords and identifier quote string).
+   */
+  private void initSyntaxRule() throws SQLException {
     // Deduce the string used to quote identifiers. For example, Oracle
     // uses double-quotes:
     //   SELECT * FROM "My Schema"."My Table"
-    String startQuote = meta.getIdentifierQuoteString();
-    final boolean upper = meta.storesUpperCaseIdentifiers();
-    if (startQuote == null
-        || startQuote.equals("")
-        || startQuote.equals(" ")) {
-      if (meta.getDatabaseProductName().startsWith("MySQL")) {
-        // Some version of the MySQL JDBC driver lie.
-        quoting = new Quoting('`', '`', upper);
-      } else {
-        quoting = new Quoting((char) 0, (char) 0, false);
-      }
-    } else if (startQuote.equals("[")) {
-      quoting = new Quoting('[', ']', upper);
-    } else if (startQuote.length() > 1) {
-      sqlLine.error(
-          "Identifier quote string is '" + startQuote
-              + "'; quote strings longer than 1 char are not supported");
-      quoting = Quoting.DEFAULT;
-    } else {
-      quoting =
-          new Quoting(startQuote.charAt(0), startQuote.charAt(0), upper);
+    String identifierQuoteString = meta.getIdentifierQuoteString();
+    if (identifierQuoteString.length() > 1) {
+      sqlLine.error("Identifier quote string is '" + identifierQuoteString
+          + "'; quote strings longer than 1 char are not supported");
+      identifierQuoteString = null;
     }
-
-    final String extraNameCharacters =
-        meta == null
-            || meta.getExtraNameCharacters() == null
-            ? ""
-            : meta.getExtraNameCharacters();
-
-    // setup the completer for the database
-    sqlCompleter = new ArgumentCompleter(
-        new ArgumentCompleter.WhitespaceArgumentDelimiter() {
-          // delimiters for SQL statements are any
-          // non-letter-or-number characters, except
-          // underscore and characters that are specified
-          // by the database to be valid name identifiers.
-          @Override public boolean isDelimiterChar(
-              final CharSequence buffer, int pos) {
-            char c = buffer.charAt(pos);
-            if (Character.isWhitespace(c)) {
-              return true;
-            }
-
-            return !Character.isLetterOrDigit(c)
-                && c != '_'
-                && extraNameCharacters.indexOf(c) == -1;
-          }
-        },
-        new SqlCompleter(sqlLine, skipmeta));
-
-    // not all argument elements need to hold true
-    ((ArgumentCompleter) sqlCompleter).setStrict(false);
+    final String productName = meta.getDatabaseProductName();
+    final Set<String> keywords =
+        Stream.of(meta.getSQLKeywords().split(","))
+            .collect(Collectors.toSet());
+    dialect = DialectImpl.create(keywords, identifierQuoteString,
+        productName, meta.storesUpperCaseIdentifiers());
   }
 
   /**
@@ -129,6 +105,7 @@ class DatabaseConnection {
     if (!foundDriver) {
       sqlLine.output(sqlLine.loc("autoloading-known-drivers", url));
       sqlLine.registerKnownDrivers();
+      theDriver = DriverManager.getDriver(url);
     }
 
     try {
@@ -150,11 +127,8 @@ class DatabaseConnection {
 */
     // Instead, we use the driver instance to make the connection
 
-    final Properties info = new Properties();
-    info.put("user", username);
-    info.put("password", password);
     connection = theDriver.connect(url, info);
-    meta = connection.getMetaData();
+    meta = new DatabaseMetaDataWrapper(sqlLine, connection.getMetaData());
 
     try {
       sqlLine.debug(
@@ -187,6 +161,7 @@ class DatabaseConnection {
       sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
           .getIsolation(),
           new DispatchCallback());
+      initSyntaxRule();
     } catch (Exception e) {
       sqlLine.handleException(e);
     }
@@ -215,7 +190,8 @@ class DatabaseConnection {
     try {
       try {
         if (connection != null && !connection.isClosed()) {
-          sqlLine.output(sqlLine.loc("closing", connection));
+          sqlLine.output(
+              sqlLine.loc("closing", connection.getClass().getName()));
           connection.close();
         }
       } catch (Exception e) {
@@ -228,7 +204,7 @@ class DatabaseConnection {
   }
 
   public Collection<String> getTableNames(boolean force) {
-    Set<String> names = new TreeSet<String>();
+    Set<String> names = new TreeSet<>();
     for (Schema.Table table : getSchema().getTables()) {
       names.add(table.getName());
     }
@@ -243,7 +219,7 @@ class DatabaseConnection {
     return schema;
   }
 
-  DatabaseMetaData getDatabaseMetaData() {
+  DatabaseMetaDataWrapper getDatabaseMetaData() {
     return meta;
   }
 
@@ -263,6 +239,19 @@ class DatabaseConnection {
     return sqlCompleter;
   }
 
+  Dialect getDialect() {
+    return dialect;
+  }
+
+  String getCurrentSchema() {
+    try {
+      return connection.getSchema();
+    } catch (Exception e) {
+      // ignore
+      return null;
+    }
+  }
+
   /** Schema. */
   class Schema {
     private List<Table> tables;
@@ -272,7 +261,7 @@ class DatabaseConnection {
         return tables;
       }
 
-      tables = new LinkedList<Table>();
+      tables = new LinkedList<>();
 
       try {
         ResultSet rs =
@@ -311,7 +300,7 @@ class DatabaseConnection {
       final String name;
       Column[] columns;
 
-      public Table(String name) {
+      Table(String name) {
         this.name = name;
       }
 
@@ -324,7 +313,7 @@ class DatabaseConnection {
         final String name;
         boolean isPrimaryKey;
 
-        public Column(String name) {
+        Column(String name) {
           this.name = name;
         }
       }

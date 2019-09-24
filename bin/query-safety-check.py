@@ -59,7 +59,11 @@ class QuerySafetyCheck():
 
 		# Execute sqlline
 		logging.info("Execute sqlline")
+<<<<<<< HEAD
 		sqlline_cmd_stream = subprocess.Popen(["sqlline", "-u", jdbc, "-f", \
+=======
+		sqlline_cmd_stream = subprocess.Popen(["bin/sqlline", "-u", jdbc, "-f", \
+>>>>>>> 33d9448a6543a25db7a398daa3fb53693691d4d5
 			queryfile, "-n", self.username, "-p", self.PASSWORD], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Poll for status on the process to check if it's running

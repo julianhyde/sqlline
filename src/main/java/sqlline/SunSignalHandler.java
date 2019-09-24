@@ -20,10 +20,10 @@ import sun.misc.*; // CHECKSTYLE: IGNORE 0
  * the currently executing query. Adapted from
  * <a href="http://www.smotricz.com/kabutz/Issue043.html">TJSN</a>.
  */
-class SunSignalHandler implements SqlLineSignalHandler, SignalHandler {
+public class SunSignalHandler implements SqlLineSignalHandler, SignalHandler {
   private DispatchCallback dispatchCallback;
 
-  SunSignalHandler() {
+  public SunSignalHandler() {
     Signal.handle(new Signal("INT"), this);
   }
 
