@@ -67,7 +67,7 @@ public class JsonOutputFormat extends AbstractOutputFormat {
       return;
     case Types.BOOLEAN:
       // JSON requires true and false, not TRUE and FALSE
-      sb.append(value.equalsIgnoreCase("TRUE"));
+      sb.append(value.equalsIgnoreCase("TRUE") || value.equals("1"));
       return;
     }
     sb.append("\"");
