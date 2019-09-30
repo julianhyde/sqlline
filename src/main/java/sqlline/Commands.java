@@ -1224,11 +1224,6 @@ public class Commands {
         offset++;
       }
     }
-    if ((connectProps.isEmpty() ? 2 : 1) > parts.length - offset) {
-      callback.setToFailure();
-      sqlLine.error(example);
-      return;
-    }
 
     String url = parts.length < offset + 1 ? null : parts[offset];
     String user = parts.length < offset + 2 ? null : parts[offset + 1];

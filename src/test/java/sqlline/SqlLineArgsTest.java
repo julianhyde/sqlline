@@ -2670,6 +2670,80 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testInitArgsWithInteractiveAskForUserPassword() {
+    try {
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        String readUsername(String url) {
+          return ConnectionSpec.H2.username;
+        }
+      };
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        String readPassword(String url) {
+          return ConnectionSpec.H2.password;
+        }
+      };
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url,
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          allOf(not(containsString("Duplicate property")),
+              not(containsString("Usage:"))));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsWithInteractiveAskForPassword() {
+    try {
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        String readPassword(String url) {
+          return ConnectionSpec.H2.password;
+        }
+      };
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url,
+          "-n", ConnectionSpec.H2.username,
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          allOf(not(containsString("Duplicate property")),
+              not(containsString("Usage:"))));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
+  public void testInitArgsWithInteractiveAskForUser() {
+    try {
+      new MockUp<sqlline.Commands>() {
+        @Mock
+        String readUsername(String url) {
+          return ConnectionSpec.H2.username;
+        }
+      };
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      final String[] connectionArgs = new String[] {
+          "-u", ConnectionSpec.H2.url,
+          "-p", ConnectionSpec.H2.password,
+          "-e", "!set maxwidth 80"};
+      begin(sqlLine, os, false, connectionArgs);
+      assertThat(os.toString("UTF8"),
+          allOf(not(containsString("Duplicate property")),
+              not(containsString("Usage:"))));
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
   public void testDropAll() {
     try {
       new MockUp<sqlline.Commands>() {
