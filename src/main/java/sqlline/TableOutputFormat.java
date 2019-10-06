@@ -31,12 +31,7 @@ class TableOutputFormat implements OutputFormat {
     int index = 0;
     AttributedString header = null;
     AttributedString headerCols = null;
-    final int maxWidth =
-        sqlLine.getOpts().getMaxWidth();
-    final int width = (maxWidth == 0
-            && sqlLine.getLineReader() != null
-        ? sqlLine.getLineReader().getTerminal().getWidth()
-        : maxWidth) - 4;
+    final int width = getCalculatedWidth();
 
     // normalize the columns sizes
     rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
@@ -87,6 +82,14 @@ class TableOutputFormat implements OutputFormat {
     }
 
     return index - 1;
+  }
+
+  private int getCalculatedWidth() {
+    final int maxWidth = sqlLine.getOpts().getMaxWidth();
+    int width = (maxWidth == 0 && sqlLine.getLineReader() != null
+        ? sqlLine.getLineReader().getTerminal().getWidth()
+        : maxWidth) - 4;
+    return Math.max(width, 0);
   }
 
   void printRow(AttributedString attributedString, boolean header) {
