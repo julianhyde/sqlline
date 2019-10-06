@@ -27,10 +27,7 @@ public class AnsiConsoleOutputFormat implements OutputFormat {
 
   public int print(Rows rows) {
     int index = 0;
-    final int maxWidth = sqlLine.getOpts().getMaxWidth();
-    final int width = (maxWidth == 0 && sqlLine.getLineReader() != null
-        ? sqlLine.getLineReader().getTerminal().getWidth()
-        : maxWidth) - 4;
+    final int width = getCalculatedWidth();
 
     // normalize the columns sizes
     rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
@@ -47,6 +44,13 @@ public class AnsiConsoleOutputFormat implements OutputFormat {
     }
 
     return index - 1;
+  }
+
+  private int getCalculatedWidth() {
+    final int maxWidth = sqlLine.getOpts().getMaxWidth();
+    return Math.max(maxWidth == 0 && sqlLine.getLineReader() != null
+        ? sqlLine.getLineReader().getTerminal().getWidth()
+        : maxWidth, 0);
   }
 
   void printRow(AttributedString cbuff) {

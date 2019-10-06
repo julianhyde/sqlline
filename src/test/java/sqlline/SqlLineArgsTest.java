@@ -42,6 +42,8 @@ import org.jline.terminal.Terminal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import mockit.Expectations;
 import mockit.Mock;
@@ -472,6 +474,17 @@ public class SqlLineArgsTest {
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString("| 1           | null        |     |\n"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 2, 3, 4})
+  public void testTableOutputWithZeroWidth(int maxWidth) {
+    final String script = "!set maxwidth " + maxWidth + "\n"
+        + "!set incremental true\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+        containsString("|  |\n"));
   }
 
   /**
@@ -1851,6 +1864,23 @@ public class SqlLineArgsTest {
     final String line1 = ""
         + "C1          C2\n"
         + "1           2 \n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
+  public void testAnsiConsoleOutputFormatWithZeroWidth() {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 0\n"
+        + "!set incremental true \n"
+        + "!set outputformat ansiconsole \n"
+        + "!all \n"
+        + "values \n"
+        + "(1, '2') \n"
+        + ";\n";
+    final String line1 = ""
+        + "\n"
+        + "\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         containsString(line1));
   }
