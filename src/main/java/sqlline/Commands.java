@@ -158,7 +158,6 @@ public class Commands {
   };
 
   private static final String CONNECT_PROPERTY = "#CONNECT_PROPERTY#.";
-  private static final String SKIP_INTERACTIVE_MODE_PROPERTY = "-no-np";
   private final SqlLine sqlLine;
 
   Commands(SqlLine sqlLine) {
@@ -1198,7 +1197,7 @@ public class Commands {
 
   public void connect(String line, DispatchCallback callback) {
     String example =
-        "Usage: connect [-no-np] [-p property value]* <url> [username] [password] [driver]"
+        "Usage: connect [-p property value]* <url> [username] [password] [driver]"
         + SqlLine.getSeparator();
     String[] parts = sqlLine.split(line);
     if (parts == null) {
@@ -1219,9 +1218,6 @@ public class Commands {
           sqlLine.error(example);
           return;
         }
-      } else if (SKIP_INTERACTIVE_MODE_PROPERTY.equals(parts[i])) {
-        connectProps.setProperty(parts[i], Boolean.TRUE.toString());
-        offset++;
       }
     }
 
@@ -1311,9 +1307,15 @@ public class Commands {
         "ConnectionPassword");
     Properties info = (Properties) props.get(CONNECT_PROPERTY);
     if (info != null) {
+      url = url == null ? info.getProperty("url") : url;
       driver = driver == null ? info.getProperty("driver") : driver;
       username = username == null ? info.getProperty("user") : username;
       password = password == null ? info.getProperty("password") : password;
+    }
+    if (username == null && password == null
+        && "useNPTogetherOrEmpty".equals(
+        sqlLine.getOpts().get(BuiltInProperty.CONNECT_INTERACTION_MODE))) {
+      username = password = "";
     }
     if (url == null || url.length() == 0) {
       callback.setToFailure();
@@ -1343,9 +1345,8 @@ public class Commands {
     }
 
     sqlLine.debug("Connecting to " + url);
-
-    if (info == null
-        || info.getProperty(SKIP_INTERACTIVE_MODE_PROPERTY) == null) {
+    if (!"notAskCredentials".equals(
+        sqlLine.getOpts().get(BuiltInProperty.CONNECT_INTERACTION_MODE))) {
       if (username == null) {
         username = readUsername(url);
         username = username == null || username.isEmpty() ? null : username;

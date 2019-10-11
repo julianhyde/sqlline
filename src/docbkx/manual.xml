@@ -444,19 +444,6 @@ value |
         </para>
       </sect1>
 
-      <sect1 id="-no-np">
-        <title>-no-np</title>
-        <para>
-          <cmdsynopsis>
-            <command>-no-np</command>
-            <arg choice="req"></arg>
-          </cmdsynopsis>
-          Without arguments. Indicates that sqlline should use only arguments
-          from the command line without interactive asking for them to connect
-          to db even if -n or -p missed.
-        </para>
-      </sect1>
-
       <sect1 id="-ch">
         <title>-ch</title>
         <para>
@@ -3164,6 +3151,18 @@ java.sql.SQLException: ORA-00942: table or view does not exist
             /<literal>vs2010</literal>,
             then this scheme will be used for command/sql syntax highlighting.
             If <literal>default</literal> then there is no syntax highlighting.
+        </para>
+      </sect1>
+      <sect1 id="setting_connectinteractionmode">
+        <title>connectinteractionmode</title>
+        <para>
+          If <literal>askCredentials</literal> then sqlline will ask for the
+          credentials if they are not specified as properties to make
+          a connection. If <literal>notAskCredentials</literal> the sqlline
+          will not ask for the credentials to make a connection. If
+          <literal>useNPTogetherOrEmpty</literal> then it will ask for the
+          credentials if there is only one specified, if there is no specified
+          then it will use empty credentials (sqlline 1.7 and earlier behavior).
         </para>
       </sect1>
       <sect1 id="setting_dateformat">

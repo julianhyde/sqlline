@@ -331,7 +331,6 @@ public class SqlLine {
     String commandHandler = null;
     String appConfig = null;
     String promptHandler = null;
-    boolean interactivelyAskUserPasswordIfAbsent = true;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -360,7 +359,7 @@ public class SqlLine {
       }
 
       if (args[i].charAt(0) == '-') {
-        if (i == args.length - 1 && !"-no-np".equals(args[i])) {
+        if (i == args.length - 1) {
           return Status.ARGS;
         }
         if (args[i].equals("-d")) {
@@ -385,8 +384,6 @@ public class SqlLine {
           appConfig = args[++i];
         } else if (args[i].equals("-ph")) {
           promptHandler = args[++i];
-        } else if (args[i].equals("-no-np")) {
-          interactivelyAskUserPasswordIfAbsent = false;
         } else {
           return Status.ARGS;
         }
@@ -405,7 +402,6 @@ public class SqlLine {
           COMMAND_PREFIX + "connect "
               + (driver == null || driver.trim().isEmpty()
                   ? "" : "-p driver " + driver + " ")
-              + (interactivelyAskUserPasswordIfAbsent ? "" : "-no-np ")
               + (user == null ? "" : "-p user " + escapeAndQuote(user) + " ")
               + (pass == null
                   ? "" : "-p password " + escapeAndQuote(pass) + " ")
