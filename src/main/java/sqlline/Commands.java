@@ -1312,7 +1312,8 @@ public class Commands {
       username = username == null ? info.getProperty("user") : username;
       password = password == null ? info.getProperty("password") : password;
     }
-    if (username == null && password == null
+    if ((username == null || username.isEmpty())
+        && (password == null || password.isEmpty())
         && "useNPTogetherOrEmpty".equals(
         sqlLine.getOpts().get(BuiltInProperty.CONNECT_INTERACTION_MODE))) {
       username = password = "";
