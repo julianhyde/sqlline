@@ -267,7 +267,8 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "batch"),
         new ReflectiveCommandHandler(sqlLine, empty, "list"),
         new ReflectiveCommandHandler(sqlLine, empty, "all"),
-        new ReflectiveCommandHandler(sqlLine, empty, "go", "#"),
+        new ReflectiveCommandHandler(sqlLine,
+            new ConnectionCompleter(sqlLine), "go", "#"),
         new ReflectiveCommandHandler(sqlLine, new FileNameCompleter(),
             "script") {
           @Override public boolean echoToFile() {
