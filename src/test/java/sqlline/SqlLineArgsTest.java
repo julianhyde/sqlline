@@ -38,7 +38,12 @@ import org.hsqldb.jdbc.JDBCDatabaseMetaData;
 import org.hsqldb.jdbc.JDBCResultSet;
 import org.hsqldb.jdbc.JDBCResultSetMetaData;
 import org.jline.builtins.Commands;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.terminal.impl.DumbTerminal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -479,13 +484,48 @@ public class SqlLineArgsTest {
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 2, 3, 4})
-  public void testTableOutputWithZeroWidth(int maxWidth) {
+  public void testTableOutputWithoutTerminalAndWithSmallWidth(int maxWidth) {
+    new MockUp<SqlLine>() {
+      @Mock
+      LineReader getLineReader() {
+        return null;
+      }
+    };
     final String script = "!set maxwidth " + maxWidth + "\n"
         + "!set incremental true\n"
         + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
     checkScriptFile(script, false,
         equalTo(SqlLine.Status.OK),
         containsString("|  |\n"));
+  }
+
+  @Test
+  public void testTableOutputWithZeroMaxWidthAndExistingTerminal() {
+    try {
+      new MockUp<DumbTerminal>() {
+        @Mock
+        public Size getSize() {
+          return new Size(80, 20);
+        }
+      };
+      final LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
+          .parser(new SqlLineParser(sqlLine))
+          .terminal(TerminalBuilder.builder().dumb(true).build());
+      sqlLine.setLineReader(lineReaderBuilder.build());
+      final String script = "!set maxwidth 0\n"
+          + "!set incremental true\n"
+          + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
+      checkScriptFile(script, false,
+          equalTo(SqlLine.Status.OK),
+          containsString(
+              "+-------------+-------------+-----+\n"
+                  + "|     C1      |     C2      | C3  |\n"
+                  + "+-------------+-------------+-----+\n"
+                  + "| 1           | null        |     |\n"
+                  + "+-------------+-------------+-----+\n"));
+    } catch (Exception e) {
+      fail("Test failed with ", e);
+    }
   }
 
   /**
@@ -1868,20 +1908,53 @@ public class SqlLineArgsTest {
   }
 
   @Test
-  public void testAnsiConsoleOutputFormatWithZeroWidth() {
-    // Set width so we don't inherit from the current terminal.
+  public void testAnsiConsoleFormatWithNonExistingTerminalAndSmallWidth() {
+    new MockUp<SqlLine>() {
+      @Mock
+      LineReader getLineReader() {
+        return null;
+      }
+    };
     final String script = "!set maxwidth 0\n"
         + "!set incremental true \n"
         + "!set outputformat ansiconsole \n"
-        + "!all \n"
-        + "values \n"
-        + "(1, '2') \n"
-        + ";\n";
+        + "values (1, '2');\n";
     final String line1 = ""
         + "\n"
         + "\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         containsString(line1));
+  }
+
+  @Test
+  public void testAnsiConsoleFormatWithZeroMaxWidthAndExistingTerminal() {
+    try {
+      new MockUp<DumbTerminal>() {
+        @Mock
+        public Size getSize() {
+          return new Size(80, 20);
+        }
+      };
+      final LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
+          .parser(new SqlLineParser(sqlLine))
+          .terminal(TerminalBuilder.builder().dumb(true).build());
+      sqlLine.setLineReader(lineReaderBuilder.build());
+      final String script = "!set maxwidth 0\n"
+          + "!set incremental true \n"
+          + "!set outputformat ansiconsole \n"
+          + "!all \n"
+          + "values \n"
+          + "(1, '2') \n"
+          + ";\n";
+      final String line1 = ""
+          + "C1          C2\n"
+          + "1           2 \n";
+      checkScriptFile(script, false,
+          equalTo(SqlLine.Status.OK),
+          containsString(line1));
+    } catch (Exception e) {
+      fail("Test failed with ", e);
+    }
   }
 
   @Test
