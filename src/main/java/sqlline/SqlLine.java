@@ -694,6 +694,9 @@ public class SqlLine {
       line = COMMAND_PREFIX + "help";
     }
 
+    if (getOpts().getAutoResize()) {
+      getCommands().resize();
+    }
     final boolean echoToFile;
     if (line.startsWith(COMMAND_PREFIX)) {
       Map<String, CommandHandler> cmdMap = new TreeMap<>();

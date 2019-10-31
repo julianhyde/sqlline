@@ -1404,6 +1404,29 @@ public class Commands {
     }
   }
 
+  void resize() {
+    final Terminal terminal = sqlLine.getTerminal();
+    if (terminal == null
+        || terminal.getWidth() == 0 || terminal.getHeight() == 0) {
+      return;
+    }
+
+    sqlLine.getOpts().set(BuiltInProperty.MAX_HEIGHT, terminal.getHeight());
+    sqlLine.getOpts().set(BuiltInProperty.MAX_WIDTH, terminal.getWidth());
+    sqlLine.debug(sqlLine.loc(
+        "new-size-after-resize", terminal.getHeight(), terminal.getWidth()));
+  }
+
+  public void resize(String line, DispatchCallback callback) {
+    try {
+      resize();
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error(e);
+    }
+  }
+
   /**
    * Lists the current connections.
    *
