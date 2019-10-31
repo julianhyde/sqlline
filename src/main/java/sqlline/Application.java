@@ -262,6 +262,7 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "nativesql"),
         new ReflectiveCommandHandler(sqlLine, empty, "dbinfo"),
         new ReflectiveCommandHandler(sqlLine, empty, "rehash"),
+        new ReflectiveCommandHandler(sqlLine, empty, "resize"),
         new ReflectiveCommandHandler(sqlLine, empty, "verbose"),
         new ReflectiveCommandHandler(sqlLine, new FileNameCompleter(), "run"),
         new ReflectiveCommandHandler(sqlLine, empty, "batch"),

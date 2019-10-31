@@ -1462,6 +1462,7 @@ sqlline> !help
 !reconnect        Reconnect to the database
 !record           Record all output to the specified file
 !rehash           Fetch table and column names for command completion
+!resize           Reset max height/width based on terminal height/width
 !rollback         Roll back the current transaction (if autocommit is off)
 !reset            Reset a sqlline variable
 !run              Run a script from the specified file
@@ -2481,6 +2482,43 @@ Done
             <screen>
               0: jdbc:hsqldb:db-hypersonic> !reset timeout
               [timeout] was reset to [-1]
+            </screen>
+          </refsect1>
+        </refentry>
+      </section>
+
+      <section id="sect_command_resize">
+        <title>resize</title>
+        <refentry id="command_resize">
+          <refmeta>
+            <refentrytitle>resize</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+
+          <refnamediv>
+            <refname>resize</refname>
+            <refpurpose>
+              Reset max height/width based on terminal height/width
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!resize</command>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+
+          <refsect1>
+            <title>Description</title>
+            <para>
+              Resets max height/width based on terminal height/width
+            </para>
+          </refsect1>
+          <refsect1>
+            <title>Example of "resize" command</title>
+            <screen>
+              0: jdbc:hsqldb:db-hypersonic> !resize
             </screen>
           </refsect1>
         </refentry>

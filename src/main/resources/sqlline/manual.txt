@@ -88,6 +88,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+resize
+resize — Reset max height/width based on terminal height/width
 rollback
 rollback — Roll back the current transaction
 run
@@ -233,6 +235,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+resize
+resize — Reset max height/width based on terminal height/width
 rollback
 rollback — Roll back the current transaction
 run
@@ -468,6 +472,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+resize
+resize — Reset max height/width based on terminal height/width
 rollback
 rollback — Roll back the current transaction
 run
@@ -1131,6 +1137,7 @@ sqlline> !help
 !reconnect          Reconnect to the database
 !record             Record all output to the specified file
 !rehash             Fetch table and column names for command completion
+!resize             Reset max height/width based on terminal height/width
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
 !save               Save the current variables and aliases
@@ -1782,6 +1789,24 @@ Warning on using "rehash"
 Caution
 
 This operation can be extremely slow for some databases.
+
+rehash
+
+Name
+
+resize — Reset max height/width based on terminal height/width
+
+Synopsis
+
+!resize
+
+Description
+
+Resets max height/width based on terminal height/width
+
+Example of "resize" command
+
+0: jdbc:hsqldb:db-hypersonic> !resize
 
 rollback
 

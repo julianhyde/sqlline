@@ -35,6 +35,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 import sqlline.SqlLineProperty.Type;
 
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.AUTO_RESIZE;
 import static sqlline.BuiltInProperty.HISTORY_FLAGS;
 import static sqlline.BuiltInProperty.READ_ONLY;
 import static sqlline.BuiltInProperty.AUTO_SAVE;
@@ -756,6 +757,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getAutoSave() {
     return getBoolean(AUTO_SAVE);
+  }
+
+  public boolean getAutoResize() {
+    return getBoolean(AUTO_RESIZE);
   }
 
   public boolean getShowLineNumbers() {
