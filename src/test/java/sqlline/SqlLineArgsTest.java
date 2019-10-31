@@ -573,6 +573,8 @@ public class SqlLineArgsTest {
         + "==================================================\n"
         + "autoCommit      true/false "
         + "Enable/disable automatic transaction commit\n"
+        + "autoResize      true/false Enable/disable automatic resizing of\n"
+        + "                           max height/width based on terminal size\n"
         + "autoSave        true/false Automatically save preferences\n";
     checkScriptFile("!help set\n", false, equalTo(SqlLine.Status.OK),
         containsString(expected));
