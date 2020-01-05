@@ -11,9 +11,6 @@
 */
 package sqlline.extensions;
 
-import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
-
 import sqlline.ConnectionMetadata;
 import sqlline.PromptHandler;
 import sqlline.SqlLine;
@@ -28,9 +25,9 @@ public class CustomPromptHandler extends PromptHandler {
     super(sqlLine);
   }
 
-  @Override protected AttributedString getDefaultPrompt(int connectionIndex,
+  @Override protected String getDefaultPrompt(int connectionIndex,
       String url, String defaultPrompt) {
-    AttributedStringBuilder builder = new AttributedStringBuilder();
+    StringBuilder builder = new StringBuilder();
     builder.append("my_app");
 
     final ConnectionMetadata meta = sqlLine.getConnectionMetadata();
@@ -39,7 +36,7 @@ public class CustomPromptHandler extends PromptHandler {
     if (currentSchema != null) {
       builder.append(" (").append(currentSchema).append(")");
     }
-    return builder.append(">").toAttributedString();
+    return builder.append(">").toString();
   }
 }
 

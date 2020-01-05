@@ -81,10 +81,12 @@ public class PromptHandler {
   }
 
   public AttributedString getPrompt() {
+    final int connectionIndex = sqlLine.getConnectionMetadata().getIndex();
     if (!sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT_SCRIPT)) {
       final String promptScript =
           sqlLine.getOpts().get(BuiltInProperty.PROMPT_SCRIPT);
-      return getPromptFromScript(sqlLine, promptScript);
+      return getPrompt(sqlLine, connectionIndex,
+          getPromptFromScript(sqlLine, promptScript));
     }
     final String defaultPrompt =
         String.valueOf(BuiltInProperty.PROMPT.defaultValue());
@@ -93,22 +95,21 @@ public class PromptHandler {
     final boolean useDefaultPrompt =
         sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT);
     if (dbc == null || dbc.getUrl() == null) {
-      return useDefaultPrompt
-          ? getDefaultPrompt(-1, null, defaultPrompt)
-          : getPrompt(sqlLine, -1, currentPrompt);
+      return getPrompt(sqlLine, connectionIndex,
+          useDefaultPrompt ? defaultPrompt : currentPrompt);
     } else {
-      final int connectionIndex = sqlLine.getConnectionMetadata().getIndex();
       if (useDefaultPrompt || dbc.getNickname() != null) {
         final String nickNameOrUrl =
             dbc.getNickname() == null ? dbc.getUrl() : dbc.getNickname();
-        return getDefaultPrompt(connectionIndex, nickNameOrUrl, defaultPrompt);
+        return getPrompt(sqlLine, connectionIndex,
+            getDefaultPrompt(connectionIndex, nickNameOrUrl, defaultPrompt));
       } else {
         return getPrompt(sqlLine, connectionIndex, currentPrompt);
       }
     }
   }
 
-  private AttributedString getPromptFromScript(SqlLine sqlLine,
+  private String getPromptFromScript(SqlLine sqlLine,
       String promptScript) {
     try {
       final ScriptEngine engine = SCRIPT_ENGINE_SUPPLIER.get();
@@ -120,10 +121,10 @@ public class PromptHandler {
       bindings.put("url", meta.getUrl());
       bindings.put("currentSchema", meta.getCurrentSchema());
       final Object o = engine.eval(promptScript, bindings);
-      return new AttributedString(String.valueOf(o));
+      return String.valueOf(o);
     } catch (ScriptException e) {
       e.printStackTrace();
-      return new AttributedString(">");
+      return ">";
     }
   }
 
@@ -213,11 +214,11 @@ public class PromptHandler {
     return promptStringBuilder.toAttributedString();
   }
 
-  protected AttributedString getDefaultPrompt(
+  protected String getDefaultPrompt(
       int connectionIndex, String url, String defaultPrompt) {
     String resultPrompt;
     if (url == null || url.length() == 0) {
-      return new AttributedString(defaultPrompt);
+      return defaultPrompt;
     } else {
       if (url.contains(";")) {
         url = url.substring(0, url.indexOf(";"));
@@ -229,7 +230,7 @@ public class PromptHandler {
       if (resultPrompt.length() > 45) {
         resultPrompt = resultPrompt.substring(0, 45);
       }
-      return new AttributedString(resultPrompt + "> ");
+      return resultPrompt + "> ";
     }
   }
 
