@@ -127,15 +127,14 @@ Use the following definition to use `sqlline` in your maven project:
 
 Prerequisites:
 
-* Maven 3.2.5 or higher
-* Java 8 or higher (12 preferred)
+* Java 8 or higher (14 preferred)
 
 Check out and build:
 
 ```bash
 git clone git://github.com/julianhyde/sqlline.git
 cd sqlline
-mvn package
+./mvnw package
 ```
 
 ## Committers
