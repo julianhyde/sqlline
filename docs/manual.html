@@ -1,7 +1,7 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>SQLLine 1.8.0</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>
-      SQLLine 1.8.0
+   <title>SQLLine 1.9.0</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book"><div class="titlepage"><div><div><h1 class="title"><a name="d5e1"></a>
+      SQLLine 1.9.0
     </h1></div><div><p class="copyright">Copyright &copy; 2002, 2003, 2004, 2005 Marc Prud'hommeaux</p></div><div><p class="copyright">Copyright &copy; 2006-2019 Julian Hyde</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="part"><a href="#manual">I. SQLLine Manual</a></span></dt><dd><dl><dt><span class="chapter"><a href="#introduction">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#license">2. License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">3. Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">4. Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d5e32">Required software</a></span></dt><dt><span class="sect1"><a href="#d5e49">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">5. Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#issuing_multiline_sql">Issuing multiline commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#options">6. Option Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#-u">-u</a></span></dt><dt><span class="sect1"><a href="#-n">-n</a></span></dt><dt><span class="sect1"><a href="#-p">-p</a></span></dt><dt><span class="sect1"><a href="#-d">-d</a></span></dt><dt><span class="sect1"><a href="#-e">-e</a></span></dt><dt><span class="sect1"><a href="#-nn">-nn</a></span></dt><dt><span class="sect1"><a href="#-ch">-ch</a></span></dt><dt><span class="sect1"><a href="#-f">-f</a></span></dt><dt><span class="sect1"><a href="#-log">-log</a></span></dt><dt><span class="sect1"><a href="#-ac">-ac</a></span></dt><dt><span class="sect1"><a href="#--run">--run</a></span></dt><dt><span class="sect1"><a href="#--help">--help</a></span></dt><dt><span class="sect1"><a href="#--<property_name&gt;">--&lt;property_name&gt;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">7. Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &#8212; 
           Execute SQL against all active connections
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_autocommit">autocommit</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_autocommit">autocommit</a></span><span class="refpurpose"> &#8212; 
@@ -34,6 +34,12 @@
           Display help information
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212; 
           Display the command history
+            -d Print timestamps for each event (default for !history)
+            -f Print full time date stamps in the US format
+            -E Print full time date stamps in the European format
+            -i Print full time date stamps in ISO8601 format
+            -n Suppresses command numbers
+            -r Reverses the order of the commands
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212; 
           List imported foreign keys for a database
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212; 
@@ -73,7 +79,9 @@
           Save the current preferences
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212; 
           Scan class path for JDBC drivers
-          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
+          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_schemas">schemas</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_schemas">schemas</a></span><span class="refpurpose"> &#8212; 
+              List all the schemas in the database
+            </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
           Save executed commands to a file
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212; 
           Set a preference, or show its value
@@ -83,7 +91,7 @@
           List all the tables in the database
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &#8212; 
           Enable verbose output
-          </span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">8. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></dd><dt><span class="chapter"><a href="#prompting">9. Prompting</a></span></dt><dd><dl><dt><span class="sect1"><a href="#%c">%c</a></span></dt><dt><span class="sect1"><a href="#%d">%d</a></span></dt><dt><span class="sect1"><a href="#%D">%D</a></span></dt><dt><span class="sect1"><a href="#%m">%m</a></span></dt><dt><span class="sect1"><a href="#%o">%o</a></span></dt><dt><span class="sect1"><a href="#%O">%O</a></span></dt><dt><span class="sect1"><a href="#%n">%n</a></span></dt><dt><span class="sect1"><a href="#%P">%P</a></span></dt><dt><span class="sect1"><a href="#%r">%r</a></span></dt><dt><span class="sect1"><a href="#%R">%R</a></span></dt><dt><span class="sect1"><a href="#%s">%s</a></span></dt><dt><span class="sect1"><a href="#%u">%u</a></span></dt><dt><span class="sect1"><a href="#%w">%w</a></span></dt><dt><span class="sect1"><a href="#%W">%W</a></span></dt><dt><span class="sect1"><a href="#%y">%y</a></span></dt><dt><span class="sect1"><a href="#%Y">%Y</a></span></dt><dt><span class="sect1"><a href="#%:property_name:">%:property_name:</a></span></dt><dt><span class="sect1"><a href="#%[...%]">%[...%]</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">10. JDBC Driver Support</a></span></dt></dl></dd><dt><span class="appendix"><a href="#project_info">A. Project Information</a></span></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>5.1. <a href="#d5e117"></a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>5.1. <a href="#sql_example">Issuing SQL commands</a></dt><dt>5.2. <a href="#simple_multiline">Multiline SQL</a></dt></dl></div>
+          </span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">8. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_connectinteractionmode">connectinteractionmode</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showcompletiondesc">showcompletiondesc</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></dd><dt><span class="chapter"><a href="#prompting">9. Prompting</a></span></dt><dd><dl><dt><span class="sect1"><a href="#%c">%c</a></span></dt><dt><span class="sect1"><a href="#%d">%d</a></span></dt><dt><span class="sect1"><a href="#%D">%D</a></span></dt><dt><span class="sect1"><a href="#%m">%m</a></span></dt><dt><span class="sect1"><a href="#%o">%o</a></span></dt><dt><span class="sect1"><a href="#%O">%O</a></span></dt><dt><span class="sect1"><a href="#%n">%n</a></span></dt><dt><span class="sect1"><a href="#%P">%P</a></span></dt><dt><span class="sect1"><a href="#%r">%r</a></span></dt><dt><span class="sect1"><a href="#%R">%R</a></span></dt><dt><span class="sect1"><a href="#%s">%s</a></span></dt><dt><span class="sect1"><a href="#%u">%u</a></span></dt><dt><span class="sect1"><a href="#%w">%w</a></span></dt><dt><span class="sect1"><a href="#%W">%W</a></span></dt><dt><span class="sect1"><a href="#%y">%y</a></span></dt><dt><span class="sect1"><a href="#%Y">%Y</a></span></dt><dt><span class="sect1"><a href="#%:property_name:">%:property_name:</a></span></dt><dt><span class="sect1"><a href="#%[...%]">%[...%]</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">10. JDBC Driver Support</a></span></dt></dl></dd><dt><span class="appendix"><a href="#project_info">A. Project Information</a></span></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>5.1. <a href="#d5e117"></a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>5.1. <a href="#sql_example">Issuing SQL commands</a></dt><dt>5.2. <a href="#simple_multiline">Multiline SQL</a></dt></dl></div>
   
   <div class="part"><div class="titlepage"><div><div><h1 class="title"><a name="manual"></a>Part&nbsp;I.&nbsp;SQLLine Manual</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="chapter"><a href="#introduction">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#license">2. License and Terms of Use</a></span></dt><dt><span class="chapter"><a href="#obtaining">3. Obtaining SQLLine</a></span></dt><dt><span class="chapter"><a href="#installation">4. Installation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#d5e32">Required software</a></span></dt><dt><span class="sect1"><a href="#d5e49">Installing SQLLine</a></span></dt></dl></dd><dt><span class="chapter"><a href="#usage">5. Using SQLLine</a></span></dt><dd><dl><dt><span class="sect1"><a href="#usage_running">Running SQLLine</a></span></dt><dt><span class="sect1"><a href="#connecting">Connecting to a database</a></span></dt><dt><span class="sect1"><a href="#issuing_sql">Issuing SQL commands</a></span></dt><dt><span class="sect1"><a href="#issuing_multiline_sql">Issuing multiline commands</a></span></dt><dt><span class="sect1"><a href="#completion">Command Completion</a></span></dt></dl></dd><dt><span class="chapter"><a href="#options">6. Option Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#-u">-u</a></span></dt><dt><span class="sect1"><a href="#-n">-n</a></span></dt><dt><span class="sect1"><a href="#-p">-p</a></span></dt><dt><span class="sect1"><a href="#-d">-d</a></span></dt><dt><span class="sect1"><a href="#-e">-e</a></span></dt><dt><span class="sect1"><a href="#-nn">-nn</a></span></dt><dt><span class="sect1"><a href="#-ch">-ch</a></span></dt><dt><span class="sect1"><a href="#-f">-f</a></span></dt><dt><span class="sect1"><a href="#-log">-log</a></span></dt><dt><span class="sect1"><a href="#-ac">-ac</a></span></dt><dt><span class="sect1"><a href="#--run">--run</a></span></dt><dt><span class="sect1"><a href="#--help">--help</a></span></dt><dt><span class="sect1"><a href="#--<property_name&gt;">--&lt;property_name&gt;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#commands">7. Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#sect_command_all">all</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_all">all</a></span><span class="refpurpose"> &#8212; 
           Execute SQL against all active connections
@@ -117,6 +125,12 @@
           Display help information
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212; 
           Display the command history
+            -d Print timestamps for each event (default for !history)
+            -f Print full time date stamps in the US format
+            -E Print full time date stamps in the European format
+            -i Print full time date stamps in ISO8601 format
+            -n Suppresses command numbers
+            -r Reverses the order of the commands
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212; 
           List imported foreign keys for a database
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212; 
@@ -156,7 +170,9 @@
           Save the current preferences
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212; 
           Scan class path for JDBC drivers
-          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
+          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_schemas">schemas</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_schemas">schemas</a></span><span class="refpurpose"> &#8212; 
+              List all the schemas in the database
+            </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
           Save executed commands to a file
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212; 
           Set a preference, or show its value
@@ -166,7 +182,7 @@
           List all the tables in the database
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_verbose">verbose</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_verbose">verbose</a></span><span class="refpurpose"> &#8212; 
           Enable verbose output
-          </span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">8. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></dd><dt><span class="chapter"><a href="#prompting">9. Prompting</a></span></dt><dd><dl><dt><span class="sect1"><a href="#%c">%c</a></span></dt><dt><span class="sect1"><a href="#%d">%d</a></span></dt><dt><span class="sect1"><a href="#%D">%D</a></span></dt><dt><span class="sect1"><a href="#%m">%m</a></span></dt><dt><span class="sect1"><a href="#%o">%o</a></span></dt><dt><span class="sect1"><a href="#%O">%O</a></span></dt><dt><span class="sect1"><a href="#%n">%n</a></span></dt><dt><span class="sect1"><a href="#%P">%P</a></span></dt><dt><span class="sect1"><a href="#%r">%r</a></span></dt><dt><span class="sect1"><a href="#%R">%R</a></span></dt><dt><span class="sect1"><a href="#%s">%s</a></span></dt><dt><span class="sect1"><a href="#%u">%u</a></span></dt><dt><span class="sect1"><a href="#%w">%w</a></span></dt><dt><span class="sect1"><a href="#%W">%W</a></span></dt><dt><span class="sect1"><a href="#%y">%y</a></span></dt><dt><span class="sect1"><a href="#%Y">%Y</a></span></dt><dt><span class="sect1"><a href="#%:property_name:">%:property_name:</a></span></dt><dt><span class="sect1"><a href="#%[...%]">%[...%]</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">10. JDBC Driver Support</a></span></dt></dl></div>
+          </span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#settings">8. Parameter Reference</a></span></dt><dd><dl><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_connectinteractionmode">connectinteractionmode</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showcompletiondesc">showcompletiondesc</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></dd><dt><span class="chapter"><a href="#prompting">9. Prompting</a></span></dt><dd><dl><dt><span class="sect1"><a href="#%c">%c</a></span></dt><dt><span class="sect1"><a href="#%d">%d</a></span></dt><dt><span class="sect1"><a href="#%D">%D</a></span></dt><dt><span class="sect1"><a href="#%m">%m</a></span></dt><dt><span class="sect1"><a href="#%o">%o</a></span></dt><dt><span class="sect1"><a href="#%O">%O</a></span></dt><dt><span class="sect1"><a href="#%n">%n</a></span></dt><dt><span class="sect1"><a href="#%P">%P</a></span></dt><dt><span class="sect1"><a href="#%r">%r</a></span></dt><dt><span class="sect1"><a href="#%R">%R</a></span></dt><dt><span class="sect1"><a href="#%s">%s</a></span></dt><dt><span class="sect1"><a href="#%u">%u</a></span></dt><dt><span class="sect1"><a href="#%w">%w</a></span></dt><dt><span class="sect1"><a href="#%W">%W</a></span></dt><dt><span class="sect1"><a href="#%y">%y</a></span></dt><dt><span class="sect1"><a href="#%Y">%Y</a></span></dt><dt><span class="sect1"><a href="#%:property_name:">%:property_name:</a></span></dt><dt><span class="sect1"><a href="#%[...%]">%[...%]</a></span></dt></dl></dd><dt><span class="chapter"><a href="#known_drivers">10. JDBC Driver Support</a></span></dt></dl></div>
     
 
     <div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="introduction"></a>Chapter&nbsp;1.&nbsp;Introduction</h2></div></div></div>
@@ -646,6 +662,12 @@ value |
           Display help information
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_history">history</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_history">history</a></span><span class="refpurpose"> &#8212; 
           Display the command history
+            -d Print timestamps for each event (default for !history)
+            -f Print full time date stamps in the US format
+            -E Print full time date stamps in the European format
+            -i Print full time date stamps in ISO8601 format
+            -n Suppresses command numbers
+            -r Reverses the order of the commands
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_importedkeys">importedkeys</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_importedkeys">importedkeys</a></span><span class="refpurpose"> &#8212; 
           List imported foreign keys for a database
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_indexes">indexes</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_indexes">indexes</a></span><span class="refpurpose"> &#8212; 
@@ -685,7 +707,9 @@ value |
           Save the current preferences
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_scan">scan</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_scan">scan</a></span><span class="refpurpose"> &#8212; 
           Scan class path for JDBC drivers
-          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
+          </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_schemas">schemas</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_schemas">schemas</a></span><span class="refpurpose"> &#8212; 
+              List all the schemas in the database
+            </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_script">script</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_script">script</a></span><span class="refpurpose"> &#8212; 
           Save executed commands to a file
           </span></dt></dl></dd><dt><span class="section"><a href="#sect_command_set">set</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#command_set">set</a></span><span class="refpurpose"> &#8212; 
           Set a preference, or show its value
@@ -1561,6 +1585,12 @@ sqlline&gt; !help
 !go               Select the current connection
 !help             Print a summary of command usage
 !history          Display the command history
+                  -d Print timestamps for each event (default for !history)
+                  -f Print full time date stamps in the US format
+                  -E Print full time date stamps in the European format
+                  -i Print full time date stamps in ISO8601 format
+                  -n Suppresses command numbers
+                  -r Reverses the order of the commands
 !importedkeys     List all the imported keys for the specified table
 !indexes          List all the indexes for the specified table
 !isolation        Set the transaction isolation for this connection
@@ -1568,7 +1598,7 @@ sqlline&gt; !help
 !metadata         Obtain metadata information
 !nickname         Create a friendly name for the connection (updates command prompt)
 !outputformat     Set the output format for displaying results
-                  (table, vertical, csv, tsv, xmlattrs, xmlelements, json)
+                  (table, vertical, csv, tsv, xmlattrs, xmlelements, json, ansiconsole)
 !prompthandler    Set custom prompt handler class name
 !properties       Connect to the database specified in the properties file(s)
 !primarykeys      List all the primary keys for the specified table
@@ -1582,6 +1612,7 @@ sqlline&gt; !help
 !run              Run a script from the specified file
 !save             Save the current variables and aliases
 !scan             Scan for installed JDBC drivers
+!schemas          List all the schemas in the database
 !script           Start saving a script to a file
 !set              Set a sqlline variable, or show its value
 !sql              Execute a SQL command
@@ -1637,6 +1668,12 @@ sqlline&gt;
           history
            &#8212; 
           Display the command history
+            -d Print timestamps for each event (default for !history)
+            -f Print full time date stamps in the US format
+            -E Print full time date stamps in the European format
+            -i Print full time date stamps in ISO8601 format
+            -n Suppresses command numbers
+            -r Reverses the order of the commands
           
         </p></div>
 
@@ -2121,6 +2158,20 @@ NAME        Microsoft
 0: jdbc:calcite:model=target/test-classes/mod&gt;
           </pre>
         </div>
+        <div class="refsect1"><a name="d5e729"></a><h2>Example of AnsiConsole output formatting</h2>
+          
+          <pre class="screen">
+0: jdbc:calcite:model=target/test-classes/mod&gt; !outputformat ansiconsole
+0: jdbc:calcite:model=target/test-classes/mod&gt; SELECT * FROM COMPANY;
+COMPANY_ID NAME
+1          Apple
+2          Sun
+3          IBM
+4          Microsoft
+4 rows selected (0.03 seconds)
+0: jdbc:calcite:model=target/test-classes/mod&gt;
+          </pre>
+        </div>
       </div>
       </div>
 
@@ -2143,13 +2194,13 @@ NAME        Microsoft
            {<em class="replaceable"><code>table name</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e743"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e746"></a><h2>Description</h2>
           
           <p>
           List all the primary keys for the specified table.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e746"></a><h2>Example of "primarykeys" command</h2>
+        <div class="refsect1"><a name="d5e749"></a><h2>Example of "primarykeys" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !primarykeys COMPANY
@@ -2185,14 +2236,14 @@ NAME        Microsoft
            [<em class="replaceable"><code>procedure name pattern</code></em>]
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e763"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e766"></a><h2>Description</h2>
           
           <p>
           Display a list of all the stored procedures that are
           exposed by the current database.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e766"></a><h2>Example of "procedures" command</h2>
+        <div class="refsect1"><a name="d5e769"></a><h2>Example of "procedures" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !procedures %JDBC%
@@ -2231,7 +2282,7 @@ NAME        Microsoft
            {<em class="replaceable"><code>file</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e783"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e786"></a><h2>Description</h2>
           
           <p>
           Connect to the database defined in the
@@ -2268,7 +2319,7 @@ NAME        Microsoft
             be used for the connection.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e796"></a><h2>Example of "properties" command</h2>
+        <div class="refsect1"><a name="d5e799"></a><h2>Example of "properties" command</h2>
           
           <pre class="screen">
 sqlline&gt; !properties test.properties
@@ -2307,13 +2358,13 @@ Transaction isolation: TRANSACTION_READ_COMMITTED
           </p></div>
         </div>
 
-          <div class="refsect1"><a name="d5e811"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e814"></a><h2>Description</h2>
           
           <p>
           Exit SQLLine.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e814"></a><h2>Example of "reconnect" command</h2>
+        <div class="refsect1"><a name="d5e817"></a><h2>Example of "reconnect" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !quit
@@ -2343,13 +2394,13 @@ Closing: org.hsqldb.jdbcConnection
           <code class="command">!reconnect</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e829"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e832"></a><h2>Description</h2>
           
           <p>
           Reconnect to the current database.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e832"></a><h2>Example of "reconnect" command</h2>
+        <div class="refsect1"><a name="d5e835"></a><h2>Example of "reconnect" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !reconnect
@@ -2389,7 +2440,7 @@ Autocommit status: true
            {<em class="replaceable"><code>file name</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e849"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e852"></a><h2>Description</h2>
           
           <p>
           Save all output from the session to the specified file.
@@ -2400,7 +2451,7 @@ Autocommit status: true
           double-quotes.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e853"></a><h2>Example of "record" command</h2>
+        <div class="refsect1"><a name="d5e856"></a><h2>Example of "record" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !record /tmp/mysession.out
@@ -2447,7 +2498,7 @@ Recording stopped.
           </p></div>
         </div>
 
-          <div class="refsect1"><a name="d5e868"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e871"></a><h2>Description</h2>
           
           <p>
           Get a list of all tables and columns from the database
@@ -2458,7 +2509,7 @@ Recording stopped.
           option is enabled.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e872"></a><h2>Example of "rehash" command</h2>
+        <div class="refsect1"><a name="d5e875"></a><h2>Example of "rehash" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !rehash
@@ -2471,7 +2522,7 @@ Done
 
           </pre>
           </div>
-          <div class="refsect1"><a name="d5e875"></a><h2>Warning on using "rehash"</h2>
+          <div class="refsect1"><a name="d5e878"></a><h2>Warning on using "rehash"</h2>
           
         <div class="caution" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Caution</h3>
           <p>
@@ -2505,7 +2556,7 @@ Done
                {<em class="replaceable"><code>preference</code></em>}
             </p></div>
           </div>
-          <div class="refsect1"><a name="d5e897"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e900"></a><h2>Description</h2>
             
             <p>
               Reset preference current value to default. When resetting a preference
@@ -2517,7 +2568,7 @@ Done
               With all keyword reset all preferences.
             </p>
           </div>
-          <div class="refsect1"><a name="d5e902"></a><h2>Example of "reset" command</h2>
+          <div class="refsect1"><a name="d5e905"></a><h2>Example of "reset" command</h2>
             
             <pre class="screen">
               0: jdbc:hsqldb:db-hypersonic&gt; !reset timeout
@@ -2545,13 +2596,13 @@ Done
           <code class="command">!rollback</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e917"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e920"></a><h2>Description</h2>
           
           <p>
           Rollback the current transaction, if autocommit is off.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e920"></a><h2>Example of "rollback" command</h2>
+        <div class="refsect1"><a name="d5e923"></a><h2>Example of "rollback" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !autocommit off
@@ -2622,7 +2673,7 @@ Rollback complete (0.016 seconds)
            {<em class="replaceable"><code>file name</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e937"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e940"></a><h2>Description</h2>
           
           <p>
           Run the individual commands specified in the file name.
@@ -2640,7 +2691,7 @@ Rollback complete (0.016 seconds)
           double-quotes.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e943"></a><h2>Example of "run" command</h2>
+        <div class="refsect1"><a name="d5e946"></a><h2>Example of "run" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !run example.sql
@@ -2696,13 +2747,13 @@ No rows affected (0 seconds)
           <code class="command">!save</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e958"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e961"></a><h2>Description</h2>
           
           <p>
           Save the current preferences.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e961"></a><h2>Example of "save" command</h2>
+        <div class="refsect1"><a name="d5e964"></a><h2>Example of "save" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !save
@@ -2733,14 +2784,14 @@ Saving preferences to: /Users/mprudhom/.sqlline/sqlline.properties
           <code class="command">!scan</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e976"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e979"></a><h2>Description</h2>
           
           <p>
           Scans all the jar files in the CLASSPATH for any
           JDBC drivers, and prints the class names of the drivers.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e979"></a><h2>Example of "scan" command</h2>
+        <div class="refsect1"><a name="d5e982"></a><h2>Example of "scan" command</h2>
           
           <pre class="screen">
 sqlline&gt; !scan
@@ -2789,6 +2840,49 @@ sqlline&gt;
       </div>
       </div>
 
+      <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_schemas"></a>schemas</h2></div></div></div>
+        
+        <div class="refentry"><a name="command_schemas"></a><div class="titlepage"></div>
+          
+
+
+          <div class="refnamediv"><h2>Name</h2><p>
+            schemas
+             &#8212; 
+              List all the schemas in the database
+            
+          </p></div>
+
+          <div class="refsynopsisdiv"><h2>Synopsis</h2>
+            <div class="cmdsynopsis"><p>
+              <code class="command">!schemas</code> 
+            </p></div>
+          </div>
+          <div class="refsect1"><a name="d5e997"></a><h2>Description</h2>
+            
+            <p>
+              List all the schemas in the database of the
+              current connection.
+            </p>
+          </div>
+          <div class="refsect1"><a name="d5e1000"></a><h2>Example of "schemas" command</h2>
+            
+            <pre class="screen">
+              0: jdbc:postgresql:thin:@localhost:5432:mydb&gt; !schemas
+
+              +--------------------+---------------+
+              |    table_schem     | table_catalog |
+              +--------------------+---------------+
+              | information_schema |               |
+              | pg_catalog         |               |
+              | public             |               |
+              +--------------------+---------------+
+
+              0: jdbc:postgresql:thin:@localhost:5432:mydb&gt;
+            </pre>
+          </div>
+        </div>
+      </div>
       <div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sect_command_script"></a>script</h2></div></div></div>
       
       <div class="refentry"><a name="command_script"></a><div class="titlepage"></div>
@@ -2808,7 +2902,7 @@ sqlline&gt;
            {<em class="replaceable"><code>filename</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e996"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e1017"></a><h2>Description</h2>
           
           <p>
           Start saving all commands entered to the specified
@@ -2823,7 +2917,7 @@ sqlline&gt;
           double-quotes.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e1001"></a><h2>Example of "script" command</h2>
+        <div class="refsect1"><a name="d5e1022"></a><h2>Example of "script" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !script /tmp/mysession.script
@@ -2895,7 +2989,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
            {<em class="replaceable"><code>value</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e1030"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e1051"></a><h2>Description</h2>
           
           <p>
           Set the specified preference to the specified value. If
@@ -2910,7 +3004,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           <a class="link" href="#command_save" title="save">save</a> command.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e1035"></a><h2>Example of "set" command</h2>
+        <div class="refsect1"><a name="d5e1056"></a><h2>Example of "set" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !set color on
@@ -2938,14 +3032,14 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
            {<em class="replaceable"><code>statement</code></em>}
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e1052"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e1073"></a><h2>Description</h2>
           
           <p>
           Issue the specified SQL statement. This is equivalent to
           entering the statement by itself from the command line.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e1055"></a><h2>Example of "sql" command</h2>
+        <div class="refsect1"><a name="d5e1076"></a><h2>Example of "sql" command</h2>
           
           <pre class="screen">
 0: jdbc:hsqldb:db-hypersonic&gt; !sql DELETE FROM COMPANY;
@@ -2976,14 +3070,14 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           <code class="command">!tables</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e1070"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e1091"></a><h2>Description</h2>
           
           <p>
           List all the tables in the database of the
           current connection.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e1073"></a><h2>Example of "tables" command</h2>
+        <div class="refsect1"><a name="d5e1094"></a><h2>Example of "tables" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; !tables
@@ -3019,7 +3113,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           <code class="command">!verbose</code> 
           </p></div>
         </div>
-          <div class="refsect1"><a name="d5e1088"></a><h2>Description</h2>
+          <div class="refsect1"><a name="d5e1109"></a><h2>Description</h2>
           
           <p>
           Enable verbose mode, which causes stack traces
@@ -3027,7 +3121,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           of debug information.
           </p>
         </div>
-        <div class="refsect1"><a name="d5e1091"></a><h2>Example of "verbose" command</h2>
+        <div class="refsect1"><a name="d5e1112"></a><h2>Example of "verbose" command</h2>
           
           <pre class="screen">
 0: jdbc:oracle:thin:@localhost:1521:mydb&gt; SELECT * FROM BOGUS_TABLE;
@@ -3065,7 +3159,7 @@ java.sql.SQLException: ORA-00942: table or view does not exist
 
     </div>
 
-    <div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="settings"></a>Chapter&nbsp;8.&nbsp;Parameter Reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></div>
+    <div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a name="settings"></a>Chapter&nbsp;8.&nbsp;Parameter Reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#setting_appconfig">appconfig</a></span></dt><dt><span class="sect1"><a href="#setting_autocommit">autocommit</a></span></dt><dt><span class="sect1"><a href="#setting_autosave">autosave</a></span></dt><dt><span class="sect1"><a href="#setting_color">color</a></span></dt><dt><span class="sect1"><a href="#setting_colorscheme">colorscheme</a></span></dt><dt><span class="sect1"><a href="#setting_connectinteractionmode">connectinteractionmode</a></span></dt><dt><span class="sect1"><a href="#setting_dateformat">dateformat</a></span></dt><dt><span class="sect1"><a href="#setting_escapeOutput">escapeOutput</a></span></dt><dt><span class="sect1"><a href="#setting_fastconnect">fastconnect</a></span></dt><dt><span class="sect1"><a href="#setting_force">force</a></span></dt><dt><span class="sect1"><a href="#setting_headerinterval">headerinterval</a></span></dt><dt><span class="sect1"><a href="#setting_historyfile">historyfile</a></span></dt><dt><span class="sect1"><a href="#setting_incremental">incremental</a></span></dt><dt><span class="sect1"><a href="#setting_incrementalbufferrows">incrementalbufferrows</a></span></dt><dt><span class="sect1"><a href="#setting_isolation">isolation</a></span></dt><dt><span class="sect1"><a href="#setting_maxcolumnwidth">maxcolumnwidth</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryfilerows">maxhistoryfilerows</a></span></dt><dt><span class="sect1"><a href="#setting_maxhistoryrows">maxhistoryrows</a></span></dt><dt><span class="sect1"><a href="#setting_maxwidth">maxwidth</a></span></dt><dt><span class="sect1"><a href="#setting_mode">mode</a></span></dt><dt><span class="sect1"><a href="#setting_nullvalue">nullvalue</a></span></dt><dt><span class="sect1"><a href="#setting_numberformat">numberformat</a></span></dt><dt><span class="sect1"><a href="#setting_outputformat">outputformat</a></span></dt><dt><span class="sect1"><a href="#setting_prompthandler">prompthandler</a></span></dt><dt><span class="sect1"><a href="#setting_prompt">prompt</a></span></dt><dt><span class="sect1"><a href="#setting_rightprompt">rightprompt</a></span></dt><dt><span class="sect1"><a href="#setting_promptscript">promptscript</a></span></dt><dt><span class="sect1"><a href="#setting_rowlimit">rowlimit</a></span></dt><dt><span class="sect1"><a href="#setting_showcompletiondesc">showcompletiondesc</a></span></dt><dt><span class="sect1"><a href="#setting_showheader">showheader</a></span></dt><dt><span class="sect1"><a href="#setting_shownestederrs">shownestederrs</a></span></dt><dt><span class="sect1"><a href="#setting_showtime">showtime</a></span></dt><dt><span class="sect1"><a href="#setting_showwarnings">showwarnings</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_silent">silent</a></span></dt><dt><span class="sect1"><a href="#setting_timeformat">timeformat</a></span></dt><dt><span class="sect1"><a href="#setting_timestampformat">timestampformat</a></span></dt><dt><span class="sect1"><a href="#setting_trimscripts">trimscripts</a></span></dt><dt><span class="sect1"><a href="#setting_verbose">verbose</a></span></dt><dt><span class="sect1"><a href="#setting_version">version</a></span></dt></dl></div>
       
       <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_appconfig"></a>appconfig</h2></div></div></div>
         
@@ -3119,6 +3213,18 @@ java.sql.SQLException: ORA-00942: table or view does not exist
             /<code class="literal">vs2010</code>,
             then this scheme will be used for command/sql syntax highlighting.
             If <code class="literal">default</code> then there is no syntax highlighting.
+        </p>
+      </div>
+      <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_connectinteractionmode"></a>connectinteractionmode</h2></div></div></div>
+        
+        <p>
+          If <code class="literal">askCredentials</code> then sqlline will ask for the
+          credentials if they are not specified as properties to make
+          a connection. If <code class="literal">notAskCredentials</code> the sqlline
+          will not ask for the credentials to make a connection. If
+          <code class="literal">useNPTogetherOrEmpty</code> then it will ask for the
+          credentials if there is only one specified, if there is no specified
+          then it will use empty credentials (sqlline 1.7 and earlier behavior).
         </p>
       </div>
       <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_dateformat"></a>dateformat</h2></div></div></div>
@@ -3348,6 +3454,14 @@ java.sql.SQLException: ORA-00942: table or view does not exist
         <p>
           The maximum number of rows to fetch per query.
           Defaults to 0, which is interpreted as fetching all rows.
+        </p>
+      </div>
+      <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showcompletiondesc"></a>showcompletiondesc</h2></div></div></div>
+        
+        <p>
+          If <code class="literal">true</code>, display help description for each
+          completion candidate. Defaults to
+          <code class="literal">true</code>.
         </p>
       </div>
       <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="setting_showheader"></a>showheader</h2></div></div></div>
