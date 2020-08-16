@@ -16,6 +16,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -257,6 +258,7 @@ public class Commands {
           sqlLine.getLineReader(),
           sqlLine.getOutputStream(),
           sqlLine.getErrorStream(),
+          Paths.get("").toAbsolutePath(),
           argsLine.isEmpty()
               ? new String[]{sqlLine.getOpts().getHistoryFlags()}
               : sqlLine.split(argsLine, " "));

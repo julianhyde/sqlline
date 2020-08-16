@@ -14,6 +14,7 @@ package sqlline;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -473,8 +474,8 @@ public class SqlLine {
    * true.
    *
    * <p>Before you invoke this method, you can redirect output by
-   * calling {@link #setOutputStream(PrintStream)}
-   * and/or {@link #setErrorStream(PrintStream)}.
+   * calling {@link #setOutputStream(OutputStream)}
+   * and/or {@link #setErrorStream(OutputStream)}.
    *
    * @param args Command-line arguments
    * @param inputStream Input stream
@@ -588,7 +589,8 @@ public class SqlLine {
         TerminalBuilder.builder().signalHandler(signalHandler);
     final Terminal terminal;
     if (inputStream != null) {
-      terminal = terminalBuilder.streams(inputStream, System.out).build();
+      terminal = terminalBuilder.streams(inputStream, getOutputStream())
+          .build();
     } else {
       terminal = terminalBuilder.system(true).build();
       getOpts().set(BuiltInProperty.MAX_WIDTH, terminal.getWidth());
@@ -1818,7 +1820,7 @@ public class SqlLine {
     this.recordOutputFile = record;
   }
 
-  public void setOutputStream(PrintStream outputStream) {
+  public void setOutputStream(OutputStream outputStream) {
     try {
       this.outputStream =
           new PrintStream(outputStream, true, StandardCharsets.UTF_8.name());
@@ -1831,7 +1833,7 @@ public class SqlLine {
     return outputStream;
   }
 
-  public void setErrorStream(PrintStream errorStream) {
+  public void setErrorStream(OutputStream errorStream) {
     try {
       this.errorStream = new PrintStream(
           errorStream, true, StandardCharsets.UTF_8.name());
