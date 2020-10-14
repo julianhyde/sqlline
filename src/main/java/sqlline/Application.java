@@ -62,6 +62,14 @@ public class Application {
       "jdbc:datadirect:sybase://<hostname>:5000",
       "jdbc:db2://<hostname>/<database>",
       "jdbc:hsqldb:<database>",
+      "jdbc:hive2://<hostname>:<port>/<database>",
+      "jdbc:hive2://<hostname>:<port>/<database>;"
+          + "transportMode=http;"
+          + "httpPath=<http_endpoint>",
+      "jdbc:hive2://<hostname>:<port>/<database>;"
+          + "ssl=true;"
+          + "sslTrustStore=<trust_store_path>;"
+          + "trustStorePassword=<trust_store_password>",
       "jdbc:idb:<database>.properties",
       "jdbc:informix-sqli://<hostname>:1526/<database>:INFORMIXSERVER=<database>",
       "jdbc:interbase://<hostname>//<database>.gdb",
