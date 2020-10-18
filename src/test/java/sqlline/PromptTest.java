@@ -20,6 +20,7 @@ import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,11 @@ import static sqlline.SqlLineArgsTest.begin;
 public class PromptTest {
   private static final String DEV_NULL = "/dev/null";
   private SqlLine sqlLine;
+
+  private static int getJavaMajorVersion() {
+    final String javaVersion = System.getProperty("java.version");
+    return Integer.parseInt(javaVersion.split("\\.")[0]);
+  }
 
   @BeforeEach
   private void init() {
@@ -208,8 +214,17 @@ public class PromptTest {
     sqlLine.getDatabaseConnection().close();
   }
 
+  /** Tests the {@code promptscript} property.
+   *
+   * <p>Disabled on JDK 15 or higher, due to
+   * <a href="https://github.com/julianhyde/sqlline/issues/394">[SQLLINE-394]
+   * The `promptscript` property is broken on JDK 15 and higher</a>. */
   @Test
   public void testPromptScript() {
+    Assumptions.assumeTrue(getJavaMajorVersion() < 15,
+        "promptscript fails on JDK 15 and higher; "
+            + "see ");
+
     sqlLine.getOpts().set(BuiltInProperty.PROMPT_SCRIPT, "'hel' + 'lo'");
 
     sqlLine.runCommands(new DispatchCallback(),

@@ -125,9 +125,9 @@ Use the following definition to use `sqlline` in your maven project:
 
 ## Building
 
-Prerequisites:
-
-* Java 8 or higher (14 preferred)
+To build or run SQLLine, you need Java 8 or higher.
+(When running on Java 15 and higher, the
+[`promptscript` property is broken](https://github.com/julianhyde/sqlline/issues/394).)
 
 Check out and build:
 
