@@ -369,6 +369,11 @@
       <version>${jline.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline-console</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
       <!-- JMockit needs to be on class path before JUnit. -->
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>

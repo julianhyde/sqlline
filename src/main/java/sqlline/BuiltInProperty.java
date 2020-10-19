@@ -29,6 +29,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 public enum BuiltInProperty implements SqlLineProperty {
 
   AUTO_COMMIT("autoCommit", Type.BOOLEAN, true),
+  AUTO_PAIRING("autoPairing", Type.BOOLEAN, true),
   AUTO_RESIZE("autoResize", Type.BOOLEAN, false),
   AUTO_SAVE("autoSave", Type.BOOLEAN, false),
   COLOR_SCHEME("colorScheme", Type.STRING, DEFAULT, true, false,

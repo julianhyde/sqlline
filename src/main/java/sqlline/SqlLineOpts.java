@@ -35,6 +35,7 @@ import org.jline.reader.impl.history.DefaultHistory;
 import sqlline.SqlLineProperty.Type;
 
 import static sqlline.BuiltInProperty.AUTO_COMMIT;
+import static sqlline.BuiltInProperty.AUTO_PAIRING;
 import static sqlline.BuiltInProperty.AUTO_RESIZE;
 import static sqlline.BuiltInProperty.HISTORY_FLAGS;
 import static sqlline.BuiltInProperty.READ_ONLY;
@@ -106,6 +107,7 @@ public class SqlLineOpts implements Completer {
       Collections.unmodifiableMap(
           new HashMap<SqlLineProperty, SqlLineProperty.Writer>() {
             {
+              put(AUTO_PAIRING, SqlLineOpts.this::setAutoPairing);
               put(COLOR_SCHEME, SqlLineOpts.this::setColorScheme);
               put(CONFIRM_PATTERN, SqlLineOpts.this::setConfirmPattern);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
@@ -483,14 +485,18 @@ public class SqlLineOpts implements Completer {
         valueToSet = value;
       } else {
         strValue = String.valueOf(value);
-        valueToSet = "true".equalsIgnoreCase(strValue)
-            || "1".equalsIgnoreCase(strValue)
-            || "on".equalsIgnoreCase(strValue)
-            || "yes".equalsIgnoreCase(strValue);
+        valueToSet = evaluateBoolean(strValue);
       }
       break;
     }
     propertiesMap.put(key, valueToSet);
+  }
+
+  private boolean evaluateBoolean(String value) {
+    return "true".equalsIgnoreCase(value)
+            || "1".equalsIgnoreCase(value)
+            || "on".equalsIgnoreCase(value)
+            || "yes".equalsIgnoreCase(value);
   }
 
   public boolean getFastConnect() {
@@ -757,6 +763,15 @@ public class SqlLineOpts implements Completer {
 
   public boolean getAutoSave() {
     return getBoolean(AUTO_SAVE);
+  }
+
+  public boolean getAutoPairing() {
+    return getBoolean(AUTO_PAIRING);
+  }
+
+  public void setAutoPairing(String newValue) {
+    set(AUTO_PAIRING, newValue);
+    sqlLine.toggleJlineAutopairWidget(evaluateBoolean(newValue));
   }
 
   public boolean getAutoResize() {

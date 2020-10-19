@@ -38,6 +38,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.jline.widget.AutopairWidgets;
 
 import static org.jline.keymap.KeyMap.alt;
 import static org.jline.keymap.KeyMap.ctrl;
@@ -70,7 +71,6 @@ public class SqlLine {
   private final DatabaseConnections connections = new DatabaseConnections();
   public static final String COMMAND_PREFIX = "!";
   private Set<Driver> drivers = null;
-  private String lastProgress = null;
   private final Map<SQLWarning, Date> seenWarnings = new HashMap<>();
   private final Commands commands = new Commands(this);
   private OutputFile scriptOutputFile = null;
@@ -78,6 +78,7 @@ public class SqlLine {
   private PrintStream outputStream;
   private PrintStream errorStream;
   private LineReader lineReader;
+  private AutopairWidgets autopairWidgets;
   private List<String> batch = null;
   private final Reflector reflector;
   private Application application;
@@ -613,6 +614,10 @@ public class SqlLine {
           .build()
         : lineReaderBuilder.build();
 
+    autopairWidgets = new AutopairWidgets(lineReader);
+    toggleJlineAutopairWidget(getOpts().getAutoPairing());
+    addWidget(lineReader,
+        this::toggleAutopairWidget, "AUTOPAIRING", alt(ctrl('p')));
     addWidget(lineReader,
         this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
     addWidget(lineReader,
@@ -627,6 +632,20 @@ public class SqlLine {
     lineReader.getWidgets().put(name, widget);
     lineReader.getKeyMaps().get(LineReader.EMACS).bind(widget, keySeq);
     lineReader.getKeyMaps().get(LineReader.VIINS).bind(widget, keySeq);
+  }
+
+  boolean toggleAutopairWidget() {
+    final boolean newValue = !getOpts().getAutoPairing();
+    getOpts().setAutoPairing(String.valueOf(newValue));
+    return true;
+  }
+
+  void toggleJlineAutopairWidget(boolean newValue) {
+    if (newValue) {
+      autopairWidgets.enable();
+    } else {
+      autopairWidgets.disable();
+    }
   }
 
   boolean nextColorSchemeWidget() {
