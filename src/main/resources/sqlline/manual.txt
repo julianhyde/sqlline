@@ -88,6 +88,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rereadconfconnections
+rereadconfconnections — Reread file with saved connections
 resize
 resize — Reset max height/width based on terminal height/width
 rollback
@@ -104,6 +106,8 @@ script
 script — Save executed commands to a file
 set
 set — Set a preference
+showconfconnections
+showconfconnections — Show connections from the file
 sql
 sql — Execute a SQL against a database
 tables
@@ -238,6 +242,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rereadconfconnections
+rereadconfconnections — Reread file with saved connections
 resize
 resize — Reset max height/width based on terminal height/width
 rollback
@@ -254,6 +260,8 @@ script
 script — Save executed commands to a file
 set
 set — Set a preference
+showconfconnections
+showconfconnections — Show connections from the file
 sql
 sql — Execute a SQL against a database
 tables
@@ -478,6 +486,8 @@ record
 record — Begin recording all output from SQL commands
 rehash
 rehash — Obtain a list of all tables and columns from the database
+rereadconfconnections
+rereadconfconnections — Reread file with saved connections
 resize
 resize — Reset max height/width based on terminal height/width
 rollback
@@ -494,6 +504,8 @@ script
 script — Save executed commands to a file
 set
 set — Set a preference
+showconfconnections
+showconfconnections — Show connections from the file
 sql
 sql — Execute a SQL against a database
 tables
@@ -1144,6 +1156,7 @@ sqlline> !help
 !reconnect          Reconnect to the database
 !record             Record all output to the specified file
 !rehash             Fetch table and column names for command completion
+!rereadconfconnections Reread file with saved connections
 !resize             Reset max height/width based on terminal height/width
 !rollback           Roll back the current transaction (if autocommit is off)
 !run                Run a script from the specified file
@@ -1152,6 +1165,7 @@ sqlline> !help
 !scan               Scan for installed JDBC drivers
 !script             Start saving a script to a file
 !set                Set a sqlline variable
+!showconfconnections Show connections from the file
 !sql                Execute a SQL command
 !tables             List all the tables in the database
 !typeinfo           Display the type map for the current connection
@@ -1807,6 +1821,18 @@ rehash
 
 Name
 
+rereadconfconnections — Reread file with saved connections
+
+Synopsis
+
+!rereadconfconnections {filename}
+
+Description
+
+Reread file with saved connections
+
+Name
+
 resize — Reset max height/width based on terminal height/width
 
 Synopsis
@@ -2105,6 +2131,18 @@ Set the specified preference to the specified value. If autosave is on, then thi
 Example of "set" command
 
 0: jdbc:hsqldb:db-hypersonic> !set color on
+
+Name
+
+showconfconnections — Show connections from the file
+
+Synopsis
+
+!showconfconnections
+
+Description
+
+Show connections from the file
 
 sql
 
