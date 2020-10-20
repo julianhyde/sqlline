@@ -40,6 +40,7 @@ public enum BuiltInProperty implements SqlLineProperty {
   CONNECT_INTERACTION_MODE("connectInteractionMode", Type.STRING,
       new Application().getDefaultInteractiveMode(), true, false,
       new HashSet<>(new Application().getConnectInteractiveModes())),
+  CONNECTION_CONFIG("connectionConfig", Type.FILE_PATH, ""),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
 
   CSV_QUOTE_CHARACTER("csvQuoteCharacter", Type.CHAR, '\''),

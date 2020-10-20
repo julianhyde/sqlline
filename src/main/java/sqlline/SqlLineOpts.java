@@ -47,6 +47,7 @@ import static sqlline.BuiltInProperty.COLOR;
 import static sqlline.BuiltInProperty.COLOR_SCHEME;
 import static sqlline.BuiltInProperty.CONFIRM;
 import static sqlline.BuiltInProperty.CONFIRM_PATTERN;
+import static sqlline.BuiltInProperty.CONNECTION_CONFIG;
 import static sqlline.BuiltInProperty.CSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
@@ -117,6 +118,7 @@ public class SqlLineOpts implements Completer {
               put(AUTO_PAIRING, SqlLineOpts.this::setAutoPairing);
               put(COLOR_SCHEME, SqlLineOpts.this::setColorScheme);
               put(CONFIRM_PATTERN, SqlLineOpts.this::setConfirmPattern);
+              put(CONNECTION_CONFIG, SqlLineOpts.this::setConnectionConfig);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
@@ -515,6 +517,7 @@ public class SqlLineOpts implements Completer {
     Object valueToSet = value;
     String strValue;
     switch (key.type()) {
+    case FILE_PATH:
     case STRING:
       strValue = value instanceof String
           ? (String) value : String.valueOf(value);
@@ -719,6 +722,27 @@ public class SqlLineOpts implements Completer {
 
   public boolean getColor() {
     return getBoolean(COLOR);
+  }
+
+  public String getConnectionConfig() {
+    return get(CONNECTION_CONFIG);
+  }
+
+  public void setConnectionConfig(String filename) {
+    if (filename == null || filename.isEmpty()) {
+      return;
+    }
+    if (DEFAULT.equalsIgnoreCase(filename)) {
+      set(CONNECTION_CONFIG, DEFAULT);
+      return;
+    }
+    Path path = Paths.get(filename);
+    if (!Files.exists(path) || Files.isDirectory(path)) {
+      sqlLine.error(sqlLine.loc("no-file", filename));
+      return;
+    }
+    set(CONNECTION_CONFIG, filename);
+    sqlLine.getCommands().resetconfconnections();
   }
 
   public String getCsvDelimiter() {

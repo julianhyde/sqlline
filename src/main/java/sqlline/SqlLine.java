@@ -334,6 +334,8 @@ public class SqlLine {
     String appConfig = null;
     String promptHandler = null;
     boolean shouldBeSilent = false;
+    String connectionConfig = null;
+    boolean nicknameFromConfig = false;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -373,29 +375,48 @@ public class SqlLine {
         if (i == args.length - 1) {
           return Status.ARGS;
         }
-        if (args[i].equals("-d")) {
+        switch (args[i]) {
+        case "-d":
           driver = args[++i];
-        } else if (args[i].equals("-ch")) {
+          break;
+        case "-ch":
           commandHandler = args[++i];
-        } else if (args[i].equals("-n")) {
+          break;
+        case "-n":
           user = args[++i];
-        } else if (args[i].equals("-p")) {
+          break;
+        case "-p":
           pass = args[++i];
-        } else if (args[i].equals("-u")) {
+          break;
+        case "-u":
           url = args[++i];
-        } else if (args[i].equals("-e")) {
+          break;
+        case "-e":
           commands.add(args[++i]);
-        } else if (args[i].equals("-f")) {
+          break;
+        case "-f":
           getOpts().setRun(args[++i]);
-        } else if (args[i].equals("-log")) {
+          break;
+        case "-log":
           logFile = args[++i];
-        } else if (args[i].equals("-nn")) {
+          break;
+        case "-nn":
           nickname = args[++i];
-        } else if (args[i].equals("-ac")) {
+          break;
+        case "-ac":
           appConfig = args[++i];
-        } else if (args[i].equals("-ph")) {
+          break;
+        case "-ph":
           promptHandler = args[++i];
-        } else {
+          break;
+        case "-c":
+          connectionConfig = args[++i];
+          break;
+        case "-cn":
+          connectionConfig = args[++i];
+          nicknameFromConfig = true;
+          break;
+        default:
           return Status.ARGS;
         }
       } else {
@@ -410,7 +431,8 @@ public class SqlLine {
           new DispatchCallback());
     }
 
-    if (url != null || user != null || pass != null || driver != null) {
+    if (url != null || user != null || pass != null || driver != null
+        || connectionConfig != null) {
       String com =
           COMMAND_PREFIX + "connect "
               + (driver == null || driver.trim().isEmpty()
@@ -418,7 +440,9 @@ public class SqlLine {
               + (user == null ? "" : "-p user " + escapeAndQuote(user) + " ")
               + (pass == null
                   ? "" : "-p password " + escapeAndQuote(pass) + " ")
-              + escapeAndQuote(url);
+              + (connectionConfig == null
+                  ? escapeAndQuote(url)
+                  : (nicknameFromConfig ? "-cn " : "-c ") + connectionConfig);
       debug("issuing: " + com);
       dispatch(com, new DispatchCallback());
     }

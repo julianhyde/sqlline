@@ -16,6 +16,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
@@ -159,9 +161,11 @@ public class Commands {
   };
 
   private final SqlLine sqlLine;
+  private final ConnectionConfigParser conConfParser;
 
   Commands(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+    this.conConfParser = new ConnectionConfigParser(sqlLine);
   }
 
   public void metadata(String line, DispatchCallback callback) {
@@ -1274,7 +1278,7 @@ public class Commands {
 
   public void connect(String line, DispatchCallback callback) {
     String example =
-        "Usage: connect [-p property value]* <url> [username] [password] [driver]"
+        "Usage: connect [-p property value]* (-(c|cn) <connectionName> | <url>) [username] [password] [driver]"
         + SqlLine.getSeparator();
     String[] parts = sqlLine.split(line);
     if (parts == null) {
@@ -1298,11 +1302,35 @@ public class Commands {
       }
     }
 
-    String url = parts.length < offset + 1 ? null : parts[offset];
+    Properties props = null;
+    String url = null;
+    String nickname = null;
+    boolean nickNameFromConfig =
+        parts.length >= offset && "-cn".equals(parts[offset]);
+    if (nickNameFromConfig
+        || parts.length >= offset && "-c".equals(parts[offset])) {
+      if (parts.length == offset + 1) {
+        sqlLine.error(example);
+        return;
+      }
+      props = conConfParser.getConnectionProperties(parts[offset + 1]);
+      if (props == null) {
+        sqlLine.error(parts[offset + 1] + " not found in connection config");
+        return;
+      }
+      nickname = nickNameFromConfig ? parts[offset + 1] : nickname;
+      offset++;
+    } else {
+      url = parts.length < offset + 1 ? null : parts[offset];
+    }
+    if (props == null) {
+      props = new Properties();
+    }
+
     String user = parts.length < offset + 2 ? null : parts[offset + 1];
     String pass = parts.length < offset + 3 ? null : parts[offset + 2];
     String driver = parts.length < offset + 4 ? null : parts[offset + 3];
-    Properties props = new Properties();
+
     if (url != null) {
       props.setProperty(ConnectionProperties.URL.getSqllineName(), url);
     }
@@ -1323,6 +1351,11 @@ public class Commands {
       }
     }
     connect(props, callback);
+    final DatabaseConnection databaseConnection =
+        sqlLine.getDatabaseConnection();
+    if (nickNameFromConfig && databaseConnection != null) {
+      databaseConnection.setNickname(nickname);
+    }
   }
 
   public void nickname(String line, DispatchCallback callback) {
@@ -1483,6 +1516,52 @@ public class Commands {
       callback.setToFailure();
       sqlLine.error(e);
     }
+  }
+
+  public void showconfconnections(String line, DispatchCallback callback) {
+    final String connectionConfig = sqlLine.getOpts().getConnectionConfig();
+    if (connectionConfig == null || connectionConfig.isEmpty()) {
+      sqlLine.error("Configuration file is not specified");
+      return;
+    }
+    Path path = Paths.get(connectionConfig);
+    if (Files.exists(path) && !Files.isDirectory(path)) {
+      try (InputStream in = new FileInputStream(path.toFile())) {
+        less(in);
+      } catch (IOException e) {
+        callback.setToFailure();
+        sqlLine.error(e);
+      }
+    } else {
+      sqlLine.error("Configuration file '"
+          + path + "' does not exist or is a directory");
+    }
+  }
+
+  public void rereadconfconnections(String line, DispatchCallback callback) {
+    String example = "Usage: rereadconfconnections [new_config]"
+        + SqlLine.getSeparator();
+    try {
+      String[] parts = sqlLine.split(line);
+      if (parts == null || parts.length > 2) {
+        callback.setToFailure();
+        sqlLine.error(example);
+        return;
+      }
+      if (parts.length == 2) {
+        sqlLine.getOpts().setConnectionConfig(parts[1]);
+      } else {
+        resetconfconnections();
+      }
+      callback.setToSuccess();
+    } catch (Exception e) {
+      callback.setToFailure();
+      sqlLine.error(e);
+    }
+  }
+
+  void resetconfconnections() {
+    conConfParser.resetConnectionProperties();
   }
 
   void resize() {
@@ -1905,6 +1984,14 @@ public class Commands {
       return;
     }
 
+    if (less(in)) {
+      callback.setToSuccess();
+    } else {
+      callback.setToFailure();
+    }
+  }
+
+  private boolean less(InputStream in) throws IOException {
     // Workaround for windows because of
     // https://github.com/jline/jline3/issues/304
     if (System.getProperty("os.name")
@@ -1916,13 +2003,11 @@ public class Commands {
             in, sqlLine.getOutputStream(), sqlLine.getErrorStream(),
             null, new String[]{"-I", "--syntax=none"});
       } catch (Exception e) {
-        callback.setToFailure();
         sqlLine.error(e);
-        return;
+        return false;
       }
     }
-
-    callback.setToSuccess();
+    return true;
   }
 
   private void sillyLess(InputStream in) throws IOException {

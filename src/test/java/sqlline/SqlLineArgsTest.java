@@ -3170,6 +3170,44 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testConnectForSavedConnections() {
+    final DatabaseConnection[] databaseConnection = new DatabaseConnection[1];
+    new MockUp<sqlline.DatabaseConnections>() {
+      @Mock
+      public void setConnection(DatabaseConnection connection) {
+        databaseConnection[0] = connection;
+      }
+    };
+
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    final File tmpSavedConnections = createTempFile(
+        "tmpconfconnections", "temp");
+    try (BufferedWriter bw =
+        new BufferedWriter(
+            new OutputStreamWriter(
+                new FileOutputStream(tmpSavedConnections),
+                    StandardCharsets.UTF_8))) {
+      String connectionName = "myconnection";
+      bw.write(connectionName + ": \n"
+          + "  url: " + ConnectionSpec.H2.url + "\n"
+          + "  user: " + ConnectionSpec.H2.username + "\n"
+          + "  password: " + ConnectionSpec.H2.password + "\n");
+      bw.flush();
+      bw.close();
+
+      String[] connectionArgs = new String[]{
+          "-c", connectionName,
+          "--connectionConfig=" + tmpSavedConnections.getAbsolutePath(),
+          "-e", "!set maxwidth 80"};
+      SqlLine.Status status = begin(sqlLine, os, false, connectionArgs);
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      assertEquals(ConnectionSpec.H2.url, databaseConnection[0].getUrl());
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  @Test
   public void testDropAll() {
     try {
       new MockUp<sqlline.Commands>() {

@@ -1463,6 +1463,7 @@ sqlline> !help
 !reconnect        Reconnect to the database
 !record           Record all output to the specified file
 !rehash           Fetch table and column names for command completion
+!rereadconfconnections Reread file with saved connections
 !resize           Reset max height/width based on terminal height/width
 !rollback         Roll back the current transaction (if autocommit is off)
 !reset            Reset a sqlline variable
@@ -1471,6 +1472,7 @@ sqlline> !help
 !scan             Scan for installed JDBC drivers
 !schemas          List all the schemas in the database
 !script           Start saving a script to a file
+!showconfconnections Show connections from the file
 !set              Set a sqlline variable, or show its value
 !sql              Execute a SQL command
 !tables           List all the tables in the database
@@ -2979,6 +2981,64 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
           </screen>
           </refsect1>
       </refentry>
+      </section>
+
+      <section id="sect_command_rereadconfconnections">
+        <title>rereadconfconnections</title>
+        <refentry id="command_rereadconfconnections">
+          <refmeta>
+            <refentrytitle>rereadconfconnections</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+          <refnamediv>
+            <refname>rereadconfconnections</refname>
+            <refpurpose>
+              Reread file with saved connections
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!rereadconfconnections</command>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+          <refsect1>
+            <title>Description</title>
+            <para>
+              Reread file with saved connections
+            </para>
+          </refsect1>
+        </refentry>
+      </section>
+
+      <section id="sect_command_showconfconnections">
+        <title>showconfconnections</title>
+        <refentry id="command_showconfconnections">
+          <refmeta>
+            <refentrytitle>showconfconnections</refentrytitle>
+            <manvolnum>1</manvolnum>
+          </refmeta>
+
+          <refnamediv>
+            <refname>showconfconnections</refname>
+            <refpurpose>
+              Show connections from the file
+            </refpurpose>
+          </refnamediv>
+
+          <refsynopsisdiv>
+            <cmdsynopsis>
+              <command>!showconfconnections</command>
+            </cmdsynopsis>
+          </refsynopsisdiv>
+          <refsect1>
+            <title>Description</title>
+            <para>
+              Show connections from the file
+            </para>
+          </refsect1>
+        </refentry>
       </section>
 
       <section id="sect_command_sql">
