@@ -681,7 +681,7 @@ public class Commands {
 
     if ("all".equals(propertyName)) {
       sqlLine.setOpts(new SqlLineOpts(sqlLine));
-      sqlLine.output(sqlLine.loc("reset-all-props"));
+      sqlLine.info(sqlLine.loc("reset-all-props"));
       // no need to auto save, since its off by default
       callback.setToSuccess();
       return;
@@ -714,7 +714,7 @@ public class Commands {
         }
       }
       if (res != null) {
-        sqlLine.output(sqlLine.loc(res, key, value));
+        sqlLine.info(sqlLine.loc(res, key, value));
       }
       callback.setToSuccess();
     } else {
@@ -1082,7 +1082,7 @@ public class Commands {
       // CTRL-C'd out of the command. Note it, but don't call it an
       // error.
       callback.setStatus(DispatchCallback.Status.CANCELED);
-      sqlLine.output(sqlLine.loc("command-canceled"));
+      sqlLine.info(sqlLine.loc("command-canceled"));
       return;
     } catch (Exception e) {
       callback.setToFailure();
@@ -1532,7 +1532,7 @@ public class Commands {
       sqlLine.handleException(e);
     }
 
-    sqlLine.output(sqlLine.loc("script-closed", sqlLine.getScriptOutputFile()));
+    sqlLine.info(sqlLine.loc("script-closed", sqlLine.getScriptOutputFile()));
     sqlLine.setScriptOutputFile(null);
     callback.setToSuccess();
   }
@@ -1560,7 +1560,7 @@ public class Commands {
     try {
       outFile = new OutputFile(expand(filename));
       sqlLine.setScriptOutputFile(outFile);
-      sqlLine.output(sqlLine.loc("script-started", outFile));
+      sqlLine.info(sqlLine.loc("script-started", outFile));
       callback.setToSuccess();
     } catch (Exception e) {
       callback.setToFailure();
@@ -1735,7 +1735,7 @@ public class Commands {
       sqlLine.handleException(e);
     }
 
-    sqlLine.output(sqlLine.loc("record-closed", sqlLine.getRecordOutputFile()));
+    sqlLine.info(sqlLine.loc("record-closed", sqlLine.getRecordOutputFile()));
     sqlLine.setRecordOutputFile(null);
     callback.setToSuccess();
   }
@@ -1762,7 +1762,7 @@ public class Commands {
     try {
       outputFile = new OutputFile(expand(filename));
       sqlLine.setRecordOutputFile(outputFile);
-      sqlLine.output(sqlLine.loc("record-started", outputFile));
+      sqlLine.info(sqlLine.loc("record-started", outputFile));
       callback.setToSuccess();
     } catch (Exception e) {
       callback.setToFailure();

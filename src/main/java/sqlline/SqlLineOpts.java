@@ -93,7 +93,7 @@ public class SqlLineOpts implements Completer {
       PROPERTY_PREFIX + "system.exit";
   private static final Date TEST_DATE = new Date();
   private static final String DEV_NULL = "/dev/null";
-  private SqlLine sqlLine;
+  private final SqlLine sqlLine;
   private String runFile;
   private Pattern compiledConfirmPattern = null;
   private Set<String> propertyNames;
@@ -336,20 +336,13 @@ public class SqlLineOpts implements Completer {
         continue;
       }
       if (key.startsWith(PROPERTY_PREFIX)) {
-        set(key.substring(PROPERTY_PREFIX.length()), props.getProperty(key));
+        set(key.substring(PROPERTY_PREFIX.length()),
+            props.getProperty(key), false);
       }
     }
   }
 
-  public void set(String key, String value) {
-    set(key, value, false);
-  }
-
-  public boolean set(String key, String value, boolean quiet) {
-    if ("run".equals(key)) {
-      setRun(value);
-      return true;
-    }
+  private SqlLineProperty getSqlLineProperty(String key, boolean quiet) {
     final SqlLineProperty property = BuiltInProperty.valueOf(key, true);
     if (property == null) {
       if (!quiet) {
@@ -360,6 +353,49 @@ public class SqlLineOpts implements Completer {
         // arbitrary order.
         System.err.println(sqlLine.loc("unknown-prop", key));
       }
+      return null;
+    }
+    return property;
+  }
+
+  public boolean setEmptyValue(String key, boolean quiet) {
+    final SqlLineProperty property = getSqlLineProperty(key, quiet);
+    if (property == null) {
+      return false;
+    }
+    if (property.type() == Type.STRING) {
+      set(property, "");
+      return true;
+    } else {
+      sqlLine.error(sqlLine.loc("empty-value-not-supported", property.type()));
+    }
+    return false;
+  }
+
+  public void set(String key, String value) {
+    set(key, value, false);
+  }
+
+  public boolean set(String key, boolean value, boolean quiet) {
+    final SqlLineProperty property = getSqlLineProperty(key, true);
+    if (property == null || property.type() != Type.BOOLEAN) {
+      sqlLine.error(sqlLine.loc("no-prop-not-supported", key));
+      return false;
+    }
+    if (property == SILENT) {
+      set(PROMPT, "");
+      set(RIGHT_PROMPT, "");
+    }
+    return set(key, String.valueOf(value), quiet);
+  }
+
+  public boolean set(String key, String value, boolean quiet) {
+    if ("run".equals(key)) {
+      setRun(value);
+      return true;
+    }
+    final SqlLineProperty property = getSqlLineProperty(key, true);
+    if (property == null) {
       return false;
     }
     if (property.isReadOnly()) {

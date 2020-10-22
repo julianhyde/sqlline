@@ -891,6 +891,50 @@ public class SqlLineArgsTest {
             + "6/8          !record\n"));
   }
 
+  @Test
+  public void testRecordInSilentMode() {
+    final String fileName = "filename";
+    File file = createTempFile(fileName, ".log");
+    final SqlLine sqlLine = new SqlLine();
+    final String script = "!set incremental true\n!set silent true\n"
+        + "!record " + sqlLine.escapeAndQuote(file.getAbsolutePath()) + "\n"
+        + "values 1;\n"
+        + "!set outputformat csv\n"
+        + "values 2;\n"
+        + "!set outputformat csv\n"
+        + "values 3;\n"
+        + "!record\n";
+
+    checkScriptFile(script, false, equalTo(SqlLine.Status.OK),
+        allOf(containsString("!set incremental true\n"),
+            containsString("!set silent true\n"),
+            containsString("+-------------+\n"),
+            containsString("|     C1      |\n"),
+            containsString("+-------------+\n"),
+            containsString("| 1           |\n"),
+            containsString("+-------------+\n"),
+            containsString("'C1'\n"),
+            containsString("'2'\n"),
+            containsString("'C1'\n"),
+            containsString("'3'\n")));
+
+    assertFileContains(file,
+        allOf(containsString("+-------------+\n"),
+            containsString("|     C1      |\n"),
+            containsString("+-------------+\n"),
+            containsString("| 1           |\n"),
+            containsString("+-------------+\n"),
+            containsString("'C1'\n"),
+            containsString("'2'\n"),
+            containsString("'C1'\n"),
+            containsString("'3'\n"),
+            not(allOf(
+                containsString("!set incremental true\n"),
+                containsString("!set silent true\n"),
+                containsString("Saving all output\n"),
+                containsString(" selected \n")))));
+  }
+
   private static void assertFileContains(File file, Matcher<String> matcher) {
     try (BufferedReader br = new BufferedReader(
         new InputStreamReader(new FileInputStream(file),
