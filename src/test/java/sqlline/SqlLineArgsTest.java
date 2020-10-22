@@ -1586,7 +1586,7 @@ public class SqlLineArgsTest {
    * </blockquote>
    */
   @Test
-  public void testConnectWithDbPropertyAsParameter2() {
+  public void testConnectWithDbPropertyAllowLiteralsAsParameter() {
     try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
       SqlLine.Status status =
           begin(sqlLine, os, false, "-e", "!set maxwidth 80");
@@ -1673,6 +1673,62 @@ public class SqlLineArgsTest {
     } catch (Exception e) {
       // fail
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/389">[SQLLINE-389]
+   * DB specific properties not read when using !properties</a>
+   *
+   * Tests the {@code !properties} command passing in the password in as a hash,
+   * and using h2's {@code PASSWORD_HASH} and {@code ALLOW_LITERALS} properties
+   * in properties file.
+   *
+   * The test is similar to
+   * {@link SqlLineArgsTest#testConnectWithDbPropertyAllowLiteralsAsParameter()}
+   * however for another command {@code !properties}
+   */
+  @Test
+  public void testPropertiesForDBSpecificProperties() {
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", "!set maxwidth 80");
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      DispatchCallback dc = new DispatchCallback();
+      sqlLine.runCommands(dc,
+          "!set maxwidth 80",
+          "!set incremental true");
+      String fakeNonEmptyPassword = "nonEmptyPasswd";
+      final byte[] bytes =
+          fakeNonEmptyPassword.getBytes(StandardCharsets.UTF_8);
+      final File tmpPropFile = createTempFile("prop", "temp");
+      try (BufferedWriter bw =
+          new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(tmpPropFile),
+                      StandardCharsets.UTF_8))) {
+        bw.write("url=" + ConnectionSpec.H2.url + "\n"
+            + "user=" + ConnectionSpec.H2.username + "\n"
+            + "password=" + StringUtils.convertBytesToHex(bytes) + "\n"
+            + "PASSWORD_HASH=TRUE\n"
+            + "ALLOW_LITERALS=NONE\n"
+        );
+        bw.flush();
+      }
+      assertThat(status, equalTo(SqlLine.Status.OK));
+
+      sqlLine.runCommands(dc, "!properties "
+          + tmpPropFile.getAbsolutePath());
+      sqlLine.runCommands(dc, "select 1;");
+      String output = os.toString("UTF8");
+      final String expected = "Error:";
+      assertThat(output, containsString(expected));
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
+      assertTrue(sqlLine.isExit());
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
     }
   }
 

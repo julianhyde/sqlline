@@ -158,7 +158,6 @@ public class Commands {
       "usesLocalFiles",
   };
 
-  private static final String CONNECT_PROPERTY = "#CONNECT_PROPERTY#.";
   private final SqlLine sqlLine;
 
   Commands(SqlLine sqlLine) {
@@ -1229,19 +1228,23 @@ public class Commands {
     String driver = parts.length < offset + 4 ? null : parts[offset + 3];
     Properties props = new Properties();
     if (url != null) {
-      props.setProperty("url", url);
+      props.setProperty(ConnectionProperties.URL.getSqllineName(), url);
     }
     if (driver != null) {
-      props.setProperty("driver", driver);
+      props.setProperty(ConnectionProperties.DRIVER.getSqllineName(), driver);
     }
     if (user != null) {
-      props.setProperty("user", user);
+      props.setProperty(ConnectionProperties.USER.getSqllineName(), user);
     }
     if (pass != null) {
-      props.setProperty("password", pass);
+      props.setProperty(ConnectionProperties.PASSWORD.getSqllineName(), pass);
     }
     if (!connectProps.isEmpty()) {
-      props.put(CONNECT_PROPERTY, connectProps);
+      for (String propName: connectProps.stringPropertyNames()) {
+        if (props.getProperty(propName) == null) {
+          props.put(propName, connectProps.getProperty(propName));
+        }
+      }
     }
     connect(props, callback);
   }
@@ -1272,6 +1275,12 @@ public class Commands {
   }
 
   private String getProperty(Properties props, String... keys) {
+    Set<String> keySet = new HashSet<>(keys.length);
+    keySet.addAll(Arrays.asList(keys));
+    return getProperty(props, keySet);
+  }
+
+  private String getProperty(Properties props, Set<String> keys) {
     for (String key : keys) {
       String val = props.getProperty(key);
       if (val != null) {
@@ -1291,28 +1300,22 @@ public class Commands {
   }
 
   public void connect(Properties props, DispatchCallback callback) {
-    String url = getProperty(props,
-        "url",
-        "javax.jdo.option.ConnectionURL",
-        "ConnectionURL");
-    String driver = getProperty(props,
-        "driver",
-        "javax.jdo.option.ConnectionDriverName",
-        "ConnectionDriverName");
-    String username = getProperty(props,
-        "user",
-        "javax.jdo.option.ConnectionUserName",
-        "ConnectionUserName");
-    String password = getProperty(props,
-        "password",
-        "javax.jdo.option.ConnectionPassword",
-        "ConnectionPassword");
-    Properties info = (Properties) props.get(CONNECT_PROPERTY);
-    if (info != null) {
-      url = url == null ? info.getProperty("url") : url;
-      driver = driver == null ? info.getProperty("driver") : driver;
-      username = username == null ? info.getProperty("user") : username;
-      password = password == null ? info.getProperty("password") : password;
+    String url = getProperty(props, ConnectionProperties.URL.getAllNames());
+    String driver =
+        getProperty(props, ConnectionProperties.DRIVER.getAllNames());
+    String username =
+        getProperty(props, ConnectionProperties.USER.getAllNames());
+    String password =
+        getProperty(props, ConnectionProperties.PASSWORD.getAllNames());
+    url = url == null ? props.getProperty("url") : url;
+    driver = driver == null ? props.getProperty("driver") : driver;
+    username = username == null ? props.getProperty("user") : username;
+    password = password == null ? props.getProperty("password") : password;
+    Properties info = new Properties();
+    for (String propName: props.stringPropertyNames()) {
+      if (ConnectionProperties.of(propName) == null) {
+        info.put(propName, props.getProperty(propName));
+      }
     }
     final String connectInteractionMode =
         sqlLine.getOpts().get(BuiltInProperty.CONNECT_INTERACTION_MODE);
@@ -1967,6 +1970,47 @@ public class Commands {
 
     @Override public String history(String line) {
       return null;
+    }
+  }
+
+  private enum ConnectionProperties {
+    DRIVER("driver", "javax.jdo.option.ConnectionDriverName",
+        "ConnectionDriverName"),
+    PASSWORD("password", "javax.jdo.option.ConnectionUserName",
+        "ConnectionUserName"),
+    URL("url", "javax.jdo.option.ConnectionURL", "ConnectionURL"),
+    USER("user", "javax.jdo.option.ConnectionUserName", "ConnectionUserName");
+
+    private final String sqllineName;
+    private final Set<String> allNames;
+    ConnectionProperties(String sqllineName, String... otherNames) {
+      this.sqllineName = sqllineName;
+      if (otherNames == null) {
+        this.allNames = Collections.singleton(sqllineName);
+      } else {
+        Set<String> names = new HashSet<>(otherNames.length + 1);
+        names.addAll(Arrays.asList(otherNames));
+        names.add(sqllineName);
+        this.allNames = Collections.unmodifiableSet(names);
+      }
+    }
+
+    public static ConnectionProperties of(String value) {
+      for (ConnectionProperties prop: values()) {
+        if (prop.sqllineName.equals(value) || prop.allNames.contains(value)) {
+          return prop;
+        }
+      }
+
+      return null;
+    }
+
+    public String getSqllineName() {
+      return sqllineName;
+    }
+
+    public Set<String> getAllNames() {
+      return allNames;
     }
   }
 }
