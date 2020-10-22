@@ -93,7 +93,7 @@ public class SqlLineOpts implements Completer {
       PROPERTY_PREFIX + "system.exit";
   private static final Date TEST_DATE = new Date();
   private static final String DEV_NULL = "/dev/null";
-  private SqlLine sqlLine;
+  private final SqlLine sqlLine;
   private String runFile;
   private Pattern compiledConfirmPattern = null;
   private Set<String> propertyNames;
@@ -336,9 +336,44 @@ public class SqlLineOpts implements Completer {
         continue;
       }
       if (key.startsWith(PROPERTY_PREFIX)) {
-        set(key.substring(PROPERTY_PREFIX.length()), props.getProperty(key));
+        set(key.substring(PROPERTY_PREFIX.length()),
+            props.getProperty(key), false);
       }
     }
+  }
+
+  private SqlLineProperty getSqlLineProperty(String key, boolean quiet) {
+    final SqlLineProperty property = BuiltInProperty.valueOf(key, true);
+    if (property == null) {
+      if (!quiet) {
+        // need to use System.err here because when bad command args
+        // are passed this is called before init is done, meaning
+        // that sqlline's error() output chokes because it depends
+        // on properties like text coloring that can get set in
+        // arbitrary order.
+        System.err.println(sqlLine.loc("unknown-prop", key));
+      }
+      return null;
+    }
+    return property;
+  }
+
+  public boolean setEmptyValue(String key, boolean quiet) {
+    final SqlLineProperty property = getSqlLineProperty(key, quiet);
+    if (property == null) {
+      return false;
+    }
+    switch (property.type()) {
+    case BOOLEAN:
+      set(property, true);
+      return true;
+    case STRING:
+      set(property, "");
+      return true;
+    default:
+      sqlLine.error(sqlLine.loc("empty-value-not-supported", property.type()));
+    }
+    return false;
   }
 
   public void set(String key, String value) {
@@ -350,16 +385,8 @@ public class SqlLineOpts implements Completer {
       setRun(value);
       return true;
     }
-    final SqlLineProperty property = BuiltInProperty.valueOf(key, true);
+    final SqlLineProperty property = getSqlLineProperty(key, true);
     if (property == null) {
-      if (!quiet) {
-        // need to use System.err here because when bad command args
-        // are passed this is called before init is done, meaning
-        // that sqlline's error() output chokes because it depends
-        // on properties like text coloring that can get set in
-        // arbitrary order.
-        System.err.println(sqlLine.loc("unknown-prop", key));
-      }
       return false;
     }
     if (property.isReadOnly()) {

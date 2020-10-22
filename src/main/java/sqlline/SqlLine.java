@@ -349,7 +349,7 @@ public class SqlLine {
           if (parts.length >= 2) {
             ret = getOpts().set(parts[0], parts[1], true);
           } else {
-            ret = getOpts().set(parts[0], "true", true);
+            ret = getOpts().setEmptyValue(parts[0], true);
           }
 
           if (!ret) {
