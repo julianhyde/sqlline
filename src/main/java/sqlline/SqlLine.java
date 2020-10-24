@@ -333,6 +333,7 @@ public class SqlLine {
     String commandHandler = null;
     String appConfig = null;
     String promptHandler = null;
+    boolean shouldBeSilent = false;
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -341,15 +342,23 @@ public class SqlLine {
 
       // -- arguments are treated as properties
       if (args[i].startsWith("--")) {
-        String[] parts = split(args[i].substring(2), "=");
+        int startIndex = args[i].startsWith("--no-") ? "--no-".length() : 2;
+        boolean propertyWithNoValue = startIndex > 2;
+        String[] parts = split(args[i].substring(startIndex), "=");
         debug(loc("setting-prop", Arrays.asList(parts)));
         if (parts.length > 0) {
           boolean ret;
 
-          if (parts.length >= 2) {
+          if (BuiltInProperty.valueOf(parts[0], true)
+              == BuiltInProperty.SILENT) {
+            shouldBeSilent = true;
+            continue;
+          } else if (propertyWithNoValue) {
+            ret = getOpts().setEmptyValue(parts[0], true);
+          } else if (parts.length >= 2) {
             ret = getOpts().set(parts[0], parts[1], true);
           } else {
-            ret = getOpts().setEmptyValue(parts[0], true);
+            ret = getOpts().set(parts[0], true, true);
           }
 
           if (!ret) {
@@ -393,6 +402,8 @@ public class SqlLine {
         files.add(args[i]);
       }
     }
+
+    makeSilent(shouldBeSilent);
 
     if (appConfig != null) {
       dispatch(COMMAND_PREFIX + "appconfig " + appConfig,
@@ -466,6 +477,24 @@ public class SqlLine {
     }
 
     return status;
+  }
+
+  private boolean makeSilent(boolean shouldBeSilent) {
+    if (!shouldBeSilent) {
+      return true;
+    }
+    Map<BuiltInProperty, String> map = new EnumMap<>(BuiltInProperty.class);
+    map.put(BuiltInProperty.PROMPT, "");
+    map.put(BuiltInProperty.RIGHT_PROMPT, "");
+    map.put(BuiltInProperty.SILENT, "true");
+    map.put(BuiltInProperty.VERBOSE, "false");
+    for (Map.Entry<BuiltInProperty, String> entry: map.entrySet()) {
+      if (!getOpts().set(
+          entry.getKey().propertyName(), entry.getValue(), true)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

@@ -363,14 +363,10 @@ public class SqlLineOpts implements Completer {
     if (property == null) {
       return false;
     }
-    switch (property.type()) {
-    case BOOLEAN:
-      set(property, true);
-      return true;
-    case STRING:
+    if (property.type() == Type.STRING) {
       set(property, "");
       return true;
-    default:
+    } else {
       sqlLine.error(sqlLine.loc("empty-value-not-supported", property.type()));
     }
     return false;
@@ -378,6 +374,19 @@ public class SqlLineOpts implements Completer {
 
   public void set(String key, String value) {
     set(key, value, false);
+  }
+
+  public boolean set(String key, boolean value, boolean quiet) {
+    final SqlLineProperty property = getSqlLineProperty(key, true);
+    if (property == null || property.type() != Type.BOOLEAN) {
+      sqlLine.error(sqlLine.loc("no-prop-not-supported", key));
+      return false;
+    }
+    if (property == SILENT) {
+      set(PROMPT, "");
+      set(RIGHT_PROMPT, "");
+    }
+    return set(key, String.valueOf(value), quiet);
   }
 
   public boolean set(String key, String value, boolean quiet) {
