@@ -391,19 +391,47 @@ public class Commands {
     return list;
   }
 
+  private void setSchemaOrSchemaAndEntityArgs(
+      Object[] args, String[][] splitResult) {
+    if (splitResult.length == 2) {
+      args[2] = splitResult[1][0];
+    } else if (splitResult.length > 2) {
+      args[1] = splitResult[1][0];
+      args[2] = splitResult[2][0];
+    }
+  }
+
   public void indexes(String line, DispatchCallback callback) throws Exception {
-    String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
-    List<Object> args = buildMetadataArgs(line, "table name", strings);
-    args.add(Boolean.FALSE);
-    args.add(Boolean.TRUE);
-    metadata("getIndexInfo", args, callback);
+    final String[][] ret = sqlLine.splitCompound(line);
+    Object[] args = new Object[]{
+        sqlLine.getConnection().getCatalog(), null, "%",
+        ret != null && ret.length > 3
+            ? Boolean.valueOf(ret[3][0]) : Boolean.FALSE,
+        ret != null && ret.length > 4
+            ? Boolean.valueOf(ret[4][0]) : Boolean.TRUE};
+    if (ret == null || ret.length > args.length) {
+      throw new IllegalArgumentException(
+          "Usage: !indexes <table name>\n"
+          + "or !indexes <schema name> <table name>\n"
+          + "or !indexes <schema name> <table name> <unique>\n"
+          + "or !indexes <schema name> <table name> <unique> <approximate>\n");
+    }
+    setSchemaOrSchemaAndEntityArgs(args, ret);
+    metadata("getIndexInfo", Arrays.asList(args), callback);
   }
 
   public void primarykeys(String line, DispatchCallback callback)
       throws Exception {
-    String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
-    List<Object> args = buildMetadataArgs(line, "table name", strings);
-    metadata("getPrimaryKeys", args, callback);
+    final String[][] ret = sqlLine.splitCompound(line);
+    Object[] args = new Object[]{
+        sqlLine.getConnection().getCatalog(), null, "%"};
+    if (ret == null || ret.length > args.length) {
+      throw new IllegalArgumentException(
+          "Usage: !primarykeys <table name>\n"
+          + "or !primarykeys <schema name> <table name>");
+    }
+    setSchemaOrSchemaAndEntityArgs(args, ret);
+    metadata("getPrimaryKeys", Arrays.asList(args), callback);
   }
 
   public void exportedkeys(String line, DispatchCallback callback)
@@ -422,18 +450,40 @@ public class Commands {
 
   public void procedures(String line, DispatchCallback callback)
       throws Exception {
-    String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
-    List<Object> args =
-        buildMetadataArgs(line, "procedure name pattern", strings);
-    metadata("getProcedures", args, callback);
+    final String[][] ret = sqlLine.splitCompound(line);
+    Object[] args = new Object[]{
+        sqlLine.getConnection().getCatalog(), null, "%"};
+    if (ret == null || ret.length > args.length) {
+      throw new IllegalArgumentException(
+          "Usage: !procedures <procedure name pattern>\n"
+          + "or !procedures <schema name pattern> <procedure name pattern>");
+    }
+    setSchemaOrSchemaAndEntityArgs(args, ret);
+    metadata("getProcedures", Arrays.asList(args), callback);
   }
 
   public void tables(String line, DispatchCallback callback)
       throws SQLException {
-    String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
-    List<Object> args = buildMetadataArgs(line, "table name", strings);
-    args.add(null);
-    metadata("getTables", args, callback);
+    Object[] args = new Object[]{
+        sqlLine.getConnection().getCatalog(), null, "%", null};
+    String[][] ret = sqlLine.splitCompound(line);
+    if (ret == null) {
+      throw new IllegalArgumentException(
+          "Usage: !tables <table name pattern>\n"
+          + "or !tables <schema name pattern> <table name pattern>\n"
+          + "or !tables <schema name pattern> <table name pattern> "
+          + "(<table type name>)*");
+    }
+    setSchemaOrSchemaAndEntityArgs(args, ret);
+    if (ret.length > 3) {
+      String[] tableTypes = new String[ret.length - 3];
+      ret = sqlLine.splitCompound(line, false, true);
+      for (int i = 3; i < ret.length; i++) {
+        tableTypes[i - 3] = ret[i][0];
+      }
+      args[3] = tableTypes;
+    }
+    metadata("getTables", Arrays.asList(args), callback);
   }
 
   public void schemas(String line, DispatchCallback callback) {
@@ -461,10 +511,21 @@ public class Commands {
 
   public void columns(String line, DispatchCallback callback)
       throws SQLException {
-    String[] strings = {sqlLine.getConnection().getCatalog(), null, "%"};
-    List<Object> args = buildMetadataArgs(line, "table name", strings);
-    args.add("%");
-    metadata("getColumns", args, callback);
+    final String[][] ret = sqlLine.splitCompound(line);
+    Object[] args = new Object[]{
+        sqlLine.getConnection().getCatalog(), null, "%", "%"};
+    if (ret == null || ret.length > args.length) {
+      throw new IllegalArgumentException(
+          "Usage: !columns <table name pattern>\n"
+          + "or !columns <schema name pattern> <table name pattern>\n"
+          + "or !columns <schema name pattern> <table name pattern> "
+          + "<column name pattern>");
+    }
+    setSchemaOrSchemaAndEntityArgs(args, ret);
+    if (ret.length == 4) {
+      args[3] = ret[3][0];
+    }
+    metadata("getColumns", Arrays.asList(args), callback);
   }
 
   public void dropall(String line, DispatchCallback callback) {
