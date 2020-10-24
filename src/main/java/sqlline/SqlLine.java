@@ -1098,10 +1098,11 @@ public class SqlLine {
    *
    * @param line the line to break up
    * @param keepSqlIdentifierQuotes keep SQL identifiers
+   * @param keepCase keep case
    * @return an array of compound words
    */
   public String[][] splitCompound(
-      String line, boolean keepSqlIdentifierQuotes) {
+      String line, boolean keepSqlIdentifierQuotes, boolean keepCase) {
     final Dialect dialect = getDialect();
 
     int state = SPACE;
@@ -1178,10 +1179,12 @@ public class SqlLine {
           String word = String.copyValueOf(chars, idStart, i - idStart - 1);
           if (word.equalsIgnoreCase("NULL")) {
             word = null;
-          } else if (dialect.isUpper()) {
-            word = word.toUpperCase(Locale.ROOT);
-          } else if (dialect.isLower()) {
-            word = word.toLowerCase(Locale.ROOT);
+          } else if (!keepCase) {
+            if (dialect.isUpper()) {
+              word = word.toUpperCase(Locale.ROOT);
+            } else if (dialect.isLower()) {
+              word = word.toLowerCase(Locale.ROOT);
+            }
           }
           current.add(word);
           state = c == '.' ? DOT_SPACE : SPACE;
@@ -1204,10 +1207,12 @@ public class SqlLine {
       if (state == UNQUOTED) {
         if (word.equalsIgnoreCase("NULL")) {
           word = null;
-        } else if (dialect.isUpper()) {
-          word = word.toUpperCase(Locale.ROOT);
-        } else if (dialect.isLower()) {
-          word = word.toLowerCase(Locale.ROOT);
+        } else if (!keepCase) {
+          if (dialect.isUpper()) {
+            word = word.toUpperCase(Locale.ROOT);
+          } else if (dialect.isLower()) {
+            word = word.toLowerCase(Locale.ROOT);
+          }
         }
       }
       current.add(word);
@@ -1225,6 +1230,11 @@ public class SqlLine {
 
   public String[][] splitCompound(String line) {
     return splitCompound(line, false);
+  }
+
+  public String[][] splitCompound(
+      String line, boolean keepSqlIdentifierQuotes) {
+    return splitCompound(line, keepSqlIdentifierQuotes, false);
   }
 
   Dialect getDialect() {

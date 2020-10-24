@@ -94,7 +94,9 @@ class Reflector {
     if (ob == null || ob.toString().equals("null")) {
       return null;
     }
-    if (toType == String.class) {
+    if (toType == ob.getClass()) {
+      return ob;
+    } else if (toType == String.class) {
       return ob.toString();
     } else if (toType == Byte.class || toType == byte.class) {
       return Byte.valueOf(ob.toString());

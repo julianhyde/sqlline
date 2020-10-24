@@ -1842,6 +1842,63 @@ public class SqlLineArgsTest {
         allOf(containsString(line0), containsString(line1)));
   }
 
+  @Test
+  public void testTablesWithTablePattern() {
+    connectionSpec = ConnectionSpec.H2;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
+        + "!tables CATALO%\n";
+    final String line0 =
+        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |\n";
+    final String line1 =
+        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE |         |       |\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line0), containsString(line1)));
+  }
+
+  @Test
+  public void testTablesWithSchemaTableType() {
+    connectionSpec = ConnectionSpec.H2;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
+        + "!tables INFORMATION_% CAT% \"SYSTEM TABLE\"\n";
+    final String line0 =
+        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |\n";
+    final String line1 =
+        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE |         |       |\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line0), containsString(line1)));
+  }
+
+  @Test
+  public void testColumnsWithSchemaTableType() {
+    connectionSpec = ConnectionSpec.H2;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
+        + "!columns INFORMATION% CAT% CAT%\n";
+    final String line0 =
+        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | COLUMN_NAME |  DATA_TYPE  | TYPE_NAME |\n";
+    final String line1 =
+        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | CATALOG_NAME | 12          | V |\n";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        allOf(containsString(line0), containsString(line1)));
+  }
+
+  @Test
+  public void testColumnsWithExtraParameters() {
+    connectionSpec = ConnectionSpec.H2;
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true\n"
+        + "!columns INFORMATION% CAT% CAT% wqer\n";
+    final String line0 = "Usage: ";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OTHER),
+        allOf(containsString(line0)));
+  }
+
   /**
    * Test case for
    * <a href="https://github.com/julianhyde/sqlline/issues/107">[SQLLINE-107]

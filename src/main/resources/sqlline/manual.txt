@@ -673,7 +673,8 @@ columns
 
 Name
 
-columns — Display columns of a table
+columns — List the columns in the specified schema, table,
+table name pattern, column name pattern.
 
 Synopsis
 
@@ -1317,6 +1318,7 @@ indexes — Display indexes for a table
 Synopsis
 
 !indexes {table name}
+!indexes {schema_name} {table_name} {unique} {approximate}
 
 Description
 
@@ -1584,7 +1586,7 @@ primarykeys
 
 Name
 
-primarykeys — Display the primary key columns for a table
+primarykeys — Display the primary key columns for a schema, table
 
 Synopsis
 
@@ -2119,7 +2121,7 @@ tables
 
 Name
 
-tables — List all the tables in the database
+tables — List all the tables in the database, schema, by pattern
 
 Synopsis
 

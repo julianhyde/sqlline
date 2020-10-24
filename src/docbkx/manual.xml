@@ -834,7 +834,8 @@ sqlline>
           <refsect1>
           <title>Description</title>
           <para>
-          List the columns in the specified table.
+          List the columns in the specified schema, table,
+          table name pattern, column name pattern.
           </para>
         </refsect1>
         <refsect1>
@@ -1637,7 +1638,7 @@ sqlline>
           <refsect1>
           <title>Description</title>
           <para>
-          List all the indexes on the specified table name.
+          List all the indexes on the specified schema, table name.
           </para>
         </refsect1>
         <refsect1>
@@ -2067,7 +2068,7 @@ COMPANY_ID NAME
         <refnamediv>
           <refname>primarykeys</refname>
           <refpurpose>
-          Display the primary key columns for a table
+          Display the primary key columns for a schema, table
           </refpurpose>
         </refnamediv>
 
@@ -3034,7 +3035,7 @@ Script closed. Enter "run /tmp/mysession.script" to replay it.
         <refnamediv>
           <refname>tables</refname>
           <refpurpose>
-          List all the tables in the database
+          List all the tables in the database, schema, by pattern
           </refpurpose>
         </refnamediv>
 
