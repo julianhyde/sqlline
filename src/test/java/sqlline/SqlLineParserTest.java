@@ -25,11 +25,17 @@ import mockit.MockUp;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.of;
+import static sqlline.SqlLineParserTest.QueryStatus.WRONG;
+import static sqlline.SqlLineParserTest.QueryStatus.OK;
 
 /**
  * Test cases for SqlLineParser.
  */
 public class SqlLineParserTest {
+  enum QueryStatus {
+    WRONG, OK
+  }
+
   @ParameterizedTest
   @MethodSource("provideListOfValidLines")
   public void testSqlLineParserForOkLines(String line) {
@@ -84,6 +90,25 @@ public class SqlLineParserTest {
     parseValid(parser, line);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideListOfValidPLSQLLines")
+  public void checkPLSQL(
+      String line, final Dialect dialect, QueryStatus status) {
+    new MockUp<DialectImpl>() {
+      @Mock
+      Dialect getDefault() {
+        return dialect;
+      }
+    };
+
+    final DefaultParser parser = new SqlLineParser(new SqlLine());
+    if (status == OK) {
+      parseValid(parser, line);
+    } else {
+      parseInvalid(parser, line);
+    }
+  }
+
   private void parseValid(Parser parser, String line) {
     try {
       parser.parse(line, line.length(), Parser.ParseContext.ACCEPT_LINE);
@@ -97,6 +122,49 @@ public class SqlLineParserTest {
     assertThrows(EOFError.class,
         () -> parser.parse(
             line, line.length(), Parser.ParseContext.ACCEPT_LINE));
+  }
+
+  static Stream<Arguments> provideListOfValidPLSQLLines() {
+    return Stream.of(
+      // POSTGRESQL
+      of("$w$ wq $w$;", BuiltInDialect.POSTGRESQL, OK),
+      of("$AbCd$ \"$'\"wq $AbCd$;", BuiltInDialect.POSTGRESQL, OK),
+      of("$w$ wq  $w$\n/* ; */;", BuiltInDialect.POSTGRESQL, OK),
+      of("$w$   $w$\n /* ; */ ;", BuiltInDialect.POSTGRESQL, OK),
+      of("$www$   $www$\n /* dsfdsa' */ ;", BuiltInDialect.POSTGRESQL, OK),
+      of("$wasd$   $wasd$\n /* dsfdsa */ ;", BuiltInDialect.POSTGRESQL, OK),
+      of("$w$ wq $$;", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$$ wq $w$;", BuiltInDialect.POSTGRESQL, WRONG),
+      // no semicolon or semicolon commented/quoted
+      of("$w$ wq $w$", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$w$ wq';' $w$", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$w$ wq --; \n $w$", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$w$ wq  $w$ --;", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$w$ wq  $w$/*;*/", BuiltInDialect.POSTGRESQL, WRONG),
+      // section name not matches
+      of("$AbCd$ wq $Abcd$;", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$AbCd$ '$$'wq $ABcD$;", BuiltInDialect.POSTGRESQL, WRONG),
+      of("$AbCd$ --$'\" \nwq $AbCd$", BuiltInDialect.POSTGRESQL, WRONG),
+
+      // ORACLE
+      of("begin end;", BuiltInDialect.ORACLE, OK),
+      of("begin end\n;", BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq end;", BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq end\n;", BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq end /* */\n;", BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq end\t;", BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq loop end loop; /* end */ 'end ;' end ;",
+          BuiltInDialect.ORACLE, OK),
+      of("begin --$'\" \nwq end ;", BuiltInDialect.ORACLE, OK),
+      of("declare integer test := 3; begin --$'\" \nwq end ;",
+          BuiltInDialect.ORACLE, OK),
+      of("integer test := 3; \n\n\nbegin --$'\" \nwq end ;",
+          BuiltInDialect.ORACLE, OK),
+      // no semicolon or semicolon commented/quoted
+      of("begin end", BuiltInDialect.ORACLE, WRONG),
+      of("begin end--;", BuiltInDialect.ORACLE, WRONG),
+      of("begin end\n/*;", BuiltInDialect.ORACLE, WRONG)
+    );
   }
 
   static Stream<Arguments> provideListOfInvalidLines() {

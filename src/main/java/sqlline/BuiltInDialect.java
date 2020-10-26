@@ -20,6 +20,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +33,12 @@ public enum BuiltInDialect implements Dialect {
   /** Default built-in dialect. Does not correspond to any particular database,
    * but behaves similarly to Oracle and PostgreSQL. */
   DEFAULT("SQLLineDefaultDialect", '"', '"', "", "--"),
+
+  POSTGRESQL("PostgreSQL", '"', '"', "",
+      new String[] {"--"}, BuiltInDialect.postgresPgSqlBlocksBoundaries()),
+
+  ORACLE("Oracle", '"', '"', "",
+      new String[] {"--"}, BuiltInDialect.oraclePLSqlBlocksBoundaries()),
 
   /** HyperSQL dialect.
    * See <a href="https://www.h2database.com/html/grammar.html#comment">HyperSQL
@@ -56,9 +65,17 @@ public enum BuiltInDialect implements Dialect {
   private final char openQuote;
   private final char closeQuote;
   private final String extraNameCharacters;
+  private final CodeBlocks codeBlocks;
 
   BuiltInDialect(String databaseName, char openQuote, char closeQuote,
       String extraNameCharacters, String... comments) {
+    this(databaseName, openQuote, closeQuote,
+        extraNameCharacters, comments, null);
+  }
+
+  BuiltInDialect(String databaseName, char openQuote, char closeQuote,
+      String extraNameCharacters, String[] comments,
+      CodeBlocks codeBlocks) {
     this.databaseName = Objects.requireNonNull(databaseName);
     this.openQuote = openQuote;
     this.closeQuote = closeQuote;
@@ -68,6 +85,7 @@ public enum BuiltInDialect implements Dialect {
     this.storesLowerCaseIdentifier = false;
     this.extraNameCharacters = extraNameCharacters;
     this.keywords = Collections.emptySet();
+    this.codeBlocks = codeBlocks;
   }
 
   @Override public boolean containsKeyword(String keyword) {
@@ -97,6 +115,10 @@ public enum BuiltInDialect implements Dialect {
 
   @Override public String getExtraNameCharacters() {
     return extraNameCharacters;
+  }
+
+  @Override public CodeBlocks getCodeBlocks() {
+    return codeBlocks;
   }
 
   static Set<String> initDefaultKeywordSet() {
@@ -137,6 +159,48 @@ public enum BuiltInDialect implements Dialect {
       }
     }
     return DEFAULT;
+  }
+
+  private static CodeBlocks postgresPgSqlBlocksBoundaries() {
+    final Pattern postgresqlStartBlock = Pattern.compile("^\\$[a-zA-Z]*\\$$");
+    final Pattern postgresqlEndBlockSecondPart = Pattern.compile("^\\s*;*$");
+    return new CodeBlocks() {
+      @Override public Predicate<String> isBlockStarted() {
+        return currentWord ->
+            postgresqlStartBlock.matcher(currentWord).find();
+      }
+
+      @Override public BiPredicate<String, String> isBlockEnded() {
+        return (prevWord, currentWord) -> prevWord.equals(currentWord)
+            || currentWord.startsWith(prevWord)
+                && postgresqlEndBlockSecondPart
+                    .matcher(currentWord.substring(prevWord.length())).find();
+      }
+    };
+  }
+
+  private static CodeBlocks oraclePLSqlBlocksBoundaries() {
+    final Pattern oracleOptionalStartBlock =
+        Pattern.compile("^declare$", Pattern.CASE_INSENSITIVE);
+    final Pattern oracleStartBlock =
+        Pattern.compile("^begin$", Pattern.CASE_INSENSITIVE);
+    final Pattern endBlock =
+        Pattern.compile("^end\\s*;$", Pattern.CASE_INSENSITIVE);
+
+    return new CodeBlocks() {
+      @Override public Predicate<String> isBlockStarting() {
+        return oracleOptionalStartBlock.asPredicate();
+      }
+
+      @Override public Predicate<String> isBlockStarted() {
+        return currentWord ->
+            oracleStartBlock.matcher(currentWord).find();
+      }
+
+      @Override public BiPredicate<String, String> isBlockEnded() {
+        return (s, s2) -> endBlock.matcher(s2).find();
+      }
+    };
   }
 }
 

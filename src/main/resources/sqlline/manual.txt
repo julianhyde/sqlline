@@ -127,6 +127,7 @@ headerinterval
 historyfile
 incremental
 isolation
+keepSemicolon
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -274,6 +275,7 @@ headerinterval
 historyfile
 incremental
 isolation
+keepSemicolon
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -1181,6 +1183,7 @@ incremental     true/false Do not receive all rows from server before
 incrementalBufferRows integer Enter incremental mode if a query returns more
                               than "incrementalBufferRows".
 isolation       LEVEL      Set transaction isolation level
+keepSemicolon   true/false Keep semicolon in queries
 maxColumnWidth  integer    The maximum width to use when displaying columns
 maxHeight       integer    The maximum height of the terminal
 maxWidth        integer    The maximum width of the terminal
@@ -2208,6 +2211,7 @@ headerinterval
 historyfile
 incremental
 isolation
+keepSemicolon
 maxcolumnwidth
 maxHistoryFileRows
 maxHistoryRows
@@ -2298,6 +2302,10 @@ When incremental set to false and the entire result set has more rows than value
 isolation
 
 The default transaction isolation that will be used for new connections. To change the isolation level of the currently active connection, use the isolation command instead.
+
+keepSemicolon
+
+When set to true, semicolon at the end of queries will not be removed before. Defaults to false.
 
 maxcolumnwidth
 

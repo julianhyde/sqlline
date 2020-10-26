@@ -11,10 +11,14 @@
 */
 package sqlline;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jline.reader.EOFError;
@@ -134,6 +138,7 @@ public class SqlLineParser extends DefaultParser {
         case ROUND_BRACKET_BALANCE_FAILED:
         case SQUARE_BRACKET_BALANCE_FAILED:
         case SEMICOLON_REQUIRED:
+        case CODE_BLOCK_END_REQUIRED:
           throw new EOFError(-1, -1, argumentList.state.message,
               argumentList.supplier.get());
         }
@@ -157,7 +162,7 @@ public class SqlLineParser extends DefaultParser {
 
   public SqlLineArgumentList parseState(
       final String line, final int cursor, ParseContext context) {
-    final List<String> words = new LinkedList<>();
+    final LinkedList<String> words = new LinkedList<>();
     final StringBuilder current = new StringBuilder();
     boolean containsNonCommentData = false;
     int wordCursor = -1;
@@ -175,6 +180,8 @@ public class SqlLineParser extends DefaultParser {
     int lastNonQuoteCommentIndex = 0;
     boolean isSql = isSql(sqlLine, line, context);
     final Dialect dialect = sqlLine.getDialect();
+    final Deque<String> codeBlocksStarted = new ArrayDeque<>();
+    final Deque<String> codeBlocksStarting = new ArrayDeque<>();
 
     for (int i = 0; i < line.length(); i++) {
       // once we reach the cursor, set the
@@ -263,9 +270,14 @@ public class SqlLineParser extends DefaultParser {
             lastNonQuoteCommentIndex = i;
           }
           if (isDelimiter(line, i)) {
+            int curentLength = current.length();
             rawWordLength = getRawWordLength(words, current, rawWordCursor,
-                rawWordLength, rawWordStart, i);
+                rawWordLength, rawWordStart, i, true);
             rawWordStart = i + 1;
+            if (curentLength > 0) {
+              handleCodeBlocks(words, dialect,
+                  codeBlocksStarted, codeBlocksStarting);
+            }
           } else {
             if (!isEscapeChar(line, i)) {
               current.append(currentChar);
@@ -276,19 +288,16 @@ public class SqlLineParser extends DefaultParser {
     }
 
     if (current.length() > 0 || cursor == line.length()) {
-      if (quoteStart >= 0 && line.charAt(quoteStart)
-          == dialect.getOpenQuote()) {
-        words.add(current.toString());
-      } else {
-        words.add(current.toString());
-      }
+      words.add(current.toString());
+      handleCodeBlocks(words, dialect,
+          codeBlocksStarted, codeBlocksStarting);
       if (rawWordCursor >= 0 && rawWordLength < 0) {
         rawWordLength = line.length() - rawWordStart;
       }
     }
     if (cursor == line.length()) {
       wordIndex = words.size() - 1;
-      wordCursor = words.get(words.size() - 1).length();
+      wordCursor = words.getLast().length();
       rawWordCursor = cursor - rawWordStart;
       rawWordLength = rawWordCursor;
     }
@@ -338,6 +347,12 @@ public class SqlLineParser extends DefaultParser {
               cursor, openingQuote, rawWordCursor, rawWordLength);
         }
 
+        if (!codeBlocksStarted.isEmpty()) {
+          return new SqlLineArgumentList(SqlParserState.CODE_BLOCK_END_REQUIRED,
+              () -> getPaddedPrompt("Close " + codeBlocksStarted.getLast()),
+              line, words, wordIndex, wordCursor,
+              cursor, openingQuote, rawWordCursor, rawWordLength);
+        }
         final int lastNonQuoteCommentIndex1 =
             lastNonQuoteCommentIndex == line.length() - 1
                 && lastNonQuoteCommentIndex - 1 >= 0
@@ -364,6 +379,55 @@ public class SqlLineParser extends DefaultParser {
     return new SqlLineArgumentList(SqlParserState.OK, () -> "",
         line, words, wordIndex, wordCursor,
         cursor, openingQuote, rawWordCursor, rawWordLength);
+  }
+
+  private void handleCodeBlocks(Deque<String> words, Dialect dialect,
+      Deque<String> codeBlocksStarted,
+      Deque<String> codeBlocksStarting) {
+    final Dialect.CodeBlocks codeBlocks = dialect.getCodeBlocks();
+    if (codeBlocks == null) {
+      return;
+    }
+    String lastWord = words.getLast();
+    String prevWord = null;
+    if (words.size() > 1) {
+      Iterator<String> iterator = words.descendingIterator();
+      iterator.next();
+      prevWord = iterator.next();
+    }
+    if (!codeBlocksStarted.isEmpty()) {
+      String prevBlock = codeBlocksStarted.getLast();
+      if (codeBlocks.isBlockEnded()
+          .test(prevBlock, lastWord)) {
+        codeBlocksStarted.pop();
+        return;
+      } else if (";".equals(lastWord) && words.size() > 1) {
+        Iterator<String> iterator = words.descendingIterator();
+        iterator.next();
+        prevWord = null;
+        while (iterator.hasNext() && (prevWord == null || prevWord.isEmpty())) {
+          prevWord = iterator.next();
+        }
+        if (prevWord != null && codeBlocks.isBlockEnded()
+            .test(prevBlock, prevWord + lastWord)) {
+          codeBlocksStarted.pop();
+          return;
+        }
+      }
+    }
+    if (codeBlocks.isBlockStarted().test(lastWord)) {
+      codeBlocksStarted.push(lastWord);
+      if (!codeBlocksStarting.isEmpty()) {
+        codeBlocksStarting.pop();
+      }
+      return;
+    } else {
+      final Predicate<String> blockStarting = codeBlocks.isBlockStarting();
+      if (blockStarting != null && blockStarting.test(lastWord)) {
+        codeBlocksStarting.push(lastWord);
+        return;
+      }
+    }
   }
 
   public String getQuoteWaitingPattern(String line, int quoteStart) {
@@ -393,15 +457,25 @@ public class SqlLineParser extends DefaultParser {
     }
   }
 
+  private int getRawWordLength(Deque<String> words, StringBuilder current,
+      int rawWordCursor, int rawWordLength, int rawWordStart, int i) {
+    return getRawWordLength(words, current, rawWordCursor,
+      rawWordLength, rawWordStart, i, false);
+  }
+
   private int getRawWordLength(
-      List<String> words,
+      Deque<String> words,
       StringBuilder current,
       int rawWordCursor,
       int rawWordLength,
       int rawWordStart,
-      int i) {
+      int i,
+      boolean addToWords) {
     if (current.length() > 0) {
-      words.add(flush(current));
+      String currentWord = flush(current);
+      if (addToWords) {
+        words.add(currentWord);
+      }
       if (rawWordCursor >= 0 && rawWordLength < 0) {
         rawWordLength = i - rawWordStart;
       }
@@ -581,6 +655,7 @@ public class SqlLineParser extends DefaultParser {
     QUOTED("Missing closing quote"),
     ROUND_BRACKET_BALANCE_FAILED("Round brackets balance fails"),
     SEMICOLON_REQUIRED("Missing semicolon at the end"),
+    CODE_BLOCK_END_REQUIRED("Missing end of the code block"),
     SQUARE_BRACKET_BALANCE_FAILED("Square brackets balance fails");
 
     private final String message;

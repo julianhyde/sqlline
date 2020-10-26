@@ -1058,10 +1058,20 @@ public class Commands {
     for (String sqlItem : fullLine.split(";")) {
       sql2execute.append(sqlItem).append(";");
       if (sqlLine.isOneLineComment(sql2execute.toString())
-          || isSqlContinuationRequired(sql2execute.toString())) {
+          || stateIsNotOk(sql2execute.toString())) {
         continue;
       }
-      final String sql = skipLast(flush(sql2execute));
+      final String flushed = flush(sql2execute);
+      final String skipLast = skipLast(flushed);
+      final String sql;
+      if (!stateIsNot(skipLast,
+          SqlLineParser.SqlParserState.CODE_BLOCK_END_REQUIRED)) {
+        sql = flushed;
+      } else if (!sqlLine.getOpts().getKeepSemicolon()) {
+        sql = skipLast;
+      } else {
+        sql = flushed;
+      }
       executeSingleQuery(sql, call, callback);
     }
     if (!callback.isFailure()) {
@@ -1131,7 +1141,12 @@ public class Commands {
         } else {
           int count = stmnt.getUpdateCount();
           long end = System.currentTimeMillis();
-          reportResult(sqlLine.loc("rows-affected", count), start, end);
+          if (!stateIsNot(skipLast(sql),
+              SqlLineParser.SqlParserState.CODE_BLOCK_END_REQUIRED)) {
+            reportResult(sqlLine.loc("script-executed"), start, end);
+          } else {
+            reportResult(sqlLine.loc("rows-affected", count), start, end);
+          }
         }
       } finally {
         if (stmnt != null) {
@@ -1662,7 +1677,7 @@ public class Commands {
           cmd.append(" \n");
           cmd.append(scriptLine);
 
-          needsContinuation = isSqlContinuationRequired(cmd.toString());
+          needsContinuation = stateIsNotOk(cmd.toString());
           if (!needsContinuation && !cmd.toString().trim().isEmpty()) {
             cmds.add(maybeTrim(flush(cmd)));
           }
@@ -1993,12 +2008,15 @@ public class Commands {
     return (Map) properties;
   }
 
-  private boolean isSqlContinuationRequired(String sql) {
+  private boolean stateIsNotOk(String sql) {
+    return stateIsNot(sql, SqlLineParser.SqlParserState.OK);
+  }
+
+  private boolean stateIsNot(String sql, SqlLineParser.SqlParserState state) {
     if (sqlLine.getLineReader() == null) {
       return false;
     }
-    return SqlLineParser.SqlParserState.OK
-        != ((SqlLineParser) sqlLine.getLineReader().getParser())
+    return state != ((SqlLineParser) sqlLine.getLineReader().getParser())
             .parseState(sql, sql.length(), Parser.ParseContext.ACCEPT_LINE)
             .getState();
   }

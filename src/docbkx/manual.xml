@@ -3306,6 +3306,13 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           command instead.
         </para>
       </sect1>
+      <sect1 id="setting_keepsemicolon">
+        <title>keepsemicolon</title>
+        <para>
+          When set to true, semicolon at the end of queries
+          will not be removed before. Defaults to false.
+        </para>
+      </sect1>
       <sect1 id="setting_maxcolumnwidth">
         <title>maxcolumnwidth</title>
         <para>

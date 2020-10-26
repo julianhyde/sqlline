@@ -29,6 +29,7 @@ class DialectImpl implements Dialect {
   private final boolean storesUpperCaseIdentifier;
   private final boolean storesLowerCaseIdentifier;
   private final String extraNameCharacters;
+  private final CodeBlocks codeBlocks;
 
   static DialectImpl create(Set<String> keywords, String identifierQuote,
       String productName) {
@@ -63,12 +64,13 @@ class DialectImpl implements Dialect {
     }
     return new DialectImpl(keywords2, storesLowerCaseIdentifier,
         storesUpperCaseIdentifier, dialect.getOneLineComments(),
-        openQuote, closeQuote, extraNameCharacters);
+        openQuote, closeQuote, extraNameCharacters, dialect.getCodeBlocks());
   }
 
   private DialectImpl(Set<String> keywords, boolean storesLowerCaseIdentifier,
       boolean storesUpperCaseIdentifier, Set<String> oneLineComments,
-      char openQuote, char closeQuote, String extraNameCharacters) {
+      char openQuote, char closeQuote, String extraNameCharacters,
+      CodeBlocks codeBlocks) {
     this.keywords = Objects.requireNonNull(keywords);
     this.storesLowerCaseIdentifier = storesLowerCaseIdentifier;
     this.storesUpperCaseIdentifier = storesUpperCaseIdentifier;
@@ -76,6 +78,7 @@ class DialectImpl implements Dialect {
     this.openQuote = openQuote;
     this.closeQuote = closeQuote;
     this.extraNameCharacters = extraNameCharacters;
+    this.codeBlocks = codeBlocks;
   }
 
   public static Dialect getDefault() {
@@ -109,6 +112,10 @@ class DialectImpl implements Dialect {
 
   @Override public String getExtraNameCharacters() {
     return extraNameCharacters;
+  }
+
+  @Override public CodeBlocks getCodeBlocks() {
+    return codeBlocks;
   }
 }
 
