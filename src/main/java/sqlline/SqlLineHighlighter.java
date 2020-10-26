@@ -11,10 +11,13 @@
 */
 package sqlline;
 
+import java.util.ArrayDeque;
 import java.util.BitSet;
+import java.util.Deque;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.impl.DefaultHighlighter;
@@ -60,6 +63,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           !isCommandPresent && sqlLine.isOneLineComment(trimmed, false);
       final boolean isSql = !isComment
           && isSqlQuery(trimmed, isCommandPresent);
+      final Deque<String> codeBlocksStarted = new ArrayDeque<>();
 
       if (trimmed.length() > 1 && isCommandPresent) {
         final int end = trimmed.indexOf(' ');
@@ -78,7 +82,7 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (isSql) {
         handleSqlSyntax(buffer, keywordBitSet, quoteBitSet,
             sqlIdentifierQuotesBitSet, commentBitSet, numberBitSet,
-            isCommandPresent);
+            isCommandPresent, codeBlocksStarted);
       } else if (isCommandPresent) {
         handleQuotesInCommands(buffer, quoteBitSet, sqlIdentifierQuotesBitSet);
       } else {
@@ -220,7 +224,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       BitSet sqlIdentifierQuotesBitSet,
       BitSet commentBitSet,
       BitSet numberBitSet,
-      boolean isCommandPresent) {
+      boolean isCommandPresent,
+      Deque<String> codeBlocksStarted) {
     int wordStart = -1;
     int start = 0;
     if (isCommandPresent) {
@@ -238,14 +243,28 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (wordStart > -1) {
         if (pos == buffer.length() - 1
             || (!Character.isLetterOrDigit(ch) && ch != '_')) {
-          String word = !Character.isLetterOrDigit(ch)
-              ? buffer.substring(wordStart, pos)
-              : buffer.substring(wordStart);
-          String upperWord = word.toUpperCase(Locale.ROOT);
-          if (dialect.containsKeyword(upperWord)) {
-            keywordBitSet.set(wordStart, wordStart + word.length());
+          String word4codeBlock = buffer.substring(wordStart, pos + 1).trim();
+          final Dialect.CodeBlocks codeBlocks = dialect.getCodeBlocks();
+          if (codeBlocks != null) {
+            final Predicate<String> bStarting = codeBlocks.isBlockStarting();
+            final Predicate<String> bStarted = codeBlocks.isBlockStarted();
+            if (bStarting != null && bStarting.test(word4codeBlock)
+                || (bStarted != null && bStarted.test(word4codeBlock))) {
+              keywordBitSet.set(wordStart,
+                  wordStart + word4codeBlock.length());
+              wordStart = -1;
+            }
           }
-          wordStart = -1;
+          if (wordStart != -1) {
+            String word = !Character.isLetterOrDigit(ch)
+                ? buffer.substring(wordStart, pos)
+                : buffer.substring(wordStart);
+            String upperWord = word.toUpperCase(Locale.ROOT);
+            if (dialect.containsKeyword(upperWord)) {
+              keywordBitSet.set(wordStart, wordStart + word.length());
+            }
+            wordStart = -1;
+          }
         } else {
           continue;
         }
@@ -263,14 +282,17 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         pos = handleComments(buffer, commentBitSet, pos, true);
       }
       if (wordStart == -1
-          && (Character.isLetter(ch) || ch == '@' || ch == '#' || ch == '_')
-          && (pos == 0 || buffer.charAt(pos - 1) != '.')) {
+          && (Character.isLetter(ch)
+              || ch == '@' || ch == '#' || ch == '_' || ch == '$')
+          && (pos == 0
+              || buffer.length() > pos - 1 && buffer.charAt(pos - 1) != '.')) {
         wordStart = pos;
         continue;
       }
       if (wordStart == -1 && Character.isDigit(ch)
           && (pos == 0
-              || (!Character.isLetterOrDigit(buffer.charAt(pos - 1))
+              || (buffer.length() > pos - 1
+                  && !Character.isLetterOrDigit(buffer.charAt(pos - 1))
                   && buffer.charAt(pos - 1) != '_'))) {
         pos = handleNumbers(buffer, numberBitSet, pos);
         continue;

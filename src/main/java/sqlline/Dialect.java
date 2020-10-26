@@ -13,6 +13,8 @@ package sqlline;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +54,19 @@ interface Dialect {
    * @return the string containing the extra characters
    */
   String getExtraNameCharacters();
+
+  CodeBlocks getCodeBlocks();
+
+  interface CodeBlocks {
+    default Predicate<String> isBlockStarting() {
+      return null;
+    }
+    Predicate<String> isBlockStarted();
+    default BiPredicate<String, String> isBlockEnding() {
+      return null;
+    }
+    BiPredicate<String, String> isBlockEnded();
+  }
 }
 
 // End Dialect.java

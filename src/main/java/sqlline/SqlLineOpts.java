@@ -56,6 +56,7 @@ import static sqlline.BuiltInProperty.HISTORY_FILE;
 import static sqlline.BuiltInProperty.INCREMENTAL;
 import static sqlline.BuiltInProperty.INCREMENTAL_BUFFER_ROWS;
 import static sqlline.BuiltInProperty.ISOLATION;
+import static sqlline.BuiltInProperty.KEEP_SEMICOLON;
 import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
 import static sqlline.BuiltInProperty.MAX_HISTORY_FILE_ROWS;
@@ -834,6 +835,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getTrimScripts() {
     return getBoolean(TRIM_SCRIPTS);
+  }
+
+  public boolean getKeepSemicolon() {
+    return getBoolean(KEEP_SEMICOLON);
   }
 
   public int getMaxHeight() {
