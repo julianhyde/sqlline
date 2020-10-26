@@ -26,7 +26,7 @@ class IncrementalRows extends Rows {
   private Row nextRow;
   private boolean endOfResult;
   private boolean normalizingWidths;
-  private DispatchCallback dispatchCallback;
+  private final DispatchCallback dispatchCallback;
 
   IncrementalRows(SqlLine sqlLine, ResultSet rs,
       DispatchCallback dispatchCallback) throws SQLException {
