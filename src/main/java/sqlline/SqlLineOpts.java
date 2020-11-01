@@ -77,6 +77,7 @@ import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
 import static sqlline.BuiltInProperty.SHOW_WARNINGS;
 import static sqlline.BuiltInProperty.SILENT;
 import static sqlline.BuiltInProperty.STRICT_JDBC;
+import static sqlline.BuiltInProperty.TABLE_STYLE;
 import static sqlline.BuiltInProperty.TIMEOUT;
 import static sqlline.BuiltInProperty.TIMESTAMP_FORMAT;
 import static sqlline.BuiltInProperty.TIME_FORMAT;
@@ -122,6 +123,7 @@ public class SqlLineOpts implements Completer {
               put(PROPERTIES_FILE, SqlLineOpts.this::setPropertiesFile);
               put(SHOW_COMPLETION_DESCR,
                   SqlLineOpts.this::setShowCompletionDesc);
+              put(TABLE_STYLE, SqlLineOpts.this::setTableStyle);
               put(TIME_FORMAT, SqlLineOpts.this::setTimeFormat);
               put(TIMESTAMP_FORMAT, SqlLineOpts.this::setTimestampFormat);
             }
@@ -895,6 +897,21 @@ public class SqlLineOpts implements Completer {
               outputFormat,
               sqlLine.getOutputFormats().keySet()));
     }
+  }
+
+  public void setTableStyle(String tableStyle) {
+    if (DEFAULT.equals(tableStyle)
+        || BuiltInTableOutputFormatStyles.BY_NAME.containsKey(tableStyle)) {
+      propertiesMap.put(TABLE_STYLE, tableStyle);
+      return;
+    }
+    sqlLine.error(
+        sqlLine.loc("unknown-value", TABLE_STYLE.propertyName(), tableStyle,
+            TABLE_STYLE.getAvailableValues()));
+  }
+
+  public String getTableStyle() {
+    return get(TABLE_STYLE);
   }
 
   public boolean getStrictJdbc() {

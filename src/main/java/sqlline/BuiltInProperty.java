@@ -74,6 +74,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   NULL_VALUE("nullValue", Type.STRING, DEFAULT),
   SILENT("silent", Type.BOOLEAN, false),
   OUTPUT_FORMAT("outputFormat", Type.STRING, "table"),
+  TABLE_STYLE("tableStyle", Type.STRING, "default", true, false,
+      new Application().getName2TableOutputFormatStyle().keySet()),
   PROMPT("prompt", Type.STRING, "sqlline> "),
   PROMPT_SCRIPT("promptScript", Type.STRING, ""),
   PROPERTIES_FILE("propertiesFile", Type.STRING,

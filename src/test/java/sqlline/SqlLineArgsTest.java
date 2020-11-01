@@ -2063,6 +2063,85 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testBoldHeaderSolidTableOutputFormat() {
+    // Set width so we don't inherit from the current terminal.
+    final String script = "!set maxwidth 80\n"
+        + "!set incremental true \n"
+        + "!set outputformat table\n"
+        + "!set tablestyle bold_header_solid\n"
+        + "!all \n"
+        + "values \n"
+        + "(1, '2') \n"
+        + ";\n";
+    final String line1 = ""
+        + "┏━━━━━━━━━━━━━┳━━━━┓\n"
+        + "┃     C1      ┃ C2 ┃\n"
+        + "┡━━━━━━━━━━━━━╇━━━━┩\n"
+        + "│ 1           │ 2  │\n"
+        + "└─────────────┴────┘";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
+  public void testSolidTableFormatWithNonExistingTerminalAndSmallWidth() {
+    new MockUp<SqlLine>() {
+      @Mock
+      LineReader getLineReader() {
+        return null;
+      }
+    };
+    final String script = "!set maxwidth 0\n"
+        + "!set incremental true \n"
+        + "!set outputformat table\n"
+        + "!set tablestyle solid\n"
+        + "values (1, '2');\n";
+    final String line1 = ""
+        + "┌──┐\n"
+        + "│  │\n"
+        + "├──┤\n"
+        + "│  │\n"
+        + "└──┘";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
+  public void testDoubleSolidTableFormatWithZeroMaxWidthAndExistingTerminal() {
+    try {
+      new MockUp<DumbTerminal>() {
+        @Mock
+        public Size getSize() {
+          return new Size(80, 20);
+        }
+      };
+      final LineReaderBuilder lineReaderBuilder = LineReaderBuilder.builder()
+          .parser(new SqlLineParser(sqlLine))
+          .terminal(TerminalBuilder.builder().dumb(true).build());
+      sqlLine.setLineReader(lineReaderBuilder.build());
+      final String script = "!set maxwidth 0\n"
+          + "!set incremental true \n"
+          + "!set outputformat table\n"
+          + "!set tablestyle double_solid\n"
+          + "!all \n"
+          + "values \n"
+          + "(1, '2') \n"
+          + ";\n";
+      final String line1 = ""
+          + "╔═════════════╦════╗\n"
+          + "║     C1      ║ C2 ║\n"
+          + "╠═════════════╬════╣\n"
+          + "║ 1           ║ 2  ║\n"
+          + "╚═════════════╩════╝\n";
+      checkScriptFile(script, false,
+          equalTo(SqlLine.Status.OK),
+          containsString(line1));
+    } catch (Exception e) {
+      fail("Test failed with ", e);
+    }
+  }
+
+  @Test
   public void testAllMultiline() {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"

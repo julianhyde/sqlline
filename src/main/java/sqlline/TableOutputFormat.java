@@ -27,64 +27,74 @@ class TableOutputFormat implements OutputFormat {
     this.sqlLine = sqlLine;
   }
 
+  protected SqlLine getSqlLine() {
+    return sqlLine;
+  }
+
   public int print(Rows rows) {
     int index = 0;
     AttributedString header = null;
+    AttributedString bottomHeader = null;
     AttributedString headerCols = null;
     final int width = getCalculatedWidth();
+    final TableOutputFormatStyle style =
+        BuiltInTableOutputFormatStyles.BY_NAME.get(
+            sqlLine.getOpts().getTableStyle());
+    final String bLine = style.getBodyLine() + "";
+    final String hLine = style.getHeaderLine() + "";
 
     // normalize the columns sizes
     rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
 
-    for (; rows.hasNext();) {
+    while (rows.hasNext()) {
       Rows.Row row = rows.next();
-      AttributedString attributedString = getOutputString(rows, row);
+      AttributedString attributedString =
+          getOutputString(rows, row, style, index == 0);
       attributedString = attributedString
           .substring(0, Math.min(attributedString.length(), width));
 
-      if (index == 0) {
-        StringBuilder h = new StringBuilder();
-        for (int j = 0; j < row.sizes.length; j++) {
-          for (int k = 0; k < row.sizes[j]; k++) {
-            h.append('-');
-          }
-          h.append("-+-");
-        }
-
-        headerCols = attributedString;
-        header =
-            new AttributedStringBuilder()
-                .append(h.toString(), AttributedStyles.GREEN)
-                .toAttributedString()
-                .subSequence(0, Math.min(h.length(), headerCols.length()));
+      if (index <= 1) {
+        StringBuilder h = buildHeaderLine(row, style, index == 0, false);
+        StringBuilder bottomH = buildHeaderLine(row, style, false, true);
+        headerCols = index == 0 ? attributedString : headerCols;
+        header = buildHeader(headerCols, h);
+        bottomHeader = buildHeader(headerCols, bottomH);
       }
 
       if (sqlLine.getOpts().getShowHeader()) {
         final int headerInterval =
             sqlLine.getOpts().getHeaderInterval();
-        if (index == 0
+        if (index <= 1
             || headerInterval > 0 && index % headerInterval == 0) {
-          printRow(header, true);
-          printRow(headerCols, false);
-          printRow(header, true);
+          if (index == 0) {
+            printRow(header, style.getHeaderTopLeft() + hLine,
+                 hLine + style.getHeaderTopRight());
+            printRow(headerCols, style.getHeaderSeparator() + " ",
+                " " + style.getHeaderSeparator());
+          } else {
+            printRow(header, style.getHeaderBodyCrossLeft() + hLine,
+                hLine + style.getHeaderBodyCrossRight());
+          }
         }
       }
 
       if (index != 0) { // don't output the header twice
-        printRow(attributedString, false);
+        printRow(attributedString,
+            style.getBodySeparator() + " ", " " + style.getBodySeparator());
       }
 
       index++;
     }
 
-    if (header != null && sqlLine.getOpts().getShowHeader()) {
-      printRow(header, true);
+    if (bottomHeader != null && sqlLine.getOpts().getShowHeader()) {
+      printRow(bottomHeader, style.getBodyBottomLeft() + bLine,
+          bLine + style.getBodyBottomRight());
     }
 
     return index - 1;
   }
 
-  private int getCalculatedWidth() {
+  protected int getCalculatedWidth() {
     final int maxWidth = sqlLine.getOpts().getMaxWidth();
     int width = (maxWidth == 0 && sqlLine.getLineReader() != null
         ? sqlLine.getLineReader().getTerminal().getWidth()
@@ -92,28 +102,55 @@ class TableOutputFormat implements OutputFormat {
     return Math.max(width, 0);
   }
 
-  void printRow(AttributedString attributedString, boolean header) {
+  void printRow(AttributedString attributedString, String left, String right) {
     AttributedStringBuilder builder = new AttributedStringBuilder();
-    if (header) {
-      sqlLine.output(
-          builder.append("+-", AttributedStyles.GREEN)
-              .append(attributedString)
-              .append("-+", AttributedStyles.GREEN)
-              .toAttributedString());
-    } else {
-      sqlLine.output(
-          builder.append("| ", AttributedStyles.GREEN)
-              .append(attributedString)
-              .append(" |", AttributedStyles.GREEN)
-              .toAttributedString());
+    getSqlLine().output(
+        builder.append(left, AttributedStyles.GREEN)
+            .append(attributedString)
+            .append(right, AttributedStyles.GREEN)
+            .toAttributedString());
+  }
+
+  private StringBuilder buildHeaderLine(Rows.Row row,
+      TableOutputFormatStyle style, boolean top, boolean lastLine) {
+    StringBuilder header = new StringBuilder();
+    final String bLine = style.getBodyLine() + "";
+    final String hLine = style.getHeaderLine() + "";
+    for (int j = 0; j < row.sizes.length; j++) {
+      for (int k = 0; k < row.sizes[j]; k++) {
+        header.append(lastLine ? bLine : hLine);
+      }
+      header.append(lastLine ? bLine : hLine);
+      if (lastLine) {
+        header.append(style.getBodyCrossUp());
+      } else {
+        header.append(
+            top ? style.getHeaderCrossDown() : style.getHeaderBodyCross());
+      }
+      header.append(lastLine ? bLine : hLine);
     }
+    return header;
   }
 
-  public AttributedString getOutputString(Rows rows, Rows.Row row) {
-    return getOutputString(rows, row, " | ");
+  private AttributedString buildHeader(
+      AttributedString headerCols, StringBuilder hTop) {
+    AttributedString topHeader;
+    topHeader =
+        new AttributedStringBuilder()
+            .append(hTop.toString(), AttributedStyles.GREEN)
+            .toAttributedString()
+            .subSequence(0, Math.min(hTop.length(), headerCols.length()));
+    return topHeader;
   }
 
-  private AttributedString getOutputString(
+  public AttributedString getOutputString(
+      Rows rows, Rows.Row row, TableOutputFormatStyle style, boolean header) {
+    return getOutputString(rows, row,
+        " " + (header ? style.getHeaderSeparator() : style.getBodySeparator())
+        + ' ');
+  }
+
+  protected AttributedString getOutputString(
       Rows rows, Rows.Row row, String delim) {
     AttributedStringBuilder builder = new AttributedStringBuilder();
 
@@ -126,7 +163,6 @@ class TableOutputFormat implements OutputFormat {
 
       String v;
 
-      final int[] sizes = row.sizes;
       if (row.isMeta) {
         v = SqlLine.center(row.values[i], row.sizes[i]);
         if (rows.isPrimaryKey(i)) {
