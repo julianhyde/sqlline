@@ -1208,6 +1208,8 @@ showNestedErrs  true/false Display nested errors
 showWarnings    true/false Display connection warnings
 silent          true/false Be more silent
 strictJdbc      true/false Use strict JDBC
+tableStyle      default/solid/double_solid/round_corners/bold_header
+                           Table output style
 timeFormat      pattern    Format times using SimpleDateFormat pattern
 timeout         integer    Query timeout in seconds; less than zero means no
                            timeout
@@ -2223,6 +2225,7 @@ showtime
 showwarnings
 silent
 strictJdbc
+tableStyle
 timeformat
 timestampformat
 trimscripts
@@ -2373,6 +2376,10 @@ If true, then reduce the amount of informational messages displayed. Useful for 
 strictJdbc
 
 If false, then use default values defined by java.sql.DatabaseMetaData in case an implementation of this interface fails with e.g. "Method not supported", otherwise it also fails. Defaults to false.
+
+tableStyle
+
+The style of tables used to output data for table output format.
 
 timeformat
 

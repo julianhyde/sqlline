@@ -365,6 +365,10 @@ public class Application {
   public String getDefaultInteractiveMode() {
     return "askCredentials";
   }
+
+  public Map<String, TableOutputFormatStyle> getName2TableOutputFormatStyle() {
+    return BuiltInTableOutputFormatStyles.BY_NAME;
+  }
 }
 
 // End Application.java

@@ -3497,6 +3497,10 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           <literal>false</literal>.
         </para>
       </sect1>
+      <sect1 id="tableStyle">
+        <title>tableStyle</title>
+        <para>The style to use while data output for table output format</para>
+      </sect1>
       <sect1 id="setting_timeformat">
         <title>timeformat</title>
         <para>

@@ -670,6 +670,9 @@ public class SqlLine {
   }
 
   void toggleJlineAutopairWidget(boolean newValue) {
+    if (autopairWidgets == null) {
+      return;
+    }
     if (newValue) {
       autopairWidgets.enable();
     } else {
