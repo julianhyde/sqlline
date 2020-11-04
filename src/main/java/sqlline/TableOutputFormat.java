@@ -27,10 +27,6 @@ class TableOutputFormat implements OutputFormat {
     this.sqlLine = sqlLine;
   }
 
-  protected SqlLine getSqlLine() {
-    return sqlLine;
-  }
-
   public int print(Rows rows) {
     int index = 0;
     AttributedString header = null;
@@ -94,7 +90,7 @@ class TableOutputFormat implements OutputFormat {
     return index - 1;
   }
 
-  protected int getCalculatedWidth() {
+  private int getCalculatedWidth() {
     final int maxWidth = sqlLine.getOpts().getMaxWidth();
     int width = (maxWidth == 0 && sqlLine.getLineReader() != null
         ? sqlLine.getLineReader().getTerminal().getWidth()
@@ -150,7 +146,7 @@ class TableOutputFormat implements OutputFormat {
         + ' ');
   }
 
-  protected AttributedString getOutputString(
+  private AttributedString getOutputString(
       Rows rows, Rows.Row row, String delim) {
     AttributedStringBuilder builder = new AttributedStringBuilder();
 
