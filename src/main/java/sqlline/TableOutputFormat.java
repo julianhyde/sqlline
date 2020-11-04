@@ -100,7 +100,7 @@ class TableOutputFormat implements OutputFormat {
 
   void printRow(AttributedString attributedString, String left, String right) {
     AttributedStringBuilder builder = new AttributedStringBuilder();
-    getSqlLine().output(
+    sqlLine.output(
         builder.append(left, AttributedStyles.GREEN)
             .append(attributedString)
             .append(right, AttributedStyles.GREEN)
