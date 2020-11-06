@@ -482,6 +482,29 @@ public class SqlLineArgsTest {
         containsString("| 1           | null        |     |\n"));
   }
 
+  @Test
+  public void testTableOutputWithoutTypes() {
+    final String script = "!set showTypes true\n"
+        + "!set incremental true\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+        allOf(
+            containsString("| INTEGER | INTEGER | VARCHAR |\n"),
+            containsString("| 1           | null        |     |\n")));
+  }
+
+  @Test
+  public void testTableOutputWithoutTypesButWithoutHeader() {
+    final String script = "!set showTypes true\n"
+        + "!set showHeader false\n"
+        + "!set incremental true\n"
+        + "values (1, cast(null as integer), cast(null as varchar(3)));\n";
+    checkScriptFile(script, false,
+        equalTo(SqlLine.Status.OK),
+            containsString("| 1           | null        |     |\n"));
+  }
+
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 2, 3, 4})
   public void testTableOutputWithoutTerminalAndWithSmallWidth(int maxWidth) {

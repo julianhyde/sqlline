@@ -141,6 +141,7 @@ rowlimit
 showheader
 shownestederrs
 showtime
+showtypes
 showwarnings
 strictJdbc
 silent
@@ -286,6 +287,7 @@ prompt
 rightprompt
 rowlimit
 showheader
+showtypes
 shownestederrs
 showtime
 showwarnings
@@ -1205,6 +1207,7 @@ showCompletionDesc true/false Display help for completions
 showElapsedTime true/false Display execution time when verbose
 showHeader      true/false Show column names in query results
 showNestedErrs  true/false Display nested errors
+showTypes       true/false Display column types
 showWarnings    true/false Display connection warnings
 silent          true/false Be more silent
 strictJdbc      true/false Use strict JDBC
@@ -2222,6 +2225,7 @@ rowlimit
 showheader
 shownestederrs
 showtime
+showtypes
 showwarnings
 silent
 strictJdbc
@@ -2364,6 +2368,10 @@ If true, display any nested errors that are reported on the connection after iss
 showtime
 
 If true, display execution time for database commands when in verbose mode. Defaults to true.
+
+showtypes
+
+If true and showheader is true, display the types of the columns when displaying results. Defaults to true.
 
 showwarnings
 
