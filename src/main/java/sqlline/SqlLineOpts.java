@@ -75,6 +75,7 @@ import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
 import static sqlline.BuiltInProperty.SHOW_HEADER;
 import static sqlline.BuiltInProperty.SHOW_LINE_NUMBERS;
 import static sqlline.BuiltInProperty.SHOW_NESTED_ERRS;
+import static sqlline.BuiltInProperty.SHOW_TYPES;
 import static sqlline.BuiltInProperty.SHOW_WARNINGS;
 import static sqlline.BuiltInProperty.SILENT;
 import static sqlline.BuiltInProperty.STRICT_JDBC;
@@ -575,6 +576,10 @@ public class SqlLineOpts implements Completer {
 
   public boolean getShowNestedErrs() {
     return getBoolean(SHOW_NESTED_ERRS);
+  }
+
+  public boolean getShowTypes() {
+    return getBoolean(SHOW_TYPES);
   }
 
   public String getNumberFormat() {

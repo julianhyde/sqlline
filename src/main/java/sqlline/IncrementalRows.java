@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 class IncrementalRows extends Rows {
   private final ResultSet rs;
   private final Row labelRow;
+  private final Row typesRow;
   private final Row maxRow;
   private Row nextRow;
   private boolean endOfResult;
@@ -35,6 +36,7 @@ class IncrementalRows extends Rows {
     this.dispatchCallback = dispatchCallback;
     final int columnCount = rsMeta.getColumnCount();
     labelRow = new Row(columnCount);
+    typesRow = new Row(columnCount, rsMeta::getColumnTypeName);
     maxRow = new Row(columnCount);
     // pre-compute normalization so we don't have to deal
     // with SQLExceptions later
@@ -94,7 +96,11 @@ class IncrementalRows extends Rows {
     }
 
     Row ret = nextRow;
-    nextRow = null;
+    if (nextRow == labelRow && sqlLine.getOpts().getShowTypes()) {
+      nextRow = typesRow;
+    } else {
+      nextRow = null;
+    }
     return ret;
   }
 

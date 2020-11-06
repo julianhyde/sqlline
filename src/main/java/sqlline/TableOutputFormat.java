@@ -33,6 +33,7 @@ class TableOutputFormat implements OutputFormat {
     AttributedString bottomHeader = null;
     AttributedString headerCols = null;
     final int width = getCalculatedWidth();
+    final boolean showTypes = sqlLine.getOpts().getShowTypes();
     final TableOutputFormatStyle style =
         BuiltInTableOutputFormatStyles.BY_NAME.get(
             sqlLine.getOpts().getTableStyle());
@@ -43,28 +44,32 @@ class TableOutputFormat implements OutputFormat {
     rows.normalizeWidths(sqlLine.getOpts().getMaxColumnWidth());
 
     while (rows.hasNext()) {
+      final boolean isHeader = index == 0 || index == 1 && showTypes;
       Rows.Row row = rows.next();
       AttributedString attributedString =
-          getOutputString(rows, row, style, index == 0);
+          getOutputString(rows, row, style, isHeader);
       attributedString = attributedString
           .substring(0, Math.min(attributedString.length(), width));
 
-      if (index <= 1) {
-        StringBuilder h = buildHeaderLine(row, style, index == 0, false);
-        StringBuilder bottomH = buildHeaderLine(row, style, false, true);
-        headerCols = index == 0 ? attributedString : headerCols;
-        header = buildHeader(headerCols, h);
-        bottomHeader = buildHeader(headerCols, bottomH);
+      if (index <= 1 || index <= 2 && showTypes) {
+        StringBuilder top = buildHeaderLine(row, style, index == 0, false);
+        StringBuilder bottom = buildHeaderLine(row, style, false, true);
+        headerCols = isHeader ? attributedString : headerCols;
+        header = buildHeader(headerCols, top);
+        bottomHeader = buildHeader(headerCols, bottom);
       }
 
       if (sqlLine.getOpts().getShowHeader()) {
         final int headerInterval =
             sqlLine.getOpts().getHeaderInterval();
-        if (index <= 1
+        if ((index <= 1 || index <= 2 && showTypes)
             || headerInterval > 0 && index % headerInterval == 0) {
           if (index == 0) {
             printRow(header, style.getHeaderTopLeft() + hLine,
-                 hLine + style.getHeaderTopRight());
+                hLine + style.getHeaderTopRight());
+            printRow(headerCols, style.getHeaderSeparator() + " ",
+                " " + style.getHeaderSeparator());
+          } else if (index == 1 && showTypes) {
             printRow(headerCols, style.getHeaderSeparator() + " ",
                 " " + style.getHeaderSeparator());
           } else {
@@ -74,7 +79,7 @@ class TableOutputFormat implements OutputFormat {
         }
       }
 
-      if (index != 0) { // don't output the header twice
+      if (!isHeader) { // don't output the header twice
         printRow(attributedString,
             style.getBodySeparator() + " ", " " + style.getBodySeparator());
       }

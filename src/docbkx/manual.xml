@@ -3476,6 +3476,14 @@ java.sql.SQLException: ORA-00942: table or view does not exist
           <literal>true</literal>.
         </para>
       </sect1>
+      <sect1 id="setting_showtypes">
+        <title>showtypes</title>
+        <para>
+          If <literal>true</literal>, display the names of the
+          column types
+          <literal>true</literal>.
+        </para>
+      </sect1>
       <sect1 id="setting_showwarnings">
         <title>showwarnings</title>
         <para>

@@ -202,6 +202,10 @@ abstract class Rows implements Iterator<Rows.Row> {
     return Collections.unmodifiableMap(map);
   }
 
+  @FunctionalInterface interface CheckedFunction<T, R> {
+    R apply(T t) throws SQLException;
+  }
+
   /** Row from a result set. */
   class Row {
     final String[] values;
@@ -212,11 +216,16 @@ abstract class Rows implements Iterator<Rows.Row> {
     protected int[] sizes;
 
     Row(int size) throws SQLException {
+      this(size, rsMeta::getColumnLabel);
+    }
+
+    Row(int size, CheckedFunction<Integer, String> toValue)
+        throws SQLException {
       isMeta = true;
       values = new String[size];
       sizes = new int[size];
       for (int i = 0; i < size; i++) {
-        values[i] = rsMeta.getColumnLabel(i + 1);
+        values[i] = toValue.apply(i + 1);
         sizes[i] = values[i] == null ? 1 : values[i].length();
       }
 
