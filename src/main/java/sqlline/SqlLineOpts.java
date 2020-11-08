@@ -221,6 +221,13 @@ public class SqlLineOpts implements Completer {
         new Completers.RegexCompleter(sb.toString(), comp::get));
   }
 
+  public List<Completer> helpCompleters() {
+    Set<String> commands = sqlLine.getCommandHandlers().stream()
+        .flatMap(t -> t.getNames().stream())
+        .collect(Collectors.toSet());
+    return Collections.singletonList(new StringsCompleter(commands));
+  }
+
   /**
    * The save directory if HOME/.sqlline/ on UNIX, and HOME/sqlline/ on
    * Windows.

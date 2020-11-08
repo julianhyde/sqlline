@@ -13,6 +13,7 @@ package sqlline;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jline.reader.Completer;
 
@@ -23,6 +24,11 @@ import org.jline.reader.Completer;
 public class ReflectiveCommandHandler extends AbstractCommandHandler {
   public ReflectiveCommandHandler(SqlLine sqlLine, List<Completer> completers,
       String... cmds) {
+    super(sqlLine, cmds, sqlLine.loc("help-" + cmds[0]), completers);
+  }
+
+  public ReflectiveCommandHandler(SqlLine sqlLine,
+      Supplier<List<Completer>> completers, String... cmds) {
     super(sqlLine, cmds, sqlLine.loc("help-" + cmds[0]), completers);
   }
 

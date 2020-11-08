@@ -180,6 +180,27 @@ public class CompletionTest {
         of("!set colorScheme sol", "!set colorScheme solarized"));
   }
 
+  @ParameterizedTest(name = "Help should be completed with available commands")
+  @MethodSource("helpCompletionProvider")
+  public void testHelpCompletions(String input, String expected) {
+    final LineReaderCompletionImpl lineReader = getDummyLineReader();
+    final Collection<Candidate> actual =
+        getLineReaderCompletedList(lineReader, input);
+    assertEquals(1, actual.size());
+    assertEquals(expected, actual.iterator().next().value());
+  }
+
+  private static Stream<Arguments> helpCompletionProvider() {
+    return Stream.of(
+        of("!help verb", "!help verbose"),
+        of("!help bri", "!help brief"),
+        of("!help conne", "!help connect"),
+        of("!help output", "!help outputformat"),
+        of("!help qu", "!help quit"),
+        of("!help help", "!help help"),
+        of("!help reconn", "!help reconnect"));
+  }
+
   @ParameterizedTest
   @MethodSource("sqlKeywordCompletionProvider")
   public void testSqlCompletions(String input, String expected) {
