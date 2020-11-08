@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.h2.util.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -48,6 +49,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import mockit.Expectations;
@@ -61,6 +64,7 @@ import sqlline.extensions.CustomApplication;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.of;
 
 /**
  * Executes tests of the command-line arguments to SqlLine.
@@ -2907,13 +2911,42 @@ public class SqlLineArgsTest {
       SqlLine.Status status =
           begin(sqlLine, os, false, "-e",
               "!set confirmPattern \"^(?i*:(TRUNCATE|ALTER))\"");
-      assertThat(status, equalTo(SqlLine.Status.OK));
+      assertThat(status, equalTo(SqlLine.Status.OTHER));
       assertThat(os.toString("UTF8"), containsString("invalid regex"));
       os.reset();
     } catch (Throwable e) {
       // fail
       throw new RuntimeException(e);
     }
+  }
+
+  @ParameterizedTest
+  @MethodSource("commandProvider")
+  public void testErrorStatusForSingleLineExecution(
+      String line, String expectedOutput, SqlLine.Status expectedStatus) {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      SqlLine.Status status =
+          begin(sqlLine, os, false, "-e", line);
+      assertEquals(status, expectedStatus);
+      assertThat(os.toString("UTF8"), containsString(expectedOutput));
+      os.reset();
+    } catch (Throwable e) {
+      // fail
+      fail(e);
+    }
+  }
+
+  static Stream<Arguments> commandProvider() {
+    return Stream.of(
+        of("!set non-existing-property test",
+            "does not exist", SqlLine.Status.OTHER),
+        of("!non-existing-command", "Unknown command", SqlLine.Status.OTHER),
+
+        // OK
+        of("!set confirmPattern \"^(?i:(TRUNCATE|ALTER))\"",
+            "", SqlLine.Status.OK)
+    );
   }
 
   @Test

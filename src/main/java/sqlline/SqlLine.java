@@ -459,7 +459,7 @@ public class SqlLine {
 
       for (String command : commands) {
         debug(loc("executing-command", command));
-        dispatch(command, new DispatchCallback());
+        dispatch(command, callback);
       }
 
       exit = true; // execute and exit
