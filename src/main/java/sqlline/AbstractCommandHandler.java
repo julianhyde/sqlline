@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.NullCompleter;
@@ -27,20 +28,23 @@ public abstract class AbstractCommandHandler implements CommandHandler {
   private final String name;
   private final List<String> names;
   private final String helpText;
-  private final List<Completer> parameterCompleters;
+  private final Supplier<List<Completer>> parameterCompleters;
 
   public AbstractCommandHandler(SqlLine sqlLine, String[] names,
       String helpText, List<Completer> completers) {
+    this(sqlLine, names, helpText,
+        completers == null || completers.size() == 0
+            ? () -> Collections.singletonList(new NullCompleter())
+            : () -> new ArrayList<>(completers));
+  }
+
+  public AbstractCommandHandler(SqlLine sqlLine, String[] names,
+      String helpText, Supplier<List<Completer>> completers) {
     this.sqlLine = sqlLine;
     name = names[0];
     this.names = Arrays.asList(names);
     this.helpText = helpText;
-    if (completers == null || completers.size() == 0) {
-      this.parameterCompleters =
-          Collections.singletonList(new NullCompleter());
-    } else {
-      this.parameterCompleters = new ArrayList<>(completers);
-    }
+    this.parameterCompleters = completers;
   }
 
   @Override public String getHelpText() {
@@ -75,7 +79,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
   }
 
   @Override public List<Completer> getParameterCompleters() {
-    return parameterCompleters;
+    return parameterCompleters.get();
   }
 
   @Override public boolean echoToFile() {
