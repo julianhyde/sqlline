@@ -22,6 +22,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -226,7 +227,8 @@ abstract class Rows implements Iterator<Rows.Row> {
       sizes = new int[size];
       for (int i = 0; i < size; i++) {
         values[i] = toValue.apply(i + 1);
-        sizes[i] = values[i] == null ? 1 : values[i].length();
+        sizes[i] = values[i] == null ? 1 : Arrays.stream(values[i].split("\n"))
+            .map(String::length).max(Integer::compare).orElse(1);
       }
 
       deleted = false;
@@ -297,7 +299,8 @@ abstract class Rows implements Iterator<Rows.Row> {
             : escapeOutput
                 ? escapeControlSymbols(values[i])
                 : values[i];
-        sizes[i] = values[i] == null ? 1 : values[i].length();
+        sizes[i] = values[i] == null ? 1 : Arrays.stream(values[i].split("\n"))
+            .map(String::length).max(Integer::compare).orElse(1);
       }
     }
 

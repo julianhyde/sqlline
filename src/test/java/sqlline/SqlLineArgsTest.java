@@ -2527,6 +2527,25 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testMaxColumnWidthForLongString() {
+    final String script1 = "!set maxcolumnwidth 30\n"
+        + "!set incremental true\n"
+        + "values ('This is a very long string\n"
+        + "This is a very long string\n"
+        + "This is a very long string')";
+    final String line1 = ""
+        + "+--------------------------------+\n"
+        + "|               C1               |\n"
+        + "+--------------------------------+\n"
+        + "| This is a very long string \n"
+        + "This is a very long string \n"
+        + "This is a very long  |\n"
+        + "+--------------------------------+";
+    checkScriptFile(script1, true, equalTo(SqlLine.Status.OK),
+        containsString(line1));
+  }
+
+  @Test
   public void testMaxColumnWidthIncremental() {
     final String script1 = "!set maxcolumnwidth -1\n"
             + "!set incremental true\n"
