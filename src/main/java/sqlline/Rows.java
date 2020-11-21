@@ -202,8 +202,7 @@ abstract class Rows implements Iterator<Rows.Row> {
     return Collections.unmodifiableMap(map);
   }
 
-  @FunctionalInterface
-  interface CheckedFunction<T, R> {
+  @FunctionalInterface interface CheckedFunction<T, R> {
     R apply(T t) throws SQLException;
   }
 

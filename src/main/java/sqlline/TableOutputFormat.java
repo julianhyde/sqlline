@@ -66,7 +66,7 @@ class TableOutputFormat implements OutputFormat {
             || headerInterval > 0 && index % headerInterval == 0) {
           if (index == 0) {
             printRow(header, style.getHeaderTopLeft() + hLine,
-                 hLine + style.getHeaderTopRight());
+                hLine + style.getHeaderTopRight());
             printRow(headerCols, style.getHeaderSeparator() + " ",
                 " " + style.getHeaderSeparator());
           } else if (index == 1 && showTypes) {
@@ -79,8 +79,7 @@ class TableOutputFormat implements OutputFormat {
         }
       }
 
-      // don't output the header twice
-      if (!isHeader) {
+      if (!isHeader) { // don't output the header twice
         printRow(attributedString,
             style.getBodySeparator() + " ", " " + style.getBodySeparator());
       }
