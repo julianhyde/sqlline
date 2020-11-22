@@ -185,9 +185,15 @@ public class SqlLineOpts implements Completer {
             new StringsCompleter(property.propertyName()));
       }
     }
+    // all file_path properties without defined available values and
+    // not customized via {@code customCompletions}
+    // use file and directory names for autocompletion
     addCompletionForProperties(sb, comp, Type.FILE_PATH,
         filePathProperties, new Completers.FileNameCompleter());
     sb.append(" | ");
+    // all boolean properties without defined available values and
+    // not customized via {@code customCompletions} have values
+    // for autocompletion specified in SqlLineProperty.BOOLEAN_VALUES
     addCompletionForProperties(sb, comp, Type.BOOLEAN, booleanProperties,
         new StringsCompleter(BuiltInProperty.BOOLEAN_VALUES));
 
