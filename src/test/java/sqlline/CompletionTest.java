@@ -13,6 +13,7 @@ package sqlline;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -177,7 +178,11 @@ public class CompletionTest {
         of("!set outputFormat js", "!set outputFormat json"),
         of("!set outputFormat xmlel", "!set outputFormat xmlelements"),
         of("!set colorScheme che", "!set colorScheme chester"),
-        of("!set colorScheme sol", "!set colorScheme solarized"));
+        of("!set colorScheme sol", "!set colorScheme solarized"),
+        // file completer should return file names
+        of("!set historyFile pom.", "!set historyFile pom.xml"),
+        of("!set historyFile sr", "!set historyFile src" + File.separator)
+    );
   }
 
   @ParameterizedTest(name = "Help should be completed with available commands")
