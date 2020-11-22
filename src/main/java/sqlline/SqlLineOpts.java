@@ -167,6 +167,7 @@ public class SqlLineOpts implements Completer {
                 "!set", sqlLine.loc("command-name"), sqlLine.loc("help-set"),
                 null, "!set", true)));
     Collection<BuiltInProperty> booleanProperties = new ArrayList<>();
+    Collection<BuiltInProperty> filePathProperties = new ArrayList<>();
     Collection<BuiltInProperty> withDefinedAvailableValues = new ArrayList<>();
     StringBuilder sb = new StringBuilder(start + " (");
     for (BuiltInProperty property : BuiltInProperty.values()) {
@@ -176,26 +177,20 @@ public class SqlLineOpts implements Completer {
         withDefinedAvailableValues.add(property);
       } else if (property.type() == Type.BOOLEAN) {
         booleanProperties.add(property);
+      } else if (property.type() == Type.FILE_PATH) {
+        filePathProperties.add(property);
       } else {
         sb.append(property.name()).append(" | ");
         comp.put(property.name(),
             new StringsCompleter(property.propertyName()));
       }
     }
-    // all boolean properties without defined available values and
-    // not customized via {@code customCompletions} have values
-    // for autocompletion specified in SqlLineProperty.BOOLEAN_VALUES
-    final String booleanTypeString = Type.BOOLEAN.toString();
-    sb.append(booleanTypeString);
-    comp.put(booleanTypeString,
-        new StringsCompleter(booleanProperties
-            .stream()
-            .map(BuiltInProperty::propertyName)
-            .toArray(String[]::new)));
-    final String booleanPropertyValueKey = booleanTypeString + "_value";
-    comp.put(booleanPropertyValueKey,
+    addCompletionForProperties(sb, comp, Type.FILE_PATH,
+        filePathProperties, new Completers.FileNameCompleter());
+    sb.append(" | ");
+    addCompletionForProperties(sb, comp, Type.BOOLEAN, booleanProperties,
         new StringsCompleter(BuiltInProperty.BOOLEAN_VALUES));
-    sb.append(" ").append(booleanPropertyValueKey);
+
     // If a property has defined values they will be used for autocompletion
     for (BuiltInProperty property : withDefinedAvailableValues) {
       final String propertyName = property.propertyName();
@@ -220,6 +215,22 @@ public class SqlLineOpts implements Completer {
     sb.append(") ");
     return Collections.singletonList(
         new Completers.RegexCompleter(sb.toString(), comp::get));
+  }
+
+  private void addCompletionForProperties(StringBuilder syntax,
+      Map<String, Completer> completerMap,
+      Type type, Collection<BuiltInProperty> properties,
+      Completer completer) {
+    final String typeStringName = type.toString();
+    syntax.append(typeStringName);
+    completerMap.put(typeStringName,
+        new StringsCompleter(properties
+            .stream()
+            .map(BuiltInProperty::propertyName)
+            .toArray(String[]::new)));
+    final String filenamePropertyValueKey = typeStringName + "_value";
+    completerMap.put(filenamePropertyValueKey, completer);
+    syntax.append(" ").append(filenamePropertyValueKey);
   }
 
   public List<Completer> helpCompleters() {
@@ -374,7 +385,7 @@ public class SqlLineOpts implements Completer {
     if (property == null) {
       return false;
     }
-    if (property.type() == Type.STRING) {
+    if (property.type() == Type.STRING || property.type() == Type.FILE_PATH) {
       set(property, "");
       return true;
     } else {

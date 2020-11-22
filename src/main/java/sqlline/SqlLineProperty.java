@@ -45,6 +45,7 @@ public interface SqlLineProperty {
   enum Type {
     BOOLEAN,
     CHAR,
+    FILE_PATH,
     INTEGER,
     STRING;
   }
