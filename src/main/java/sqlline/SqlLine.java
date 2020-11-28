@@ -643,20 +643,24 @@ public class SqlLine {
           .highlighter(new SqlLineHighlighter(this))
           .expander(new SqlLineExpander(this))
           .build();
-      autopairWidgets = new AutopairWidgets(lineReader);
-      toggleJlineAutopairWidget(getOpts().getAutoPairing());
-      addWidget(lineReader,
-          this::toggleAutopairWidget, "AUTOPAIRING", alt(ctrl('p')));
-      addWidget(lineReader,
-          this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
-      addWidget(lineReader,
-          this::toggleLineNumbersWidget, "TOGGLE_LINE_NUMBERS", alt(ctrl('n')));
+      addSqlLineWidgets(lineReader);
     } else {
       lineReader = lineReaderBuilder.build();
     }
     fileHistory.attach(lineReader);
     setLineReader(lineReader);
     return lineReader;
+  }
+
+  private void addSqlLineWidgets(LineReader lineReader) {
+    autopairWidgets = new AutopairWidgets(lineReader);
+    toggleJlineAutopairWidget(getOpts().getAutoPairing());
+    addWidget(lineReader,
+        this::toggleAutopairWidget, "AUTOPAIRING", alt(ctrl('p')));
+    addWidget(lineReader,
+        this::nextColorSchemeWidget, "CHANGE_COLOR_SCHEME", alt('h'));
+    addWidget(lineReader,
+        this::toggleLineNumbersWidget, "TOGGLE_LINE_NUMBERS", alt(ctrl('n')));
   }
 
   private void addWidget(
