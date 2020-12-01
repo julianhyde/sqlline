@@ -1914,7 +1914,7 @@ public class Commands {
       try {
         org.jline.builtins.Commands.less(sqlLine.getLineReader().getTerminal(),
             in, sqlLine.getOutputStream(), sqlLine.getErrorStream(),
-            null, new String[]{});
+            null, new String[]{"-I", "--syntax=none"});
       } catch (Exception e) {
         callback.setToFailure();
         sqlLine.error(e);
