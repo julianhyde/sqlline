@@ -25,13 +25,13 @@
     <top.dir>${project.basedir}</top.dir>
 
     <!-- The following list is sorted. -->
-    <checkstyle.version>8.36.2</checkstyle.version>
+    <checkstyle.version>8.37</checkstyle.version>
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
     <forbiddenapis.version>3.1</forbiddenapis.version>
     <h2.version>1.4.200</h2.version>
     <hamcrest.version>2.2</hamcrest.version>
     <hsqldb.version>2.5.0</hsqldb.version>
-    <jline.version>3.16.0</jline.version>
+    <jline.version>3.18.0</jline.version>
     <jmockit.version>1.49</jmockit.version>
     <junit.version>5.7.0</junit.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>

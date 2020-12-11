@@ -33,6 +33,10 @@ import static sqlline.AttributedStyles.*;
  * <a href="https://github.com/ozmoroz/ozbsidian-sqldeveloper">
  * ozmoroz's OzBsidian colour scheme for Oracle SQL Developer</a>.
  *
+ * <p>Similarly, the {@link #GESHI} style is inspired by
+ * <a href="https://github.com/GeSHi/geshi-1.0/blob/master/src/geshi/sql.php">
+ * GeSHi - Generic Syntax Highlighter for sql</a>
+ *
  * @see HighlightStyle
  */
 enum BuiltInHighlightStyle {
@@ -42,7 +46,14 @@ enum BuiltInHighlightStyle {
   DRACULA(BOLD_MAGENTA, BOLD_WHITE, GREEN, RED, ITALIC_CYAN, YELLOW, WHITE),
   SOLARIZED(BOLD_YELLOW, BOLD_BLUE, GREEN, RED, ITALIC_BRIGHT, CYAN, BLUE),
   VS2010(BOLD_BLUE, BOLD_WHITE, RED, MAGENTA, ITALIC_GREEN, BRIGHT, WHITE),
-  OBSIDIAN(BOLD_GREEN, BOLD_WHITE, RED, MAGENTA, ITALIC_BRIGHT, YELLOW, WHITE);
+  OBSIDIAN(BOLD_GREEN, BOLD_WHITE, RED, MAGENTA, ITALIC_BRIGHT, YELLOW, WHITE),
+  GESHI(AttributedStyle.BOLD.foreground(99, 33, 33),
+      BOLD_WHITE,
+      AttributedStyle.DEFAULT.foreground(0x66, 0xCC, 0x66),
+      AttributedStyle.DEFAULT.foreground(0x0, 0x0, 0x99),
+      AttributedStyle.DEFAULT.italic().foreground(0x80, 0x80, 0x80),
+      AttributedStyle.DEFAULT.foreground(0xCC, 0x66, 0xCC),
+      WHITE);
 
   final HighlightStyle style;
 
