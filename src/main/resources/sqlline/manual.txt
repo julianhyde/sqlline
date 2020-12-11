@@ -1179,7 +1179,7 @@ Variable        Value      Description
 autoCommit      true/false Enable/disable automatic transaction commit
 autoSave        true/false Automatically save preferences
 color           true/false Control whether color is used for display
-colorScheme     chester/dark/dracula/light/obsidian/solarized/vs2010
+colorScheme     chester/dark/dracula/geshi/light/obsidian/solarized/vs2010
                            Syntax highlight schema
 confirm         true/false Prompts for confirmation before running
                            commands specified in confirmPattern
@@ -2295,7 +2295,7 @@ If true, then output to the terminal will use color for a more pleasing visual e
 
 colorScheme
 
-If chester/dark/dracula/light/obsidian/solarized/vs2010, then this scheme will be used for command/sql syntax highlighting. If default then there is no syntax highlighting.
+If chester/dark/dracula/geshi/light/obsidian/solarized/vs2010, then this scheme will be used for command/sql syntax highlighting. If default then there is no syntax highlighting.
 
 confirm
 

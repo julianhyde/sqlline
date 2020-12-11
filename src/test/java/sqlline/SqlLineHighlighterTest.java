@@ -773,13 +773,13 @@ public class SqlLineHighlighterTest {
     final AttributedString attributedString =
         highlighter.highlight(sqlLine.getLineReader(), line);
     final HighlightStyle highlightStyle = sqlLine.getHighlightStyle();
-    int commandStyle = highlightStyle.getCommandStyle().getStyle();
-    int keywordStyle = highlightStyle.getKeywordStyle().getStyle();
-    int singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
-    int identifierStyle = highlightStyle.getIdentifierStyle().getStyle();
-    int commentStyle = highlightStyle.getCommentStyle().getStyle();
-    int numberStyle = highlightStyle.getNumberStyle().getStyle();
-    int defaultStyle = highlightStyle.getDefaultStyle().getStyle();
+    long commandStyle = highlightStyle.getCommandStyle().getStyle();
+    long keywordStyle = highlightStyle.getKeywordStyle().getStyle();
+    long singleQuoteStyle = highlightStyle.getQuotedStyle().getStyle();
+    long identifierStyle = highlightStyle.getIdentifierStyle().getStyle();
+    long commentStyle = highlightStyle.getCommentStyle().getStyle();
+    long numberStyle = highlightStyle.getNumberStyle().getStyle();
+    long defaultStyle = highlightStyle.getDefaultStyle().getStyle();
 
     for (int i = 0; i < line.length(); i++) {
       checkSymbolStyle(line, i, expectedHighlightStyle.commands,
@@ -811,7 +811,7 @@ public class SqlLineHighlighterTest {
       SqlLineHighlighter defaultHighlighter) {
     final AttributedString attributedString =
         defaultHighlighter.highlight(sqlLine.getLineReader(), line);
-    int defaultStyle = AttributedStyle.DEFAULT.getStyle();
+    long defaultStyle = AttributedStyle.DEFAULT.getStyle();
 
     for (int i = 0; i < line.length(); i++) {
       if (Character.isWhitespace(line.charAt(i))) {
@@ -850,7 +850,7 @@ public class SqlLineHighlighterTest {
       int i,
       BitSet styleBitSet,
       AttributedString highlightedLine,
-      int style,
+      long style,
       String styleName) {
     if (styleBitSet.get(i)) {
       assertEquals(i == 0 ? style + 32 : style,

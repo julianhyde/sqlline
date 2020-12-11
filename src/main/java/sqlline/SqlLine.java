@@ -658,6 +658,7 @@ public class SqlLine {
         .variable(LineReader.LINE_OFFSET, 1)  // start line numbers with 1
         .option(LineReader.Option.AUTO_LIST, false)
         .option(LineReader.Option.AUTO_MENU, true)
+        .option(LineReader.Option.GROUP_PERSIST, true)
         .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true);
     final LineReader lineReader;
     if (inputStream == null) {
