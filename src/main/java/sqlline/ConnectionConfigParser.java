@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 class ConnectionConfigParser {
-  private static final String SEPARATOR = ": ";
+  private static final String SEPARATOR = ":";
   private static final char COMMENT_START = '#';
   private final SqlLine sqlLine;
   private final Map<String, Properties> connections = new HashMap<>();
