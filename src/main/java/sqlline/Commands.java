@@ -1350,10 +1350,12 @@ public class Commands {
         }
       }
     }
+    int numberOfConnections = sqlLine.getDatabaseConnections().size();
     connect(props, callback);
     final DatabaseConnection databaseConnection =
         sqlLine.getDatabaseConnection();
-    if (nickNameFromConfig && databaseConnection != null) {
+    if (nickNameFromConfig && databaseConnection != null
+        && numberOfConnections + 1 == sqlLine.getDatabaseConnections().size()) {
       databaseConnection.setNickname(nickname);
     }
   }
