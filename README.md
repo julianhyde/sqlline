@@ -134,7 +134,7 @@ Check out and build:
 ```bash
 git clone git://github.com/julianhyde/sqlline.git
 cd sqlline
-./mvnw package
+./mvn package
 ```
 
 ## Committers
