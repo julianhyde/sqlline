@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 import org.jline.builtins.Completers;
 import org.jline.keymap.KeyMap;
@@ -75,6 +77,7 @@ import static sqlline.BuiltInProperty.PROMPT;
 import static sqlline.BuiltInProperty.PROPERTIES_FILE;
 import static sqlline.BuiltInProperty.RIGHT_PROMPT;
 import static sqlline.BuiltInProperty.ROW_LIMIT;
+import static sqlline.BuiltInProperty.SCRIPT_ENGINE;
 import static sqlline.BuiltInProperty.SHOW_COMPLETION_DESCR;
 import static sqlline.BuiltInProperty.SHOW_ELAPSED_TIME;
 import static sqlline.BuiltInProperty.SHOW_HEADER;
@@ -130,6 +133,7 @@ public class SqlLineOpts implements Completer {
               put(NUMBER_FORMAT, SqlLineOpts.this::setNumberFormat);
               put(OUTPUT_FORMAT, SqlLineOpts.this::setOutputFormat);
               put(PROPERTIES_FILE, SqlLineOpts.this::setPropertiesFile);
+              put(SCRIPT_ENGINE, SqlLineOpts.this::setScriptEngine);
               put(SHOW_COMPLETION_DESCR,
                   SqlLineOpts.this::setShowCompletionDesc);
               put(TABLE_STYLE, SqlLineOpts.this::setTableStyle);
@@ -523,7 +527,8 @@ public class SqlLineOpts implements Completer {
           ? (String) value : String.valueOf(value);
       valueToSet = DEFAULT.equalsIgnoreCase(strValue)
           ? key.defaultValue() : value;
-      if (!key.getAvailableValues().isEmpty()
+      if (!DEFAULT.equalsIgnoreCase(strValue)
+          && !key.getAvailableValues().isEmpty()
           && !key.getAvailableValues().contains(valueToSet.toString())) {
         sqlLine.error(
             sqlLine.loc("unknown-value",
@@ -1082,6 +1087,30 @@ public class SqlLineOpts implements Completer {
 
   public String getHistoryFlags() {
     return get(HISTORY_FLAGS);
+  }
+
+  public String getScriptEngine() {
+    return get(SCRIPT_ENGINE);
+  }
+
+  public void setScriptEngine(String engineName) {
+    if (DEFAULT.equalsIgnoreCase(engineName)) {
+      set(SCRIPT_ENGINE, SCRIPT_ENGINE.defaultValue());
+      return;
+    }
+    final ScriptEngineManager engineManager = new ScriptEngineManager();
+    ScriptEngine scriptEngine = engineManager.getEngineByName(engineName);
+    if (scriptEngine == null) {
+      if (engineManager.getEngineFactories().isEmpty()) {
+        sqlLine.error(sqlLine.loc("not-supported-script-engine-no-available",
+            engineName));
+      } else {
+        sqlLine.error(sqlLine.loc("not-supported-script-engine",
+            engineName, SCRIPT_ENGINE.getAvailableValues()));
+      }
+    } else {
+      set(SCRIPT_ENGINE, engineName);
+    }
   }
 }
 

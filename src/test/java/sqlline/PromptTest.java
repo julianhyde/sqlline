@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import javax.script.ScriptEngineManager;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
@@ -221,8 +222,9 @@ public class PromptTest {
    * The `promptscript` property is broken on JDK 15 and higher</a>. */
   @Test
   public void testPromptScript() {
-    Assumptions.assumeTrue(getJavaMajorVersion() < 15,
-        "promptscript fails on JDK 15 and higher; "
+    Assumptions.assumeTrue(
+        !new ScriptEngineManager().getEngineFactories().isEmpty(),
+        "promptscript fails if there is no script engines; "
             + "see ");
 
     sqlLine.getOpts().set(BuiltInProperty.PROMPT_SCRIPT, "'hel' + 'lo'");

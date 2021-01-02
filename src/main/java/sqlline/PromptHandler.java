@@ -61,11 +61,26 @@ public class PromptHandler {
 
   protected final SqlLine sqlLine;
 
-  static final Supplier<ScriptEngine> SCRIPT_ENGINE_SUPPLIER =
-      new MemoizingSupplier<>(() -> {
-        final ScriptEngineManager engineManager = new ScriptEngineManager();
-        return engineManager.getEngineByName("nashorn");
-      });
+  final Supplier<ScriptEngine> scriptEngineSupplier =
+      getEngineSupplier();
+
+  MemoizingSupplier<ScriptEngine> getEngineSupplier() {
+    return new MemoizingSupplier<>(() -> {
+      final ScriptEngineManager engineManager = new ScriptEngineManager();
+      String engineName = sqlLine.getOpts().get(BuiltInProperty.SCRIPT_ENGINE);
+      ScriptEngine scriptEngine = engineManager.getEngineByName(engineName);
+      if (scriptEngine == null) {
+        if (engineManager.getEngineFactories().isEmpty()) {
+          sqlLine.error(sqlLine.loc("not-supported-script-engine-no-available",
+              engineName));
+        } else {
+          sqlLine.error(sqlLine.loc("not-supported-script-engine",
+              engineName, BuiltInProperty.SCRIPT_ENGINE.getAvailableValues()));
+        }
+      }
+      return scriptEngine;
+    });
+  }
 
   public PromptHandler(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
@@ -112,16 +127,20 @@ public class PromptHandler {
   private String getPromptFromScript(SqlLine sqlLine,
       String promptScript) {
     try {
-      final ScriptEngine engine = SCRIPT_ENGINE_SUPPLIER.get();
-      final Bindings bindings = new SimpleBindings();
-      final ConnectionMetadata meta = sqlLine.getConnectionMetadata();
-      bindings.put("connectionIndex", meta.getIndex());
-      bindings.put("databaseProductName", meta.getDatabaseProductName());
-      bindings.put("userName", meta.getUserName());
-      bindings.put("url", meta.getUrl());
-      bindings.put("currentSchema", meta.getCurrentSchema());
-      final Object o = engine.eval(promptScript, bindings);
-      return String.valueOf(o);
+      final ScriptEngine engine = scriptEngineSupplier.get();
+      if (engine == null) {
+        return ">";
+      } else {
+        final Bindings bindings = new SimpleBindings();
+        final ConnectionMetadata meta = sqlLine.getConnectionMetadata();
+        bindings.put("connectionIndex", meta.getIndex());
+        bindings.put("databaseProductName", meta.getDatabaseProductName());
+        bindings.put("userName", meta.getUserName());
+        bindings.put("url", meta.getUrl());
+        bindings.put("currentSchema", meta.getCurrentSchema());
+        final Object o = engine.eval(promptScript, bindings);
+        return String.valueOf(o);
+      }
     } catch (ScriptException e) {
       e.printStackTrace();
       return ">";

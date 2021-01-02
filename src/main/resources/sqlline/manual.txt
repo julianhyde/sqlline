@@ -104,6 +104,8 @@ schemas
 schemas — List all the schemas in the database
 script
 script — Save executed commands to a file
+scriptengine
+scriptengine - script engine name
 set
 set — Set a preference
 showconfconnections
@@ -258,6 +260,8 @@ scan
 scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
+scriptengine
+scriptengine - script engine name
 set
 set — Set a preference
 showconfconnections
@@ -502,6 +506,8 @@ scan
 scan — Scan class path for JDBC drivers
 script
 script — Save executed commands to a file
+scriptengine
+scriptengine - script engine name
 set
 set — Set a preference
 showconfconnections
@@ -1223,6 +1229,7 @@ propertiesFile  path       File from which SQLLine reads properties on
 rightPrompt     pattern    Format right prompt
 rowLimit        integer    Maximum number of rows returned from a query; zero
                            means no limit
+scriptEngine    string     Script engine name
 showCompletionDesc true/false Display help for completions
 showElapsedTime true/false Display execution time when verbose
 showHeader      true/false Show column names in query results
@@ -2410,6 +2417,10 @@ hsql database engine:0>
 rowlimit
 
 The maximum number of rows to fetch per query. Defaults to 0, which is interpreted as fetching all rows.
+
+scriptengine
+
+A script engine to use to evaluate scripts for instance from promptScript. Defaults to nashorn.
 
 showheader
 

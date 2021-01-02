@@ -87,6 +87,8 @@ public enum BuiltInProperty implements SqlLineProperty {
   RIGHT_PROMPT("rightPrompt", Type.STRING, ""),
   ROW_LIMIT("rowLimit", Type.INTEGER, 0),
   SHOW_ELAPSED_TIME("showElapsedTime", Type.BOOLEAN, true),
+  SCRIPT_ENGINE("scriptEngine", Type.STRING, "nashorn", true, false,
+      new Application().getAvailableScriptEngineNames()),
   SHOW_COMPLETION_DESCR("showCompletionDesc", Type.BOOLEAN, true),
   SHOW_HEADER("showHeader", Type.BOOLEAN, true),
   SHOW_LINE_NUMBERS("showLineNumbers", Type.BOOLEAN, false),
