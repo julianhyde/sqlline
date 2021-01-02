@@ -1100,17 +1100,11 @@ public class SqlLineOpts implements Completer {
     }
     final ScriptEngineManager engineManager = new ScriptEngineManager();
     ScriptEngine scriptEngine = engineManager.getEngineByName(engineName);
-    if (scriptEngine == null) {
-      if (engineManager.getEngineFactories().isEmpty()) {
-        sqlLine.error(sqlLine.loc("not-supported-script-engine-no-available",
-            engineName));
-      } else {
-        sqlLine.error(sqlLine.loc("not-supported-script-engine",
-            engineName, SCRIPT_ENGINE.getAvailableValues()));
-      }
-    } else {
-      set(SCRIPT_ENGINE, engineName);
+    if (scriptEngine == null && engineManager.getEngineFactories().isEmpty()) {
+      sqlLine.error(sqlLine.loc("not-supported-script-engine-no-available",
+          engineName));
     }
+    set(SCRIPT_ENGINE, engineName);
   }
 }
 
