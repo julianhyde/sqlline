@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,8 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 
 import org.jline.builtins.Completers.FileNameCompleter;
 import org.jline.reader.Completer;
@@ -372,6 +375,38 @@ public class Application {
 
   public Map<String, TableOutputFormatStyle> getName2TableOutputFormatStyle() {
     return BuiltInTableOutputFormatStyles.BY_NAME;
+  }
+
+  /**
+   * Override this method to modify available script engine names.
+   *
+   * <p>If method is not overridden, current set of engine names will
+   * contain first non intersected values (ordered by abc).
+   *
+   * @return Set of available script engine names
+   */
+  public Set<String> getAvailableScriptEngineNames() {
+    final Set<String> result = new HashSet<>();
+    final Map<String, Set<String>> fName2Aliases = new HashMap<>();
+    final List<ScriptEngineFactory> factories =
+        new ScriptEngineManager().getEngineFactories();
+    for (ScriptEngineFactory factory: factories) {
+      fName2Aliases.put(factory.getEngineName(),
+          new HashSet<>(factory.getNames()));
+    }
+    for (Map.Entry<String, Set<String>> fEntry: fName2Aliases.entrySet()) {
+      Set<String> aliases = new TreeSet<>(fEntry.getValue());
+      for (Map.Entry<String, Set<String>> fEntry2: fName2Aliases.entrySet()) {
+        if (fEntry.getKey().equals(fEntry2.getKey())) {
+          continue;
+        }
+        aliases.removeAll(fEntry2.getValue());
+      }
+      if (!aliases.isEmpty()) {
+        result.add(aliases.iterator().next());
+      }
+    }
+    return result;
   }
 }
 
