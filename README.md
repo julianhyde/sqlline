@@ -30,7 +30,7 @@ If you have [Coursier](https://github.com/coursier/coursier) installed, you
 can quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb) with:
 
 ```
-$ coursier launch sqlline:sqlline:1.9.0 org.hsqldb:hsqldb:2.5.0 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+$ coursier launch sqlline:sqlline:1.10.0 org.hsqldb:hsqldb:2.5.0 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
 0: jdbc:hsqldb:res:foodmart> select avg("shelf_height" * "shelf_width" * "shelf_depth") as "avg_volume" from "product";
 +-------------------------+
 |       avg_volume        |
@@ -119,22 +119,22 @@ Use the following definition to use `sqlline` in your maven project:
 <dependency>
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
-  <version>1.9.0</version>
+  <version>1.10.0</version>
 </dependency>
 ```
 
 ## Building
 
 To build or run SQLLine, you need Java 8 or higher.
-(When running on Java 15 and higher, the
-[`promptscript` property is broken](https://github.com/julianhyde/sqlline/issues/394).)
+(When running on Java 15 and higher, you will need to
+[set `scriptEngine` before you use `promptscript`](https://github.com/julianhyde/sqlline/issues/394).)
 
 Check out and build:
 
 ```bash
 git clone git://github.com/julianhyde/sqlline.git
 cd sqlline
-./mvn package
+./mvnw package
 ```
 
 ## Committers

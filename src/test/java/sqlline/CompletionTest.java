@@ -180,7 +180,7 @@ public class CompletionTest {
         of("!set colorScheme che", "!set colorScheme chester"),
         of("!set colorScheme sol", "!set colorScheme solarized"),
         // file completer should return file names
-        of("!set historyFile pom.", "!set historyFile pom.xml"),
+        of("!set historyFile README.", "!set historyFile README.md"),
         of("!set historyFile sr", "!set historyFile src" + File.separator)
     );
   }

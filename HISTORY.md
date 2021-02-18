@@ -2,6 +2,89 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.10.0">1.10.0</a> (2021-02-17)
+
+Pluggable [scripting engines](https://github.com/julianhyde/sqlline/issues/394) (to accommodate JDK 15)
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/394">SQLLINE-394</a>]
+  Make script engine configurable via new `scriptEngine` property;
+  compensates for the fact that Nashorn is not available on JDK 15 and above
+* [<a href="https://github.com/julianhyde/sqlline/issues/419">SQLLINE-419</a>]
+  Allow empty string after connection name in config
+* [<a href="https://github.com/julianhyde/sqlline/issues/386">SQLLINE-386</a>]
+  Support saved connections
+* [<a href="https://github.com/julianhyde/sqlline/issues/415">SQLLINE-415</a>]
+  Switch off highlighting in manual; ignore case while searching through manual
+* [<a href="https://github.com/julianhyde/sqlline/issues/254">SQLLINE-254</a>]
+  Live templates support
+* [<a href="https://github.com/julianhyde/sqlline/issues/412">SQLLINE-412</a>]
+  Autocompletion for all properties with FILE_PATH type
+* [<a href="https://github.com/julianhyde/sqlline/issues/410">SQLLINE-410</a>]
+  Respect line separator while column size calculations
+* [<a href="https://github.com/julianhyde/sqlline/issues/157">SQLLINE-157</a>]
+  Column types in header
+* [<a href="https://github.com/julianhyde/sqlline/issues/391">SQLLINE-391</a>]
+  Set error code when `-e` command fails
+* [<a href="https://github.com/julianhyde/sqlline/issues/407">SQLLINE-407</a>]
+  Autocompletion for `!help` command
+* [<a href="https://github.com/julianhyde/sqlline/issues/336">SQLLINE-336</a>] and
+* [<a href="https://github.com/julianhyde/sqlline/issues/376">SQLLINE-376</a>]
+  Support PL/SQL and PL/pgSQL queries, and ability to add similar support
+  for other dialects
+* [<a href="https://github.com/julianhyde/sqlline/issues/402">SQLLINE-402</a>]
+  Table styles for table output format
+* [<a href="https://github.com/julianhyde/sqlline/issues/361">SQLLINE-361</a>]
+  Support patterns for tables, columns, procedures; add parameter support for
+  `!tables`, `!columns`, `!indexes`, `!primarykeys`, and `!procedures`
+  commands
+* [<a href="https://github.com/julianhyde/sqlline/issues/378">SQLLINE-378</a>]
+  Check for silent property before outputting info message; `--no-` prefix for
+  string properties is handled as empty if empty value is allowed for that
+  property; `--silent` as input parameter makes prompts empty
+* [<a href="https://github.com/julianhyde/sqlline/issues/389">SQLLINE-389</a>]
+  Respect all properties from properties file
+* [<a href="https://github.com/julianhyde/sqlline/issues/395">SQLLINE-395</a>]
+  Enable autopairing JLine feature
+* [<a href="https://github.com/julianhyde/sqlline/issues/355">SQLLINE-355</a>]
+  Colours in default and script prompts
+* [<a href="https://github.com/julianhyde/sqlline/issues/388">SQLLINE-388</a>]
+  Use `outputstream` instead of `System.out`
+* [<a href="https://github.com/julianhyde/sqlline/issues/379">SQLLINE-379</a>]
+  DB2 JDBC driver throws if SQLLine attempts to call `ResultSet.next` after
+  last row
+* [<a href="https://github.com/julianhyde/sqlline/issues/362">SQLLINE-362</a>]
+  Add completion for `!go` command
+* [<a href="https://github.com/julianhyde/sqlline/issues/367">SQLLINE-367</a>]
+  `!resize` command and `autoResize` property
+
+Build and tests:
+* Make `SqlLineParserTest` using parameterized tests
+* Make tests for
+  [<a href="https://github.com/julianhyde/sqlline/issues/354">SQLLINE-354</a>]
+  work on Windows
+
+Other:
+* Document that the `promptscript` property is broken in JDK 15, per
+  [<a href="https://github.com/julianhyde/sqlline/issues/394">SQLLINE-394</a>]
+  (but see the new `scriptEngine` property)
+* [<a href="https://github.com/julianhyde/sqlline/issues/392">SQLLINE-392</a>]
+  Add JDBC url templates for Hiveserver2
+* Regenerate web site for sqlline-1.9.0
+* [<a href="https://github.com/julianhyde/sqlline/issues/380">SQLLINE-380</a>]
+  Add Maven wrapper, so that people may build using "./mvnw"
+* Upgrades:
+  * [<a href="https://github.com/julianhyde/sqlline/issues/417">SQLLINE-417</a>]
+    Update JLine to 3.18.0, add geshi color scheme
+  * [<a href="https://github.com/julianhyde/sqlline/issues/421">SQLLINE-421</a>]
+    Require Maven 3.2.3 or higher
+  * [<a href="https://github.com/julianhyde/sqlline/issues/382">SQLLINE-382</a>]
+    Update JLine3 to 3.16.0
+  * Bump checkstyle from 8.23 to 8.29
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.9.0">1.9.0</a> (2019-10-16)
 
 There are several improvements regarding user interaction, such as
