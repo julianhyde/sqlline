@@ -2987,7 +2987,9 @@ public class SqlLineArgsTest {
 
         // OK
         of("!set confirmPattern \"^(?i:(TRUNCATE|ALTER))\"",
-            "", SqlLine.Status.OK)
+            "", SqlLine.Status.OK),
+        of("!history", "", SqlLine.Status.OK),
+        of("!quit", "", SqlLine.Status.OK)
     );
   }
 

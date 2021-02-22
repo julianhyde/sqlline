@@ -1175,6 +1175,7 @@ public class Commands {
   public void quit(String line, DispatchCallback callback) {
     sqlLine.setExit(true);
     close(null, callback);
+    callback.setToSuccess();
   }
 
   /**
