@@ -1,10 +1,11 @@
 # SQLLine release history and change log
 
-For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">github</a>.
+For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">GitHub</a>.
 
-## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.10.0">1.10.0</a> (2021-02-17)
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.10.0">1.10.0</a> (2021-02-21)
 
-Pluggable [scripting engines](https://github.com/julianhyde/sqlline/issues/394) (to accommodate JDK 15)
+Pluggable [scripting engines](https://github.com/julianhyde/sqlline/issues/394)
+(to accommodate JDK 15).
 
 This release requires Java version 8 or higher.
 
@@ -31,8 +32,9 @@ Bugs and functional changes:
   Set error code when `-e` command fails
 * [<a href="https://github.com/julianhyde/sqlline/issues/407">SQLLINE-407</a>]
   Autocompletion for `!help` command
-* [<a href="https://github.com/julianhyde/sqlline/issues/336">SQLLINE-336</a>] and
-* [<a href="https://github.com/julianhyde/sqlline/issues/376">SQLLINE-376</a>]
+* [<a href="https://github.com/julianhyde/sqlline/issues/336">SQLLINE-336</a>]
+  and
+  [<a href="https://github.com/julianhyde/sqlline/issues/376">SQLLINE-376</a>]
   Support PL/SQL and PL/pgSQL queries, and ability to add similar support
   for other dialects
 * [<a href="https://github.com/julianhyde/sqlline/issues/402">SQLLINE-402</a>]
