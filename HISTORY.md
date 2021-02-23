@@ -2,6 +2,17 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">GitHub</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.11.0">1.11.0</a> (2021-02-25)
+
+A patch to release 1.10.0, fixing one issue.
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/425">SQLLINE-425</a>]
+  `!quit` command should return success
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.10.0">1.10.0</a> (2021-02-21)
 
 Pluggable [scripting engines](https://github.com/julianhyde/sqlline/issues/394)

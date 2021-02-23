@@ -4,7 +4,7 @@
 [
     <!-- "http://www.docbook.org/xml/4.2/docbookx.dtd" -->
     <!-- "file:/sw/share/xml/dtd/docbookx/4.2.0/docbookx.dtd" -->
-    <!ENTITY VERSION "1.10.0">
+    <!ENTITY VERSION "1.11.0">
 ]>
 <book>
   <bookinfo>
@@ -16,7 +16,7 @@
       <holder>Marc Prud'hommeaux</holder>
     </copyright>
     <copyright>
-      <year>2006-2019</year>
+      <year>2006-2021</year>
       <holder>Julian Hyde</holder>
     </copyright>
   </bookinfo>

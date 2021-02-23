@@ -18,10 +18,12 @@ Write release notes. Run the
 [relNotes](https://github.com/julianhyde/share/blob/master/tools/relNotes)
 script and append the output to [HISTORY.md](HISTORY.md).
 
-Update version numbers in README, README.md, src/docbkx/manual.xml,
-and the copyright date in NOTICE.
+Update version numbers in README, README.md, src/main/resources/manual.txt,
+src/docbkx/manual.xml;
+and the copyright date in NOTICE, src/main/resources/manual.txt,
+src/docbkx/manual.xml.
 
-Switch to JDK 15.
+Switch to JDK 11.
 
 Check that the sandbox is clean:
 
