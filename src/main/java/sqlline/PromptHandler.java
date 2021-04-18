@@ -110,8 +110,9 @@ public class PromptHandler {
     final boolean useDefaultPrompt =
         sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT);
     if (dbc == null || dbc.getUrl() == null) {
-      return getPrompt(sqlLine, connectionIndex,
-          useDefaultPrompt ? defaultPrompt : currentPrompt);
+      return getPrompt(sqlLine, connectionIndex, useDefaultPrompt
+          ? getDefaultPrompt(connectionIndex, null, defaultPrompt)
+          : currentPrompt);
     } else {
       if (useDefaultPrompt || dbc.getNickname() != null) {
         final String nickNameOrUrl =
