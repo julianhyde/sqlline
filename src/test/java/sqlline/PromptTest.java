@@ -248,6 +248,11 @@ public class PromptTest {
   @Test
   public void testCustomPromptHandler() {
     sqlLine.runCommands(new DispatchCallback(),
+        "!prompthandler sqlline.extensions.CustomPromptHandler");
+    assertThat(sqlLine.getPromptHandler().getPrompt().toAnsi(),
+        is("my_app>"));
+
+    sqlLine.runCommands(new DispatchCallback(),
         "!connect "
             + SqlLineArgsTest.ConnectionSpec.H2.url + " "
             + SqlLineArgsTest.ConnectionSpec.H2.username + " \"\"",
