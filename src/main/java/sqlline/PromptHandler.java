@@ -109,20 +109,23 @@ public class PromptHandler {
     final DatabaseConnection dbc = sqlLine.getDatabaseConnection();
     final boolean useDefaultPrompt =
         sqlLine.getOpts().isDefault(BuiltInProperty.PROMPT);
+    final String prompt;
     if (dbc == null || dbc.getUrl() == null) {
-      return getPrompt(sqlLine, connectionIndex, useDefaultPrompt
-          ? getDefaultPrompt(connectionIndex, null, defaultPrompt)
-          : currentPrompt);
-    } else {
-      if (useDefaultPrompt || dbc.getNickname() != null) {
-        final String nickNameOrUrl =
-            dbc.getNickname() == null ? dbc.getUrl() : dbc.getNickname();
-        return getPrompt(sqlLine, connectionIndex,
-            getDefaultPrompt(connectionIndex, nickNameOrUrl, defaultPrompt));
+      if (useDefaultPrompt) {
+        prompt = getDefaultPrompt(connectionIndex, null, defaultPrompt);
       } else {
-        return getPrompt(sqlLine, connectionIndex, currentPrompt);
+        prompt = currentPrompt;
       }
+    } else if (dbc.getNickname() != null) {
+      final String nickname = dbc.getNickname();
+      prompt = getDefaultPrompt(connectionIndex, nickname, defaultPrompt);
+    } else if (useDefaultPrompt) {
+      final String url = dbc.getUrl();
+      prompt = getDefaultPrompt(connectionIndex, url, defaultPrompt);
+    } else {
+      prompt = currentPrompt;
     }
+    return getPrompt(sqlLine, connectionIndex, prompt);
   }
 
   private String getPromptFromScript(SqlLine sqlLine,
