@@ -239,7 +239,13 @@ public class SqlLineHighlighterTest {
     String[] linesRequiredToBeNumbers = {
         "123456789",
         "0123",
-        "1"
+        "1",
+        "2.1",
+        ".1",
+        ".2341",
+        "1e+1",
+        "1e-12",
+        "1.2E+12"
     };
 
     for (String line : linesRequiredToBeNumbers) {

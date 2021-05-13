@@ -289,7 +289,8 @@ public class SqlLineHighlighter extends DefaultHighlighter {
         wordStart = pos;
         continue;
       }
-      if (wordStart == -1 && Character.isDigit(ch)
+      if (wordStart == -1
+          && (Character.isDigit(ch) || ch == '.' || ch == 'e' || ch == 'E')
           && (pos == 0
               || (buffer.length() > pos - 1
                   && !Character.isLetterOrDigit(buffer.charAt(pos - 1))
@@ -426,8 +427,39 @@ public class SqlLineHighlighter extends DefaultHighlighter {
    * @return position where number finished
    */
   int handleNumbers(String line, BitSet numberBitSet, int startingPoint) {
-    int end = startingPoint + 1;
-    while (end < line.length() && Character.isDigit(line.charAt(end))) {
+    int end = startingPoint;
+    int dotCount = 0;
+    int eCount = 0;
+    char c;
+    while (end < line.length()
+        && (Character.isDigit(line.charAt(end))
+            || line.charAt(end) == '.'
+            || line.charAt(end) == 'e'
+            || line.charAt(end) == 'E')) {
+      c = line.charAt(end);
+      switch (c) {
+      case '.':
+        if (dotCount == 1 || eCount > 0) {
+          return startingPoint;
+        }
+        dotCount++;
+        break;
+      case 'e':
+      case 'E':
+        if (eCount == 1
+            || end == startingPoint
+            || end >= line.length() - 2) {
+          return startingPoint;
+        }
+        char sign = line.charAt(end + 1);
+        if (sign != '-' && sign != '+'
+            || !Character.isDigit(line.charAt(end + 2))) {
+          return startingPoint;
+        }
+        eCount++;
+        end++;
+        break;
+      }
       end++;
     }
     if (end == line.length()) {
