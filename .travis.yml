@@ -9,6 +9,8 @@ matrix:
   - jdk: openjdk13
   - jdk: openjdk12
   - jdk: openjdk11
+  - jdk: openjdk10
+  - jdk: openjdk9
   - jdk: openjdk8
 branches:
   only:

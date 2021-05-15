@@ -1,6 +1,5 @@
 # Configuration for Appveyor CI
 version: '{build}'
-image: Visual Studio 2019
 clone_depth: 10000
 # branches to build
 branches:
@@ -15,13 +14,33 @@ matrix:
   fast_finish: true
 environment:
   matrix:
-  - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-  - JAVA_HOME: C:\Program Files\Java\jdk11
-  - JAVA_HOME: C:\Program Files\Java\jdk12
-  - JAVA_HOME: C:\Program Files\Java\jdk13
-  - JAVA_HOME: C:\Program Files\Java\jdk14
-  - JAVA_HOME: C:\Program Files\Java\jdk15
-  - JAVA_HOME: C:\Program Files\Java\jdk16
+  - job_name: Windows jdk8
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+  - job_name: Windows jdk9
+    appveyor_build_worker_image: Visual Studio 2017
+    JAVA_HOME: C:\Program Files\Java\jdk9
+  - job_name: Windows jdk10
+    appveyor_build_worker_image: Visual Studio 2017
+    JAVA_HOME: C:\Program Files\Java\jdk10
+  - job_name: Windows jdk11
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk11
+  - job_name: Windows jdk12
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk12
+  - job_name: Windows jdk13
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk13
+  - job_name: Windows jdk14
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk14
+  - job_name: Windows jdk15
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk15
+  - job_name: Windows jdk16
+    appveyor_build_worker_image: Visual Studio 2019
+    JAVA_HOME: C:\Program Files\Java\jdk16
 build_script:
 - mvn clean -V install -DskipTests -Dmaven.javadoc.skip=true -Djavax.net.ssl.trustStorePassword=changeit
 test_script:
