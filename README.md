@@ -26,11 +26,34 @@ It is distributed via the
 
 ## Quick start
 
-If you have [Coursier](https://github.com/coursier/coursier) installed, you
-can quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb) with:
+You can use either [jbang](https://jbang.dev) or [Coursier](https://github.com/coursier/coursier) to quickly connect to a [demo Hypersonic database](https://github.com/julianhyde/foodmart-data-hsqldb).
+### jbang 
+
+If you do not have `jbang` or even java installed you can do the following:
+
+On Linux/OSX/Windows(w/bash shell)
+
+```
+curl -Ls https://sh.jbang.dev | bash -s -  --deps org.hsqldb:hsqldb:2.5.0 --deps net.hydromatic:foodmart-data-hsqldb:0.4 run@julianhyde/sqlline -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+```
+
+On Windows Powershell:
+
+```
+iex "& { $(iwr https://ps.jbang.dev) } --deps org.hsqldb:hsqldb:2.5.0 --deps net.hydromatic:foodmart-data-hsqldb:0.4 run@julianhyde/sqlline -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver"
+```
+
+This will install and run java and jbang if not already available and then run sqlline in one go.
+
+### Coursier 
+
+If you have `coursier` installed, you do the following:
 
 ```
 $ coursier launch sqlline:sqlline:1.11.0 org.hsqldb:hsqldb:2.5.0 net.hydromatic:foodmart-data-hsqldb:0.4 -M sqlline.SqlLine -- -u jdbc:hsqldb:res:foodmart -n FOODMART -p FOODMART -d org.hsqldb.jdbcDriver
+
+### Example
+
 0: jdbc:hsqldb:res:foodmart> select avg("shelf_height" * "shelf_width" * "shelf_depth") as "avg_volume" from "product";
 +-------------------------+
 |       avg_volume        |

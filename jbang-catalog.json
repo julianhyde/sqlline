@@ -1,0 +1,10 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "run": {
+      "script-ref": "sqlline:sqlline:1.11.0",
+      "description": "Runs sqlline. To add a driver use jbang --deps <driver mavencoordinate> run@julianhyde/sqlline"
+    }
+  },
+  "templates": {}
+}
