@@ -13,6 +13,7 @@
 package sqlline;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +25,9 @@ import java.util.Map;
 import java.util.Properties;
 
 class ConnectionConfigParser {
+  public static final String GLOBAL_CONFIG_NAME = "global-conf";
+  private static final String DEFAULT_CONNECTION_CONFIG_LOCATION =
+          new File(SqlLineOpts.saveDir(), "configuration").getAbsolutePath();
   private static final String SEPARATOR = ":";
   private static final char COMMENT_START = '#';
   private final SqlLine sqlLine;
@@ -37,10 +41,18 @@ class ConnectionConfigParser {
     if (connections.isEmpty()) {
       final String connectionConfig = sqlLine.getOpts().getConnectionConfig();
       if (connectionConfig == null || connectionConfig.isEmpty()) {
-        sqlLine.error("Connection config is not set");
-        return null;
+        Path connectionConfigLocation = Paths
+                .get(DEFAULT_CONNECTION_CONFIG_LOCATION);
+        if (!Files.exists(connectionConfigLocation)
+                || Files.isDirectory(connectionConfigLocation)) {
+          return null;
+        } else {
+          readFromFile(connectionConfigLocation);
+        }
+      } else {
+        readFromFile(Paths.get(connectionConfig));
       }
-      readFromFile(Paths.get(connectionConfig));
+
     }
     return connections.get(connectionName);
   }

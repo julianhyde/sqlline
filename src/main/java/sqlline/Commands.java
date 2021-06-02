@@ -1303,7 +1303,13 @@ public class Commands {
       }
     }
 
-    Properties props = null;
+    Properties props = conConfParser
+            .getConnectionProperties(ConnectionConfigParser.GLOBAL_CONFIG_NAME);
+    if (props != null) {
+      for (String propName : props.stringPropertyNames()) {
+        setProperty(propName, props.getProperty(propName), null, callback);
+      }
+    }
     String url = null;
     String nickname = null;
     boolean nickNameFromConfig =
