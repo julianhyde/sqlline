@@ -26,8 +26,11 @@ import java.util.Properties;
 
 class ConnectionConfigParser {
   public static final String GLOBAL_CONFIG_NAME = "global-conf";
+
+  public static final File DEFAULT_CONNECTION_CONFIG_FILE =
+          new File(SqlLineOpts.saveDir(), "configuration");
   private static final String DEFAULT_CONNECTION_CONFIG_LOCATION =
-          new File(SqlLineOpts.saveDir(), "configuration").getAbsolutePath();
+          DEFAULT_CONNECTION_CONFIG_FILE.getAbsolutePath();
   private static final String SEPARATOR = ":";
   private static final char COMMENT_START = '#';
   private final SqlLine sqlLine;
