@@ -51,7 +51,9 @@ import static sqlline.BuiltInProperty.CONFIRM;
 import static sqlline.BuiltInProperty.CONFIRM_PATTERN;
 import static sqlline.BuiltInProperty.CONNECTION_CONFIG;
 import static sqlline.BuiltInProperty.CSV_DELIMITER;
+import static sqlline.BuiltInProperty.TSV_DELIMITER;
 import static sqlline.BuiltInProperty.CSV_QUOTE_CHARACTER;
+import static sqlline.BuiltInProperty.TSV_QUOTE_CHARACTER;
 import static sqlline.BuiltInProperty.DATE_FORMAT;
 import static sqlline.BuiltInProperty.DEFAULT;
 import static sqlline.BuiltInProperty.ESCAPE_OUTPUT;
@@ -123,6 +125,7 @@ public class SqlLineOpts implements Completer {
               put(CONFIRM_PATTERN, SqlLineOpts.this::setConfirmPattern);
               put(CONNECTION_CONFIG, SqlLineOpts.this::setConnectionConfig);
               put(CSV_QUOTE_CHARACTER, SqlLineOpts.this::setCsvQuoteCharacter);
+              put(TSV_QUOTE_CHARACTER, SqlLineOpts.this::setTsvQuoteCharacter);
               put(DATE_FORMAT, SqlLineOpts.this::setDateFormat);
               put(HISTORY_FILE, SqlLineOpts.this::setHistoryFile);
               put(LIVE_TEMPLATES, SqlLineOpts.this::setLiveTemplatesFile);
@@ -754,8 +757,16 @@ public class SqlLineOpts implements Completer {
     return get(CSV_DELIMITER);
   }
 
+  public String getTsvDelimiter() {
+    return get(TSV_DELIMITER);
+  }
+
   public char getCsvQuoteCharacter() {
     return getChar(CSV_QUOTE_CHARACTER);
+  }
+
+  public char getTsvQuoteCharacter() {
+    return getChar(TSV_QUOTE_CHARACTER);
   }
 
   public void setMaxHistoryRows(String maxHistoryRows) {
@@ -821,6 +832,25 @@ public class SqlLineOpts implements Completer {
     }
     sqlLine.error("CsvQuoteCharacter is '"
         + csvQuoteCharacter + "'; it must be a character or default");
+  }
+
+  public void setTsvQuoteCharacter(String tsvQuoteCharacter) {
+    if (DEFAULT.equals(tsvQuoteCharacter)) {
+      propertiesMap.put(
+              TSV_QUOTE_CHARACTER, TSV_QUOTE_CHARACTER.defaultValue());
+      return;
+    } else if (tsvQuoteCharacter != null) {
+      if (tsvQuoteCharacter.length() == 1) {
+        propertiesMap.put(TSV_QUOTE_CHARACTER, tsvQuoteCharacter.charAt(0));
+        return;
+      } else if (tsvQuoteCharacter.length() == 2
+              && tsvQuoteCharacter.charAt(0) == '\\') {
+        propertiesMap.put(TSV_QUOTE_CHARACTER, tsvQuoteCharacter.charAt(1));
+        return;
+      }
+    }
+    sqlLine.error("TsvQuoteCharacter is '"
+            + tsvQuoteCharacter + "'; it must be a character or default");
   }
 
   public boolean getShowHeader() {

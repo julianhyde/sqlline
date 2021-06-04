@@ -156,6 +156,8 @@ silent
 timeformat
 timestampformat
 trimscripts
+tsvDelimiter
+tsvQuoteCharacter
 uselinecontinuation
 verbose
 JDBC Driver Support
@@ -312,6 +314,8 @@ strictJdbc
 timeformat
 timestampformat
 trimscripts
+tsvDelimiter
+tsvQuoteCharacter
 uselinecontinuation
 verbose
 JDBC Driver Support
@@ -1246,6 +1250,8 @@ timeout         integer    Query timeout in seconds; less than zero means no
 timestampFormat pattern    Format timestamps using SimpleDateFormat pattern
 trimScripts     true/false Remove trailing spaces from lines read from script
                            files
+tsvDelimiter    String     Delimiter in tsv outputFormat
+tsvQuoteCharacter char     Quote character in tsv outputFormat
 useLineContinuation true/false Use line continuation
 verbose         true/false Show verbose error messages and debug info
 
@@ -2286,6 +2292,8 @@ tableStyle
 timeformat
 timestampformat
 trimscripts
+tsvDelimiter
+tsvQuoteCharacter
 uselinecontinuation
 verbose
 autocommit
