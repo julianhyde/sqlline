@@ -3297,6 +3297,72 @@ public class SqlLineArgsTest {
     }
   }
 
+  @Test
+  public void testGlobalConfiguration() {
+    final File globalConnectionConf = createTempFile(
+            "tmpconfconnections", "temp");
+    Path confPath = Paths.get(globalConnectionConf.getAbsolutePath());
+    String connectionName = "myconnection";
+    try (BufferedWriter bw =
+                 new BufferedWriter(
+                         new OutputStreamWriter(
+                                 new FileOutputStream(globalConnectionConf),
+                                 StandardCharsets.UTF_8))) {
+      // In the connection configuration we write a global-conf: section
+      bw.write(ConnectionConfigParser.GLOBAL_CONFIG_NAME + ": \n"
+              + "  maxWidth:15\n"
+              + "  incremental:true\n"
+              + connectionName + ": \n"
+              + "  url: " + ConnectionSpec.H2.url + "\n"
+              + "  user: " + ConnectionSpec.H2.username + "\n"
+              + "  password: " + "somenonemptypw" + "\n");
+      bw.flush();
+      bw.close();
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      String[] connectionArgs = new String[]{
+          "-c", connectionName,
+          "--connectionConfig=" + globalConnectionConf.getAbsolutePath()};
+      SqlLine.Status status = begin(sqlLine, os, false, connectionArgs);
+      assertThat(status, equalTo(SqlLine.Status.OK));
+      DispatchCallback dc = new DispatchCallback();
+      sqlLine.runCommands(dc, "!connect -c "
+              + connectionName);
+      sqlLine.runCommands(dc, "values (123456789, 123456789)");
+      String output = os.toString("UTF8");
+      // Max widdth of the output should be 15 chars
+      String expected = "| 123456789   |";
+      assertThat(output, containsString(expected));
+      // This is longer than 15, so it should not be in the output.
+      String notExpected = "123456789   | 1";
+      assertThat(output, not(containsString(notExpected)));
+
+      sqlLine.runCommands(dc, "!set maxwidth 25");
+      // We can override the maxWidth later
+      sqlLine.runCommands(dc, "values (123456789, 123456789)");
+      output = os.toString("UTF8");
+      // It will write 25 chars.
+      expected = "| 123456789   | 1234567 |";
+      assertThat(output, containsString(expected));
+      // This is longer than 25, so it should not be in the output.
+      notExpected = "123456789   | 12345678";
+      assertThat(output, not(containsString(notExpected)));
+
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
+      assertTrue(sqlLine.isExit());
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
+    }
+    try {
+      Files.delete(confPath);
+    } catch (java.io.IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   /** Information necessary to create a JDBC connection. Specify one to run
    * tests against a different database. (hsqldb is the default.) */
   public static class ConnectionSpec {
