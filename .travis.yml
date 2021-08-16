@@ -23,7 +23,7 @@ script:
 # Print surefire output to the console instead of files
 - mvn -Dcheckstyle.skip -Dsurefire.useFile=false -Dsurefire.threadCount=1 -Dsurefire.perCoreThreadCount=false -Djavax.net.ssl.trustStorePassword=changeit test javadoc:javadoc
 git:
-  depth: 10000
+  depth: 3
 sudo: required
 cache:
   directories:
