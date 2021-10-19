@@ -131,10 +131,10 @@ public class SqlLineHighlighter extends DefaultHighlighter {
           sb.style(highlightStyle.getDefaultStyle());
         } else {
           final boolean defaultStyleStart =
-              (i == 0 && commandEnd == -1 && commandStart == -1)
-                  || (i > Math.max(commandEnd, commandStart)
+              i == 0 && commandEnd == -1 && commandStart == -1
+                  || i > Math.max(commandEnd, commandStart)
                       && (i < underlineStart || i > underlineEnd)
-                      && (i < negativeStart || i > negativeEnd));
+                      && (i < negativeStart || i > negativeEnd);
           if (isSql) {
             if (keywordBitSet.get(i)) {
               sb.style(highlightStyle.getKeywordStyle());
@@ -242,14 +242,14 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       char ch = buffer.charAt(pos);
       if (wordStart > -1) {
         if (pos == buffer.length() - 1
-            || (!Character.isLetterOrDigit(ch) && ch != '_')) {
+            || !Character.isLetterOrDigit(ch) && ch != '_') {
           String word4codeBlock = buffer.substring(wordStart, pos + 1).trim();
           final Dialect.CodeBlocks codeBlocks = dialect.getCodeBlocks();
           if (codeBlocks != null) {
             final Predicate<String> bStarting = codeBlocks.isBlockStarting();
             final Predicate<String> bStarted = codeBlocks.isBlockStarted();
             if (bStarting != null && bStarting.test(word4codeBlock)
-                || (bStarted != null && bStarted.test(word4codeBlock))) {
+                || bStarted != null && bStarted.test(word4codeBlock)) {
               keywordBitSet.set(wordStart,
                   wordStart + word4codeBlock.length());
               wordStart = -1;
@@ -292,9 +292,9 @@ public class SqlLineHighlighter extends DefaultHighlighter {
       if (wordStart == -1
           && (Character.isDigit(ch) || ch == '.' || ch == 'e' || ch == 'E')
           && (pos == 0
-              || (buffer.length() > pos - 1
+              || buffer.length() > pos - 1
                   && !Character.isLetterOrDigit(buffer.charAt(pos - 1))
-                  && buffer.charAt(pos - 1) != '_'))) {
+                  && buffer.charAt(pos - 1) != '_')) {
         pos = handleNumbers(buffer, numberBitSet, pos);
         continue;
       }

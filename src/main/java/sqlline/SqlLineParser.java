@@ -210,8 +210,8 @@ public class SqlLineParser extends DefaultParser {
         if (quoteStart >= 0) {
           // In a quote block
           if ((line.charAt(quoteStart) == currentChar
-              || (currentChar == dialect.getCloseQuote()
-                  && line.charAt(quoteStart) == dialect.getOpenQuote()))
+              || currentChar == dialect.getCloseQuote()
+                  && line.charAt(quoteStart) == dialect.getOpenQuote())
               && !isEscaped(line, i)) {
             // End the block; arg could be empty, but that's fine
             if (line.charAt(quoteStart) == dialect.getOpenQuote()) {

@@ -25,26 +25,26 @@
     <top.dir>${project.basedir}</top.dir>
 
     <!-- The following list is sorted. -->
-    <checkstyle.version>8.37</checkstyle.version>
+    <checkstyle.version>9.0.1</checkstyle.version>
     <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
-    <forbiddenapis.version>3.1</forbiddenapis.version>
+    <forbiddenapis.version>3.2</forbiddenapis.version>
     <h2.version>1.4.200</h2.version>
     <hamcrest.version>2.2</hamcrest.version>
     <hsqldb.version>2.5.0</hsqldb.version>
-    <jline.version>3.18.0</jline.version>
+    <jline.version>3.21.0</jline.version>
     <jmockit.version>1.49</jmockit.version>
-    <junit.version>5.7.0</junit.version>
+    <junit.version>5.8.1</junit.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
     <maven-javadoc-plugin.additionalOptions>-html5</maven-javadoc-plugin.additionalOptions>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
+    <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+    <maven-project-info-reports-plugin.version>3.1.2</maven-project-info-reports-plugin.version>
     <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <scott-data-hsqldb.version>0.1</scott-data-hsqldb.version>

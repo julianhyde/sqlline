@@ -1304,17 +1304,17 @@ public class SqlLine {
       return str;
     }
 
-    if ((str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"'))
-        || ((str.charAt(0) == '"' || str.charAt(0) == '\''
+    if (str.length() == 1 && (str.charAt(0) == '\'' || str.charAt(0) == '\"')
+        || (str.charAt(0) == '"' || str.charAt(0) == '\''
             || str.charAt(str.length() - 1) == '"'
             || str.charAt(str.length() - 1) == '\'')
-            && str.charAt(0) != str.charAt(str.length() - 1))) {
+            && str.charAt(0) != str.charAt(str.length() - 1)) {
       throw new IllegalArgumentException(
           "A quote should be closed for <" + str + ">");
     }
     char prevQuote = 0;
     int index = 0;
-    while ((str.charAt(index) == str.charAt(str.length() - index - 1))
+    while (str.charAt(index) == str.charAt(str.length() - index - 1)
         && (str.charAt(index) == '"' || str.charAt(index) == '\'')) {
       // if start and end point to the same element
       if (index == str.length() - index - 1) {
@@ -1372,10 +1372,10 @@ public class SqlLine {
         if (inQuotes) {
           i += delim.length() - 1;
           continue;
-        } else if (i > 0 && (
-            !line.regionMatches(i - delim.length(), delim, 0, delim.length())
+        } else if (i > 0
+            && !line.regionMatches(i - delim.length(), delim, 0, delim.length())
             && line.charAt(i - 1) != '\''
-            && line.charAt(i - 1) != '"')) {
+            && line.charAt(i - 1) != '"') {
           tokens.add(line.substring(tokenStart, i));
           lastProcessedIndex = i;
           i += delim.length() - 1;
@@ -1389,9 +1389,9 @@ public class SqlLine {
         tokenStart = i;
       }
     }
-    if ((lastProcessedIndex != line.length() - 1
-            && (limit == 0 || limit > tokens.size()))
-        || (lastProcessedIndex == 0 && line.length() == 1)) {
+    if (lastProcessedIndex != line.length() - 1
+            && (limit == 0 || limit > tokens.size())
+        || lastProcessedIndex == 0 && line.length() == 1) {
       tokens.add(line.substring(tokenStart));
     }
     String[] ret = new String[tokens.size()];
@@ -1503,7 +1503,7 @@ public class SqlLine {
       case '>':
         // could be skipped for xml attribute and there is no sequence ]]>
         // could be skipped for element text and there is no sequence ]]>
-        if ((i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 2) == ']')
+        if (i > 1 && str.charAt(i - 1) == ']' && str.charAt(i - 2) == ']'
             || charsCouldBeNotEncoded.indexOf(ch) == -1) {
           sb.append("&gt;");
         } else {
@@ -1749,7 +1749,7 @@ public class SqlLine {
     if ("csv".equals(format)) {
       final SeparatedValuesOutputFormat csvOutput =
           (SeparatedValuesOutputFormat) f;
-      if ((csvOutput.separator == null && getOpts().getCsvDelimiter() != null)
+      if (csvOutput.separator == null && getOpts().getCsvDelimiter() != null
           || (csvOutput.separator != null
               && !csvOutput.separator.equals(getOpts().getCsvDelimiter())
               || csvOutput.quoteCharacter

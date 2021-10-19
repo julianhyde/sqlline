@@ -42,13 +42,13 @@ class VerticalOutputFormat implements OutputFormat {
     String[] head = header.values;
     String[] vals = row.values;
     int headWidth = 0;
-    for (int i = 0; (i < head.length) && (i < vals.length); i++) {
+    for (int i = 0; i < head.length && i < vals.length; i++) {
       headWidth = Math.max(headWidth, head[i].length());
     }
 
     headWidth += 2;
 
-    for (int i = 0; (i < head.length) && (i < vals.length); i++) {
+    for (int i = 0; i < head.length && i < vals.length; i++) {
       sqlLine.output(
           new AttributedStringBuilder()
               .append(rpad(head[i], headWidth), AttributedStyle.BOLD)

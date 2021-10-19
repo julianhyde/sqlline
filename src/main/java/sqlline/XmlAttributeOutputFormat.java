@@ -37,7 +37,7 @@ class XmlAttributeOutputFormat extends AbstractOutputFormat {
 
     StringBuilder result = new StringBuilder("  <result");
 
-    for (int i = 0; (i < head.length) && (i < vals.length); i++) {
+    for (int i = 0; i < head.length && i < vals.length; i++) {
       result.append(' ').append(head[i]).append("=\"").append(
           SqlLine.xmlEncode(vals[i], ALLOWED_NOT_ENCODE_SYMBOLS)).append('"');
     }
