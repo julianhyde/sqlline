@@ -34,7 +34,7 @@ class XmlElementOutputFormat extends AbstractOutputFormat {
     String[] vals = row.values;
 
     sqlLine.output("  <result>");
-    for (int i = 0; (i < head.length) && (i < vals.length); i++) {
+    for (int i = 0; i < head.length && i < vals.length; i++) {
       sqlLine.output(
           "    <" + head[i] + ">"
               + (SqlLine.xmlEncode(vals[i], ALLOWED_NOT_ENCODE_SYMBOLS))

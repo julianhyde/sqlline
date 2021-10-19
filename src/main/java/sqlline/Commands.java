@@ -275,7 +275,7 @@ public class Commands {
     String[] cmd = sqlLine.split(line);
     History history = sqlLine.getLineReader().getHistory();
     int size = history.size();
-    if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+    if (cmd.length > 2 || cmd.length == 2 && !cmd[1].matches("-?\\d+")) {
       if (size == 0) {
         sqlLine.error("Usage: rerun <offset>, history should not be empty");
       } else {
@@ -318,7 +318,7 @@ public class Commands {
     String command = iterator.next().line();
     if (command.trim().startsWith("!/") || command.startsWith("!rerun")) {
       String[] cmd = sqlLine.split(command);
-      if (cmd.length > 2 || (cmd.length == 2 && !cmd[1].matches("-?\\d+"))) {
+      if (cmd.length > 2 || cmd.length == 2 && !cmd[1].matches("-?\\d+")) {
         return command;
       }
       int offset = cmd.length == 1 ? -1 : Integer.parseInt(cmd[1]);

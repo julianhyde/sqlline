@@ -1011,8 +1011,8 @@ public class SqlLineOpts implements Completer {
   public void setPropertiesFile(String propertyFile) {
     final String oldPropertyFile = get(PROPERTIES_FILE);
     if (Objects.equals(propertyFile, oldPropertyFile)
-        || (Objects.equals(PROPERTIES_FILE.defaultValue(), oldPropertyFile)
-            && DEFAULT.equalsIgnoreCase(propertyFile))) {
+        || Objects.equals(PROPERTIES_FILE.defaultValue(), oldPropertyFile)
+            && DEFAULT.equalsIgnoreCase(propertyFile)) {
       return;
     }
     // reset properties

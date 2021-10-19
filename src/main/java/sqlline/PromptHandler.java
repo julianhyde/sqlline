@@ -214,9 +214,9 @@ public class PromptHandler {
               int nextColonIndex = prompt.indexOf(":", i + 2);
               SqlLineProperty property;
               if (nextColonIndex > 0
-                  && ((property = BuiltInProperty.valueOf(
+                  && (property = BuiltInProperty.valueOf(
                   prompt.substring(i + 2, nextColonIndex),
-                  true)) != null)) {
+                  true)) != null) {
                 promptStringBuilder.append(opts.get(property));
                 i = nextColonIndex - 1;
                 break;
