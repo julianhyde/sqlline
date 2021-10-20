@@ -1411,6 +1411,9 @@ public class SqlLineArgsTest {
   @Test
   public void testSelectJson() {
     final String script = "!set outputformat json\n"
+        // two lines of values to cover case from
+        // https://github.com/julianhyde/sqlline/issues/447
+        + "values (1);\n"
         + "values (1, -1.5, 1 = 1, date '1969-07-20', null, ' 1''2\"3\t4');\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString("{\"resultset\":["),

@@ -29,6 +29,7 @@ public class JsonOutputFormat extends AbstractOutputFormat {
 
   @Override void printFooter(Rows.Row header) {
     sqlLine.output("]}");
+    columnTypes = null;
   }
 
   @Override void printRow(Rows rows, Rows.Row header, Rows.Row row) {
