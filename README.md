@@ -144,9 +144,9 @@ cd sqlline
 * [Joe Posner](https://github.com/joeposner)
 * John Pham
 * [John V. Sichi](https://github.com/jsichi)
-* [Julian Hyde](https://github.com/julianhyde)
+* [Julian Hyde](https://github.com/julianhyde) (PMC)
 * [Marc Prud'hommeaux](https://github.com/marcprux)
-* [Sergey Nuyanzin](https://github.com/snuyanzin)
+* [Sergey Nuyanzin](https://github.com/snuyanzin) (PMC Chair)
 * [Stephan Zuercher](https://github.com/zuercher)
 * Steve Herskovitz
 * Sunny Choi
