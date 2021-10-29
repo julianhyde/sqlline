@@ -5,8 +5,8 @@ clone_depth: 10000
 branches:
   # whitelist
   only:
-  - master
-  - new-master
+  - main
+  - new-main
   - javadoc
   - /^branch-.*$/
   - /^[0-9]+-.*$/

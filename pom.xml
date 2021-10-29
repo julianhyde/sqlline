@@ -83,7 +83,7 @@
   <scm>
     <connection>scm:git:git://github.com/julianhyde/sqlline.git</connection>
     <developerConnection>scm:git:git@github.com:julianhyde/sqlline.git</developerConnection>
-    <url>https://github.com/julianhyde/sqlline/tree/master</url>
+    <url>https://github.com/julianhyde/sqlline/tree/main</url>
     <tag>HEAD</tag>
   </scm>
 

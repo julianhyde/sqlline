@@ -15,7 +15,7 @@ Make sure `mvn clean install`, `mvn site`, and
 11, 12, 13, 14, 15 and 16.
 
 Write release notes. Run the
-[relNotes](https://github.com/julianhyde/share/blob/master/tools/relNotes)
+[relNotes](https://github.com/julianhyde/share/blob/main/tools/relNotes)
 script and append the output to [HISTORY.md](HISTORY.md).
 
 Update version numbers in README, README.md, src/main/resources/manual.txt,

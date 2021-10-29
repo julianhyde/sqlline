@@ -14,7 +14,7 @@ matrix:
   - jdk: openjdk8
 branches:
   only:
-    - master
+    - main
     - scratch
 install:
 # Print the Maven version, skip tests and javadoc
