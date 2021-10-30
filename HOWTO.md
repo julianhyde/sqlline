@@ -12,7 +12,7 @@ Capitalization is tricky:
 
 Make sure `mvn clean install`, `mvn site`, and
 `mvn javadoc:javadoc javadoc:test-javadoc` pass under JDK 8, 9, 10,
-11, 12, 13, 14, 15 and 16.
+11, 12, 13, 14, 15, 16 and 17.
 
 Write release notes. Run the
 [relNotes](https://github.com/julianhyde/share/blob/main/tools/relNotes)
