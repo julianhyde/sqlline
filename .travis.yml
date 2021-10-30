@@ -3,6 +3,7 @@ language: java
 matrix:
   fast_finish: true
   include:
+  - jdk: openjdk17
   - jdk: openjdk16
   - jdk: openjdk15
   - jdk: openjdk14
