@@ -95,7 +95,7 @@ public class SqlLine {
   private static boolean initComplete = false;
 
   private final SqlLineSignalHandler signalHandler;
-  private final Completer sqlLineCommandCompleter;
+  private Completer sqlLineCommandCompleter;
 
   static {
     String testClass = "org.jline.reader.LineReader";
@@ -1971,6 +1971,8 @@ public class SqlLine {
     setDrivers(null);
     this.application = application;
     this.appConfig = new Config(application);
+    // re-create the command line completer, since new commands can be added via setAppConfig
+    this.sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
   }
 
   public HighlightStyle getHighlightStyle() {
