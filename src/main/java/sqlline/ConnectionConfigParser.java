@@ -66,11 +66,11 @@ class ConnectionConfigParser {
   void resetConnectionProperties() {
     connections.clear();
   }
-  
+
   List<String> getConnectionNames() {
-	  List<String> result = new ArrayList<>(connections.keySet());
-	  Collections.sort(result);
-	  return result;
+    List<String> result = new ArrayList<>(connections.keySet());
+    Collections.sort(result);
+    return result;
   }
 
   private void readFromFile(Path path) {

@@ -1276,16 +1276,16 @@ public class Commands {
       callback.setToSuccess();
     }
   }
-  
+
   public void namedConnect(String line, DispatchCallback callback) {
-	  String example = "Usage: namedconnect <connectionname>";
-	  String[] parts = sqlLine.split(line);
-	  if (parts.length != 2) {
-		  sqlLine.error(example);
-		  return;
-	  }
-	  String resultline = "connect -c " + parts[1];
-	  connect(resultline, callback);
+    String example = "Usage: namedconnect <connectionname>";
+    String[] parts = sqlLine.split(line);
+    if (parts.length != 2) {
+      sqlLine.error(example);
+      return;
+    }
+    String resultline = "connect -c " + parts[1];
+    connect(resultline, callback);
   }
 
   public void connect(String line, DispatchCallback callback) {
@@ -2197,9 +2197,9 @@ public class Commands {
       return allNames;
     }
   }
-  
+
   List<String> configuredConnectionNames() {
-	  return conConfParser.getConnectionNames();
+    return conConfParser.getConnectionNames();
   }
 }
 

@@ -1971,7 +1971,8 @@ public class SqlLine {
     setDrivers(null);
     this.application = application;
     this.appConfig = new Config(application);
-    // re-create the command line completer, since new commands can be added via setAppConfig
+    // re-create the command line completer, since new commands can be added
+    // via setAppConfig
     this.sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
   }
 
