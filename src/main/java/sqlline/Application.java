@@ -319,7 +319,8 @@ public class Application {
         new ReflectiveCommandHandler(sqlLine, empty, "appconfig"),
         new ReflectiveCommandHandler(sqlLine, empty, "rerun", "/"),
         new ReflectiveCommandHandler(sqlLine, empty, "prompthandler"),
-        new ReflectiveCommandHandler(sqlLine, empty, "namedconnect")
+        new ReflectiveCommandHandler(sqlLine, new ConnectionCompleter(sqlLine),
+            "namedconnect")
     };
     return Collections.unmodifiableList(Arrays.asList(handlers));
   }

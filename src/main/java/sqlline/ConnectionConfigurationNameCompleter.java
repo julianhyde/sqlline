@@ -19,10 +19,14 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.StringsCompleter;
 
-public class ConnectionConfigurationNameCompleter<SqlLine>
+public class ConnectionConfigurationNameCompleter
     implements Completer {
 
   private SqlLine sqlline;
+
+  public ConnectionConfigurationNameCompleter(SqlLine sqlline) {
+    this.sqlline = sqlline;
+  }
 
   @Override
   public void complete(LineReader reader, ParsedLine line,
