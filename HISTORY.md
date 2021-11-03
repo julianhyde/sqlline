@@ -2,6 +2,47 @@
 
 For a full list of releases, see <a href="https://github.com/julianhyde/sqlline/releases">GitHub</a>.
 
+## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.12.0">1.12.0</a> (2021-11-07)
+
+Now sqlline works on Apple/M1 architecture
+<a href="https://github.com/julianhyde/sqlline/issues/444">SQLLINE-444</a>.
+
+This release requires Java version 8 or higher.
+
+Bugs and functional changes:
+
+* [<a href="https://github.com/julianhyde/sqlline/issues/447">SQLLINE-447</a>] 
+  Certain sequence of queries for JSON output format leads to 
+  ArrayIndexOutOfBoundsException
+* [<a href="https://github.com/julianhyde/sqlline/issues/436">SQLLINE-436</a>]
+  User configuration file for sqlline (Richard Antal)
+* [<a href="https://github.com/julianhyde/sqlline/issues/432">SQLLINE-432</a>]
+  Highlight decimal numbers when highlighting is on
+* [<a href="https://github.com/julianhyde/sqlline/issues/431">SQLLINE-431</a>]
+  Custom prompt handler should apply even if there is no connection 
+  The custom prompt handler is ignored until a connection is created; 
+  with no connection, prompt is always "sqlline> " (IceMimosa)
+
+Other:
+* [<a href="https://github.com/julianhyde/sqlline/issues/434">SQLLINE-434</a>]
+  Support JDK 14, 15, 16
+* [<a href="https://github.com/julianhyde/sqlline/issues/453">SQLLINE-453</a>]
+  Rename 'master' git branch to 'main'
+* [<a href="https://github.com/julianhyde/sqlline/issues/454">SQLLINE-454</a>]
+  Enable jdk17 in Travis
+* [<a href="https://github.com/julianhyde/sqlline/issues/444">SQLLINE-444</a>]
+  Update JLine to 3.21.0
+* Upgrades:
+  * checkstyle to 9.0.1
+  * forbiddenapis to 3.2
+  * junit to 5.8.1
+  * maven-checkstyle-plugin to 3.1.2
+  * maven-dependency-plugin to 3.2.0
+  * maven-enforcer-plugin to 3.0.0
+  * maven-javadoc-plugin to 3.3.1
+  * maven-project-info-reports-plugin to 3.1.2
+  * maven-gpg-plugin to 3.0.1
+
 ## <a href="https://github.com/julianhyde/sqlline/releases/tag/sqlline-1.11.0">1.11.0</a> (2021-02-25)
 
 A patch to release 1.10.0, fixing one issue.

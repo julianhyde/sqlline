@@ -1,4 +1,4 @@
-SQLLine 1.11.0
+SQLLine 1.12.0
 
 Copyright © 2002, 2003, 2004, 2005 Marc Prud'hommeaux
 Copyright 2006-2021 Julian Hyde
