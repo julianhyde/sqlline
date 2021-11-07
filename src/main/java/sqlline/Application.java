@@ -53,6 +53,7 @@ public class Application {
 
   private static final String[] CONNECTION_URLS = {
       "jdbc:JSQLConnect://<hostname>/database=<database>",
+      "jdbc:clickhouse://<host>:<port>[/<database>]",
       "jdbc:cloudscape:<database>;create=true",
       "jdbc:twtds:sqlserver://<hostname>/<database>",
       "jdbc:daffodilDB_embedded:<database>;create=true",
