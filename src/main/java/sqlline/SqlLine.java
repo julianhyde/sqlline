@@ -1397,7 +1397,7 @@ public class SqlLine {
     String[] ret = new String[tokens.size()];
     for (int i = 0; i < tokens.size(); i++) {
       final String token = tokens.get(i);
-      if (token != null && token.charAt(0) == '"') {
+      if (token != null && !token.isEmpty() && token.charAt(0) == '"') {
         ret[i] = unescape(dequote(tokens.get(i)));
       } else {
         ret[i] = dequote(tokens.get(i));

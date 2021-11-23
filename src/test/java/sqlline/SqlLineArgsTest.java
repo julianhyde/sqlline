@@ -207,6 +207,26 @@ public class SqlLineArgsTest {
     }
   }
 
+  /**
+   * Tests behavior in case of wrong input arguments.
+   * Test case for
+   * <a href="https://github.com/julianhyde/sqlline/issues/462">[SQLLINE-462]
+   * StringIndexOutOfBoundsException for wrong input arguments</a>.
+   */
+  @ParameterizedTest
+  @ValueSource(strings = {"--", "--bad-argument", "--wrong--argument--"})
+  public void testWrongInputArguments(String args) {
+    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+      SqlLine.Status status = begin(sqlLine, os, false, args);
+      assertThat(status, equalTo(SqlLine.Status.ARGS));
+      sqlLine.runCommands(new DispatchCallback(), "!quit");
+      assertTrue(sqlLine.isExit());
+    } catch (Throwable t) {
+      // fail
+      throw new RuntimeException(t);
+    }
+  }
+
   @Test
   public void testMultilineScriptWithComments() {
     final String script1Text =
