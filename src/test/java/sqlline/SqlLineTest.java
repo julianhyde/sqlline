@@ -132,6 +132,8 @@ public class SqlLineTest {
     SqlLine line = new SqlLine();
     String[] strings;
 
+    strings = line.split("", "=");
+    assertArrayEquals(new String[]{""}, strings);
     // query check
     strings = line.split("values (1, cast(null as integer), "
         + "cast(null as varchar(3));", " ");
