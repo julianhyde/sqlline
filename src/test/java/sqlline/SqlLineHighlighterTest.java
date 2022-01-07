@@ -545,16 +545,22 @@ public class SqlLineHighlighterTest {
    */
   @Test
   public void testH2SqlKeywordsFromDatabase() {
-    // The list is taken from H2 1.4.197 getSQLKeywords output
+    // The list is taken from H2 2.0.206 getSQLKeywords output
+    // ("!metadata getSQLKeywords"). "KEY" and "_ROWID_" are also keywords.
     String[] linesRequiredToBeConnectionSpecificKeyWords = {
+        "CURRENT_CATALOG",
+        "CURRENT_SCHEMA",
+        "GROUPS",
+        "IF",
+        "ILIKE",
+        "INTERSECTS",
         "LIMIT",
         "MINUS",
         "OFFSET",
+        "QUALIFY",
+        "REGEXP",
         "ROWNUM",
-        "SYSDATE",
-        "SYSTIME",
-        "SYSTIMESTAMP",
-        "TODAY",
+        "TOP",
     };
 
     for (String line : linesRequiredToBeConnectionSpecificKeyWords) {
