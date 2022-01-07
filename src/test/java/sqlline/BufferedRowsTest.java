@@ -19,10 +19,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import org.h2.result.RowImpl;
 import org.h2.tools.SimpleResultSet;
-import org.h2.value.Value;
-import org.h2.value.ValueInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -42,8 +39,7 @@ public class BufferedRowsTest {
     try {
       SimpleResultSet rs = new SimpleResultSet();
       for (int i = 0; i < size; i++) {
-        rs.addRow(
-            new RowImpl(new Value[] {ValueInt.get(1), ValueInt.get(2)}, 123));
+        rs.addRow(1, 2);
       }
 
       SqlLine sqlLine = getSqlLine();
