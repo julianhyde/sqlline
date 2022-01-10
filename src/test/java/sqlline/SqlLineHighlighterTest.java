@@ -553,7 +553,6 @@ public class SqlLineHighlighterTest {
         "GROUPS",
         "IF",
         "ILIKE",
-        "INTERSECTS",
         "LIMIT",
         "MINUS",
         "OFFSET",

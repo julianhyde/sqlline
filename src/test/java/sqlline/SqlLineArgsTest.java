@@ -370,6 +370,7 @@ public class SqlLineArgsTest {
         final String script = "\n"
             + "\n"
             + "!set incremental true\n"
+            + "!set maxColumnWidth 10\n"
             + "\n"
             + "\n"
             + "select * from information_schema.tables// ';\n"
@@ -388,8 +389,8 @@ public class SqlLineArgsTest {
               "--run=" + tmpHistoryFile.getAbsolutePath());
       assertThat(status, equalTo(SqlLine.Status.OK));
       String output = os.toString("UTF8");
-      final String expected = "| TABLE_CATALOG | TABLE_SCHEMA |"
-          + " TABLE_NAME | TABLE_TYPE | STORAGE_TYPE | SQL  |";
+      final String expected = "| UNNAMED    |"
+          + " INFORMATION_SCHEMA | ENUM_VALUES | BASE TABLE";
       assertThat(output, containsString(expected));
       sqlLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(sqlLine.isExit());
@@ -1593,14 +1594,15 @@ public class SqlLineArgsTest {
       DispatchCallback dc = new DispatchCallback();
       sqlLine.runCommands(dc,
           "!set maxwidth 80",
+          "!set maxColumnWidth 10",
           "!set incremental true");
       sqlLine.runCommands(dc, "!connect "
           + ConnectionSpec.H2.url + " "
           + ConnectionSpec.H2.username);
       sqlLine.runCommands(dc, "!tables");
       String output = os.toString("UTF8");
-      final String expected = "| TABLE_CAT | TABLE_SCHEM | "
-          + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
+      final String expected = "| TABLE_CAT  | TABLE_SCHEM |"
+          + " TABLE_NAME | TABLE_TYPE |  REMARKS   |  TYPE_CAT  |";
       assertThat(output, containsString(expected));
       sqlLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(sqlLine.isExit());
@@ -1627,6 +1629,7 @@ public class SqlLineArgsTest {
       DispatchCallback dc = new DispatchCallback();
       sqlLine.runCommands(dc,
           "!set maxwidth 80",
+          "!set maxColumnWidth 10\n",
           "!set incremental true");
       String fakeNonEmptyPassword = "nonEmptyPasswd";
       final byte[] bytes =
@@ -1638,8 +1641,8 @@ public class SqlLineArgsTest {
           + StringUtils.convertBytesToHex(bytes));
       sqlLine.runCommands(dc, "!tables");
       String output = os.toString("UTF8");
-      final String expected = "| TABLE_CAT | TABLE_SCHEM | "
-          + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
+      final String expected = "| TABLE_CAT  | TABLE_SCHEM |"
+          + " TABLE_NAME | TABLE_TYPE |  REMARKS   |  TYPE_CAT  |";
       assertThat(output, containsString(expected));
       sqlLine.runCommands(new DispatchCallback(), "!quit");
       assertTrue(sqlLine.isExit());
@@ -1703,7 +1706,7 @@ public class SqlLineArgsTest {
     DispatchCallback dc = new DispatchCallback();
 
     try {
-      sqlLine.runCommands(dc, "!set maxwidth 80");
+      sqlLine.runCommands(dc, "!set maxwidth 80", "!set maxColumnWidth 10");
 
       // fail attempt
       String fakeNonEmptyPassword = "nonEmptyPasswd";
@@ -1729,8 +1732,8 @@ public class SqlLineArgsTest {
       sqlLine.runCommands(dc, "!set incremental true");
       sqlLine.runCommands(dc, "!tables");
       output = os.toString("UTF8");
-      final String expected1 = "| TABLE_CAT | TABLE_SCHEM | "
-          + "TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |";
+      final String expected1 = "| TABLE_CAT  | TABLE_SCHEM |"
+          + " TABLE_NAME | TABLE_TYPE |  REMARKS   |  TYPE_CAT  |";
       assertThat(output, containsString(expected1));
 
       sqlLine.runCommands(dc, "select 5;");
@@ -1864,10 +1867,11 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set incremental true\n"
+        + "!set maxColumnWidth 10\n"
         + "!tables\n";
-    final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
+    final String line0 = "| TABLE_CAT  | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
-        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE";
+        "| UNNAMED    | INFORMATION_SCHEMA | CONSTANTS  | BASE TABLE";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1878,11 +1882,12 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set incremental true\n"
-        + "!tables CATALO%\n";
+        + "!set maxColumnWidth 10\n"
+        + "!tables INDEXES%\n";
     final String line0 =
-        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |\n";
+        "| TABLE_CAT  | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE |  REMARKS   |  TYPE_CAT  |\n";
     final String line1 =
-        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE |         |       |\n";
+        "| UNNAMED    | INFORMATION_SCHEMA | INDEXES    | BASE TABLE |            |     |\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1893,11 +1898,12 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set incremental true\n"
-        + "!tables INFORMATION_% CAT% \"SYSTEM TABLE\"\n";
+        + "!set maxColumnWidth 10\n"
+        + "!tables INFORMATION_% \n";
     final String line0 =
-        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE | REMARKS | TYPE_CAT | TYP |\n";
+        "| TABLE_CAT  | TABLE_SCHEM | TABLE_NAME | TABLE_TYPE |  REMARKS   |  TYPE_CAT  |\n";
     final String line1 =
-        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE |         |       |\n";
+        "| UNNAMED    | INFORMATION_SCHEMA | INFORMATION_SCHEMA_CATALOG_NAME | BASE TAB |\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1907,12 +1913,13 @@ public class SqlLineArgsTest {
     connectionSpec = ConnectionSpec.H2;
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
+        + "!set maxColumnWidth 10\n"
         + "!set incremental true\n"
-        + "!columns INFORMATION% CAT% CAT%\n";
+        + "!columns INFORMATION_SCHEMA % %\n";
     final String line0 =
-        "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME | COLUMN_NAME |  DATA_TYPE  | TYPE_NAME |\n";
+        "| TABLE_CAT  | TABLE_SCHEM | TABLE_NAME | COLUMN_NAME | DATA_TYPE  | TYPE_NAME |\n";
     final String line1 =
-        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | CATALOG_NAME | 12          | V |\n";
+        "| UNNAMED    | INFORMATION_SCHEMA | CHECK_CONSTRAINTS | CONSTRAINT_CATALOG | 1 |\n";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
         allOf(containsString(line0), containsString(line1)));
   }
@@ -1942,10 +1949,11 @@ public class SqlLineArgsTest {
     // Set width so we don't inherit from the current terminal.
     final String script = "!set maxwidth 80\n"
         + "!set incremental true\n"
+        + "!set maxColumnWidth 10\n"
         + "!tables\n";
-    final String line0 = "| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |";
+    final String line0 = "| TABLE_CAT  | TABLE_SCHEM | TABLE_NAME |";
     final String line1 =
-        "| UNNAMED   | INFORMATION_SCHEMA | CATALOGS   | SYSTEM TABLE";
+        "| UNNAMED    | INFORMATION_SCHEMA | CONSTANTS  | BASE TABLE";
     final String message = "Could not find driver "
         + connectionSpec.driver
         + "; using registered driver org.h2.Driver instead";
@@ -2338,7 +2346,7 @@ public class SqlLineArgsTest {
         + " sqlline.extensions.CustomApplication\n"
         + "!scan";
     checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
-        allOf(containsString("yes       1.4     org.h2.Driver"),
+        allOf(containsString("yes       2.1     org.h2.Driver"),
                 not(containsString("org.hsqldb.jdbc.JDBCDriver"))));
   }
 
