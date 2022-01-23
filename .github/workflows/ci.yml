@@ -1,0 +1,76 @@
+name: CI
+on:
+  push:
+    branches: [ main, scratch ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  Doc-generation:
+    strategy:
+      matrix:
+        platform: [ macos-latest, windows-latest, ubuntu-latest ]
+    runs-on: ubuntu-latest 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: 8
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: mvn docbkx:generate-html docbkx:generate-xhtml docbkx:generate-xhtml5 docbkx:generate-manpages
+    
+  Linux:
+    strategy:
+      matrix:
+        java-version: [ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ]
+    runs-on: ubuntu-latest 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: ./mvnw install -Dskip.docbkx=true -DskipTests=true -Dmaven.javadoc.skip=true -Djavax.net.ssl.trustStorePassword=changeit -B -V
+    - name: Tests
+      run: ./mvnw -Dskip.docbkx=true -Dcheckstyle.skip -Dsurefire.useFile=false -Dsurefire.threadCount=1 -Dsurefire.perCoreThreadCount=false -Djavax.net.ssl.trustStorePassword=changeit test javadoc:javadoc
+      
+  Mac:
+    strategy:
+      matrix:
+        java-version: [ 8, 11, 17 ]
+    runs-on: macos-latest 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: ./mvnw install -Dskip.docbkx=true -DskipTests=true -Dmaven.javadoc.skip=true -Djavax.net.ssl.trustStorePassword=changeit -B -V
+    - name: Tests
+      run: ./mvnw -Dskip.docbkx=true -Dcheckstyle.skip -Dsurefire.useFile=false -Dsurefire.threadCount=1 -Dsurefire.perCoreThreadCount=false -Djavax.net.ssl.trustStorePassword=changeit test javadoc:javadoc
+
+  Windows:      
+    strategy:
+      matrix:
+        java-version: [ 8, 11, 17 ]
+    runs-on: windows-latest 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'zulu'
+        cache: maven
+    - name: Build with Maven
+      run: mvn install `-Dskip`.docbkx=true `-DskipTests=true `-Dmaven`.javadoc`.skip=true `-Djavax`.net`.ssl`.trustStorePassword=changeit `-B `-V
+    - name: Tests
+      run: mvn `-Dskip`.docbkx=true `-Dcheckstyle`.skip `-Dsurefire`.useFile=false `-Dsurefire`.threadCount=1 `-Dsurefire`.perCoreThreadCount=false `-Djavax`.net`.ssl`.trustStorePassword=changeit test javadoc:javadoc
