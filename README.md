@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/julianhyde/sqlline.png)](https://travis-ci.com/julianhyde/sqlline)
+[![CI](https://github.com/julianhyde/sqlline/actions/workflows/ci.yml/badge.svg)](https://github.com/julianhyde/sqlline/actions/workflows/ci.yml)
 
 Command-line shell for issuing SQL to relational databases via JDBC.
 
