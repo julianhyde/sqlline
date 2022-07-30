@@ -1277,6 +1277,17 @@ public class Commands {
     }
   }
 
+  public void namedConnect(String line, DispatchCallback callback) {
+    String example = "Usage: namedconnect <connectionname>";
+    String[] parts = sqlLine.split(line);
+    if (parts.length != 2) {
+      sqlLine.error(example);
+      return;
+    }
+    String resultline = "connect -c " + parts[1];
+    connect(resultline, callback);
+  }
+
   public void connect(String line, DispatchCallback callback) {
     String example =
         "Usage: connect [-p property value]* (-(c|cn) <connectionName> | <url>) [username] [password] [driver]"
@@ -2185,6 +2196,10 @@ public class Commands {
     public Set<String> getAllNames() {
       return allNames;
     }
+  }
+
+  List<String> configuredConnectionNames() {
+    return conConfParser.getConnectionNames();
   }
 }
 

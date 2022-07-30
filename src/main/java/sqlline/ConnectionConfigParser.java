@@ -20,7 +20,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -62,6 +65,12 @@ class ConnectionConfigParser {
 
   void resetConnectionProperties() {
     connections.clear();
+  }
+
+  List<String> getConnectionNames() {
+    List<String> result = new ArrayList<>(connections.keySet());
+    Collections.sort(result);
+    return result;
   }
 
   private void readFromFile(Path path) {
