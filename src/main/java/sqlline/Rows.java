@@ -282,13 +282,25 @@ abstract class Rows implements Iterator<Rows.Row> {
           setFormat(rs.getObject(i + 1), null, i);
           break;
         case Types.TIME:
-          setFormat(rs.getObject(i + 1), timeFormat, i);
+          if (!sqlLine.getOpts().getlegacyDateAndTimeFormat()) {
+            setFormat(rs.getObject(i + 1), timeFormat, i);
+          } else {
+            values[i] = rs.getString(i + 1);
+          }
           break;
         case Types.DATE:
-          setFormat(rs.getObject(i + 1), dateFormat, i);
+          if (!sqlLine.getOpts().getlegacyDateAndTimeFormat()) {
+            setFormat(rs.getObject(i + 1), dateFormat, i);
+          } else {
+            values[i] = rs.getString(i + 1);
+          }
           break;
         case Types.TIMESTAMP:
-          setFormat(rs.getObject(i + 1), timestampFormat, i);
+          if (!sqlLine.getOpts().getlegacyDateAndTimeFormat()) {
+            setFormat(rs.getObject(i + 1), timestampFormat, i);
+          } else {
+            values[i] = rs.getString(i + 1);
+          }
           break;
         default:
           values[i] = rs.getString(i + 1);

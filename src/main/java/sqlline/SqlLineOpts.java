@@ -63,6 +63,7 @@ import static sqlline.BuiltInProperty.INCREMENTAL;
 import static sqlline.BuiltInProperty.INCREMENTAL_BUFFER_ROWS;
 import static sqlline.BuiltInProperty.ISOLATION;
 import static sqlline.BuiltInProperty.KEEP_SEMICOLON;
+import static sqlline.BuiltInProperty.LEGACY_DATE_AND_TIME_FOMRAT;
 import static sqlline.BuiltInProperty.LIVE_TEMPLATES;
 import static sqlline.BuiltInProperty.MAX_COLUMN_WIDTH;
 import static sqlline.BuiltInProperty.MAX_HEIGHT;
@@ -963,6 +964,10 @@ public class SqlLineOpts implements Completer {
           sqlLine.loc("unknown-value", MODE.propertyName(),
               mode, Arrays.asList(LineReader.EMACS, "vi")));
     }
+  }
+
+  public boolean getlegacyDateAndTimeFormat() {
+    return getBoolean(LEGACY_DATE_AND_TIME_FOMRAT);
   }
 
   public void setOutputFormat(String outputFormat) {

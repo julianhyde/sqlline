@@ -2271,6 +2271,7 @@ maxwidth
 mode
 nullValue
 numberformat
+legacyDateAndTimeFormat
 outputformat
 prompt
 rightprompt
@@ -2391,6 +2392,10 @@ The value which will be used instead of null values. Setting to default causes '
 numberformat
 
 The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits, values like "6.022E23".
+
+legacyDateAndTimeFormat
+
+Enables legacy output format for DATE, TIME and TIMESTAMP data types
 
 outputformat
 
