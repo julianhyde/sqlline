@@ -1371,6 +1371,24 @@ public class SqlLineArgsTest {
   }
 
   @Test
+  public void testTsvDelimiterAndQuoteCharacter() {
+    final String script = "!set outputformat tsv\n"
+            + "!set tsvDelimiter null\n"
+            + "!set tsvQuoteCharacter @\n"
+            + "values ('#', '@#@', 1, date '1969-07-20', null, ' 1''2\"3\t4');\n"
+            + "!set tsvDelimiter ##\n"
+            + "values ('#', '@#@', 1, date '1969-07-20', null, ' 1''2\"3\t4');\n";
+    final String line1 = "@C1@null@C2@null@C3@null@C4@null@C5@null@C6@";
+    final String line2 =
+            "@#@null@@@#@@@null@1@null@1969-07-20@null@@null@ 1'2\"3\t4@";
+    final String line3 = "@C1@##@C2@##@C3@##@C4@##@C5@##@C6@";
+    final String line4 = "@#@##@@@#@@@##@1@##@1969-07-20@##@@##@ 1'2\"3\t4@";
+    checkScriptFile(script, true, equalTo(SqlLine.Status.OK),
+            allOf(containsString(line1), containsString(line2),
+                    containsString(line3), containsString(line4)));
+  }
+
+  @Test
   public void testSetForNulls() {
     final String script = "!set numberFormat null\n"
         + "!set\n";

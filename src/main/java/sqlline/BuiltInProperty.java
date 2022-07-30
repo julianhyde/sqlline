@@ -42,8 +42,9 @@ public enum BuiltInProperty implements SqlLineProperty {
       new HashSet<>(new Application().getConnectInteractiveModes())),
   CONNECTION_CONFIG("connectionConfig", Type.FILE_PATH, ""),
   CSV_DELIMITER("csvDelimiter", Type.STRING, ","),
-
+  TSV_DELIMITER("tsvDelimiter", Type.STRING, "\t"),
   CSV_QUOTE_CHARACTER("csvQuoteCharacter", Type.CHAR, '\''),
+  TSV_QUOTE_CHARACTER("tsvQuoteCharacter", Type.CHAR, '\"'),
 
   DATE_FORMAT("dateFormat", Type.STRING, DEFAULT),
   ESCAPE_OUTPUT("escapeOutput", Type.BOOLEAN, false),

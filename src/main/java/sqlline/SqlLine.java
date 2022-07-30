@@ -1761,6 +1761,21 @@ public class SqlLine {
         updFormats.put("csv", f);
         updateOutputFormats(updFormats);
       }
+    } else if ("tsv".equals(format)) {
+      final SeparatedValuesOutputFormat tsvOutput =
+              (SeparatedValuesOutputFormat) f;
+      if ((tsvOutput.separator == null && getOpts().getTsvDelimiter() != null)
+              || (tsvOutput.separator != null
+              && !tsvOutput.separator.equals(getOpts().getTsvDelimiter())
+              || tsvOutput.quoteCharacter
+              != getOpts().getTsvQuoteCharacter())) {
+        f = new SeparatedValuesOutputFormat(this,
+                getOpts().getTsvDelimiter(), getOpts().getTsvQuoteCharacter());
+        Map<String, OutputFormat> updFormats =
+                new HashMap<>(getOutputFormats());
+        updFormats.put("csv", f);
+        updateOutputFormats(updFormats);
+      }
     }
 
     Rows rows;
