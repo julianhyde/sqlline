@@ -1473,10 +1473,13 @@ public class SqlLineArgsTest {
       // successful patterns
       final String okTimeFormat = "!set timeFormat HH:mm:ss\n";
       final String defaultTimeFormat = "!set timeFormat default\n";
+      final String legacyTimeFormat = "!set timeFormat ''\n";
       final String okDateFormat = "!set dateFormat YYYY-MM-dd\n";
-      final String defaultDateFormat = "!set dateFormat default\n";
+      final String defaultDateFormat = "!set dateFormat ''\n";
+      final String legacyDateFormat = "!set dateFormat default\n";
       final String okTimestampFormat = "!set timestampFormat default\n";
       final String defaultTimestampFormat = "!set timestampFormat default\n";
+      final String legacyTimestampFormat = "!set timestampFormat ''\n";
 
       // successful cases
       sqlLine.getOpts().setPropertiesFile(DEV_NULL);
@@ -1489,6 +1492,10 @@ public class SqlLineArgsTest {
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
+      checkScriptFile(legacyTimeFormat, false, equalTo(SqlLine.Status.OK),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
       checkScriptFile(okDateFormat, false, equalTo(SqlLine.Status.OK),
           not(
               anyOf(containsString("Error setting configuration"),
@@ -1497,11 +1504,19 @@ public class SqlLineArgsTest {
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
+      checkScriptFile(legacyDateFormat, false, equalTo(SqlLine.Status.OK),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
       checkScriptFile(okTimestampFormat, false, equalTo(SqlLine.Status.OK),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));
       checkScriptFile(defaultTimestampFormat, false, equalTo(SqlLine.Status.OK),
+          not(
+              anyOf(containsString("Error setting configuration"),
+                  containsString("Exception"))));
+      checkScriptFile(legacyTimestampFormat, false, equalTo(SqlLine.Status.OK),
           not(
               anyOf(containsString("Error setting configuration"),
                   containsString("Exception"))));

@@ -2322,7 +2322,7 @@ Sets the quote character in csv outputFormat. Setting to default causes usage of
 
 dateformat
 
-The format for how date values are displayed. Setting to default causes date values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "YYYY_MM_dd" yields values like "1970_01_01".
+The format for how date values are displayed. Setting to default causes date values to be fetched and rendered via ResultSet.getObject.toString. Setting to empty string causes date values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "YYYY_MM_dd" yields values like "1970_01_01".
 
 escapeOutput
 
@@ -2390,7 +2390,7 @@ The value which will be used instead of null values. Setting to default causes '
 
 numberformat
 
-The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits, values like "6.022E23".
+The format for how numeric values are displayed. Setting to default causes numeric values to be fetched and rendered via ResultSet.getObject.toString. Setting to empty string causes numeric values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.DecimalFormat. For example, the setting "0.###E0" yields scientific notation with up to three fractional digits, values like "6.022E23".
 
 outputformat
 
@@ -2456,11 +2456,11 @@ The style of tables used to output data for table output format.
 
 timeformat
 
-The format for how time values are displayed. Setting to default causes time values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "HH:mm:ss" yields values like "14:12:11".
+The format for how time values are displayed. Setting to default causes time values to be fetched and rendered via ResultSet.getObject.toString. Setting to empty string causes time values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "HH:mm:ss" yields values like "14:12:11".
 
 timestampformat
 
-The format for how timestamp values are displayed. Setting to default causes timestamp values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
+The format for how timestamp values are displayed. Setting to default causes timestamp values to be fetched and rendered via ResultSet.getObject.toString. Setting to empty string causes timestamp values to be fetched and rendered via ResultSet.getString. Any other setting results in fetch via ResultSet.getObject and rendering via java.text.SimpleDateFormat. For example, the setting "dd/MM/YYYY'T'HH:mm:ss" yields values like "01/01/1970T12:32:12".
 
 trimscripts
 

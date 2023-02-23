@@ -619,6 +619,10 @@ public class SqlLineOpts implements Completer {
       propertiesMap.put(NUMBER_FORMAT, NUMBER_FORMAT.defaultValue());
       return;
     }
+    if ("".equals(numberFormat)) {
+      propertiesMap.put(NUMBER_FORMAT, numberFormat);
+      return;
+    }
     try {
       NumberFormat nf = new DecimalFormat(numberFormat,
           DecimalFormatSymbols.getInstance(Locale.ROOT));
@@ -1050,6 +1054,9 @@ public class SqlLineOpts implements Completer {
 
   private String getValidDateTimePatternOrThrow(String dateTimePattern) {
     if (DEFAULT.equalsIgnoreCase(dateTimePattern)) {
+      return dateTimePattern;
+    }
+    if ("".equals(dateTimePattern)) {
       return dateTimePattern;
     }
     try {
