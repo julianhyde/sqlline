@@ -47,6 +47,10 @@ abstract class Rows implements Iterator<Rows.Row> {
   final DateFormat timeFormat;
   final DateFormat timestampFormat;
   final String nullValue;
+  final boolean useGetStringForDate;
+  final boolean useGetStringForTime;
+  final boolean useGetStringForTimestamp;
+  final boolean useGetStringForNumber;
   final boolean escapeOutput;
 
   Rows(SqlLine sqlLine, ResultSet rs) throws SQLException {
@@ -56,29 +60,61 @@ abstract class Rows implements Iterator<Rows.Row> {
     primaryKeys = new Boolean[count];
     if (sqlLine.getOpts().isDefault(BuiltInProperty.NUMBER_FORMAT)) {
       numberFormat = null;
+      useGetStringForNumber = false;
     } else {
       final String pattern =
           sqlLine.getOpts().get(BuiltInProperty.NUMBER_FORMAT);
-      numberFormat = new DecimalFormat(pattern,
-          DecimalFormatSymbols.getInstance(Locale.ROOT));
+      if ("".equals(pattern)) {
+        numberFormat = null;
+        useGetStringForNumber = true;
+      } else {
+        numberFormat =
+                new DecimalFormat(pattern,
+                    DecimalFormatSymbols.getInstance(Locale.ROOT));
+        useGetStringForNumber = false;
+      }
     }
     if (sqlLine.getOpts().isDefault(BuiltInProperty.DATE_FORMAT)) {
       dateFormat = null;
+      useGetStringForDate = false;
     } else {
-      String pattern = sqlLine.getOpts().get(BuiltInProperty.DATE_FORMAT);
-      dateFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+      String pattern =
+          sqlLine.getOpts().get(BuiltInProperty.DATE_FORMAT);
+      if ("".equals(pattern)) {
+        dateFormat = null;
+        useGetStringForDate = true;
+      } else {
+        dateFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+        useGetStringForDate = false;
+      }
     }
     if (sqlLine.getOpts().isDefault(BuiltInProperty.TIME_FORMAT)) {
       timeFormat = null;
+      useGetStringForTime = false;
     } else {
-      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIME_FORMAT);
-      timeFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+      String pattern =
+          sqlLine.getOpts().get(BuiltInProperty.TIME_FORMAT);
+      if ("".equals(pattern)) {
+        timeFormat = null;
+        useGetStringForTime = true;
+      } else {
+        timeFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+        useGetStringForTime = false;
+      }
     }
     if (sqlLine.getOpts().isDefault(BuiltInProperty.TIMESTAMP_FORMAT)) {
       timestampFormat = null;
+      useGetStringForTimestamp = false;
     } else {
-      String pattern = sqlLine.getOpts().get(BuiltInProperty.TIMESTAMP_FORMAT);
-      timestampFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+      String pattern =
+          sqlLine.getOpts().get(BuiltInProperty.TIMESTAMP_FORMAT);
+      if ("".equals(pattern)) {
+        timestampFormat = null;
+        useGetStringForTimestamp = true;
+      } else {
+        timestampFormat = new SimpleDateFormat(pattern, Locale.ROOT);
+        useGetStringForTimestamp = false;
+      }
     }
     if (sqlLine.getOpts().isDefault(BuiltInProperty.NULL_VALUE)) {
       nullValue = null;
@@ -268,7 +304,7 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.DOUBLE:
         case Types.DECIMAL:
         case Types.NUMERIC:
-          setFormat(rs.getObject(i + 1), numberFormat, i);
+          setFormat(rs, numberFormat, useGetStringForNumber, i);
           break;
         case Types.BIT:
         case Types.CLOB:
@@ -279,16 +315,16 @@ abstract class Rows implements Iterator<Rows.Row> {
         case Types.ROWID:
         case Types.NCLOB:
         case Types.SQLXML:
-          setFormat(rs.getObject(i + 1), null, i);
+          setFormat(rs, null, false, i);
           break;
         case Types.TIME:
-          setFormat(rs.getObject(i + 1), timeFormat, i);
+          setFormat(rs, timeFormat, useGetStringForTime, i);
           break;
         case Types.DATE:
-          setFormat(rs.getObject(i + 1), dateFormat, i);
+          setFormat(rs, dateFormat, useGetStringForDate, i);
           break;
         case Types.TIMESTAMP:
-          setFormat(rs.getObject(i + 1), timestampFormat, i);
+          setFormat(rs, timestampFormat, useGetStringForTimestamp, i);
           break;
         default:
           values[i] = rs.getString(i + 1);
@@ -304,13 +340,19 @@ abstract class Rows implements Iterator<Rows.Row> {
       }
     }
 
-    private void setFormat(Object o, Format format, int i) {
-      if (o == null) {
-        values[i] = String.valueOf(nullValue);
-      } else if (format != null) {
-        values[i] = format.format(o);
+    private void setFormat(ResultSet rs, Format format, boolean useGetString,
+        int i) throws SQLException {
+      if (useGetString) {
+        values[i] = rs.getString(i + 1);
       } else {
-        values[i] = o.toString();
+        Object o = rs.getObject(i + 1);
+        if (o == null) {
+          values[i] = String.valueOf(nullValue);
+        } else if (format != null) {
+          values[i] = format.format(o);
+        } else {
+          values[i] = o.toString();
+        }
       }
     }
   }
