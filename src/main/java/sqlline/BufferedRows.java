@@ -107,7 +107,17 @@ class BufferedRows extends Rows {
         list.add(columnTypes);
       }
     }
-    if (rs.isClosed()) {
+
+    // For drivers compiled with earlier versions of Java
+    // The ResultSet isClosed method may be unsupported
+    boolean resultSetClosed = false;
+    try {
+      resultSetClosed = rs.isClosed();
+    } catch (AbstractMethodError e) {
+      sqlLine.debug("ResultSet isClosed() not suported by driver");
+    }
+
+    if (resultSetClosed) {
       // Result set is closed. Perhaps the driver closed it automatically
       // because we reached the end. Do nothing.
     } else if (limit > 0) {
