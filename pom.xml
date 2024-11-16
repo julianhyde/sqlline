@@ -31,7 +31,7 @@
     <h2.version>2.1.210</h2.version>
     <hamcrest.version>2.2</hamcrest.version>
     <hsqldb.version>2.5.0</hsqldb.version>
-    <jline.version>3.21.0</jline.version>
+    <jline.version>3.26.3</jline.version>
     <jmockit.version>1.49</jmockit.version>
     <junit.version>5.8.1</junit.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
@@ -355,6 +355,11 @@
     <dependency>
       <groupId>org.jline</groupId>
       <artifactId>jline-terminal-jansi</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline-terminal-jni</artifactId>
       <version>${jline.version}</version>
     </dependency>
     <dependency>
