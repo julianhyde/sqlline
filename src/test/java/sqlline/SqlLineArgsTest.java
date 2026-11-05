@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +49,7 @@ import org.jline.terminal.impl.DumbTerminal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -738,7 +740,7 @@ public class SqlLineArgsTest {
       new MockUp<Commands>() {
         @Mock
         void less(Terminal terminal, InputStream in, PrintStream out,
-            PrintStream err, Path currentDir, String[] argv) {
+            PrintStream err, Path currentDir, Object[] argv) {
         }
       };
 
@@ -752,6 +754,37 @@ public class SqlLineArgsTest {
     } catch (Throwable t) {
       // fail
       throw new RuntimeException(t);
+    }
+  }
+
+  /**
+   * Tests that {@code !manual} runs the real JLine pager (no mocks) and
+   * shows the manual. Pressing 'q' must quit the pager. This catches JLine
+   * API changes that break the {@code less} call, and a pager that never
+   * returns.
+   */
+  @Test
+  @Timeout(value = 60, unit = TimeUnit.SECONDS)
+  public void testManualWithRealPager() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final InputStream keys =
+        new ByteArrayInputStream("q".getBytes(StandardCharsets.UTF_8));
+    try (Terminal terminal = new DumbTerminal("test", "ansi", keys, baos,
+        StandardCharsets.UTF_8)) {
+      terminal.setSize(new Size(80, 24));
+      sqlLine.setOutputStream(getPrintStream(baos));
+      sqlLine.setErrorStream(getPrintStream(baos));
+      sqlLine.setLineReader(
+          LineReaderBuilder.builder().terminal(terminal).build());
+
+      final DispatchCallback callback = new DispatchCallback();
+      sqlLine.runCommands(callback, "!manual");
+      terminal.flush();
+
+      final String output = baos.toString("UTF8");
+      assertThat(output, callback.isSuccess(), is(true));
+      assertThat(output, containsString("SQLLine Manual"));
+      assertThat(output, not(containsString("NoSuchMethodError")));
     }
   }
 
